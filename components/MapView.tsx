@@ -82,7 +82,14 @@ export default function MapView({ stations, fromName, focus, onMapClick }: MapVi
         if (!f) return;
         const p = f.properties as { name: string; line: string; fare: number };
         const el = document.createElement("div");
-        el.innerHTML = `<strong>${p.name}</strong><br/>${p.line}<br/>概算 ${p.fare}円<br/>`;
+        const nameEl = document.createElement("strong");
+        nameEl.textContent = p.name;
+        el.appendChild(nameEl);
+        el.appendChild(document.createElement("br"));
+        el.appendChild(document.createTextNode(p.line));
+        el.appendChild(document.createElement("br"));
+        el.appendChild(document.createTextNode(`概算 ${p.fare}円`));
+        el.appendChild(document.createElement("br"));
         const a = document.createElement("a");
         a.textContent = "経路を見る";
         a.className = "underline text-blue-600 cursor-pointer";

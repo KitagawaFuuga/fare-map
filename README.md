@@ -33,6 +33,8 @@ curl "http://localhost:3000/api/reachable?from=<上で得た駅 id>&budget=500"
 2. Azure: `az group create -n fare-map-rg -l japaneast`
 3. `az containerapp env create` / `az containerapp create --name fare-map --min-replicas 0 --memory 1Gi --target-port 3000 --ingress external`
 4. 以後は `main` への push で `.github/workflows/deploy.yml` が自動デプロイする
+5. （任意）駅すぱあと API フリープランのキーを取得済みなら、Container App の環境変数に `EKISPERT_API_KEY` を設定する。
+   未設定の場合は経路検索リンクが Google Maps へのフォールバックになる。
 
 CI（`.github/workflows/ci.yml`）は push / PR ごとに lint / format:check / typecheck / test を実行する。
 

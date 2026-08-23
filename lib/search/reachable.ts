@@ -12,6 +12,7 @@ interface SearchState {
   doneFare: number;    // 確定済み区間の運賃合計
   segOperator: string; // 進行中区間の事業者（"" = 未乗車）
   segKm: number;       // 進行中区間の距離
+  fare: number;         // doneFare + estimate(segOperator, segKm) を状態生成時に確定したもの
 }
 
 export function findReachable(
@@ -31,36 +32,42 @@ export function findReachable(
     addAdj(e.to, e.from, e.km, e.kind, e.operator);
   }
 
-  const totalFare = (s: SearchState): number => s.doneFare + calc.estimate(s.segOperator, s.segKm);
   const best = new Map<string, number>();
-  const heap = new MinHeap<SearchState>((a, b) => totalFare(a) - totalFare(b));
-  heap.push({ stationId: fromId, doneFare: 0, segOperator: "", segKm: 0 });
+  const heap = new MinHeap<SearchState>((a, b) => a.fare - b.fare);
+  heap.push({ stationId: fromId, doneFare: 0, segOperator: "", segKm: 0, fare: 0 });
   best.set(fromId, 0);
 
   while (heap.size > 0) {
     const state = heap.pop();
     if (state === undefined) break;
-    const fare = totalFare(state);
-    if (fare > (best.get(state.stationId) ?? Infinity)) continue;
+    if (state.fare > (best.get(state.stationId) ?? Infinity)) continue;
 
     for (const edge of adjacency.get(state.stationId) ?? []) {
       let next: SearchState;
       if (edge.kind === "transfer") {
         next = { ...state, stationId: edge.to };
       } else if (edge.operator === state.segOperator) {
-        next = { ...state, stationId: edge.to, segKm: state.segKm + edge.km };
-      } else {
+        const segKm = state.segKm + edge.km;
         next = {
           stationId: edge.to,
-          doneFare: state.doneFare + calc.estimate(state.segOperator, state.segKm),
+          doneFare: state.doneFare,
+          segOperator: state.segOperator,
+          segKm,
+          fare: state.doneFare + calc.estimate(state.segOperator, segKm),
+        };
+      } else {
+        const doneFare = state.doneFare + calc.estimate(state.segOperator, state.segKm);
+        next = {
+          stationId: edge.to,
+          doneFare,
           segOperator: edge.operator,
           segKm: edge.km,
+          fare: doneFare + calc.estimate(edge.operator, edge.km),
         };
       }
-      const nextFare = totalFare(next);
-      if (nextFare > budget) continue;
-      if (nextFare < (best.get(next.stationId) ?? Infinity)) {
-        best.set(next.stationId, nextFare);
+      if (next.fare > budget) continue;
+      if (next.fare < (best.get(next.stationId) ?? Infinity)) {
+        best.set(next.stationId, next.fare);
         heap.push(next);
       }
     }

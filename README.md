@@ -1,0 +1,43 @@
+# fare-map
+
+指定した予算で出発駅からどこまで行けるかを地図に表示する Web アプリ。
+在来線・私鉄対応（普通運賃の距離ベース概算）。
+
+## 開発
+
+```
+npm i && npm run dev
+```
+
+http://localhost:3000 で起動する。
+
+データ（`data/graph.json`）はコミット済みなのでそのまま動く。
+更新・再生成する場合は `scripts/pipeline/README.md` の手順に従う。
+
+## Docker
+
+```
+docker compose up --build
+```
+
+http://localhost:3000 で起動する。動作確認済みのコマンド:
+
+```
+curl "http://localhost:3000/api/stations?q=新宿"
+curl "http://localhost:3000/api/reachable?from=<上で得た駅 id>&budget=500"
+```
+
+## デプロイ（初回の手動セットアップ）
+
+1. GitHub リポジトリの Secrets に `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` / `AZURE_CREDENTIALS` を設定
+2. Azure: `az group create -n fare-map-rg -l japaneast`
+3. `az containerapp env create` / `az containerapp create --name fare-map --min-replicas 0 --memory 1Gi --target-port 3000 --ingress external`
+4. 以後は `main` への push で `.github/workflows/deploy.yml` が自動デプロイする
+
+CI（`.github/workflows/ci.yml`）は push / PR ごとに lint / format:check / typecheck / test を実行する。
+
+## 出典・ライセンス
+
+- 地図: OpenStreetMap contributors / OpenFreeMap
+- 駅・路線データ: 駅データ.jp
+- 運賃は概算です。正確な運賃は各社の経路検索で確認してください。

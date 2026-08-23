@@ -23,12 +23,18 @@ export function buildGraph(input: EkidataInput): RailGraph {
   for (const s of input.stations) {
     const line = lineInfo.get(s.line_cd ?? "");
     if (!line || !s.station_cd) continue;
+    // 空文字は Number("") = 0（null island）に、キー欠落は Number(undefined) = NaN になる。
+    // どちらも座標欠損であり距離計算に使えないため、生値の段階で弾いてからノードに入れる。
+    if (!s.lat || !s.lon) continue;
+    const lat = Number(s.lat);
+    const lng = Number(s.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
     nodes[s.station_cd] = {
       id: s.station_cd,
       groupId: s.station_g_cd ?? s.station_cd,
       name: s.station_name ?? "",
-      lat: Number(s.lat),
-      lng: Number(s.lon),
+      lat,
+      lng,
       lineId: s.line_cd ?? "",
       lineName: line.name,
       operator: line.operator,

@@ -38,4 +38,29 @@ describe("buildGraph", () => {
     expect(g.nodes["S1"]?.operator).toBe("テスト鉄道");
     expect(g.nodes["S1"]?.lineName).toBe("テスト線");
   });
+
+  it("座標が欠損した駅（空文字/キー欠落）はノードにもエッジにも現れない", () => {
+    const brokenInput = {
+      companies: input.companies,
+      lines: input.lines,
+      stations: [
+        ...input.stations,
+        // lat が空文字 → Number("") = 0 になってしまう不正データ
+        { station_cd: "S4", station_g_cd: "G4", station_name: "う駅", line_cd: "L1", lon: "139.80", lat: "" },
+        // lon キー自体が欠落 → Number(undefined) = NaN になる不正データ
+        { station_cd: "S5", station_g_cd: "G5", station_name: "え駅", line_cd: "L1", lat: "35.70" },
+      ],
+      joins: [
+        ...input.joins,
+        { line_cd: "L1", station_cd1: "S4", station_cd2: "S5" },
+      ],
+    };
+    const g = buildGraph(brokenInput);
+    expect(g.nodes["S4"]).toBeUndefined();
+    expect(g.nodes["S5"]).toBeUndefined();
+    const touchesBroken = g.edges.some(
+      (e) => e.from === "S4" || e.to === "S4" || e.from === "S5" || e.to === "S5",
+    );
+    expect(touchesBroken).toBe(false);
+  });
 });

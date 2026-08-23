@@ -11,7 +11,9 @@ export function validateGraph(g: RailGraph): string[] {
       if (!g.nodes[id]) problems.push(`エッジが存在しないノード ${id} を参照`);
       touched.add(id);
     }
-    if (e.kind === "rail" && e.km > MAX_RAIL_KM) {
+    if (e.kind === "rail" && !Number.isFinite(e.km)) {
+      problems.push(`rail エッジ ${e.from}-${e.to} の距離が NaN/非有限値 (座標欠損の疑い)`);
+    } else if (e.kind === "rail" && e.km > MAX_RAIL_KM) {
       problems.push(`rail エッジ ${e.from}-${e.to} が 100km 超 (${e.km.toFixed(1)}km)`);
     }
   }

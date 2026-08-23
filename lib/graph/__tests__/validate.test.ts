@@ -35,4 +35,12 @@ describe("validateGraph", () => {
     };
     expect(validateGraph(g).some((m) => m.includes("100km"))).toBe(true);
   });
+
+  it("km が NaN の rail エッジを異常値として報告する", () => {
+    const g: RailGraph = {
+      nodes: { A: node("A"), B: node("B", 36) },
+      edges: [{ from: "A", to: "B", km: NaN, kind: "rail", operator: "Op" }],
+    };
+    expect(validateGraph(g).some((m) => m.includes("NaN"))).toBe(true);
+  });
 });

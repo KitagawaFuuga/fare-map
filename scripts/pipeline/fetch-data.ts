@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 
 const BASE = "https://raw.githubusercontent.com/ny-a/ekidata/master/csvs";
 const FILES = ["company", "line", "station", "join"] as const;
@@ -17,8 +17,21 @@ async function main(): Promise<void> {
     process.stdout.write(`${name}.csv: ${text.split("\n").length - 1} rows\n`);
   }
 
-  for (const { name, text } of fetched) {
-    writeFileSync(`data/raw/${name}.csv`, text);
+  // 実データの書き込みは .tmp に対して行い、全件成功してから rename で確定させる。
+  // rename はファイルシステム内のメタデータ操作なので、書き込み完了後は失敗しうる窓がほぼ無い。
+  // 途中で例外が起きた場合は finally で .tmp を必ず片付け、data/raw/ 本体には触れない。
+  const tmpPaths = fetched.map(({ name }) => `data/raw/${name}.csv.tmp`);
+  try {
+    for (const { name, text } of fetched) {
+      writeFileSync(`data/raw/${name}.csv.tmp`, text);
+    }
+    for (const { name } of fetched) {
+      renameSync(`data/raw/${name}.csv.tmp`, `data/raw/${name}.csv`);
+    }
+  } finally {
+    for (const p of tmpPaths) {
+      rmSync(p, { force: true });
+    }
   }
 }
 

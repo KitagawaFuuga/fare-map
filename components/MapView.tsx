@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import {
   Map as MapLibreMap,
   Popup,
+  setWorkerUrl,
   type ExpressionSpecification,
   type GeoJSONSource,
   type MapLayerMouseEvent,
@@ -22,6 +23,12 @@ export interface MapViewProps {
 
 const SOURCE_ID = "reachable";
 const LAYER_ID = "reachable-circles";
+
+// maplibre-gl はワーカースクリプトを import.meta.url からの相対パスで解決するが、
+// Turbopack がバンドルしたチャンク URL は node_modules 上の相対位置と一致せず 404 になり、
+// タイルが永久に読み込み中のまま止まる。public/ に配置した実体を明示的に指定して回避する
+// (scripts/copy-maplibre-worker.mjs が npm install / dev / build 前にコピーする)。
+setWorkerUrl("/maplibre-gl-worker.mjs");
 
 function toGeoJson(stations: MapViewProps["stations"]): GeoJSON.FeatureCollection {
   return {

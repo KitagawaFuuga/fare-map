@@ -1,0 +1,11 @@
+node_modules/
+.next/
+data/graph.json
+data/raw/
+public/*.mjs
+docs/
+.superpowers/
+package-lock.json
+AGENTS.md
+CLAUDE.md
+next-env.d.ts

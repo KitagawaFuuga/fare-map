@@ -1,6 +1,10 @@
 "use client";
 
-export default function LocateButton({ onLocate }: { onLocate(lat: number, lng: number): void }) {
+export default function LocateButton({
+  onLocate,
+}: {
+  onLocate(lat: number, lng: number): void;
+}) {
   return (
     <button
       type="button"

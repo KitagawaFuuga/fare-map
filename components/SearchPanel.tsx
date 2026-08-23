@@ -64,7 +64,9 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
           ))}
         </ul>
       )}
-      {selected && <p className="mt-1 text-sm text-gray-600">選択中: {selected.name}</p>}
+      {selected && (
+        <p className="mt-1 text-sm text-gray-600">選択中: {selected.name}</p>
+      )}
     </div>
   );
 }

@@ -6,7 +6,11 @@ export const metadata: Metadata = {
   description: "予算でどこまで行けるかを地図に表示",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="ja">
       <body>{children}</body>

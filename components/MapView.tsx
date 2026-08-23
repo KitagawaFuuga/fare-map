@@ -30,28 +30,52 @@ const LAYER_ID = "reachable-circles";
 // (scripts/copy-maplibre-worker.mjs が npm install / dev / build 前にコピーする)。
 setWorkerUrl("/maplibre-gl-worker.mjs");
 
-function toGeoJson(stations: MapViewProps["stations"]): GeoJSON.FeatureCollection {
+function toGeoJson(
+  stations: MapViewProps["stations"],
+): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
     features: stations.map((s) => ({
       type: "Feature",
       geometry: { type: "Point", coordinates: [s.lng, s.lat] },
-      properties: { name: s.name, line: s.line, fare: s.fare, bracket: s.bracket },
+      properties: {
+        name: s.name,
+        line: s.line,
+        fare: s.fare,
+        bracket: s.bracket,
+      },
     })),
   };
 }
 
 // bracket(0..6) を BRACKET_COLORS の色に対応させる match 式。最後の色は既定値（該当なし）。
 function buildCircleColorExpression(): ExpressionSpecification {
-  const colorEntries = BRACKET_COLORS.slice(0, -1).map((color, i): [number, string] => [i, color]);
+  const colorEntries = BRACKET_COLORS.slice(0, -1).map(
+    (color, i): [number, string] => [i, color],
+  );
   const fallback = BRACKET_COLORS[BRACKET_COLORS.length - 1] ?? "#888";
   const [first, ...rest] = colorEntries;
   if (!first) return ["match", ["get", "bracket"], 0, fallback, fallback];
-  const restFlat: (number | string)[] = rest.flatMap(([label, color]) => [label, color]);
-  return ["match", ["get", "bracket"], first[0], first[1], ...restFlat, fallback];
+  const restFlat: (number | string)[] = rest.flatMap(([label, color]) => [
+    label,
+    color,
+  ]);
+  return [
+    "match",
+    ["get", "bracket"],
+    first[0],
+    first[1],
+    ...restFlat,
+    fallback,
+  ];
 }
 
-export default function MapView({ stations, fromName, focus, onMapClick }: MapViewProps) {
+export default function MapView({
+  stations,
+  fromName,
+  focus,
+  onMapClick,
+}: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const onMapClickRef = useRef(onMapClick);
@@ -115,7 +139,8 @@ export default function MapView({ stations, fromName, focus, onMapClick }: MapVi
 
       map.on("click", (e: MapMouseEvent) => {
         const hits = map.queryRenderedFeatures(e.point, { layers: [LAYER_ID] });
-        if (hits.length === 0) onMapClickRef.current(e.lngLat.lat, e.lngLat.lng);
+        if (hits.length === 0)
+          onMapClickRef.current(e.lngLat.lat, e.lngLat.lng);
       });
     });
 
@@ -126,12 +151,14 @@ export default function MapView({ stations, fromName, focus, onMapClick }: MapVi
   }, []);
 
   useEffect(() => {
-    const src = mapRef.current?.getSource(SOURCE_ID) as GeoJSONSource | undefined;
+    const src = mapRef.current?.getSource(SOURCE_ID) as
+      GeoJSONSource | undefined;
     src?.setData(toGeoJson(stations));
   }, [stations]);
 
   useEffect(() => {
-    if (focus) mapRef.current?.flyTo({ center: [focus.lng, focus.lat], zoom: 12 });
+    if (focus)
+      mapRef.current?.flyTo({ center: [focus.lng, focus.lat], zoom: 12 });
   }, [focus]);
 
   return <div ref={containerRef} className="h-full w-full" />;

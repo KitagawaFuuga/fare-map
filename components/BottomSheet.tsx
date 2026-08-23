@@ -31,7 +31,8 @@ export default function BottomSheet({
         const end = e.changedTouches[0]?.clientY;
         if (start === null || end === undefined) return;
         const delta = start - end;
-        if (Math.abs(delta) > 40) onStateChange(sheetNext(state, delta > 0 ? "up" : "down"));
+        if (Math.abs(delta) > 40)
+          onStateChange(sheetNext(state, delta > 0 ? "up" : "down"));
         touchStartY.current = null;
       }}
     >
@@ -39,9 +40,13 @@ export default function BottomSheet({
         type="button"
         aria-label="シートを開閉"
         className="mx-auto mt-2 block h-1.5 w-10 rounded-full bg-gray-300"
-        onClick={() => onStateChange(sheetNext(state, state === "full" ? "down" : "up"))}
+        onClick={() =>
+          onStateChange(sheetNext(state, state === "full" ? "down" : "up"))
+        }
       />
-      <div className="h-[calc(100%-1.5rem)] overflow-y-auto px-4 pb-4 pt-2">{children}</div>
+      <div className="h-[calc(100%-1.5rem)] overflow-y-auto px-4 pb-4 pt-2">
+        {children}
+      </div>
     </div>
   );
 }

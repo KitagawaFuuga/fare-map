@@ -9,10 +9,10 @@ export interface ReachableStation {
 
 interface SearchState {
   stationId: string;
-  doneFare: number;    // 確定済み区間の運賃合計
+  doneFare: number; // 確定済み区間の運賃合計
   segOperator: string; // 進行中区間の事業者（"" = 未乗車）
-  segKm: number;       // 進行中区間の距離
-  fare: number;         // doneFare + estimate(segOperator, segKm) を状態生成時に確定したもの
+  segKm: number; // 進行中区間の距離
+  fare: number; // doneFare + estimate(segOperator, segKm) を状態生成時に確定したもの
 }
 
 export function findReachable(
@@ -21,8 +21,17 @@ export function findReachable(
   fromId: string,
   budget: number,
 ): ReachableStation[] {
-  const adjacency = new Map<string, { to: string; km: number; kind: "rail" | "transfer"; operator: string }[]>();
-  const addAdj = (from: string, to: string, km: number, kind: "rail" | "transfer", operator: string) => {
+  const adjacency = new Map<
+    string,
+    { to: string; km: number; kind: "rail" | "transfer"; operator: string }[]
+  >();
+  const addAdj = (
+    from: string,
+    to: string,
+    km: number,
+    kind: "rail" | "transfer",
+    operator: string,
+  ) => {
     const arr = adjacency.get(from) ?? [];
     arr.push({ to, km, kind, operator });
     adjacency.set(from, arr);
@@ -34,7 +43,13 @@ export function findReachable(
 
   const best = new Map<string, number>();
   const heap = new MinHeap<SearchState>((a, b) => a.fare - b.fare);
-  heap.push({ stationId: fromId, doneFare: 0, segOperator: "", segKm: 0, fare: 0 });
+  heap.push({
+    stationId: fromId,
+    doneFare: 0,
+    segOperator: "",
+    segKm: 0,
+    fare: 0,
+  });
   best.set(fromId, 0);
 
   while (heap.size > 0) {
@@ -56,7 +71,8 @@ export function findReachable(
           fare: state.doneFare + calc.estimate(state.segOperator, segKm),
         };
       } else {
-        const doneFare = state.doneFare + calc.estimate(state.segOperator, state.segKm);
+        const doneFare =
+          state.doneFare + calc.estimate(state.segOperator, state.segKm);
         next = {
           stationId: edge.to,
           doneFare,

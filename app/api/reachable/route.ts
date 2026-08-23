@@ -10,13 +10,21 @@ const querySchema = z.object({
 
 export function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
-  const parsed = querySchema.safeParse({ from: sp.get("from"), budget: sp.get("budget") });
+  const parsed = querySchema.safeParse({
+    from: sp.get("from"),
+    budget: sp.get("budget"),
+  });
   if (!parsed.success) {
-    return NextResponse.json({ error: "from と budget(100〜100000) を指定" }, { status: 400 });
+    return NextResponse.json(
+      { error: "from と budget(100〜100000) を指定" },
+      { status: 400 },
+    );
   }
   const store = getGraphStore();
   if (!store.graph.nodes[parsed.data.from]) {
     return NextResponse.json({ error: "未知の駅 id" }, { status: 404 });
   }
-  return NextResponse.json(reachable(store, parsed.data.from, parsed.data.budget));
+  return NextResponse.json(
+    reachable(store, parsed.data.from, parsed.data.budget),
+  );
 }

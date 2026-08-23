@@ -17,19 +17,31 @@ const fuseCache = new WeakMap<GraphStore, Fuse<StationNode>>();
 function getFuse(store: GraphStore): Fuse<StationNode> {
   let fuse = fuseCache.get(store);
   if (!fuse) {
-    fuse = new Fuse(Object.values(store.graph.nodes), { keys: ["name"], threshold: 0.3 });
+    fuse = new Fuse(Object.values(store.graph.nodes), {
+      keys: ["name"],
+      threshold: 0.3,
+    });
     fuseCache.set(store, fuse);
   }
   return fuse;
 }
 
-export function suggestStations(store: GraphStore, q: string, limit = 10): StationSuggestion[] {
+export function suggestStations(
+  store: GraphStore,
+  q: string,
+  limit = 10,
+): StationSuggestion[] {
   const seen = new Set<string>();
   const out: StationSuggestion[] = [];
   for (const { item } of getFuse(store).search(q, { limit: limit * 3 })) {
     if (seen.has(item.groupId)) continue;
     seen.add(item.groupId);
-    out.push({ id: item.id, name: item.name, lineName: item.lineName, operator: item.operator });
+    out.push({
+      id: item.id,
+      name: item.name,
+      lineName: item.lineName,
+      operator: item.operator,
+    });
     if (out.length >= limit) break;
   }
   return out;
@@ -74,7 +86,11 @@ export interface ReachableResult {
   meta: { from: string; budget: number; count: number };
 }
 
-export function reachable(store: GraphStore, fromId: string, budget: number): ReachableResult {
+export function reachable(
+  store: GraphStore,
+  fromId: string,
+  budget: number,
+): ReachableResult {
   const fromNode = store.graph.nodes[fromId];
   if (!fromNode) throw new Error(`未知の駅: ${fromId}`);
   const raw = findReachable(store.graph, store.calc, fromId, budget);

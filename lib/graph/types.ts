@@ -1,6 +1,6 @@
 export interface StationNode {
-  id: string;       // station_cd
-  groupId: string;  // station_g_cd（同一駅の別路線ノードをまとめる）
+  id: string; // station_cd
+  groupId: string; // station_g_cd（同一駅の別路線ノードをまとめる）
   name: string;
   lat: number;
   lng: number;

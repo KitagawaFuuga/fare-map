@@ -11,7 +11,8 @@ export function createFareCalculator(rules: FareRule[]): FareCalculator {
     if (r.operators.length === 0) fallback = r;
     for (const op of r.operators) byOperator.set(op, r);
   }
-  if (!fallback) throw new Error("フォールバック運賃ルール (operators: []) が必要");
+  if (!fallback)
+    throw new Error("フォールバック運賃ルール (operators: []) が必要");
   const fb = fallback;
 
   return {

@@ -22,7 +22,9 @@ export function useReachable(): UseReachable {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/reachable?from=${encodeURIComponent(fromId)}&budget=${budget}`);
+      const res = await fetch(
+        `/api/reachable?from=${encodeURIComponent(fromId)}&budget=${budget}`,
+      );
       if (!res.ok) {
         const body = (await res.json()) as { error?: string };
         throw new Error(body.error ?? `HTTP ${res.status}`);

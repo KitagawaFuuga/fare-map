@@ -10,10 +10,18 @@ const querySchema = z.object({
 
 export function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
-  const parsed = querySchema.safeParse({ lat: sp.get("lat"), lng: sp.get("lng") });
+  const parsed = querySchema.safeParse({
+    lat: sp.get("lat"),
+    lng: sp.get("lng"),
+  });
   if (!parsed.success) {
-    return NextResponse.json({ error: "lat/lng が日本国内の範囲外" }, { status: 400 });
+    return NextResponse.json(
+      { error: "lat/lng が日本国内の範囲外" },
+      { status: 400 },
+    );
   }
   const { lat, lng } = parsed.data;
-  return NextResponse.json({ station: nearestStation(getGraphStore(), lat, lng) });
+  return NextResponse.json({
+    station: nearestStation(getGraphStore(), lat, lng),
+  });
 }

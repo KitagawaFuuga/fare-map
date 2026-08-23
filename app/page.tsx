@@ -25,7 +25,9 @@ export default function Home() {
   const setFromByCoords = useCallback(async (lat: number, lng: number) => {
     const res = await fetch(`/api/stations/nearest?lat=${lat}&lng=${lng}`);
     if (!res.ok) return;
-    const body = (await res.json()) as { station: StationSuggestion & { lat: number; lng: number } };
+    const body = (await res.json()) as {
+      station: StationSuggestion & { lat: number; lng: number };
+    };
     setFrom({ id: body.station.id, name: body.station.name });
     setFocus({ lat: body.station.lat, lng: body.station.lng });
   }, []);
@@ -52,7 +54,8 @@ export default function Home() {
       <FareLegend />
       <StationList stations={data?.stations ?? []} onPick={setFocus} />
       <footer className="pt-4 text-xs text-gray-400">
-        出典: OpenStreetMap / OpenFreeMap / 駅データ.jp。運賃は距離ベースの概算です。
+        出典: OpenStreetMap / OpenFreeMap /
+        駅データ.jp。運賃は距離ベースの概算です。
       </footer>
     </div>
   );

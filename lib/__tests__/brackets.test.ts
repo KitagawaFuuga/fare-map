@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { BRACKETS, BRACKET_COLORS, bracketLabel, bracketOf } from "@/lib/brackets";
+import {
+  BRACKETS,
+  BRACKET_COLORS,
+  bracketLabel,
+  bracketOf,
+} from "@/lib/brackets";
 
 describe("brackets", () => {
   it("境界値: 500 円は bracket 0、501 円は bracket 1", () => {

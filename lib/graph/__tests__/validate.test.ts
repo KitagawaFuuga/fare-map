@@ -3,7 +3,14 @@ import { validateGraph } from "@/lib/graph/validate";
 import type { RailGraph } from "@/lib/graph/types";
 
 const node = (id: string, lat = 35, lng = 139) => ({
-  id, groupId: id, name: id, lat, lng, lineId: "L1", lineName: "L", operator: "Op",
+  id,
+  groupId: id,
+  name: id,
+  lat,
+  lng,
+  lineId: "L1",
+  lineName: "L",
+  operator: "Op",
 });
 
 describe("validateGraph", () => {

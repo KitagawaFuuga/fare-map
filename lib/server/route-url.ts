@@ -29,7 +29,10 @@ function isSafeHttpUrl(value: string): boolean {
   }
 }
 
-export async function buildRouteUrl(fromName: string, toName: string): Promise<string> {
+export async function buildRouteUrl(
+  fromName: string,
+  toName: string,
+): Promise<string> {
   const key = process.env.EKISPERT_API_KEY;
   if (!key) return googleMapsUrl(fromName, toName);
   try {
@@ -38,7 +41,9 @@ export async function buildRouteUrl(fromName: string, toName: string): Promise<s
     if (!res.ok) return googleMapsUrl(fromName, toName);
     const body: unknown = await res.json();
     const parsed = ekispertResponseSchema.safeParse(body);
-    const resourceUri = parsed.success ? parsed.data?.ResultSet?.ResourceURI : undefined;
+    const resourceUri = parsed.success
+      ? parsed.data?.ResultSet?.ResourceURI
+      : undefined;
     if (resourceUri && isSafeHttpUrl(resourceUri)) return resourceUri;
     return googleMapsUrl(fromName, toName);
   } catch {

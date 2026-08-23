@@ -8,8 +8,13 @@ import type { RailGraph } from "@/lib/graph/types";
 // 20km を 1 区間として引くと 150 円、10km を 2 回引くと 200 円。
 const calc = createFareCalculator([
   {
-    id: "test", operators: [],
-    table: [[10, 100], [20, 150], [30, 300]],
+    id: "test",
+    operators: [],
+    table: [
+      [10, 100],
+      [20, 150],
+      [30, 300],
+    ],
     beyond: { fromKm: 30, baseFare: 300, ratePerKm: 10 },
   },
 ]);
@@ -20,24 +25,42 @@ const calc = createFareCalculator([
 // D の運賃がその専用表由来になることを判別できるようにする。
 const calcWithOpB = createFareCalculator([
   {
-    id: "test", operators: [],
-    table: [[10, 100], [20, 150], [30, 300]],
+    id: "test",
+    operators: [],
+    table: [
+      [10, 100],
+      [20, 150],
+      [30, 300],
+    ],
     beyond: { fromKm: 30, baseFare: 300, ratePerKm: 10 },
   },
   {
-    id: "opb", operators: ["OpB"],
+    id: "opb",
+    operators: ["OpB"],
     table: [[10, 80]],
     beyond: { fromKm: 10, baseFare: 80, ratePerKm: 5 },
   },
 ]);
 
 const node = (id: string) => ({
-  id, groupId: id, name: id, lat: 35, lng: 139, lineId: "L", lineName: "L", operator: "OpA",
+  id,
+  groupId: id,
+  name: id,
+  lat: 35,
+  lng: 139,
+  lineId: "L",
+  lineName: "L",
+  operator: "OpA",
 });
 
 // A -10km- B -10km- C、C から OpB で -10km- D
 const graph: RailGraph = {
-  nodes: { A: node("A"), B: node("B"), C: node("C"), D: { ...node("D"), operator: "OpB" } },
+  nodes: {
+    A: node("A"),
+    B: node("B"),
+    C: node("C"),
+    D: { ...node("D"), operator: "OpB" },
+  },
   edges: [
     { from: "A", to: "B", km: 10, kind: "rail", operator: "OpA" },
     { from: "B", to: "C", km: 10, kind: "rail", operator: "OpA" },

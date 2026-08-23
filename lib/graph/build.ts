@@ -11,11 +11,16 @@ export interface EkidataInput {
 const TRANSFER_RADIUS_KM = 0.3;
 
 export function buildGraph(input: EkidataInput): RailGraph {
-  const companyName = new Map(input.companies.map((c) => [c.company_cd ?? "", c.company_name ?? ""]));
+  const companyName = new Map(
+    input.companies.map((c) => [c.company_cd ?? "", c.company_name ?? ""]),
+  );
   const lineInfo = new Map(
     input.lines.map((l) => [
       l.line_cd ?? "",
-      { name: l.line_name ?? "", operator: companyName.get(l.company_cd ?? "") ?? "" },
+      {
+        name: l.line_name ?? "",
+        operator: companyName.get(l.company_cd ?? "") ?? "",
+      },
     ]),
   );
 
@@ -46,7 +51,13 @@ export function buildGraph(input: EkidataInput): RailGraph {
     const a = nodes[j.station_cd1 ?? ""];
     const b = nodes[j.station_cd2 ?? ""];
     if (!a || !b) continue;
-    edges.push({ from: a.id, to: b.id, km: haversineKm(a, b), kind: "rail", operator: a.operator });
+    edges.push({
+      from: a.id,
+      to: b.id,
+      km: haversineKm(a, b),
+      kind: "rail",
+      operator: a.operator,
+    });
   }
 
   edges.push(...buildTransferEdges(Object.values(nodes)));
@@ -81,7 +92,8 @@ function buildTransferEdges(stations: StationNode[]): GraphEdge[] {
   }
 
   // (b) 近接駅。グリッド分割で近傍セルのみ比較する
-  const cell = (s: StationNode) => `${Math.round(s.lat * 100)}:${Math.round(s.lng * 100)}`;
+  const cell = (s: StationNode) =>
+    `${Math.round(s.lat * 100)}:${Math.round(s.lng * 100)}`;
   const grid = new Map<string, StationNode[]>();
   for (const s of stations) {
     const k = cell(s);

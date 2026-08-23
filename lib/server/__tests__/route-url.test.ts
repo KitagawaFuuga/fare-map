@@ -22,7 +22,9 @@ describe("buildRouteUrl", () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: () =>
-          Promise.resolve({ ResultSet: { ResourceURI: "https://roote.ekispert.net/result?x=1" } }),
+          Promise.resolve({
+            ResultSet: { ResourceURI: "https://roote.ekispert.net/result?x=1" },
+          }),
       }),
     );
     const url = await buildRouteUrl("新宿", "高尾");
@@ -71,7 +73,9 @@ describe("buildRouteUrl", () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: () =>
-          Promise.resolve({ ResultSet: { ResourceURI: "javascript:alert(1)" } }),
+          Promise.resolve({
+            ResultSet: { ResourceURI: "javascript:alert(1)" },
+          }),
       }),
     );
     const url = await buildRouteUrl("新宿", "高尾");

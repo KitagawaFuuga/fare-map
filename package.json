@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "pipeline:fetch": "tsx scripts/pipeline/fetch-data.ts",
+    "pipeline:fetch": "tsx scripts/pipeline/fetch-data.ts && tsx scripts/pipeline/fetch-kilometrage.ts",
+    "pipeline:fetch-km": "tsx scripts/pipeline/fetch-kilometrage.ts",
     "pipeline:build": "tsx scripts/pipeline/build-graph.ts",
     "pipeline:validate": "tsx scripts/pipeline/validate-graph.ts"
   },

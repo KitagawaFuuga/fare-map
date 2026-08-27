@@ -1,6 +1,11 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { parseCsv } from "@/lib/graph/csv";
 import { buildGraph } from "@/lib/graph/build";
+import {
+  buildCalibration,
+  calibratedKm,
+  type CalibrationSection,
+} from "@/lib/graph/calibrate";
 
 const raw = (name: string) =>
   parseCsv(readFileSync(`data/raw/${name}`, "utf8"));
@@ -12,7 +17,44 @@ const graph = buildGraph({
   joins: raw("join.csv"),
 });
 
+// kilometrage.csv は引用符で囲まれているが埋め込みカンマは無いため、
+// 引用符を除去してから parseCsv（単純 split 実装）に通せる
+const kmRows = parseCsv(
+  readFileSync("data/raw/kilometrage.csv", "utf8").replace(/"/g, ""),
+);
+const sections: CalibrationSection[] = kmRows
+  .map((r) => ({
+    operator: r["事業者名"] ?? "",
+    line: r["路線名"] ?? "",
+    from: r["起点駅"] ?? "",
+    to: r["終点駅"] ?? "",
+    officialKm: Number(r["営業キロ"]),
+  }))
+  .filter(
+    (s) =>
+      s.operator !== "" &&
+      s.line !== "" &&
+      s.from !== "" &&
+      s.to !== "" &&
+      Number.isFinite(s.officialKm) &&
+      s.officialKm > 0,
+  );
+
+const calibration = buildCalibration(graph, sections);
+for (const edge of graph.edges) {
+  if (edge.kind !== "rail") continue;
+  const node = graph.nodes[edge.from];
+  if (!node) continue;
+  edge.km = calibratedKm(calibration, node, edge.km);
+}
+
+writeFileSync("data/calibration.json", JSON.stringify(calibration, null, 2));
 writeFileSync("data/graph.json", JSON.stringify(graph));
 process.stdout.write(
   `nodes: ${Object.keys(graph.nodes).length}, edges: ${graph.edges.length}\n`,
+);
+process.stdout.write(
+  `calibration: byLine=${Object.keys(calibration.byLine).length} 路線, byOperator=${
+    Object.keys(calibration.byOperator).length
+  } 事業者, fallback=${calibration.fallback.toFixed(3)}\n`,
 );

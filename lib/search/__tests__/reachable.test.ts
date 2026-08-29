@@ -122,6 +122,84 @@ describe("findReachable", () => {
     expect(c?.fare).toBe(150);
   });
 
+  it("探索経由で特定運賃が適用される（区間全体の駅ペアに override があれば距離表より優先される）", () => {
+    // A -5km- B -5km- C（OpA）。距離表なら 10km=300 円だが、
+    // override で (A, C) ペアに 250 円が設定されているのでそちらが採用されるはず
+    const calcWithOverride = createFareCalculator(
+      [
+        {
+          id: "test",
+          operators: [],
+          table: [
+            [5, 100],
+            [10, 300],
+            [20, 500],
+          ],
+          beyond: { fromKm: 20, baseFare: 500, ratePerKm: 10 },
+        },
+      ],
+      [
+        {
+          operator: "OpA",
+          pairs: [{ from: "A", to: "C", fare: 250 }],
+          source: { url: "", fetchedAt: "2026-08-29", note: "test" },
+        },
+      ],
+    );
+    const abcGraph: RailGraph = {
+      nodes: { A: node("A"), B: node("B"), C: node("C") },
+      edges: [
+        { from: "A", to: "B", km: 5, kind: "rail", operator: "OpA" },
+        { from: "B", to: "C", km: 5, kind: "rail", operator: "OpA" },
+      ],
+    };
+    const result = findReachable(abcGraph, calcWithOverride, "A", 10000);
+    const c = result.find((r) => r.id === "C");
+    expect(c?.fare).toBe(250);
+  });
+
+  it("区間の途中駅ペアには override が適用されない（区間全体の駅ペアでのみ判定する）", () => {
+    // A -5km- B -5km- C（OpA）。override は (A,B)=999円 と (B,C)=111円 の
+    // “途中駅ペア” に設定されているが、A→C は区間全体としては (A,C) ペアであり、
+    // これらのどちらとも一致しないため距離表（10km=300円）が採用されるはず。
+    // segFromId を使わず「直前の駅」を from として誤って引くバグがあれば
+    // (B,C)=111 円になってしまい、このテストで判別できる。
+    const calcWithMidOverride = createFareCalculator(
+      [
+        {
+          id: "test",
+          operators: [],
+          table: [
+            [5, 100],
+            [10, 300],
+            [20, 500],
+          ],
+          beyond: { fromKm: 20, baseFare: 500, ratePerKm: 10 },
+        },
+      ],
+      [
+        {
+          operator: "OpA",
+          pairs: [
+            { from: "A", to: "B", fare: 999 },
+            { from: "B", to: "C", fare: 111 },
+          ],
+          source: { url: "", fetchedAt: "2026-08-29", note: "test" },
+        },
+      ],
+    );
+    const abcGraph: RailGraph = {
+      nodes: { A: node("A"), B: node("B"), C: node("C") },
+      edges: [
+        { from: "A", to: "B", km: 5, kind: "rail", operator: "OpA" },
+        { from: "B", to: "C", km: 5, kind: "rail", operator: "OpA" },
+      ],
+    };
+    const result = findReachable(abcGraph, calcWithMidOverride, "A", 10000);
+    const c = result.find((r) => r.id === "C");
+    expect(c?.fare).toBe(300);
+  });
+
   it("transfer エッジの逆方向にも到達できる", () => {
     const transferGraph: RailGraph = {
       nodes: { A: node("A"), B: node("B"), B2: node("B2"), C: node("C") },

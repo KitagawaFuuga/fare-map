@@ -5,7 +5,12 @@ import {
   createFareCalculator,
   type FareCalculator,
 } from "@/lib/fare/calculator";
-import { fareRuleSchema, type FareRule } from "@/lib/fare/types";
+import {
+  fareOverrideSchema,
+  fareRuleSchema,
+  type FareOverride,
+  type FareRule,
+} from "@/lib/fare/types";
 
 export interface GraphStore {
   graph: RailGraph;
@@ -15,8 +20,9 @@ export interface GraphStore {
 export function createGraphStore(
   graph: RailGraph,
   rules: FareRule[],
+  overrides?: FareOverride[],
 ): GraphStore {
-  return { graph, calc: createFareCalculator(rules) };
+  return { graph, calc: createFareCalculator(rules, overrides) };
 }
 
 let cached: GraphStore | undefined;
@@ -34,7 +40,15 @@ export function getGraphStore(): GraphStore {
           JSON.parse(readFileSync(path.join(dir, f), "utf8")),
         ),
       );
-    cached = createGraphStore(graph, rules);
+    const overridesDir = path.join(process.cwd(), "data/fare-overrides");
+    const overrides = readdirSync(overridesDir)
+      .filter((f) => f.endsWith(".json"))
+      .map((f) =>
+        fareOverrideSchema.parse(
+          JSON.parse(readFileSync(path.join(overridesDir, f), "utf8")),
+        ),
+      );
+    cached = createGraphStore(graph, rules, overrides);
   }
   return cached;
 }

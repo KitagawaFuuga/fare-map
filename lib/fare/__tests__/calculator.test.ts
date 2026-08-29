@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createFareCalculator } from "@/lib/fare/calculator";
-import { fareRuleSchema } from "@/lib/fare/types";
+import { fareOverrideSchema, fareRuleSchema } from "@/lib/fare/types";
 import jrEast from "@/data/fare-rules/jr-east.json";
 import jrCentral from "@/data/fare-rules/jr-central.json";
 import jrWest from "@/data/fare-rules/jr-west.json";
@@ -11,6 +11,7 @@ import kintetsu from "@/data/fare-rules/kintetsu.json";
 import meitetsu from "@/data/fare-rules/meitetsu.json";
 import tobu from "@/data/fare-rules/tobu.json";
 import generic from "@/data/fare-rules/generic-private.json";
+import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 
 const rules = [
   jrEast,
@@ -24,7 +25,8 @@ const rules = [
   tobu,
   generic,
 ].map((r) => fareRuleSchema.parse(r));
-const calc = createFareCalculator(rules);
+const overrides = [jrWestOverride].map((o) => fareOverrideSchema.parse(o));
+const calc = createFareCalculator(rules, overrides);
 
 // 実区間照合テストは、加算運賃・特定運賃のかからない一般区間を選び実運賃と toBe で完全一致検証する
 // （brief参照）。一致しない区間は「表で表現できない特殊運賃が乗っている」ことを意味するため、
@@ -178,6 +180,32 @@ describe("FareCalculator", () => {
 
     it("初乗り運賃(1〜4km)が160円", () => {
       expect(calc.estimate("東武鉄道", 3)).toBe(160);
+    });
+  });
+
+  describe("特定運賃（駅ペア単位の割引運賃）", () => {
+    // 出典: https://www.westjr.co.jp/press/article/items/240515_00_press_keihanshin_unchin.pdf
+    // 別紙4（2026-08-29取得）。大阪→京都は営業キロ42.8kmで幹線表なら770円だが特定運賃580円。
+    it("特定運賃が設定された駅ペアは距離表ではなく特定運賃を返す", () => {
+      expect(calc.estimate("JR西日本", 42.8, "大阪", "京都")).toBe(580);
+    });
+
+    it("方向を入れ替えても同じ特定運賃になる", () => {
+      expect(calc.estimate("JR西日本", 42.8, "京都", "大阪")).toBe(580);
+    });
+
+    it("駅名を与えなければ従来どおり距離表を引く", () => {
+      expect(calc.estimate("JR西日本", 42.8)).toBe(770);
+    });
+
+    it("特定運賃の無いペアは距離表を引く", () => {
+      expect(calc.estimate("JR西日本", 42.8, "大阪", "存在しない駅")).toBe(
+        770,
+      );
+    });
+
+    it("override 未設定の事業者は駅名を渡しても距離表を引く", () => {
+      expect(calc.estimate("JR東海", 42.8, "大阪", "京都")).not.toBe(580);
     });
   });
 });

@@ -11,6 +11,7 @@ interface SearchState {
   stationId: string;
   doneFare: number; // 確定済み区間の運賃合計
   segOperator: string; // 進行中区間の事業者（"" = 未乗車）
+  segFromId: string; // 進行中区間の開始駅（特定運賃は区間全体の駅ペアに適用するため必要）
   segKm: number; // 進行中区間の距離
   fare: number; // doneFare + estimate(segOperator, segKm) を状態生成時に確定したもの
 }
@@ -41,12 +42,15 @@ export function findReachable(
     addAdj(e.to, e.from, e.km, e.kind, e.operator);
   }
 
+  const nameOf = (id: string): string | undefined => graph.nodes[id]?.name;
+
   const best = new Map<string, number>();
   const heap = new MinHeap<SearchState>((a, b) => a.fare - b.fare);
   heap.push({
     stationId: fromId,
     doneFare: 0,
     segOperator: "",
+    segFromId: fromId,
     segKm: 0,
     fare: 0,
   });
@@ -67,18 +71,40 @@ export function findReachable(
           stationId: edge.to,
           doneFare: state.doneFare,
           segOperator: state.segOperator,
+          segFromId: state.segFromId,
           segKm,
-          fare: state.doneFare + calc.estimate(state.segOperator, segKm),
+          fare:
+            state.doneFare +
+            calc.estimate(
+              state.segOperator,
+              segKm,
+              nameOf(state.segFromId),
+              nameOf(edge.to),
+            ),
         };
       } else {
         const doneFare =
-          state.doneFare + calc.estimate(state.segOperator, state.segKm);
+          state.doneFare +
+          calc.estimate(
+            state.segOperator,
+            state.segKm,
+            nameOf(state.segFromId),
+            nameOf(state.stationId),
+          );
         next = {
           stationId: edge.to,
           doneFare,
           segOperator: edge.operator,
+          segFromId: state.stationId,
           segKm: edge.km,
-          fare: doneFare + calc.estimate(edge.operator, edge.km),
+          fare:
+            doneFare +
+            calc.estimate(
+              edge.operator,
+              edge.km,
+              nameOf(state.stationId),
+              nameOf(edge.to),
+            ),
         };
       }
       if (next.fare > budget) continue;

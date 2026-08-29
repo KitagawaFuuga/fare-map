@@ -1,0 +1,12 @@
+{
+  "operator": "京急電鉄",
+  "pairs": [
+    { "from": "品川", "to": "横浜", "fare": 320 },
+    { "from": "京急川崎", "to": "横浜", "fare": 240 }
+  ],
+  "source": {
+    "url": "https://ekitan.com/rail-company/547/fare/sf-2236/st-3260, https://ekitan.com/transit/fare/sf-2050/st-3260",
+    "fetchedAt": "2026-08-29",
+    "note": "駅探（ekitan.com）実測。JR京浜東北線・東海道線と競合する区間はfare-rules/keikyu.jsonの一般表(22.2km=350円/10.4km=230円)より安い競合運賃が設定されている。品川→横浜22.2km実運賃320円(IC313円)、京急川崎→横浜10.4km実運賃240円(IC240円)。同様の競合構造がJR側にもあり(data/fare-overrides/jr-east.jsonの品川→横浜350円は京急と競合した結果のJR側の特定運賃で、本ファイルの京急側の実運賃320円とは別物）。"
+  }
+}

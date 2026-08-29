@@ -19,8 +19,15 @@ import nankai from "@/data/fare-rules/nankai.json";
 import seibu from "@/data/fare-rules/seibu.json";
 import hankyu from "@/data/fare-rules/hankyu.json";
 import hiroshimaDentetsu from "@/data/fare-rules/hiroshima-dentetsu.json";
+import keio from "@/data/fare-rules/keio.json";
+import keikyu from "@/data/fare-rules/keikyu.json";
+import keisei from "@/data/fare-rules/keisei.json";
+import keihan from "@/data/fare-rules/keihan.json";
+import tokyu from "@/data/fare-rules/tokyu.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
+import keikyuOverride from "@/data/fare-overrides/keikyu.json";
+import tokyuOverride from "@/data/fare-overrides/tokyu.json";
 
 const rules = [
   jrEast,
@@ -41,10 +48,18 @@ const rules = [
   seibu,
   hankyu,
   hiroshimaDentetsu,
+  keio,
+  keikyu,
+  keisei,
+  keihan,
+  tokyu,
 ].map((r) => fareRuleSchema.parse(r));
-const overrides = [jrWestOverride, jrEastOverride].map((o) =>
-  fareOverrideSchema.parse(o),
-);
+const overrides = [
+  jrWestOverride,
+  jrEastOverride,
+  keikyuOverride,
+  tokyuOverride,
+].map((o) => fareOverrideSchema.parse(o));
 const calc = createFareCalculator(rules, overrides);
 
 // 実区間照合テストは、加算運賃・特定運賃のかからない一般区間を選び実運賃と toBe で完全一致検証する
@@ -400,6 +415,112 @@ describe("FareCalculator", () => {
 
     it("極端に短い距離でも240円", () => {
       expect(calc.estimate("広島電鉄", 0.5)).toBe(240);
+    });
+  });
+
+  describe("京王電鉄（2023年10月1日改定後）", () => {
+    // 出典: https://www.keio.co.jp/train/ticket/fare_chart/fare_chart_km.html
+    // 実運賃はekitan.com(2026-08-29取得)で照合
+    it("新宿→高尾 43.0km、実運賃410円（JR中央線経由720円より安い）", () => {
+      expect(calc.estimate("京王電鉄", 43.0)).toBe(410);
+    });
+
+    it("新宿→京王八王子 37.9km、実運賃410円", () => {
+      expect(calc.estimate("京王電鉄", 37.9)).toBe(410);
+    });
+
+    it("新宿→調布 15.5km、実運賃280円", () => {
+      expect(calc.estimate("京王電鉄", 15.5)).toBe(280);
+    });
+  });
+
+  describe("京急電鉄（2023年10月1日改定後）", () => {
+    // 出典: https://www.keikyu.co.jp/cp/unchinkaitei/pdf/futsuu_unchin.pdf
+    // 実運賃はekitan.com(2026-08-29取得)で照合。品川〜横浜・京急川崎〜横浜はJRと競合する
+    // 特定運賃(fare-overrides/keikyu.json)のため、ここでは一般表と一致する区間のみ使用
+    it("金沢文庫→横須賀中央 10.4km、実運賃280円", () => {
+      expect(calc.estimate("京急電鉄", 10.4)).toBe(280);
+    });
+
+    it("金沢文庫→品川 39.5km、実運賃510円", () => {
+      expect(calc.estimate("京急電鉄", 39.5)).toBe(510);
+    });
+
+    it("品川→横須賀中央 49.9km、実運賃620円", () => {
+      expect(calc.estimate("京急電鉄", 49.9)).toBe(620);
+    });
+
+    it("品川→横浜はJRと競合する特定運賃320円（一般表なら350円）", () => {
+      expect(calc.estimate("京急電鉄", 22.2, "品川", "横浜")).toBe(320);
+    });
+  });
+
+  describe("京成電鉄（2024年3月16日改定後・バリアフリー料金込み）", () => {
+    // 出典: https://jikokuhyo.train-times.net/data/keisei_fare
+    // 実運賃はekitan.com・京成公式PDF(2026-08-29取得)で照合。成田空港線は加算運賃対象のため除外
+    it("京成上野→青砥 11.5km、実運賃280円", () => {
+      expect(calc.estimate("京成電鉄", 11.5)).toBe(280);
+    });
+
+    it("京成上野→京成船橋 25.1km、実運賃450円", () => {
+      expect(calc.estimate("京成電鉄", 25.1)).toBe(450);
+    });
+
+    it("京成成田→京成上野 61.2km、実運賃860円（京成本線経由・空港第2ビル非経由）", () => {
+      expect(calc.estimate("京成電鉄", 61.2)).toBe(860);
+    });
+  });
+
+  describe("京阪電鉄（2025年10月1日改定後）", () => {
+    // 出典: https://www.keihan.co.jp/traffic/station/assets/pdf/fare/010.pdf（淀屋橋発着運賃表）
+    // 実運賃はekitan.com(2026-08-29取得)で照合
+    it("淀屋橋→京橋(大阪) 3.0km、実運賃180円", () => {
+      expect(calc.estimate("京阪電鉄", 3.0)).toBe(180);
+    });
+
+    it("淀屋橋→枚方市 21.8km、実運賃400円", () => {
+      expect(calc.estimate("京阪電鉄", 21.8)).toBe(400);
+    });
+
+    it("淀屋橋→出町柳 51.6km（京阪線最長区間）、実運賃550円", () => {
+      expect(calc.estimate("京阪電鉄", 51.6)).toBe(550);
+    });
+  });
+
+  describe("東急電鉄（2023年3月18日改定後・本線対キロ制）", () => {
+    // 出典: https://jikokuhyo.train-times.net/data/tokyu_fare
+    // 実運賃はekitan.com(2026-08-29取得)で照合
+    it("渋谷→池尻大橋(田園都市線) 1.9km、実運賃140円", () => {
+      expect(calc.estimate("東急電鉄", 1.9)).toBe(140);
+    });
+
+    it("渋谷→横浜(東横線) 24.2km、実運賃310円", () => {
+      expect(calc.estimate("東急電鉄", 24.2)).toBe(310);
+    });
+
+    it("渋谷→中央林間(田園都市線) 31.5km、実運賃390円", () => {
+      expect(calc.estimate("東急電鉄", 31.5)).toBe(390);
+    });
+  });
+
+  describe("東急世田谷線・こどもの国線（均一運賃、駅ペアoverride）", () => {
+    // 出典: https://setagaya-line.com/2023/03/18/ (世田谷線160円均一)
+    //       https://ja.wikipedia.org/wiki/東急こどもの国線 (こどもの国線157円均一)
+    // 本線用の対キロ制表(tokyu.json)ではなくoverrideが適用されることを確認
+    it("三軒茶屋→下高井戸(世田谷線全線)は均一160円", () => {
+      expect(calc.estimate("東急電鉄", 5.0, "三軒茶屋", "下高井戸")).toBe(160);
+    });
+
+    it("世田谷線内の隣接駅(松陰神社前→世田谷)も同じ160円均一", () => {
+      expect(calc.estimate("東急電鉄", 0.6, "松陰神社前", "世田谷")).toBe(160);
+    });
+
+    it("長津田→こどもの国(こどもの国線全線)は均一157円", () => {
+      expect(calc.estimate("東急電鉄", 3.4, "長津田", "こどもの国")).toBe(157);
+    });
+
+    it("override対象外の駅ペアは本線の対キロ制表を引く", () => {
+      expect(calc.estimate("東急電鉄", 24.2, "渋谷", "横浜")).toBe(310);
     });
   });
 });

@@ -12,6 +12,7 @@ import meitetsu from "@/data/fare-rules/meitetsu.json";
 import tobu from "@/data/fare-rules/tobu.json";
 import generic from "@/data/fare-rules/generic-private.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
+import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 
 const rules = [
   jrEast,
@@ -25,7 +26,9 @@ const rules = [
   tobu,
   generic,
 ].map((r) => fareRuleSchema.parse(r));
-const overrides = [jrWestOverride].map((o) => fareOverrideSchema.parse(o));
+const overrides = [jrWestOverride, jrEastOverride].map((o) =>
+  fareOverrideSchema.parse(o),
+);
 const calc = createFareCalculator(rules, overrides);
 
 // 実区間照合テストは、加算運賃・特定運賃のかからない一般区間を選び実運賃と toBe で完全一致検証する
@@ -205,7 +208,24 @@ describe("FareCalculator", () => {
     });
 
     it("override 未設定の事業者は駅名を渡しても距離表を引く", () => {
-      expect(calc.estimate("JR東海", 42.8, "大阪", "京都")).not.toBe(580);
+      // JR東海の距離表(jr-central.json)で42.8kmは41-45km帯=770円。JR西日本の特定運賃580円とは無関係。
+      expect(calc.estimate("JR東海", 42.8, "大阪", "京都")).toBe(770);
+    });
+  });
+
+  describe("JR東日本の特定運賃（駅探の実測による、jreast.co.jpはbot保護で一次情報取得不可のため）", () => {
+    // 出典: 駅探(ekitan.com) 2026-08-29取得。data/fare-overrides/jr-east.json 参照。
+    // 公式営業キロで距離表を引いた値と、駅探が返す実運賃（きっぷ）が乖離する区間のみを特定運賃として採用。
+    it("新宿→八王子 37.1km、実運賃620円（京王線と競合、表なら720円）", () => {
+      expect(calc.estimate("JR東日本", 37.1, "新宿", "八王子")).toBe(620);
+    });
+
+    it("新宿→高尾 42.8km、実運賃720円（京王線・高尾山口方面と競合、表なら810円）", () => {
+      expect(calc.estimate("JR東日本", 42.8, "新宿", "高尾")).toBe(720);
+    });
+
+    it("品川→横浜 22.0km、実運賃350円（京急本線と競合、表なら440円）", () => {
+      expect(calc.estimate("JR東日本", 22.0, "品川", "横浜")).toBe(350);
     });
   });
 });

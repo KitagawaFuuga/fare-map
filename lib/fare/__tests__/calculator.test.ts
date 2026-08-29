@@ -11,6 +11,14 @@ import kintetsu from "@/data/fare-rules/kintetsu.json";
 import meitetsu from "@/data/fare-rules/meitetsu.json";
 import tobu from "@/data/fare-rules/tobu.json";
 import generic from "@/data/fare-rules/generic-private.json";
+import tokyoMetro from "@/data/fare-rules/tokyo-metro.json";
+import toei from "@/data/fare-rules/toei.json";
+import osakaMetro from "@/data/fare-rules/osaka-metro.json";
+import nagoyaCity from "@/data/fare-rules/nagoya-city.json";
+import nankai from "@/data/fare-rules/nankai.json";
+import seibu from "@/data/fare-rules/seibu.json";
+import hankyu from "@/data/fare-rules/hankyu.json";
+import hiroshimaDentetsu from "@/data/fare-rules/hiroshima-dentetsu.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 
@@ -25,6 +33,14 @@ const rules = [
   meitetsu,
   tobu,
   generic,
+  tokyoMetro,
+  toei,
+  osakaMetro,
+  nagoyaCity,
+  nankai,
+  seibu,
+  hankyu,
+  hiroshimaDentetsu,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [jrWestOverride, jrEastOverride].map((o) =>
   fareOverrideSchema.parse(o),
@@ -226,6 +242,135 @@ describe("FareCalculator", () => {
 
     it("品川→横浜 22.0km、実運賃350円（京急本線と競合、表なら440円）", () => {
       expect(calc.estimate("JR東日本", 22.0, "品川", "横浜")).toBe(350);
+    });
+  });
+
+  describe("東京メトロ（2023年3月18日改定後）", () => {
+    // 出典: https://www.tokyometro.jp/safety/barrierfree/pdf/barrierfree_price_230525.pdf
+    // 実運賃はekitan.com(2026-08-29取得)で照合し、いずれも特定運賃の対象外区間
+    it("浅草→渋谷(銀座線) 14.3km、実運賃260円", () => {
+      expect(calc.estimate("東京メトロ", 14.3)).toBe(260);
+    });
+
+    it("和光市→渋谷(副都心線) 20.4km、実運賃300円", () => {
+      expect(calc.estimate("東京メトロ", 20.4)).toBe(300);
+    });
+
+    it("中野→西船橋(東西線) 30.8km、実運賃330円", () => {
+      expect(calc.estimate("東京メトロ", 30.8)).toBe(330);
+    });
+  });
+
+  describe("東京都交通局（2019年10月1日改定後）", () => {
+    // 出典: https://ja.wikipedia.org/wiki/都営地下鉄
+    // 実運賃はekitan.com(2026-08-29取得)で照合
+    it("新宿→本八幡(都営新宿線) 23.5km、実運賃380円", () => {
+      expect(calc.estimate("東京都交通局", 23.5)).toBe(380);
+    });
+
+    it("西馬込→押上(都営浅草線) 18.3km、実運賃330円", () => {
+      expect(calc.estimate("東京都交通局", 18.3)).toBe(330);
+    });
+
+    it("光が丘→都庁前(都営大江戸線) 12.1km、実運賃280円", () => {
+      expect(calc.estimate("東京都交通局", 12.1)).toBe(280);
+    });
+  });
+
+  describe("Osaka Metro（2023年4月1日改定後）", () => {
+    // 出典: https://ja.wikipedia.org/wiki/Osaka_Metro
+    // 実運賃はekitan.com(2026-08-29取得)で照合。夢洲発着は加算運賃90円がかかるため対象外
+    it("梅田→心斎橋(御堂筋線) 3.2km、実運賃240円", () => {
+      expect(calc.estimate("Osaka Metro", 3.2)).toBe(240);
+    });
+
+    it("江坂→なかもず(御堂筋線) 24.5km、実運賃390円（19km超はフラット）", () => {
+      expect(calc.estimate("Osaka Metro", 24.5)).toBe(390);
+    });
+
+    it("大日→八尾南(谷町線) 28.3km、実運賃390円（19km超はフラット）", () => {
+      expect(calc.estimate("Osaka Metro", 28.3)).toBe(390);
+    });
+  });
+
+  describe("名古屋市交通局", () => {
+    // 出典: https://www.kotsu.city.nagoya.jp/rp/subway/trp0000172.htm
+    // 実運賃はekitan.com(2026-08-29取得)で照合
+    it("名古屋→栄(東山線) 2.4km、実運賃210円", () => {
+      expect(calc.estimate("名古屋市交通局", 2.4)).toBe(210);
+    });
+
+    it("名古屋→金山(東山線・名城線) 5.4km、実運賃240円", () => {
+      expect(calc.estimate("名古屋市交通局", 5.4)).toBe(240);
+    });
+
+    it("高畑→藤が丘(東山線全線) 20.6km、実運賃340円（15km超はフラット）", () => {
+      expect(calc.estimate("名古屋市交通局", 20.6)).toBe(340);
+    });
+  });
+
+  describe("南海電鉄（2023年10月1日改定後）", () => {
+    // 出典: https://www.mlit.go.jp/common/001583779.pdf（運輸審議会説明資料）
+    // 実運賃はekitan.com(2026-08-29取得)で照合。難波～三国ヶ丘・中百舌鳥はJR西日本・Osaka Metroとの
+    // 競合特定運賃(350円)の対象区間のため使用しない
+    it("難波→堺(南海本線) 9.8km、実運賃290円", () => {
+      expect(calc.estimate("南海電鉄", 9.8)).toBe(290);
+    });
+
+    it("難波→岸和田(南海本線) 26.0km、実運賃540円", () => {
+      expect(calc.estimate("南海電鉄", 26.0)).toBe(540);
+    });
+
+    it("難波→橋本(高野線) 43.8km、実運賃740円", () => {
+      expect(calc.estimate("南海電鉄", 43.8)).toBe(740);
+    });
+  });
+
+  describe("西武鉄道（2026年3月14日改定後）", () => {
+    // 出典: https://www.seiburailway.jp/file.jsp?file%2F202603_fare_bykm.pdf=
+    // 実運賃はekitan.com(2026-08-29取得)で照合
+    it("池袋→所沢(池袋線) 24.8km、実運賃410円", () => {
+      expect(calc.estimate("西武鉄道", 24.8)).toBe(410);
+    });
+
+    it("池袋→飯能(池袋線) 43.7km、実運賃560円", () => {
+      expect(calc.estimate("西武鉄道", 43.7)).toBe(560);
+    });
+
+    it("西武新宿→本川越(新宿線) 47.5km、実運賃600円", () => {
+      expect(calc.estimate("西武鉄道", 47.5)).toBe(600);
+    });
+  });
+
+  describe("阪急電鉄（2023年4月1日改定後）", () => {
+    // 出典: https://jikokuhyo.train-times.net/data/hankyu_fare
+    // 実運賃はekitan.com(2026-08-29取得)で照合
+    it("大阪梅田→西宮北口(神戸線) 15.6km、実運賃280円", () => {
+      expect(calc.estimate("阪急電鉄", 15.6)).toBe(280);
+    });
+
+    it("大阪梅田→神戸三宮(神戸線) 32.3km、実運賃330円", () => {
+      expect(calc.estimate("阪急電鉄", 32.3)).toBe(330);
+    });
+
+    it("大阪梅田→京都河原町(京都線) 47.7km、実運賃410円", () => {
+      expect(calc.estimate("阪急電鉄", 47.7)).toBe(410);
+    });
+  });
+
+  describe("広島電鉄（2025年2月1日改定・全線240円均一）", () => {
+    // 出典: https://news.railway-pressnet.com/archives/69108
+    // 実運賃はekitan.com(2026-08-29取得)で照合。均一運賃のため距離によらず240円
+    it("紙屋町東付近 1.9km、実運賃240円", () => {
+      expect(calc.estimate("広島電鉄", 1.9)).toBe(240);
+    });
+
+    it("宮島線全線 21.3km、実運賃240円", () => {
+      expect(calc.estimate("広島電鉄", 21.3)).toBe(240);
+    });
+
+    it("極端に短い距離でも240円", () => {
+      expect(calc.estimate("広島電鉄", 0.5)).toBe(240);
     });
   });
 });

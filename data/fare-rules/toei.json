@@ -1,0 +1,18 @@
+{
+  "id": "toei",
+  "operators": ["東京都交通局"],
+  "table": [
+    [4, 180],
+    [9, 220],
+    [15, 280],
+    [21, 330],
+    [27, 380],
+    [46, 430]
+  ],
+  "beyond": { "fromKm": 46, "baseFare": 430, "ratePerKm": 8 },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/%E9%83%BD%E5%96%B6%E5%9C%B0%E4%B8%8B%E9%89%84, https://www.kotsu.metro.tokyo.jp/subway/fare/regular.html",
+    "fetchedAt": "2026-08-29",
+    "note": "普通旅客運賃（きっぷ、10円単位）。2019年10月1日改定後の表（公式サイトの改定告知に新しい改定は見当たらず、Wikipediaのキロ程表と一致）。実運賃はekitan.com(2026-08-29取得)で照合し、新宿→本八幡(都営新宿線)23.5km=380円、西馬込→押上(都営浅草線)18.3km=330円、光が丘→都庁前(都営大江戸線)12.1km=280円がいずれも表と完全一致。"
+  }
+}

@@ -9,5 +9,12 @@ export const fareRuleSchema = z.object({
     baseFare: z.number(),
     ratePerKm: z.number(),
   }),
+  source: z
+    .object({
+      url: z.string(),
+      fetchedAt: z.string(),
+      note: z.string(),
+    })
+    .optional(),
 });
 export type FareRule = z.infer<typeof fareRuleSchema>;

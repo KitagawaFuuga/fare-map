@@ -28,6 +28,7 @@ import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
 import tokyuOverride from "@/data/fare-overrides/tokyu.json";
+import keihanOverride from "@/data/fare-overrides/keihan.json";
 
 const rules = [
   jrEast,
@@ -59,6 +60,7 @@ const overrides = [
   jrEastOverride,
   keikyuOverride,
   tokyuOverride,
+  keihanOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 const calc = createFareCalculator(rules, overrides);
 
@@ -487,6 +489,37 @@ describe("FareCalculator", () => {
     });
   });
 
+  describe("京阪大津線（京津線・石山坂本線、駅ペアoverride）", () => {
+    // 出典: https://www.keihan.co.jp/traffic/ticket/information/kirotei.html（営業キロ程）
+    // 実運賃はekitan.com(2026-08-29取得)で照合。operator文字列だけでは京阪線本表と大津線を
+    // 区別できないため、data/fare-overrides/keihan.jsonで大津線の全駅ペアを個別に上書きする。
+    it("御陵→京阪山科(京津線) 1.5km、実運賃200円（本表なら180円）", () => {
+      expect(calc.estimate("京阪電鉄", 1.5, "御陵", "京阪山科")).toBe(200);
+    });
+
+    it("びわ湖浜大津→石山寺(石山坂本線) 6.7km、実運賃280円（本表なら240円）", () => {
+      expect(calc.estimate("京阪電鉄", 6.7, "びわ湖浜大津", "石山寺")).toBe(
+        280,
+      );
+    });
+
+    it("御陵→びわ湖浜大津(京津線) 7.5km、実運賃280円（本表なら240円）", () => {
+      expect(calc.estimate("京阪電鉄", 7.5, "御陵", "びわ湖浜大津")).toBe(
+        280,
+      );
+    });
+
+    it("坂本比叡山口→石山寺(石山坂本線全線) 14.1km、実運賃380円（本表なら360円）", () => {
+      expect(
+        calc.estimate("京阪電鉄", 14.1, "坂本比叡山口", "石山寺"),
+      ).toBe(380);
+    });
+
+    it("override対象外の駅ペアは京阪線本表を引く", () => {
+      expect(calc.estimate("京阪電鉄", 21.8, "淀屋橋", "枚方市")).toBe(400);
+    });
+  });
+
   describe("東急電鉄（2023年3月18日改定後・本線対キロ制）", () => {
     // 出典: https://jikokuhyo.train-times.net/data/tokyu_fare
     // 実運賃はekitan.com(2026-08-29取得)で照合
@@ -505,7 +538,8 @@ describe("FareCalculator", () => {
 
   describe("東急世田谷線・こどもの国線（均一運賃、駅ペアoverride）", () => {
     // 出典: https://setagaya-line.com/2023/03/18/ (世田谷線160円均一)
-    //       https://ja.wikipedia.org/wiki/東急こどもの国線 (こどもの国線157円均一)
+    //       https://ja.wikipedia.org/wiki/東急こどもの国線 (こどもの国線 IC157円/きっぷ160円。
+    //       本プロジェクトは全事業者きっぷ運賃で統一のため160円を採用)
     // 本線用の対キロ制表(tokyu.json)ではなくoverrideが適用されることを確認
     it("三軒茶屋→下高井戸(世田谷線全線)は均一160円", () => {
       expect(calc.estimate("東急電鉄", 5.0, "三軒茶屋", "下高井戸")).toBe(160);
@@ -515,8 +549,8 @@ describe("FareCalculator", () => {
       expect(calc.estimate("東急電鉄", 0.6, "松陰神社前", "世田谷")).toBe(160);
     });
 
-    it("長津田→こどもの国(こどもの国線全線)は均一157円", () => {
-      expect(calc.estimate("東急電鉄", 3.4, "長津田", "こどもの国")).toBe(157);
+    it("長津田→こどもの国(こどもの国線全線)は均一160円（きっぷ。IC157円とは別）", () => {
+      expect(calc.estimate("東急電鉄", 3.4, "長津田", "こどもの国")).toBe(160);
     });
 
     it("override対象外の駅ペアは本線の対キロ制表を引く", () => {

@@ -102,6 +102,35 @@ describe("FareCalculator", () => {
     });
   });
 
+  describe("100km超の基準額表（JR本州3社が使う階段テーブル、線形外挿ではなく完全一致）", () => {
+    // 出典: http://web.archive.org/web/20260306174402/https://www.jreast.co.jp/2026unchin-kaitei/assets/pdf/kijun_kasan_futsuu.pdf
+    // （Wayback Machine経由で全文取得、2026-08-29）。JR東海・JR西日本はこの基準額表と同一の運賃を使う。
+    // 従来のbeyond線形式(baseFare+(km-100)*16.2)では250.8km=4,140円になり公式4,510円と-370円ズレていた。
+    it("250.8km(281〜300km帯ではなく241〜260km帯)、基準額表どおり4,510円（JR東海）", () => {
+      expect(calc.estimate("JR東海", 250.8)).toBe(4510);
+    });
+
+    it("293.6km(281〜300km帯)、基準額表どおり5,170円（JR東海）", () => {
+      expect(calc.estimate("JR東海", 293.6)).toBe(5170);
+    });
+
+    it("303.9km(301〜320km帯)、基準額表どおり5,500円（JR東海）", () => {
+      expect(calc.estimate("JR東海", 303.9)).toBe(5500);
+    });
+
+    it("250.8kmはJR西日本でも同じ基準額表で4,510円", () => {
+      expect(calc.estimate("JR西日本", 250.8)).toBe(4510);
+    });
+
+    it("293.6kmはJR西日本でも同じ基準額表で5,170円", () => {
+      expect(calc.estimate("JR西日本", 293.6)).toBe(5170);
+    });
+
+    it("303.9kmはJR西日本でも同じ基準額表で5,500円", () => {
+      expect(calc.estimate("JR西日本", 303.9)).toBe(5500);
+    });
+  });
+
   describe("JR西日本（電車特定区間外・幹線が実質据え置き）", () => {
     // 出典: https://www.westjr.co.jp/press/article/items/240515_00_press_keihanshin_unchin.pdf
     // 幹線(拡大区間)は2025年4月改定でも金額変更なし。電車特定区間内の都市部ルートは

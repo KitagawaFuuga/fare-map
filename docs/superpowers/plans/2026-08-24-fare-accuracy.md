@@ -229,3 +229,88 @@ JR東日本だけで 1,865 駅（全体の 17.8%）を占めるため、ここ�
 代表的な区間 10 件以上について、改善前（v1）・改善後の概算と実運賃を並べた表をレポートに残す。
 
 - [ ] **Step 4: Commit** — `feat: 汎用運賃表を実態に合わせて調整`
+
+---
+
+### Task 5: 特定運賃（駅ペア単位の割引運賃）への対応
+
+**背景:** JR は私鉄と競合する区間に、距離に応じた通常運賃より安い「特定運賃」を設定している。現行のデータモデルは事業者ごとに 1 つの距離→運賃表しか持てないため表現できず、大阪→京都は実運賃 580 円に対し 770 円（+33%）と出る。首都圏・京阪神の主要区間に効くため、最も検索される場所の精度に直結する。
+
+**Files:**
+- Create: `data/fare-overrides/jr-east.json`, `data/fare-overrides/jr-west.json`（ほか判明した事業者）
+- Modify: `lib/fare/types.ts`, `lib/fare/calculator.ts`, `lib/search/reachable.ts`, `lib/server/graph-store.ts`
+- Test: `lib/fare/__tests__/calculator.test.ts`, `lib/search/__tests__/reachable.test.ts`
+
+**Interfaces（変更あり。後続が依存するので厳密に）:**
+
+```ts
+// lib/fare/types.ts に追加
+export const fareOverrideSchema = z.object({
+  operator: z.string(),
+  pairs: z.array(z.object({
+    from: z.string(),   // 駅名（graph.json の name と一致させる）
+    to: z.string(),
+    fare: z.number().int().positive(),
+  })),
+  source: z.object({ url: z.string(), fetchedAt: z.string(), note: z.string() }),
+});
+export type FareOverride = z.infer<typeof fareOverrideSchema>;
+
+// lib/fare/calculator.ts — 第4引数を追加（既存呼び出しを壊さないよう任意引数にする）
+export interface FareCalculator {
+  estimate(operator: string, km: number, fromName?: string, toName?: string): number;
+}
+export function createFareCalculator(rules: FareRule[], overrides?: FareOverride[]): FareCalculator;
+```
+
+- `estimate` は `fromName`/`toName` が与えられ、その事業者の override に該当ペアがあれば**その運賃を返す**（方向は問わない。`from`/`to` を入れ替えても一致させる）。無ければ従来どおり距離表を引く
+- override は「その事業者の乗車区間全体」に対して適用される。区間の途中駅ペアには適用しない
+
+**探索側の変更:** `SearchState` に `segFromId: string` を追加し、事業者区間の開始駅を保持する。区間を確定するとき（事業者変更時・最終評価時）に `estimate(operator, km, 開始駅名, 現在駅名)` を呼ぶ。
+
+- [ ] **Step 1: 特定運賃の一覧を調査する**
+
+JR東日本・JR西日本の公式サイトから特定区間運賃（特定運賃）の一覧を取得する。**必ず出典を確認すること。記憶で書かない。** 件数が多い場合は、駅数の多い主要区間から入れる。見つからない事業者は入れない。
+
+調査結果（件数・出典 URL・代表例）をレポートに記載すること。
+
+- [ ] **Step 2: 失敗するテストを書く**
+
+`lib/fare/__tests__/calculator.test.ts` に、override が効くことを検証するテストを追加する:
+
+```ts
+it("特定運賃が設定された駅ペアは距離表ではなく特定運賃を返す", () => {
+  // 大阪→京都: 営業キロ 42.8km。幹線表なら 770 円だが特定運賃 580 円
+  expect(calc.estimate("JR西日本", 42.8, "大阪", "京都")).toBe(580);
+});
+it("方向を入れ替えても同じ特定運賃になる", () => {
+  expect(calc.estimate("JR西日本", 42.8, "京都", "大阪")).toBe(580);
+});
+it("駅名を与えなければ従来どおり距離表を引く", () => {
+  expect(calc.estimate("JR西日本", 42.8)).toBe(770);
+});
+it("特定運賃の無いペアは距離表を引く", () => {
+  expect(calc.estimate("JR西日本", 42.8, "大阪", "存在しない駅")).toBe(770);
+});
+```
+
+`lib/search/__tests__/reachable.test.ts` にも、**探索経由で特定運賃が適用されること**を検証するテストを追加する（合成グラフで、区間開始駅と終了駅のペアに override を設定し、その運賃が採用されることを確認する）。区間の途中駅には適用されないことも検証すること。
+
+- [ ] **Step 3: 実装** — 上記 Interfaces のとおり。`getGraphStore` は `data/fare-overrides/*.json` を読み込んで `createFareCalculator` に渡す
+
+- [ ] **Step 4: 効果測定** — 大阪→京都をはじめ、特定運賃を入れた区間について修正前後の概算と実運賃を並べた表をレポートに記載する
+
+- [ ] **Step 5: Commit** — `feat: 特定運賃（駅ペア単位の割引運賃）に対応`
+
+---
+
+### Task 6: 上位20社の残り（地下鉄・関西私鉄ほか）
+
+Task 3 と同じ内容。**対象:** 東京メトロ(185) / 広島電鉄(167) / 東京都交通局(149) / Osaka Metro(133) / 富山地方鉄道(121) / 東急電鉄(114) / 南海電鉄(112) / 西武鉄道(110) / 伊予鉄道(110) / 名古屋市交通局(100) / 阪急電鉄(99)
+
+手順は Task 2 と同一（公式出典の確認 → JSON 作成 → `source` に出典記録 → **実運賃との完全一致テスト**を各社 3 件以上）。
+
+**重要な注意:**
+- テストに使う区間は**加算運賃・特定運賃の対象外**であることを確認すること（Task 2 で名鉄の空港線加算運賃を見落とした前例がある）
+- 許容誤差は使わない。完全一致にできない区間はテストに使わない
+- 広島電鉄・伊予鉄道は路面電車主体で**均一運賃**の区間が多い。均一なら `table: [[9999, 220]]` のように 1 段で表現できるが、郊外線が別運賃なら単一表で表現できない。その場合は**その事業者を対象外とし、理由を記載する**こと（誤った表を入れるより汎用フォールバックのままのほうがよい）

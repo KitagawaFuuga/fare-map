@@ -35,7 +35,8 @@ interface ParetoEntry {
 // 永遠に非支配のまま生成され続け、探索が停止しなくなる。）
 //
 // A が B を支配する: doneFare も segKm も同時に B 以下（同等以上に有利）で、
-// どちらか一方は真に有利。両方等しい場合は重複として扱い、後着ちで良い。
+// どちらか一方は真に有利。両方等しい場合は重複として扱う
+// （dominates は非 strict な <= のため、既存が新規を支配し新規は挿入されない＝先着ち）。
 function dominates(a: ParetoEntry, b: ParetoEntry): boolean {
   return a.doneFare <= b.doneFare && a.segKm <= b.segKm;
 }
@@ -172,7 +173,24 @@ export function findReachable(
     for (const edge of adjacency.get(state.stationId) ?? []) {
       let next: SearchState;
       if (edge.kind === "transfer") {
-        next = { ...state, stationId: edge.to };
+        // fare の不変条件は doneFare + estimate(segOperator, segKm, 起点名, 現在駅名)。
+        // stationId だけ差し替えて fare をそのまま引き継ぐと「現在駅名」に対応する
+        // 部分が古いまま（乗り換え前の駅名）になり、override 判定が正しく行われない
+        // stale な fare を持つ状態ができてしまう。Pareto 支配は (doneFare, segKm)
+        // だけを見て fare を見ないため、この stale な fare が「本当は安い」正しい
+        // 状態を誤って支配して消してしまう事故につながる。必ず再計算する。
+        next = {
+          ...state,
+          stationId: edge.to,
+          fare:
+            state.doneFare +
+            calc.estimate(
+              state.segOperator,
+              state.segKm,
+              nameOf(state.segFromId),
+              nameOf(edge.to),
+            ),
+        };
       } else if (edge.operator === state.segOperator) {
         const segKm = state.segKm + edge.km;
         next = {
@@ -219,10 +237,22 @@ export function findReachable(
       // 刈ると「区間の途中は予算超過だが override で安くなる終点」を取りこぼす。
       // 代わりに doneFare（確定済み区間の合計。経路に沿って非減少）に、
       // 進行中区間の「今後どう乗り継いでも絶対にこれを下回らない」下界を足した
-      // 値で刈る。この下界は km について単調非減少なので、区間を伸ばすほど
-      // 大きくなり最終的に budget を超えて確実に打ち切れる
-      // （lowerBound の詳細は lib/fare/calculator.ts 参照）。
-      const segLowerBound = calc.lowerBound(next.segOperator, next.segKm);
+      // 値で刈る。
+      //
+      // 停止性の根拠: この下界は常に 0 以上（lowerBound の実装参照）。よって
+      // doneFare + lowerBound > budget でない限り doneFare <= budget が保つ。
+      // doneFare は運賃（整数）の和であり budget も有限なので、doneFare が
+      // 取りうる値は有限個しかない。したがって「区間を伸ばせば下界が単調に
+      // 増加して budget を超える」ことに依らずとも、探索全体は必ず停止する
+      // （下界自体は fromName が override anchor の場合に事業者単位の
+      // override 最安値で頭打ちになり得るため、km について単調増加するとは
+      // 限らない。isOverrideAnchor 非該当の起点では距離表運賃のみが下界になり
+      // km について単調非減少になるため、そちらは実際に単調に効く）。
+      const segLowerBound = calc.lowerBound(
+        next.segOperator,
+        next.segKm,
+        nameOf(next.segFromId),
+      );
       if (next.doneFare + segLowerBound > budget) continue;
 
       const nextBucket = getBucket(

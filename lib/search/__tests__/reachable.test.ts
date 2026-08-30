@@ -361,6 +361,54 @@ describe("findReachable", () => {
     const ids = limited.map((r) => r.id).sort();
     expect(ids).toEqual(["Start", "Z"]); // M(200円) は予算外だが Z(150円) は予算内で残るはず
   });
+
+  it("レビュー指摘1再現: transfer 分岐で fare を再計算しないと stale な fare で override 状態を握り潰す", () => {
+    // A --rail 5km(OpX)--> T,  A --rail 3km(OpX)--> S,  T --transfer 0km--> S
+    // override: (A,T) = 100円 / 表: 5km以下=200円, 10km以下=300円
+    //
+    // T には2通りで到達できる:
+    //   - 直通 A->T (5km): override(A,T)=100円、(doneFare=0, segKm=5)
+    //   - 迂回 A->S(3km)->transfer->T: stationId が T に変わるだけで fare を
+    //     再計算しないと、S 時点の fare=200(表引き、override非該当)が
+    //     そのまま stale に持ち越されてしまう。(doneFare=0, segKm=3, fare=200 stale)
+    //
+    // stale な迂回状態は (doneFare=0, segKm=3) が (doneFare=0, segKm=5) を
+    // segKm の小ささで支配してしまい、正しい override 適用済みの直通状態
+    // (100円) を bucket から追い出す。fare を正しく再計算していれば
+    // 迂回状態の実際の fare は estimate(OpX,3,A,T)=override(A,T)=100 になり、
+    // 直通と同額（支配し合わない）になるはずで、最終的な T の最安値は 100円 のまま。
+    const table: [number, number][] = [
+      [5, 200],
+      [10, 300],
+    ];
+    const calcOverride = createFareCalculator(
+      [
+        {
+          id: "test",
+          operators: [],
+          table,
+          beyond: { fromKm: 10, baseFare: 300, ratePerKm: 50 },
+        },
+      ],
+      [
+        {
+          operator: "OpX",
+          pairs: [{ from: "A", to: "T", fare: 100 }],
+          source: { url: "", fetchedAt: "2026-08-29", note: "test" },
+        },
+      ],
+    );
+    const transferOverrideGraph: RailGraph = {
+      nodes: { A: node("A"), T: node("T"), S: node("S") },
+      edges: [
+        { from: "A", to: "T", km: 5, kind: "rail", operator: "OpX" },
+        { from: "A", to: "S", km: 3, kind: "rail", operator: "OpX" },
+        { from: "T", to: "S", km: 0, kind: "transfer", operator: "" },
+      ],
+    };
+    const result = findReachable(transferOverrideGraph, calcOverride, "A", 10000);
+    expect(result.find((r) => r.id === "T")?.fare).toBe(100);
+  });
 });
 
 describe("tryInsertPareto（同一キー内の非支配集合の管理）", () => {
@@ -393,7 +441,7 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
     expect(bucket).toHaveLength(2);
   });
 
-  it("完全に同一の状態は重複して増えない（後着ちで置き換え）", () => {
+  it("完全に同一の状態は重複して増えない（先着ちで既存が残る）", () => {
     const bucket: { doneFare: number; segKm: number; fare: number }[] = [];
     tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150 });
     // doneFare・segKm が完全一致 => 相互支配なので既存で弾かれる

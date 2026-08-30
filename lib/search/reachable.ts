@@ -29,15 +29,22 @@ interface SearchState {
 // （1〜3程度）を大きく上回る値にしてあるため、正当な経路を切り詰めない。
 const MAX_OPERATOR_SWITCHES = 6;
 
-// usedOperators を Pareto バケットキーに使うための正規化文字列。
-// 集合の順序に依存しないよう事業者名でソートしてから連結する。区切り文字は
-// 事業者名に空白を含むもの（例: Osaka Metro）があり単純なスペース区切りでは
-// 異なる集合が同じ文字列に衝突しうるため、通常の事業者名には出現しない
-// NUL 文字（String.fromCharCode(0)）を使う
-// （lib/fare/calculator.ts の pairKey と同じ方針）。
-const OPERATOR_KEY_SEPARATOR = String.fromCharCode(0);
-function usedOperatorsKey(usedOperators: ReadonlySet<string>): string {
-  return [...usedOperators].sort().join(OPERATOR_KEY_SEPARATOR);
+const EMPTY_OPERATORS: ReadonlySet<string> = new Set();
+
+// a が b の部分集合（a ⊆ b）か。a の要素が全て b にも含まれるなら、
+// a を経由した状態は b を経由した状態より「今後まだ乗れる事業者」が
+// 同等以上に多い＝将来にわたって同等以上に有利と言える。
+function isSubsetOrEqual(
+  a: ReadonlySet<string>,
+  b: ReadonlySet<string>,
+): boolean {
+  if (a.size > b.size) return false;
+  for (const op of a) if (!b.has(op)) return false;
+  return true;
+}
+
+function setEquals(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
+  return a.size === b.size && isSubsetOrEqual(a, b);
 }
 
 // 枝刈り用ラベル。(doneFare, segKm) の組み合わせ次第で将来の運賃（override 込み）
@@ -47,6 +54,10 @@ interface ParetoEntry {
   doneFare: number; // 小さいほうが有利
   segKm: number; // 小さいほうが有利
   fare: number; // 今この駅で降りた場合の運賃
+  // 分割乗車抑制（案B）用の状態。これまでに乗車した（進行中区間も含む）
+  // 事業者の集合。省略時は空集合として扱う（既存の呼び出し元・テストとの
+  // 互換性のため任意項目にしてある）。
+  usedOperators?: ReadonlySet<string>;
 }
 
 // 同一キー内では segFromId と stationId の駅名ペアが全エントリで共通になる。
@@ -61,8 +72,23 @@ interface ParetoEntry {
 // A が B を支配する: doneFare も segKm も同時に B 以下（同等以上に有利）で、
 // どちらか一方は真に有利。両方等しい場合は重複として扱う
 // （dominates は非 strict な <= のため、既存が新規を支配し新規は挿入されない＝先着ち）。
+//
+// 分割乗車抑制（案B）の反映: usedOperators も比較に加え、A の使用済み事業者集合が
+// B の部分集合（A ⊆ B）である場合のみ「A は B 以下」とみなす。もし usedOperators を
+// 無視して (doneFare, segKm) だけで比較すると、「使用済み事業者が多く今は安い状態」
+// が「使用済み事業者が少なく今は高い状態」を握り潰してしまい、後者だけが持つ
+// 将来の乗車可能性（＝より安い到達）を消してしまう（レビュー指摘の落とし穴）。
+// usedOperators を独立したバケットキー（完全一致）にする案もあるが、それだと
+// 経路ごとに異なる事業者集合の組み合わせがバケットとして分裂し続け、実データの
+// 密な路線網では状態数が組み合わせ的に爆発する（実測: 大阪発 budget=10000 で
+// OOM）。部分集合による支配判定なら、既存の (stationId, segOperator, segFromId)
+// バケット内で従来通り Pareto 支配によって状態数が抑えられる。
 function dominates(a: ParetoEntry, b: ParetoEntry): boolean {
-  return a.doneFare <= b.doneFare && a.segKm <= b.segKm;
+  return (
+    a.doneFare <= b.doneFare &&
+    a.segKm <= b.segKm &&
+    isSubsetOrEqual(a.usedOperators ?? EMPTY_OPERATORS, b.usedOperators ?? EMPTY_OPERATORS)
+  );
 }
 
 // entry を bucket（同一 (stationId, segOperator, segFromId) の非支配集合）へ挿入する。
@@ -85,23 +111,16 @@ export function tryInsertPareto(
   return true;
 }
 
-// 4階層のネスト Map でキーを表現する（文字列結合による区切り文字衝突を避けるため）。
-// 4段目の usedOperators は分割乗車抑制（案B）の状態。同じ (stationId, segOperator,
-// segFromId) でも「今後どの事業者に再乗車できるか」は usedOperators 次第で変わる
-// ため、これを分けずに (doneFare, segKm) だけで Pareto 支配すると、
-// 「使用済み事業者が多く今は安い状態」が「使用済み事業者が少なく今は高い状態」を
-// 誤って握り潰し、後者だけが持つ将来の乗車可能性（＝より安い到達）を消してしまう。
-type ParetoStore = Map<
-  string,
-  Map<string, Map<string, Map<string, ParetoEntry[]>>>
->;
+// 3階層のネスト Map でキーを表現する（文字列結合による区切り文字衝突を避けるため）。
+// usedOperators はバケットキーに含めない（上の dominates のコメント参照）。
+// 同じバケット内で usedOperators の部分集合関係も含めて Pareto 支配を行う。
+type ParetoStore = Map<string, Map<string, Map<string, ParetoEntry[]>>>;
 
 function getBucket(
   store: ParetoStore,
   stationId: string,
   segOperator: string,
   segFromId: string,
-  usedOperators: string,
 ): ParetoEntry[] {
   let byOperator = store.get(stationId);
   if (byOperator === undefined) {
@@ -113,15 +132,10 @@ function getBucket(
     byFrom = new Map();
     byOperator.set(segOperator, byFrom);
   }
-  let byUsed = byFrom.get(segFromId);
-  if (byUsed === undefined) {
-    byUsed = new Map();
-    byFrom.set(segFromId, byUsed);
-  }
-  let bucket = byUsed.get(usedOperators);
+  let bucket = byFrom.get(segFromId);
   if (bucket === undefined) {
     bucket = [];
-    byUsed.set(usedOperators, bucket);
+    byFrom.set(segFromId, bucket);
   }
   return bucket;
 }
@@ -186,12 +200,12 @@ export function findReachable(
       initial.stationId,
       initial.segOperator,
       bucketFromId(initial.segOperator, initial.segFromId),
-      usedOperatorsKey(initial.usedOperators),
     ),
     {
       doneFare: initial.doneFare,
       segKm: initial.segKm,
       fare: initial.fare,
+      usedOperators: initial.usedOperators,
     },
   );
 
@@ -205,10 +219,12 @@ export function findReachable(
       state.stationId,
       state.segOperator,
       bucketFromId(state.segOperator, state.segFromId),
-      usedOperatorsKey(state.usedOperators),
     );
     const stillLive = bucket.some(
-      (e) => e.doneFare === state.doneFare && e.segKm === state.segKm,
+      (e) =>
+        e.doneFare === state.doneFare &&
+        e.segKm === state.segKm &&
+        setEquals(e.usedOperators ?? EMPTY_OPERATORS, state.usedOperators),
     );
     if (!stillLive) continue;
 
@@ -315,12 +331,12 @@ export function findReachable(
         next.stationId,
         next.segOperator,
         bucketFromId(next.segOperator, next.segFromId),
-        usedOperatorsKey(next.usedOperators),
       );
       const inserted = tryInsertPareto(nextBucket, {
         doneFare: next.doneFare,
         segKm: next.segKm,
         fare: next.fare,
+        usedOperators: next.usedOperators,
       });
       if (inserted) heap.push(next);
     }
@@ -331,13 +347,11 @@ export function findReachable(
   const byStation = new Map<string, number>();
   for (const [stationId, byOperator] of store) {
     for (const byFrom of byOperator.values()) {
-      for (const byUsed of byFrom.values()) {
-        for (const bucket of byUsed.values()) {
-          for (const entry of bucket) {
-            if (entry.fare > budget) continue;
-            if (entry.fare < (byStation.get(stationId) ?? Infinity)) {
-              byStation.set(stationId, entry.fare);
-            }
+      for (const bucket of byFrom.values()) {
+        for (const entry of bucket) {
+          if (entry.fare > budget) continue;
+          if (entry.fare < (byStation.get(stationId) ?? Infinity)) {
+            byStation.set(stationId, entry.fare);
           }
         }
       }

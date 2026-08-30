@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { findReachable, tryInsertPareto } from "@/lib/search/reachable";
+import {
+  findReachable,
+  tryInsertPareto,
+  type ParetoEntry,
+} from "@/lib/search/reachable";
 import { createFareCalculator } from "@/lib/fare/calculator";
 import type { RailGraph } from "@/lib/graph/types";
 
@@ -419,33 +423,41 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
   // segKm が単調増加する非支配状態を無限に生成し続け、探索が停止しなくなる。
 
   it("doneFare・segKm ともに小さい状態は、両方大きい状態を支配して締め出す", () => {
-    const bucket: { doneFare: number; segKm: number; fare: number }[] = [];
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150 })).toBe(true);
+    const bucket: ParetoEntry[] = [];
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true })).toBe(true);
     // 両方で劣るので挿入されない
-    expect(tryInsertPareto(bucket, { doneFare: 200, segKm: 20, fare: 250 })).toBe(false);
-    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, fare: 150 }]);
+    expect(tryInsertPareto(bucket, { doneFare: 200, segKm: 20, fare: 250, alive: true })).toBe(false);
+    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, fare: 150, alive: true }]);
   });
 
   it("新しい状態がより有利なら、既存の支配される状態を追い出して挿入する", () => {
-    const bucket: { doneFare: number; segKm: number; fare: number }[] = [
-      { doneFare: 200, segKm: 20, fare: 250 },
+    const bucket: ParetoEntry[] = [
+      { doneFare: 200, segKm: 20, fare: 250, alive: true },
     ];
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150 })).toBe(true);
-    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, fare: 150 }]);
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true })).toBe(true);
+    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, fare: 150, alive: true }]);
   });
 
   it("片方だけ有利（doneFare 小・segKm 大）なトレードオフはどちらも残す", () => {
-    const bucket: { doneFare: number; segKm: number; fare: number }[] = [];
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 20, fare: 150 })).toBe(true);
-    expect(tryInsertPareto(bucket, { doneFare: 50, segKm: 30, fare: 200 })).toBe(true);
+    const bucket: ParetoEntry[] = [];
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 20, fare: 150, alive: true })).toBe(true);
+    expect(tryInsertPareto(bucket, { doneFare: 50, segKm: 30, fare: 200, alive: true })).toBe(true);
     expect(bucket).toHaveLength(2);
   });
 
   it("完全に同一の状態は重複して増えない（先着ちで既存が残る）", () => {
-    const bucket: { doneFare: number; segKm: number; fare: number }[] = [];
-    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150 });
+    const bucket: ParetoEntry[] = [];
+    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true });
     // doneFare・segKm が完全一致 => 相互支配なので既存で弾かれる
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150 })).toBe(false);
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true })).toBe(false);
     expect(bucket).toHaveLength(1);
+  });
+
+  it("支配されて追い出された既存エントリは alive が false になる", () => {
+    const bucket: ParetoEntry[] = [];
+    tryInsertPareto(bucket, { doneFare: 200, segKm: 20, fare: 250, alive: true });
+    const dominated = bucket[0];
+    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true });
+    expect(dominated?.alive).toBe(false);
   });
 });

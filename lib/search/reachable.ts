@@ -14,15 +14,23 @@ interface SearchState {
   segFromId: string; // 進行中区間の開始駅（特定運賃は区間全体の駅ペアに適用するため必要）
   segKm: number; // 進行中区間の距離
   fare: number; // doneFare + estimate(segOperator, segKm) を状態生成時に確定したもの
+  // この状態が Pareto store に挿入された際のエントリへの参照。pop 時の生死判定
+  // （stillLive）に使う。bucket をネスト Map から再探索する必要をなくすためのもの。
+  entry: ParetoEntry;
 }
 
 // 枝刈り用ラベル。(doneFare, segKm) の組み合わせ次第で将来の運賃（override 込み）
 // が変わりうるため、単純な「今の運賃が安い方を残す」では正しさを保てない。
 // 状態爆発は Pareto 支配（非支配集合のみ残す）で抑える。
-interface ParetoEntry {
+export interface ParetoEntry {
   doneFare: number; // 小さいほうが有利
   segKm: number; // 小さいほうが有利
   fare: number; // 今この駅で降りた場合の運賃
+  // 支配されて bucket から取り除かれた（tryInsertPareto の splice 対象になった）
+  // ら false にする。SearchState 側がこの entry への参照を直接持つことで、
+  // pop 時に「まだ生きているか」を O(1) で判定できる（bucket をネスト Map から
+  // 再探索してから線形走査で値一致を確認する必要がなくなる）。
+  alive: boolean;
 }
 
 // 同一キー内では segFromId と stationId の駅名ペアが全エントリで共通になる。
@@ -41,9 +49,29 @@ function dominates(a: ParetoEntry, b: ParetoEntry): boolean {
   return a.doneFare <= b.doneFare && a.segKm <= b.segKm;
 }
 
+// SearchState.entry の一時的なプレースホルダ。Pareto store への挿入が成功する
+// までは本物の entry が決まらないが、next オブジェクトは最初から entry
+// フィールドを持たせておきたい（後から spread で足すと V8 の隠れクラスが
+// 変わり、余分なオブジェクト生成コストもかかる）。挿入成功後に必ず本物の
+// entry で上書きするので、この値自体が bucket や heap に混入することはない。
+const PENDING_ENTRY: ParetoEntry = {
+  doneFare: 0,
+  segKm: 0,
+  fare: 0,
+  alive: false,
+};
+
 // entry を bucket（同一 (stationId, segOperator, segFromId) の非支配集合）へ挿入する。
 // 既存のいずれかに支配されていれば挿入せず false を返す。
-// 挿入する場合、entry に支配される既存エントリは取り除く。
+// 挿入する場合、entry に支配される既存エントリは取り除く（alive を false にしてから
+// splice する。SearchState 側が該当エントリへの参照を保持していれば、bucket を
+// 再探索せずに alive フラグだけで生死判定できる）。
+//
+// 呼び出し側は alive: true を含む完全な ParetoEntry を渡す（bucket に積まれる
+// 既存エントリと同じ形の値を渡すことで、内部でオブジェクトを作り直さずそのまま
+// push できる。dominates の呼び出しも常に同じ形のオブジェクト同士になり、
+// 呼び出しごとに形が変わる＝ V8 が dominates の呼び出しをモノモーフィックに
+// 最適化できなくなる、という事態を避けられる）。
 export function tryInsertPareto(
   bucket: ParetoEntry[],
   entry: ParetoEntry,
@@ -54,6 +82,7 @@ export function tryInsertPareto(
   for (let i = bucket.length - 1; i >= 0; i--) {
     const existing = bucket[i];
     if (existing !== undefined && dominates(entry, existing)) {
+      existing.alive = false;
       bucket.splice(i, 1);
     }
   }
@@ -130,6 +159,11 @@ export function findReachable(
     calc.isOverrideAnchor(segOperator, nameOf(segFromId)) ? segFromId : "";
 
   const store: ParetoStore = new Map();
+  const initialEntry: ParetoEntry = { doneFare: 0, segKm: 0, fare: 0, alive: true };
+  tryInsertPareto(
+    getBucket(store, fromId, "", bucketFromId("", fromId)),
+    initialEntry,
+  );
   const initial: SearchState = {
     stationId: fromId,
     doneFare: 0,
@@ -137,40 +171,28 @@ export function findReachable(
     segFromId: fromId,
     segKm: 0,
     fare: 0,
+    entry: initialEntry,
   };
   const heap = new MinHeap<SearchState>((a, b) => a.fare - b.fare);
   heap.push(initial);
-  tryInsertPareto(
-    getBucket(
-      store,
-      initial.stationId,
-      initial.segOperator,
-      bucketFromId(initial.segOperator, initial.segFromId),
-    ),
-    {
-      doneFare: initial.doneFare,
-      segKm: initial.segKm,
-      fare: initial.fare,
-    },
-  );
 
   while (heap.size > 0) {
     const state = heap.pop();
     if (state === undefined) break;
 
     // pop 時点で既に他状態に支配されて bucket から取り除かれていないか確認する。
-    const bucket = getBucket(
-      store,
-      state.stationId,
-      state.segOperator,
-      bucketFromId(state.segOperator, state.segFromId),
-    );
-    const stillLive = bucket.some(
-      (e) => e.doneFare === state.doneFare && e.segKm === state.segKm,
-    );
-    if (!stillLive) continue;
+    // state.entry は挿入時の Pareto エントリそのものへの参照なので、bucket を
+    // ネスト Map から再探索して線形走査する必要がない（tryInsertPareto が
+    // 支配されたエントリを splice する際に alive=false にする）。
+    if (!state.entry.alive) continue;
 
     for (const edge of adjacency.get(state.stationId) ?? []) {
+      // entry はこの時点ではまだ確定していない（Pareto store への挿入が成功して
+      // 初めて確定する）ので、いったんダミーの PENDING_ENTRY を積んでおき、
+      // 挿入成功後に本物の entry で上書きする。next オブジェクト自体は最初から
+      // entry フィールドを持った状態で作る（後から spread で entry を足すと、
+      // その一手間だけ余分なオブジェクト生成とコピーが発生し、計測上は
+      // pop 側の O(1) 化で節約した分より高くついた）。
       let next: SearchState;
       if (edge.kind === "transfer") {
         // fare の不変条件は doneFare + estimate(segOperator, segKm, 起点名, 現在駅名)。
@@ -180,8 +202,11 @@ export function findReachable(
         // だけを見て fare を見ないため、この stale な fare が「本当は安い」正しい
         // 状態を誤って支配して消してしまう事故につながる。必ず再計算する。
         next = {
-          ...state,
           stationId: edge.to,
+          doneFare: state.doneFare,
+          segOperator: state.segOperator,
+          segFromId: state.segFromId,
+          segKm: state.segKm,
           fare:
             state.doneFare +
             calc.estimate(
@@ -190,6 +215,7 @@ export function findReachable(
               nameOf(state.segFromId),
               nameOf(edge.to),
             ),
+          entry: PENDING_ENTRY,
         };
       } else if (edge.operator === state.segOperator) {
         const segKm = state.segKm + edge.km;
@@ -207,6 +233,7 @@ export function findReachable(
               nameOf(state.segFromId),
               nameOf(edge.to),
             ),
+          entry: PENDING_ENTRY,
         };
       } else {
         const doneFare =
@@ -231,6 +258,7 @@ export function findReachable(
               nameOf(state.stationId),
               nameOf(edge.to),
             ),
+          entry: PENDING_ENTRY,
         };
       }
       // next.fare（今降りた場合の運賃）は override により非単調なので、これで
@@ -261,12 +289,19 @@ export function findReachable(
         next.segOperator,
         bucketFromId(next.segOperator, next.segFromId),
       );
-      const inserted = tryInsertPareto(nextBucket, {
+      const nextEntry: ParetoEntry = {
         doneFare: next.doneFare,
         segKm: next.segKm,
         fare: next.fare,
-      });
-      if (inserted) heap.push(next);
+        alive: true,
+      };
+      const inserted = tryInsertPareto(nextBucket, nextEntry);
+      if (inserted) {
+        // PENDING_ENTRY を本物の entry に差し替える。既存のプロパティへの
+        // 代入なので隠れクラスは変わらない（スプレッドで作り直すより安い）。
+        next.entry = nextEntry;
+        heap.push(next);
+      }
     }
   }
 

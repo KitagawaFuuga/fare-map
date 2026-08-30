@@ -557,4 +557,55 @@ describe("FareCalculator", () => {
       expect(calc.estimate("東急電鉄", 24.2, "渋谷", "横浜")).toBe(310);
     });
   });
+
+  describe("isOverrideAnchor（探索側が区間の起点駅を区別すべきか判定するための API）", () => {
+    // 探索側 (lib/search/reachable.ts) は、区間の起点駅の名前がその事業者の
+    // override 駅ペアのどちらにも登場しない場合、この区間は将来どの駅で降りても
+    // override を引けないと判断して状態をマージする（状態爆発を防ぐ最適化）。
+    // その安全性は「from と to の両方が anchor と判定される」ことに依存するため、
+    // 逆向き探索（B→A）でも override を引けることを確認する必要がある。
+    const calcAnchor = createFareCalculator(
+      [
+        {
+          id: "test",
+          operators: [],
+          table: [[10, 200]],
+          beyond: { fromKm: 10, baseFare: 200, ratePerKm: 20 },
+        },
+      ],
+      [
+        {
+          operator: "OpA",
+          pairs: [{ from: "A", to: "B", fare: 150 }],
+          source: { url: "", fetchedAt: "2026-08-29", note: "test" },
+        },
+        {
+          operator: "OpA",
+          pairs: [{ from: "C", to: "D", fare: 90 }],
+          source: { url: "", fetchedAt: "2026-08-29", note: "test" },
+        },
+      ],
+    );
+
+    it("(a) override ペアの from・to のどちらも anchor と判定される", () => {
+      expect(calcAnchor.isOverrideAnchor("OpA", "A")).toBe(true);
+      expect(calcAnchor.isOverrideAnchor("OpA", "B")).toBe(true);
+    });
+
+    it("(b) override 未登録の事業者・駅名では false", () => {
+      expect(calcAnchor.isOverrideAnchor("OpA", "存在しない駅")).toBe(false);
+      expect(calcAnchor.isOverrideAnchor("未登録事業者", "A")).toBe(false);
+    });
+
+    it("(c) stationName が undefined なら false", () => {
+      expect(calcAnchor.isOverrideAnchor("OpA", undefined)).toBe(false);
+    });
+
+    it("(d) 同一事業者に複数の override エントリがあるとき駅集合がマージされる", () => {
+      // "C","D" は2つ目の override エントリ（別の pairs 配列）に属する。
+      // マージされていなければここが false になってしまう。
+      expect(calcAnchor.isOverrideAnchor("OpA", "C")).toBe(true);
+      expect(calcAnchor.isOverrideAnchor("OpA", "D")).toBe(true);
+    });
+  });
 });

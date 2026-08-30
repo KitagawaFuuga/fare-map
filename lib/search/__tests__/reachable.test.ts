@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findReachable } from "@/lib/search/reachable";
+import { findReachable, tryInsertPareto } from "@/lib/search/reachable";
 import { createFareCalculator } from "@/lib/fare/calculator";
 import type { RailGraph } from "@/lib/graph/types";
 
@@ -275,5 +275,129 @@ describe("findReachable", () => {
     const result = findReachable(originGraph, calcWithOverride, "Start", 10000);
     const z = result.find((r) => r.id === "Z");
     expect(z?.fare).toBe(150);
+  });
+
+  it("C-1再現: override非対象でも (stationId, segOperator) 粒度の枝刈りは初乗り二重取りを握り潰してはいけない", () => {
+    // 上のテストから override を丸ごと外した版。isOverrideAnchor は override 0件なので
+    // 常に false になり、旧実装は stationId+segOperator 粒度で枝刈りしてしまう。
+    // M では「迂回(OpY経由, 160円, segFromId=P2)」が「直通(OpX, 200円, segFromId=Start)」より
+    // 一時的に安いため、旧実装は直通側を握り潰す。
+    // しかし真の最安は直通で Start→Z を 15km 通しにした estimate(OpX,15)=250円。
+    // 迂回側しか残っていないと Z は 80(OpY)+200(OpX 2km) = 280円 になってしまう。
+    const table: [number, number][] = [
+      [5, 80],
+      [10, 200],
+      [15, 250],
+    ];
+    const calcNoOverride = createFareCalculator([
+      {
+        id: "test",
+        operators: [],
+        table,
+        beyond: { fromKm: 15, baseFare: 250, ratePerKm: 50 },
+      },
+    ]);
+    const originGraph: RailGraph = {
+      nodes: {
+        Start: node("Start"),
+        Start2: { ...node("Start2"), operator: "OpY" },
+        P: { ...node("P"), operator: "OpY" },
+        P2: node("P2"),
+        M: node("M"),
+        Z: node("Z"),
+      },
+      edges: [
+        { from: "Start", to: "M", km: 10, kind: "rail", operator: "OpX" },
+        { from: "M", to: "Z", km: 5, kind: "rail", operator: "OpX" },
+        { from: "Start", to: "Start2", km: 0, kind: "transfer", operator: "" },
+        { from: "Start2", to: "P", km: 1, kind: "rail", operator: "OpY" },
+        { from: "P", to: "P2", km: 0, kind: "transfer", operator: "" },
+        { from: "P2", to: "M", km: 2, kind: "rail", operator: "OpX" },
+      ],
+    };
+    const result = findReachable(originGraph, calcNoOverride, "Start", 10000);
+    const m = result.find((r) => r.id === "M");
+    const z = result.find((r) => r.id === "Z");
+    expect(m?.fare).toBe(160); // M 単体では迂回のほうが安いのでこれは正しい
+    expect(z?.fare).toBe(250); // だが Z へは直通の方が本来安い
+  });
+
+  it("I-1再現: 予算超過を理由に途中で捨てると override による割安な遠方駅が消える", () => {
+    // Start→Z の直線。距離表なら 10km=300円 だが override で Start→Z ペアに
+    // 150円が設定されている。旧実装は M（途中経由点の運賃200円 > budget=190）で
+    // 打ち切ってしまい、Z（override適用で150円、budget内）に到達できなくなる。
+    const calcWithOverride = createFareCalculator(
+      [
+        {
+          id: "test",
+          operators: [],
+          table: [
+            [5, 200],
+            [10, 300],
+          ],
+          beyond: { fromKm: 10, baseFare: 300, ratePerKm: 50 },
+        },
+      ],
+      [
+        {
+          operator: "OpX",
+          pairs: [{ from: "Start", to: "Z", fare: 150 }],
+          source: { url: "", fetchedAt: "2026-08-29", note: "test" },
+        },
+      ],
+    );
+    const straightGraph: RailGraph = {
+      nodes: { Start: node("Start"), M: node("M"), Z: node("Z") },
+      edges: [
+        { from: "Start", to: "M", km: 5, kind: "rail", operator: "OpX" },
+        { from: "M", to: "Z", km: 5, kind: "rail", operator: "OpX" },
+      ],
+    };
+    const full = findReachable(straightGraph, calcWithOverride, "Start", 10000);
+    expect(full.find((r) => r.id === "Z")?.fare).toBe(150);
+    expect(full.find((r) => r.id === "M")?.fare).toBe(200);
+
+    const limited = findReachable(straightGraph, calcWithOverride, "Start", 190);
+    const ids = limited.map((r) => r.id).sort();
+    expect(ids).toEqual(["Start", "Z"]); // M(200円) は予算外だが Z(150円) は予算内で残るはず
+  });
+});
+
+describe("tryInsertPareto（同一キー内の非支配集合の管理）", () => {
+  // 同一 (stationId, segOperator, segFromId) キー内では override 適用の可否が
+  // km に依存しないため、doneFare・segKm ともに小さいほうが同等以上に有利になる
+  // （運賃表は km について単調非減少で、override は駅名ペアのみで判定されるため）。
+  // 「segKm が大きいほうが有利」という向きにすると、同じ路線を往復するだけで
+  // segKm が単調増加する非支配状態を無限に生成し続け、探索が停止しなくなる。
+
+  it("doneFare・segKm ともに小さい状態は、両方大きい状態を支配して締め出す", () => {
+    const bucket: { doneFare: number; segKm: number; fare: number }[] = [];
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150 })).toBe(true);
+    // 両方で劣るので挿入されない
+    expect(tryInsertPareto(bucket, { doneFare: 200, segKm: 20, fare: 250 })).toBe(false);
+    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, fare: 150 }]);
+  });
+
+  it("新しい状態がより有利なら、既存の支配される状態を追い出して挿入する", () => {
+    const bucket: { doneFare: number; segKm: number; fare: number }[] = [
+      { doneFare: 200, segKm: 20, fare: 250 },
+    ];
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150 })).toBe(true);
+    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, fare: 150 }]);
+  });
+
+  it("片方だけ有利（doneFare 小・segKm 大）なトレードオフはどちらも残す", () => {
+    const bucket: { doneFare: number; segKm: number; fare: number }[] = [];
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 20, fare: 150 })).toBe(true);
+    expect(tryInsertPareto(bucket, { doneFare: 50, segKm: 30, fare: 200 })).toBe(true);
+    expect(bucket).toHaveLength(2);
+  });
+
+  it("完全に同一の状態は重複して増えない（後着ちで置き換え）", () => {
+    const bucket: { doneFare: number; segKm: number; fare: number }[] = [];
+    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150 });
+    // doneFare・segKm が完全一致 => 相互支配なので既存で弾かれる
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150 })).toBe(false);
+    expect(bucket).toHaveLength(1);
   });
 });

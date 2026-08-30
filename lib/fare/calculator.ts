@@ -7,15 +7,18 @@ export interface FareCalculator {
     fromName?: string,
     toName?: string,
   ): number;
-  // その事業者に駅ペア単位の特定運賃（override）が登録されているか。
-  // 探索側が「区間の起点駅」を区別すべき事業者を絞り込むために使う
-  // （区別を全事業者に広げると状態空間が爆発するため）。
-  hasOverride(operator: string): boolean;
+  // 探索の枝刈り用。この事業者・この距離で「今後どう乗り継いでも絶対に
+  // これより安くはならない」運賃の下界を返す（override 込みで安全側に見積もる）。
+  // 運賃表は km について単調非減少なので現在の km での距離表運賃は有効な下界になり、
+  // override はその事業者に登録された最安値を下界候補として加味する
+  // （override は駅名ペアのみで判定され km に依存しないため、将来この事業者の
+  // どこかで override が適用されても、その事業者の最安 override 値を下回ることはない）。
+  lowerBound(operator: string, km: number): number;
   // stationName がその事業者の override 駅ペアのどちらか一方に登場するか。
-  // 登場しない駅を区間の起点にしている限り、この区間は将来も override を
-  // 引けないため「起点駅の違い」を区別する必要が無い。JR のように事業者自体は
-  // override 対象でも路線網が広大な場合に、区別対象を該当駅だけへ絞り込み
-  // 状態空間の爆発を防ぐために使う。
+  // 登場しない駅を区間の起点にしている限り、この区間はどの駅で降りても override を
+  // 引けない（override は fromName が登録ペアのどちらかと一致する場合にしか
+  // マッチしないため）。探索側はこれを使って「区間の起点駅を区別する必要が無い
+  // （=状態を安全にマージしてよい）」ケースを判定し、状態空間の爆発を防ぐ。
   isOverrideAnchor(operator: string, stationName: string | undefined): boolean;
 }
 
@@ -40,28 +43,35 @@ export function createFareCalculator(
   const fb = fallback;
 
   const overrideByOperator = new Map<string, Map<string, number>>();
+  const minOverrideByOperator = new Map<string, number>();
   const overrideStationsByOperator = new Map<string, Set<string>>();
   for (const o of overrides ?? []) {
     const map = overrideByOperator.get(o.operator) ?? new Map<string, number>();
     const stations =
       overrideStationsByOperator.get(o.operator) ?? new Set<string>();
+    let min = minOverrideByOperator.get(o.operator) ?? Infinity;
     for (const p of o.pairs) {
       map.set(pairKey(p.from, p.to), p.fare);
       stations.add(p.from);
       stations.add(p.to);
+      if (p.fare < min) min = p.fare;
     }
     overrideByOperator.set(o.operator, map);
     overrideStationsByOperator.set(o.operator, stations);
+    minOverrideByOperator.set(o.operator, min);
+  }
+
+  function tableFare(operator: string, km: number): number {
+    if (km <= 0) return 0;
+    const rule = byOperator.get(operator) ?? fb;
+    for (const [maxKm, fare] of rule.table) {
+      if (km <= maxKm) return fare;
+    }
+    const { fromKm, baseFare, ratePerKm } = rule.beyond;
+    return Math.ceil((baseFare + (km - fromKm) * ratePerKm) / 10) * 10;
   }
 
   return {
-    hasOverride(operator) {
-      return overrideByOperator.has(operator);
-    },
-    isOverrideAnchor(operator, stationName) {
-      if (stationName === undefined) return false;
-      return overrideStationsByOperator.get(operator)?.has(stationName) ?? false;
-    },
     estimate(operator, km, fromName, toName) {
       if (km <= 0) return 0;
       if (fromName !== undefined && toName !== undefined) {
@@ -70,12 +80,15 @@ export function createFareCalculator(
           ?.get(pairKey(fromName, toName));
         if (overridden !== undefined) return overridden;
       }
-      const rule = byOperator.get(operator) ?? fb;
-      for (const [maxKm, fare] of rule.table) {
-        if (km <= maxKm) return fare;
-      }
-      const { fromKm, baseFare, ratePerKm } = rule.beyond;
-      return Math.ceil((baseFare + (km - fromKm) * ratePerKm) / 10) * 10;
+      return tableFare(operator, km);
+    },
+    lowerBound(operator, km) {
+      const minOverride = minOverrideByOperator.get(operator) ?? Infinity;
+      return Math.min(tableFare(operator, km), minOverride);
+    },
+    isOverrideAnchor(operator, stationName) {
+      if (stationName === undefined) return false;
+      return overrideStationsByOperator.get(operator)?.has(stationName) ?? false;
     },
   };
 }

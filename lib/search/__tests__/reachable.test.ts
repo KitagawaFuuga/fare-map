@@ -212,4 +212,68 @@ describe("findReachable", () => {
     const result = findReachable(transferGraph, calc, "C", 10000);
     expect(result.some((r) => r.id === "A")).toBe(true);
   });
+
+  it("由来（区間の起点駅）が違う同一駅の状態を安易な運賃比較で握り潰さない", () => {
+    // 実データ（御陵→びわ湖浜大津）で発覚したバグを再現する合成グラフ。
+    //
+    //   Start(OpX) --rail(OpX,10km)-------------------------> M(OpX) --rail(OpX,5km)--> Z(OpX)
+    //   Start(OpX) --transfer--> Start2(OpY) --rail(OpY,1km)--> P(OpY) --transfer--> P2(OpX) --rail(OpX,2km)--> M(OpX)
+    //
+    // M には2通りで到達できる:
+    //   - 直通 (OpX を Start から乗り続け): 10km => 200円、segFromId=Start
+    //   - 迂回 (OpY を1駅使って P2 で OpX に乗り換え): 80(OpY 1km) + 80(OpX 2km) = 160円、segFromId=P2
+    // 迂回のほうが M での「今の運賃」は安い(160<200)。
+    // stationId だけで枝刈りすると直通側(200円, segFromId=Start)が握り潰される。
+    //
+    // しかし OpX には Start→Z の特定運賃(150円)が override 登録されており、
+    // これは segFromId=Start のまま OpX に乗り続けた場合にしか適用されない。
+    // 迂回側は M で乗り換えているため segFromId=P2 になり、override は適用されず
+    // 距離表で 80+200=280円 になる。
+    //
+    // 正しい最安値は 150円（直通 + override）。stationId だけで枝刈りすると
+    // 直通状態が消え、280円しか見つからない。
+    const table: [number, number][] = [
+      [5, 80],
+      [10, 200],
+      [15, 250],
+    ];
+    const calcWithOverride = createFareCalculator(
+      [
+        {
+          id: "test",
+          operators: [],
+          table,
+          beyond: { fromKm: 15, baseFare: 250, ratePerKm: 50 },
+        },
+      ],
+      [
+        {
+          operator: "OpX",
+          pairs: [{ from: "Start", to: "Z", fare: 150 }],
+          source: { url: "", fetchedAt: "2026-08-29", note: "test" },
+        },
+      ],
+    );
+    const originGraph: RailGraph = {
+      nodes: {
+        Start: node("Start"),
+        Start2: { ...node("Start2"), operator: "OpY" },
+        P: { ...node("P"), operator: "OpY" },
+        P2: node("P2"),
+        M: node("M"),
+        Z: node("Z"),
+      },
+      edges: [
+        { from: "Start", to: "M", km: 10, kind: "rail", operator: "OpX" },
+        { from: "M", to: "Z", km: 5, kind: "rail", operator: "OpX" },
+        { from: "Start", to: "Start2", km: 0, kind: "transfer", operator: "" },
+        { from: "Start2", to: "P", km: 1, kind: "rail", operator: "OpY" },
+        { from: "P", to: "P2", km: 0, kind: "transfer", operator: "" },
+        { from: "P2", to: "M", km: 2, kind: "rail", operator: "OpX" },
+      ],
+    };
+    const result = findReachable(originGraph, calcWithOverride, "Start", 10000);
+    const z = result.find((r) => r.id === "Z");
+    expect(z?.fare).toBe(150);
+  });
 });

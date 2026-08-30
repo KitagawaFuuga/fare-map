@@ -26,19 +26,21 @@ export class MinHeap<T> {
     if (this.items.length > 0 && last !== undefined) {
       this.items[0] = last;
       let i = 0;
+      // 元実装は sift-down のループ 1 反復ごとに `at` クロージャを生成していた
+      // （pop 1 回あたり最大ヒープ高さ分、約18万回の pop で数百万個のクロージャ割当に
+      // なる）。挙動を変えずに this.items[k] への直接アクセスへ置き換える。
       for (;;) {
         const l = 2 * i + 1;
         const r = l + 1;
         let smallest = i;
-        const at = (k: number) => this.items[k];
-        const cur = at(smallest);
+        const cur = this.items[smallest];
         if (l < this.items.length && cur !== undefined) {
-          const lv = at(l);
+          const lv = this.items[l];
           if (lv !== undefined && this.compare(lv, cur) < 0) smallest = l;
         }
-        const cur2 = at(smallest);
+        const cur2 = this.items[smallest];
         if (r < this.items.length && cur2 !== undefined) {
-          const rv = at(r);
+          const rv = this.items[r];
           if (rv !== undefined && this.compare(rv, cur2) < 0) smallest = r;
         }
         if (smallest === i) break;

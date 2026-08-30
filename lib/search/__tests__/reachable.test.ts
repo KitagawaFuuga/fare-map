@@ -409,57 +409,6 @@ describe("findReachable", () => {
     const result = findReachable(transferOverrideGraph, calcOverride, "A", 10000);
     expect(result.find((r) => r.id === "T")?.fare).toBe(100);
   });
-
-  it("分割乗車再現: 同一事業者に2回乗る経路のほうが安くても選ばず、事業者を跨がない通し運賃を返す", () => {
-    // 大阪→京都（阪急→JR西→阪急...ではなく、単純化した合成グラフ）を模す。
-    //   A --rail(OpX,4km)--> M --rail(OpY,1km)--> P --rail(OpX,4km)--> Z  （分割: OpX を2回使う）
-    //   A --rail(OpX,10km)--> Z                                          （通し: OpX 1区間のみ）
-    // OpX表: 4km=200円, 10km=500円 / OpY表: 1km=50円
-    // 分割: 200(OpX 4km) + 50(OpY 1km) + 200(OpX 4km, 表引き) = 450円 < 通し 500円
-    // だが分割は OpX の切符を2回買うことになるため、抑制後は通しの500円が採用されるはず。
-    const table: [number, number][] = [
-      [4, 200],
-      [10, 500],
-    ];
-    const calcSplit = createFareCalculator([
-      {
-        id: "opx",
-        operators: ["OpX"],
-        table,
-        beyond: { fromKm: 10, baseFare: 500, ratePerKm: 100 },
-      },
-      {
-        id: "opy",
-        operators: ["OpY"],
-        table: [[1, 50]],
-        beyond: { fromKm: 1, baseFare: 50, ratePerKm: 100 },
-      },
-      {
-        // フォールバック（未使用だが createFareCalculator の要件で必須）
-        id: "fallback",
-        operators: [],
-        table,
-        beyond: { fromKm: 10, baseFare: 500, ratePerKm: 100 },
-      },
-    ]);
-    const splitGraph: RailGraph = {
-      nodes: {
-        A: node("A"),
-        M: node("M"),
-        P: { ...node("P"), operator: "OpY" },
-        Z: node("Z"),
-      },
-      edges: [
-        { from: "A", to: "M", km: 4, kind: "rail", operator: "OpX" },
-        { from: "M", to: "P", km: 1, kind: "rail", operator: "OpY" },
-        { from: "P", to: "Z", km: 4, kind: "rail", operator: "OpX" },
-        { from: "A", to: "Z", km: 10, kind: "rail", operator: "OpX" },
-      ],
-    };
-    const result = findReachable(splitGraph, calcSplit, "A", 10000);
-    const z = result.find((r) => r.id === "Z");
-    expect(z?.fare).toBe(500); // 分割(450円)を抑制し、通し運賃(500円)を返す
-  });
 });
 
 describe("tryInsertPareto（同一キー内の非支配集合の管理）", () => {

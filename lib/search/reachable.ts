@@ -14,37 +14,6 @@ interface SearchState {
   segFromId: string; // 進行中区間の開始駅（特定運賃は区間全体の駅ペアに適用するため必要）
   segKm: number; // 進行中区間の距離
   fare: number; // doneFare + estimate(segOperator, segKm) を状態生成時に確定したもの
-  // 分割乗車抑制（案B）: これまでに乗車した（進行中区間も含む）事業者の集合。
-  // 事業者切替のたびに切替先を追加する。同じ事業者へ2回目以降乗ろうとする
-  // 経路は「その事業者の切符を2枚買う」ことになるため、切替の分岐で禁止する。
-  usedOperators: ReadonlySet<string>;
-  // 案A（安全弁）: 事業者切替回数。理論上の状態空間を有界にするための保険で、
-  // 実データでの切替回数は数個程度のため通常は効かない。
-  switchCount: number;
-}
-
-// 状態空間を理論上も有界にするための安全弁（案A）。案Bで同一事業者の再乗車は
-// 既に禁止されるため実データでは効かないが、極端な合成グラフで事業者切替が
-// 際限なく連鎖するのを防ぐ保険として残す。現実の経路で必要になる事業者数
-// （1〜3程度）を大きく上回る値にしてあるため、正当な経路を切り詰めない。
-const MAX_OPERATOR_SWITCHES = 6;
-
-const EMPTY_OPERATORS: ReadonlySet<string> = new Set();
-
-// a が b の部分集合（a ⊆ b）か。a の要素が全て b にも含まれるなら、
-// a を経由した状態は b を経由した状態より「今後まだ乗れる事業者」が
-// 同等以上に多い＝将来にわたって同等以上に有利と言える。
-function isSubsetOrEqual(
-  a: ReadonlySet<string>,
-  b: ReadonlySet<string>,
-): boolean {
-  if (a.size > b.size) return false;
-  for (const op of a) if (!b.has(op)) return false;
-  return true;
-}
-
-function setEquals(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
-  return a.size === b.size && isSubsetOrEqual(a, b);
 }
 
 // 枝刈り用ラベル。(doneFare, segKm) の組み合わせ次第で将来の運賃（override 込み）
@@ -54,10 +23,6 @@ interface ParetoEntry {
   doneFare: number; // 小さいほうが有利
   segKm: number; // 小さいほうが有利
   fare: number; // 今この駅で降りた場合の運賃
-  // 分割乗車抑制（案B）用の状態。これまでに乗車した（進行中区間も含む）
-  // 事業者の集合。省略時は空集合として扱う（既存の呼び出し元・テストとの
-  // 互換性のため任意項目にしてある）。
-  usedOperators?: ReadonlySet<string>;
 }
 
 // 同一キー内では segFromId と stationId の駅名ペアが全エントリで共通になる。
@@ -72,23 +37,8 @@ interface ParetoEntry {
 // A が B を支配する: doneFare も segKm も同時に B 以下（同等以上に有利）で、
 // どちらか一方は真に有利。両方等しい場合は重複として扱う
 // （dominates は非 strict な <= のため、既存が新規を支配し新規は挿入されない＝先着ち）。
-//
-// 分割乗車抑制（案B）の反映: usedOperators も比較に加え、A の使用済み事業者集合が
-// B の部分集合（A ⊆ B）である場合のみ「A は B 以下」とみなす。もし usedOperators を
-// 無視して (doneFare, segKm) だけで比較すると、「使用済み事業者が多く今は安い状態」
-// が「使用済み事業者が少なく今は高い状態」を握り潰してしまい、後者だけが持つ
-// 将来の乗車可能性（＝より安い到達）を消してしまう（レビュー指摘の落とし穴）。
-// usedOperators を独立したバケットキー（完全一致）にする案もあるが、それだと
-// 経路ごとに異なる事業者集合の組み合わせがバケットとして分裂し続け、実データの
-// 密な路線網では状態数が組み合わせ的に爆発する（実測: 大阪発 budget=10000 で
-// OOM）。部分集合による支配判定なら、既存の (stationId, segOperator, segFromId)
-// バケット内で従来通り Pareto 支配によって状態数が抑えられる。
 function dominates(a: ParetoEntry, b: ParetoEntry): boolean {
-  return (
-    a.doneFare <= b.doneFare &&
-    a.segKm <= b.segKm &&
-    isSubsetOrEqual(a.usedOperators ?? EMPTY_OPERATORS, b.usedOperators ?? EMPTY_OPERATORS)
-  );
+  return a.doneFare <= b.doneFare && a.segKm <= b.segKm;
 }
 
 // entry を bucket（同一 (stationId, segOperator, segFromId) の非支配集合）へ挿入する。
@@ -112,8 +62,6 @@ export function tryInsertPareto(
 }
 
 // 3階層のネスト Map でキーを表現する（文字列結合による区切り文字衝突を避けるため）。
-// usedOperators はバケットキーに含めない（上の dominates のコメント参照）。
-// 同じバケット内で usedOperators の部分集合関係も含めて Pareto 支配を行う。
 type ParetoStore = Map<string, Map<string, Map<string, ParetoEntry[]>>>;
 
 function getBucket(
@@ -189,8 +137,6 @@ export function findReachable(
     segFromId: fromId,
     segKm: 0,
     fare: 0,
-    usedOperators: new Set(),
-    switchCount: 0,
   };
   const heap = new MinHeap<SearchState>((a, b) => a.fare - b.fare);
   heap.push(initial);
@@ -205,7 +151,6 @@ export function findReachable(
       doneFare: initial.doneFare,
       segKm: initial.segKm,
       fare: initial.fare,
-      usedOperators: initial.usedOperators,
     },
   );
 
@@ -221,10 +166,7 @@ export function findReachable(
       bucketFromId(state.segOperator, state.segFromId),
     );
     const stillLive = bucket.some(
-      (e) =>
-        e.doneFare === state.doneFare &&
-        e.segKm === state.segKm &&
-        setEquals(e.usedOperators ?? EMPTY_OPERATORS, state.usedOperators),
+      (e) => e.doneFare === state.doneFare && e.segKm === state.segKm,
     );
     if (!stillLive) continue;
 
@@ -257,8 +199,6 @@ export function findReachable(
           segOperator: state.segOperator,
           segFromId: state.segFromId,
           segKm,
-          usedOperators: state.usedOperators,
-          switchCount: state.switchCount,
           fare:
             state.doneFare +
             calc.estimate(
@@ -269,13 +209,6 @@ export function findReachable(
             ),
         };
       } else {
-        // 事業者切替。分割乗車抑制（案B）: 既に乗車済み（乗り終えた区間・進行中
-        // 区間のどちらでも）の事業者に再び乗ろうとする経路は、その事業者の切符を
-        // 2枚買うことになるため禁止する。安全弁（案A）として切替回数にも上限を
-        // 設ける（MAX_OPERATOR_SWITCHES のコメント参照）。
-        if (state.usedOperators.has(edge.operator)) continue;
-        if (state.switchCount >= MAX_OPERATOR_SWITCHES) continue;
-
         const doneFare =
           state.doneFare +
           calc.estimate(
@@ -284,16 +217,12 @@ export function findReachable(
             nameOf(state.segFromId),
             nameOf(state.stationId),
           );
-        const usedOperators = new Set(state.usedOperators);
-        usedOperators.add(edge.operator);
         next = {
           stationId: edge.to,
           doneFare,
           segOperator: edge.operator,
           segFromId: state.stationId,
           segKm: edge.km,
-          usedOperators,
-          switchCount: state.switchCount + 1,
           fare:
             doneFare +
             calc.estimate(
@@ -336,7 +265,6 @@ export function findReachable(
         doneFare: next.doneFare,
         segKm: next.segKm,
         fare: next.fare,
-        usedOperators: next.usedOperators,
       });
       if (inserted) heap.push(next);
     }

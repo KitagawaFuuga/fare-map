@@ -50,20 +50,33 @@ export function createFareCalculator(
   const overrideByOperator = new Map<string, Map<string, number>>();
   const minOverrideByOperator = new Map<string, number>();
   const overrideStationsByOperator = new Map<string, Set<string>>();
+  // 下界の締め上げ用: 事業者ごとに「その駅を含む override ペアの最小運賃」。
+  // 事業者単位の最小値（minOverrideByOperator）より必ず大きいか等しいので、
+  // anchor 駅がわかっている場合はこちらを使うほうが下界が締まる。
+  const minOverrideByOperatorStation = new Map<string, Map<string, number>>();
   for (const o of overrides ?? []) {
     const map = overrideByOperator.get(o.operator) ?? new Map<string, number>();
     const stations =
       overrideStationsByOperator.get(o.operator) ?? new Set<string>();
+    const byStation =
+      minOverrideByOperatorStation.get(o.operator) ?? new Map<string, number>();
     let min = minOverrideByOperator.get(o.operator) ?? Infinity;
+    const bumpStationMin = (station: string, fare: number) => {
+      const cur = byStation.get(station) ?? Infinity;
+      if (fare < cur) byStation.set(station, fare);
+    };
     for (const p of o.pairs) {
       map.set(pairKey(p.from, p.to), p.fare);
       stations.add(p.from);
       stations.add(p.to);
       if (p.fare < min) min = p.fare;
+      bumpStationMin(p.from, p.fare);
+      bumpStationMin(p.to, p.fare);
     }
     overrideByOperator.set(o.operator, map);
     overrideStationsByOperator.set(o.operator, stations);
     minOverrideByOperator.set(o.operator, min);
+    minOverrideByOperatorStation.set(o.operator, byStation);
   }
 
   function tableFare(operator: string, km: number): number {
@@ -104,14 +117,19 @@ export function createFareCalculator(
     },
     lowerBound(operator, km, fromName) {
       const table = tableFare(operator, km);
-      if (
-        fromName !== undefined &&
-        !(overrideStationsByOperator.get(operator)?.has(fromName) ?? false)
-      ) {
-        // fromName が override 駅ペアのどちらにも登場しない = この区間は
-        // どの駅で降りても override を絶対に引けない。距離表運賃だけが
-        // 有効な下界であり、これは km について単調非減少（下界が頭打ちしない）。
-        return table;
+      if (fromName !== undefined) {
+        const stationMin = minOverrideByOperatorStation
+          .get(operator)
+          ?.get(fromName);
+        if (stationMin === undefined) {
+          // fromName が override 駅ペアのどちらにも登場しない = この区間は
+          // どの駅で降りても override を絶対に引けない。距離表運賃だけが
+          // 有効な下界であり、これは km について単調非減少（下界が頭打ちしない）。
+          return table;
+        }
+        // fromName を含む override ペアの最小値まで締める（事業者全体の最小値
+        // より必ず大きいか等しい＝下界としてより厳しくても安全）。
+        return Math.min(table, stationMin);
       }
       const minOverride = minOverrideByOperator.get(operator) ?? Infinity;
       return Math.min(table, minOverride);

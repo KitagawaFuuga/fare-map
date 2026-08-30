@@ -69,8 +69,23 @@ export function createFareCalculator(
   function tableFare(operator: string, km: number): number {
     if (km <= 0) return 0;
     const rule = byOperator.get(operator) ?? fb;
-    for (const [maxKm, fare] of rule.table) {
-      if (km <= maxKm) return fare;
+    // table は maxKm 昇順（fare/types.ts のスキーマコメント参照）なので二分探索できる。
+    // 「km <= maxKm を満たす最初の行」を探す＝線形走査と同じ結果。
+    const table = rule.table;
+    let lo = 0;
+    let hi = table.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      const row = table[mid];
+      if (row !== undefined && km <= row[0]) {
+        hi = mid;
+      } else {
+        lo = mid + 1;
+      }
+    }
+    if (lo < table.length) {
+      const row = table[lo];
+      if (row !== undefined) return row[1];
     }
     const { fromKm, baseFare, ratePerKm } = rule.beyond;
     return Math.ceil((baseFare + (km - fromKm) * ratePerKm) / 10) * 10;

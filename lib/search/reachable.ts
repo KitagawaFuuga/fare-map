@@ -14,6 +14,30 @@ interface SearchState {
   segFromId: string; // 進行中区間の開始駅（特定運賃は区間全体の駅ペアに適用するため必要）
   segKm: number; // 進行中区間の距離
   fare: number; // doneFare + estimate(segOperator, segKm) を状態生成時に確定したもの
+  // 分割乗車抑制（案B）: これまでに乗車した（進行中区間も含む）事業者の集合。
+  // 事業者切替のたびに切替先を追加する。同じ事業者へ2回目以降乗ろうとする
+  // 経路は「その事業者の切符を2枚買う」ことになるため、切替の分岐で禁止する。
+  usedOperators: ReadonlySet<string>;
+  // 案A（安全弁）: 事業者切替回数。理論上の状態空間を有界にするための保険で、
+  // 実データでの切替回数は数個程度のため通常は効かない。
+  switchCount: number;
+}
+
+// 状態空間を理論上も有界にするための安全弁（案A）。案Bで同一事業者の再乗車は
+// 既に禁止されるため実データでは効かないが、極端な合成グラフで事業者切替が
+// 際限なく連鎖するのを防ぐ保険として残す。現実の経路で必要になる事業者数
+// （1〜3程度）を大きく上回る値にしてあるため、正当な経路を切り詰めない。
+const MAX_OPERATOR_SWITCHES = 6;
+
+// usedOperators を Pareto バケットキーに使うための正規化文字列。
+// 集合の順序に依存しないよう事業者名でソートしてから連結する。区切り文字は
+// 事業者名に空白を含むもの（例: Osaka Metro）があり単純なスペース区切りでは
+// 異なる集合が同じ文字列に衝突しうるため、通常の事業者名には出現しない
+// NUL 文字（String.fromCharCode(0)）を使う
+// （lib/fare/calculator.ts の pairKey と同じ方針）。
+const OPERATOR_KEY_SEPARATOR = String.fromCharCode(0);
+function usedOperatorsKey(usedOperators: ReadonlySet<string>): string {
+  return [...usedOperators].sort().join(OPERATOR_KEY_SEPARATOR);
 }
 
 // 枝刈り用ラベル。(doneFare, segKm) の組み合わせ次第で将来の運賃（override 込み）
@@ -61,14 +85,23 @@ export function tryInsertPareto(
   return true;
 }
 
-// 3階層のネスト Map でキーを表現する（文字列結合による区切り文字衝突を避けるため）。
-type ParetoStore = Map<string, Map<string, Map<string, ParetoEntry[]>>>;
+// 4階層のネスト Map でキーを表現する（文字列結合による区切り文字衝突を避けるため）。
+// 4段目の usedOperators は分割乗車抑制（案B）の状態。同じ (stationId, segOperator,
+// segFromId) でも「今後どの事業者に再乗車できるか」は usedOperators 次第で変わる
+// ため、これを分けずに (doneFare, segKm) だけで Pareto 支配すると、
+// 「使用済み事業者が多く今は安い状態」が「使用済み事業者が少なく今は高い状態」を
+// 誤って握り潰し、後者だけが持つ将来の乗車可能性（＝より安い到達）を消してしまう。
+type ParetoStore = Map<
+  string,
+  Map<string, Map<string, Map<string, ParetoEntry[]>>>
+>;
 
 function getBucket(
   store: ParetoStore,
   stationId: string,
   segOperator: string,
   segFromId: string,
+  usedOperators: string,
 ): ParetoEntry[] {
   let byOperator = store.get(stationId);
   if (byOperator === undefined) {
@@ -80,10 +113,15 @@ function getBucket(
     byFrom = new Map();
     byOperator.set(segOperator, byFrom);
   }
-  let bucket = byFrom.get(segFromId);
+  let byUsed = byFrom.get(segFromId);
+  if (byUsed === undefined) {
+    byUsed = new Map();
+    byFrom.set(segFromId, byUsed);
+  }
+  let bucket = byUsed.get(usedOperators);
   if (bucket === undefined) {
     bucket = [];
-    byFrom.set(segFromId, bucket);
+    byUsed.set(usedOperators, bucket);
   }
   return bucket;
 }
@@ -137,6 +175,8 @@ export function findReachable(
     segFromId: fromId,
     segKm: 0,
     fare: 0,
+    usedOperators: new Set(),
+    switchCount: 0,
   };
   const heap = new MinHeap<SearchState>((a, b) => a.fare - b.fare);
   heap.push(initial);
@@ -146,6 +186,7 @@ export function findReachable(
       initial.stationId,
       initial.segOperator,
       bucketFromId(initial.segOperator, initial.segFromId),
+      usedOperatorsKey(initial.usedOperators),
     ),
     {
       doneFare: initial.doneFare,
@@ -164,6 +205,7 @@ export function findReachable(
       state.stationId,
       state.segOperator,
       bucketFromId(state.segOperator, state.segFromId),
+      usedOperatorsKey(state.usedOperators),
     );
     const stillLive = bucket.some(
       (e) => e.doneFare === state.doneFare && e.segKm === state.segKm,
@@ -199,6 +241,8 @@ export function findReachable(
           segOperator: state.segOperator,
           segFromId: state.segFromId,
           segKm,
+          usedOperators: state.usedOperators,
+          switchCount: state.switchCount,
           fare:
             state.doneFare +
             calc.estimate(
@@ -209,6 +253,13 @@ export function findReachable(
             ),
         };
       } else {
+        // 事業者切替。分割乗車抑制（案B）: 既に乗車済み（乗り終えた区間・進行中
+        // 区間のどちらでも）の事業者に再び乗ろうとする経路は、その事業者の切符を
+        // 2枚買うことになるため禁止する。安全弁（案A）として切替回数にも上限を
+        // 設ける（MAX_OPERATOR_SWITCHES のコメント参照）。
+        if (state.usedOperators.has(edge.operator)) continue;
+        if (state.switchCount >= MAX_OPERATOR_SWITCHES) continue;
+
         const doneFare =
           state.doneFare +
           calc.estimate(
@@ -217,12 +268,16 @@ export function findReachable(
             nameOf(state.segFromId),
             nameOf(state.stationId),
           );
+        const usedOperators = new Set(state.usedOperators);
+        usedOperators.add(edge.operator);
         next = {
           stationId: edge.to,
           doneFare,
           segOperator: edge.operator,
           segFromId: state.stationId,
           segKm: edge.km,
+          usedOperators,
+          switchCount: state.switchCount + 1,
           fare:
             doneFare +
             calc.estimate(
@@ -260,6 +315,7 @@ export function findReachable(
         next.stationId,
         next.segOperator,
         bucketFromId(next.segOperator, next.segFromId),
+        usedOperatorsKey(next.usedOperators),
       );
       const inserted = tryInsertPareto(nextBucket, {
         doneFare: next.doneFare,
@@ -275,11 +331,13 @@ export function findReachable(
   const byStation = new Map<string, number>();
   for (const [stationId, byOperator] of store) {
     for (const byFrom of byOperator.values()) {
-      for (const bucket of byFrom.values()) {
-        for (const entry of bucket) {
-          if (entry.fare > budget) continue;
-          if (entry.fare < (byStation.get(stationId) ?? Infinity)) {
-            byStation.set(stationId, entry.fare);
+      for (const byUsed of byFrom.values()) {
+        for (const bucket of byUsed.values()) {
+          for (const entry of bucket) {
+            if (entry.fare > budget) continue;
+            if (entry.fare < (byStation.get(stationId) ?? Infinity)) {
+              byStation.set(stationId, entry.fare);
+            }
           }
         }
       }

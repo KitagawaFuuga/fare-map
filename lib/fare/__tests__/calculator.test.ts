@@ -558,6 +558,147 @@ describe("FareCalculator", () => {
     });
   });
 
+  describe("tableFare の二分探索境界（table が maxKm 昇順である前提の検証）", () => {
+    // c795886 で線形走査から二分探索に変わった。二分探索は「km <= maxKm を
+    // 満たす最初の行」を探すが、線形走査と一致するのは table が maxKm の
+    // 昇順であるときだけ。ここでは境界値を総当たりして両者が一致することを固定する。
+    const table: [number, number][] = [
+      [3, 100],
+      [10, 200],
+      [30, 300],
+    ];
+    const calcTable = createFareCalculator([
+      {
+        id: "test-boundary",
+        operators: [],
+        table,
+        beyond: { fromKm: 30, baseFare: 300, ratePerKm: 10 },
+      },
+    ]);
+
+    it("最初の行の maxKm ちょうど", () => {
+      expect(calcTable.estimate("X", 3)).toBe(100);
+    });
+
+    it("行間の値（2行目に落ちる）", () => {
+      expect(calcTable.estimate("X", 5)).toBe(200);
+    });
+
+    it("最終行の maxKm ちょうど", () => {
+      expect(calcTable.estimate("X", 30)).toBe(300);
+    });
+
+    it("最終行を超過すると beyond 外挿に落ちる", () => {
+      expect(calcTable.estimate("X", 31)).toBe(
+        Math.ceil((300 + 1 * 10) / 10) * 10,
+      );
+    });
+
+    it("1行だけのテーブル", () => {
+      const single = createFareCalculator([
+        {
+          id: "test-single",
+          operators: [],
+          table: [[10, 999]],
+          beyond: { fromKm: 10, baseFare: 999, ratePerKm: 5 },
+        },
+      ]);
+      expect(single.estimate("X", 5)).toBe(999);
+      expect(single.estimate("X", 10)).toBe(999);
+      expect(single.estimate("X", 11)).toBe(
+        Math.ceil((999 + 1 * 5) / 10) * 10,
+      );
+    });
+
+    it("空テーブルは常に beyond 外挿に落ちる", () => {
+      const empty = createFareCalculator([
+        {
+          id: "test-empty",
+          operators: [],
+          table: [],
+          beyond: { fromKm: 0, baseFare: 150, ratePerKm: 20 },
+        },
+      ]);
+      expect(empty.estimate("X", 1)).toBe(
+        Math.ceil((150 + 1 * 20) / 10) * 10,
+      );
+      expect(empty.estimate("X", 100)).toBe(
+        Math.ceil((150 + 100 * 20) / 10) * 10,
+      );
+    });
+  });
+
+  describe("fareRuleSchema: table が maxKm 昇順であることの検証", () => {
+    // 二分探索（tableFare）は table が maxKm の厳密な昇順であることに依存する。
+    // 順序が崩れたデータはパース時点で確実に弾かれる必要がある。
+    const baseBeyond = { fromKm: 30, baseFare: 300, ratePerKm: 10 };
+
+    it("maxKm が降順を含むデータは parse で例外になる", () => {
+      expect(() =>
+        fareRuleSchema.parse({
+          id: "broken-desc",
+          operators: [],
+          table: [
+            [10, 200],
+            [3, 100],
+            [30, 300],
+          ],
+          beyond: baseBeyond,
+        }),
+      ).toThrow();
+    });
+
+    it("maxKm が同値（重複）のデータも parse で例外になる（二分探索の一意性が崩れるため）", () => {
+      expect(() =>
+        fareRuleSchema.parse({
+          id: "broken-dup",
+          operators: [],
+          table: [
+            [3, 100],
+            [10, 200],
+            [10, 250],
+          ],
+          beyond: baseBeyond,
+        }),
+      ).toThrow();
+    });
+
+    it("エラーメッセージにルール id と違反位置(index)が含まれる", () => {
+      try {
+        fareRuleSchema.parse({
+          id: "broken-with-id",
+          operators: [],
+          table: [
+            [10, 200],
+            [3, 100],
+          ],
+          beyond: baseBeyond,
+        });
+        throw new Error("should have thrown");
+      } catch (e) {
+        const message = String(e);
+        expect(message).toContain("broken-with-id");
+        expect(message).toContain("table[0]");
+        expect(message).toContain("table[1]");
+      }
+    });
+
+    it("正しく昇順のデータは parse を通る", () => {
+      expect(() =>
+        fareRuleSchema.parse({
+          id: "ok",
+          operators: [],
+          table: [
+            [3, 100],
+            [10, 200],
+            [30, 300],
+          ],
+          beyond: baseBeyond,
+        }),
+      ).not.toThrow();
+    });
+  });
+
   describe("isOverrideAnchor（探索側が区間の起点駅を区別すべきか判定するための API）", () => {
     // 探索側 (lib/search/reachable.ts) は、区間の起点駅の名前がその事業者の
     // override 駅ペアのどちらにも登場しない場合、この区間は将来どの駅で降りても

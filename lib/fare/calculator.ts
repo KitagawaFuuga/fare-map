@@ -1,5 +1,21 @@
 import type { FareOverride, FareRule } from "@/lib/fare/types";
 
+// JR本州3社（東日本・東海・西日本）をまたぐ乗車の場合、会社境界で運賃を
+// 分割せず「基準額＋加算額」の通し運賃方式を使う（2026年3月14日改定で新設）。
+// この3社間の切り替えだけを特別扱いし、三島会社（北海道・四国・九州）や
+// 私鉄との切り替えは対象外（従来どおり区間を確定して初乗りからやり直す）。
+// 三島会社は加算額表の数値が未確認のため対象外とした
+// （詳細: .superpowers/sdd/2026-08-24-fare-accuracy/task-9-report.md）。
+export const HONSHU_OPERATORS = new Set(["JR東日本", "JR東海", "JR西日本"]);
+
+// 通し運賃の「基準額」表として使う代表事業者。基準額表は JR東海・JR西日本の
+// 単独運賃表（改定前から据え置き）と同一の値であることが確認済み
+// （data/fare-rules/jr-central.json, jr-west.json の source.note 参照）。
+const HONSHU_BASE_OPERATOR = "JR東海";
+// 「加算額」表（JR東日本区間の営業キロに対する上乗せ額）は、実在のどの事業者名
+// とも衝突しない合成事業者名で data/fare-rules/jr-honshu-kasan.json に登録する。
+const HONSHU_KASAN_OPERATOR = "__jr-honshu-kasan";
+
 export interface FareCalculator {
   estimate(
     operator: string,
@@ -25,6 +41,16 @@ export interface FareCalculator {
   // マッチしないため）。探索側はこれを使って「区間の起点駅を区別する必要が無い
   // （=状態を安全にマージしてよい）」ケースを判定し、状態空間の爆発を防ぐ。
   isOverrideAnchor(operator: string, stationName: string | undefined): boolean;
+  // JR本州3社をまたぐ通し運賃 = 基準額（総営業キロで基準額表を1回引いた額）
+  // + 加算額（JR東日本区間の営業キロ分。ただし総営業キロが100kmを超える場合は
+  // 0円）。加算額が100km超で0になる理由の一次資料は確認できておらず、
+  // 実測3件（新宿→豊橋293.6km・東京→名古屋366km帯・東京→大阪556km帯、
+  // いずれも基準額のみで実運賃と一致）から採用した規則。詳細・限界は
+  // task-9-report.md 参照。
+  estimateHonshuThrough(totalKm: number, eastKm: number): number;
+  // 上記の下界。加算額は常に0以上なので基準額のみを返せば安全
+  // （距離が伸びても単調非減少で、絶対にこれを下回らない）。
+  honshuThroughBaseFare(totalKm: number): number;
 }
 
 // 事業者ごとの特定運賃（駅ペア単位）を方向を問わず引けるようにするためのキー生成。
@@ -137,6 +163,31 @@ export function createFareCalculator(
     isOverrideAnchor(operator, stationName) {
       if (stationName === undefined) return false;
       return overrideStationsByOperator.get(operator)?.has(stationName) ?? false;
+    },
+    estimateHonshuThrough(totalKm, eastKm) {
+      if (totalKm <= 0) return 0;
+      if (!byOperator.has(HONSHU_BASE_OPERATOR)) {
+        throw new Error(
+          `JR本州3社通し運賃の基準額表(${HONSHU_BASE_OPERATOR})が見つかりません`,
+        );
+      }
+      const base = tableFare(HONSHU_BASE_OPERATOR, totalKm);
+      if (totalKm > 100) return base;
+      if (!byOperator.has(HONSHU_KASAN_OPERATOR)) {
+        throw new Error(
+          `JR本州3社通し運賃の加算額表(${HONSHU_KASAN_OPERATOR})が見つかりません`,
+        );
+      }
+      return base + tableFare(HONSHU_KASAN_OPERATOR, eastKm);
+    },
+    honshuThroughBaseFare(totalKm) {
+      if (totalKm <= 0) return 0;
+      if (!byOperator.has(HONSHU_BASE_OPERATOR)) {
+        throw new Error(
+          `JR本州3社通し運賃の基準額表(${HONSHU_BASE_OPERATOR})が見つかりません`,
+        );
+      }
+      return tableFare(HONSHU_BASE_OPERATOR, totalKm);
     },
   };
 }

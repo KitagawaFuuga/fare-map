@@ -4,6 +4,7 @@ import { fareOverrideSchema, fareRuleSchema } from "@/lib/fare/types";
 import jrEast from "@/data/fare-rules/jr-east.json";
 import jrCentral from "@/data/fare-rules/jr-central.json";
 import jrWest from "@/data/fare-rules/jr-west.json";
+import jrHonshuKasan from "@/data/fare-rules/jr-honshu-kasan.json";
 import jrKyushu from "@/data/fare-rules/jr-kyushu.json";
 import jrHokkaido from "@/data/fare-rules/jr-hokkaido.json";
 import jrShikoku from "@/data/fare-rules/jr-shikoku.json";
@@ -34,6 +35,7 @@ const rules = [
   jrEast,
   jrCentral,
   jrWest,
+  jrHonshuKasan,
   jrKyushu,
   jrHokkaido,
   jrShikoku,
@@ -841,6 +843,58 @@ describe("FareCalculator", () => {
       // マージされていなければここが false になってしまう。
       expect(calcAnchor.isOverrideAnchor("OpA", "C")).toBe(true);
       expect(calcAnchor.isOverrideAnchor("OpA", "D")).toBe(true);
+    });
+  });
+
+  // JR本州3社（東日本・東海・西日本）をまたぐ通し運賃 = 基準額（総営業キロで
+  // 基準額表を1回引いた額）+ 加算額（JR東日本区間の営業キロ分。ただし総営業キロが
+  // 100kmを超える場合は0円）。基準額表は data/fare-rules/jr-central.json
+  // （JR東海、据え置きの幹線表）を代表として使う。実測3件がいずれも「基準額の
+  // みで実運賃と一致」したことから100km超は加算額0円という規則を採用した
+  // （一次資料でこの閾値の理由は確認できていない。詳細はtask-9-report.md参照）。
+  describe("estimateHonshuThrough / honshuThroughBaseFare（JR本州3社をまたぐ通し運賃）", () => {
+    it("総距離100km以下: 基準額＋加算額（jr-central.json・jr-honshu-kasan.json の実データで検証）", () => {
+      // 90km = jr-central.json の [90, 1520] 帯。加算額表 [30, 30] は26〜30km帯=30円。
+      expect(calc.estimateHonshuThrough(90, 30)).toBe(1520 + 30);
+      // ちょうど100km: 基準額 [100, 1690] + 加算額 [100, 110]（91〜100km帯）
+      expect(calc.estimateHonshuThrough(100, 100)).toBe(1690 + 110);
+    });
+
+    it("総距離100km超: 加算額は乗らず基準額のみ（実測3件と一致する規則）", () => {
+      // 101km: jr-central.json では101〜120km帯 [120, 1980] を引く。
+      // 100kmちょうどの場合(1800円)より高いので、加算額を落としても運賃は
+      // 距離とともに単調非減少のまま。
+      expect(calc.estimateHonshuThrough(101, 90)).toBe(1980);
+      // 東京→豊橋（実測293.6km、実運賃5,170円）: 281〜300km帯そのもの
+      expect(calc.estimateHonshuThrough(293.6, 104.6)).toBe(5170);
+      // 東京→名古屋相当（361〜380km帯、実運賃6,380円）
+      expect(calc.estimateHonshuThrough(370, 104.6)).toBe(6380);
+      // 東京→大阪相当（541〜560km帯、実運賃8,910円）
+      expect(calc.estimateHonshuThrough(556.4, 104.6)).toBe(8910);
+    });
+
+    it("km<=0 は0円", () => {
+      expect(calc.estimateHonshuThrough(0, 0)).toBe(0);
+      expect(calc.estimateHonshuThrough(-1, 0)).toBe(0);
+    });
+
+    it("honshuThroughBaseFare は加算額抜きの基準額のみ（枝刈り用の下界）", () => {
+      expect(calc.honshuThroughBaseFare(90)).toBe(1520);
+      expect(calc.honshuThroughBaseFare(293.6)).toBe(5170);
+      expect(calc.honshuThroughBaseFare(0)).toBe(0);
+    });
+
+    it("基準額表(JR東海)・加算額表が未登録の calculator で呼ぶとエラーになる（サイレントな誤運賃を防ぐ）", () => {
+      const bare = createFareCalculator([
+        {
+          id: "fallback",
+          operators: [],
+          table: [[10, 100]],
+          beyond: { fromKm: 10, baseFare: 100, ratePerKm: 10 },
+        },
+      ]);
+      expect(() => bare.estimateHonshuThrough(50, 10)).toThrow();
+      expect(() => bare.honshuThroughBaseFare(50)).toThrow();
     });
   });
 });

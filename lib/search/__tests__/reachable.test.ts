@@ -427,41 +427,77 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
 
   it("doneFare・segKm ともに小さい状態は、両方大きい状態を支配して締め出す", () => {
     const bucket: ParetoEntry[] = [];
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true })).toBe(true);
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true })).toBe(true);
     // 両方で劣るので挿入されない
-    expect(tryInsertPareto(bucket, { doneFare: 200, segKm: 20, fare: 250, alive: true })).toBe(false);
-    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, fare: 150, alive: true }]);
+    expect(tryInsertPareto(bucket, { doneFare: 200, segKm: 20, honshuKm: 0, honshuEastKm: 0, fare: 250, alive: true })).toBe(false);
+    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true }]);
   });
 
   it("新しい状態がより有利なら、既存の支配される状態を追い出して挿入する", () => {
     const bucket: ParetoEntry[] = [
-      { doneFare: 200, segKm: 20, fare: 250, alive: true },
+      { doneFare: 200, segKm: 20, honshuKm: 0, honshuEastKm: 0, fare: 250, alive: true },
     ];
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true })).toBe(true);
-    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, fare: 150, alive: true }]);
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true })).toBe(true);
+    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true }]);
   });
 
   it("片方だけ有利（doneFare 小・segKm 大）なトレードオフはどちらも残す", () => {
     const bucket: ParetoEntry[] = [];
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 20, fare: 150, alive: true })).toBe(true);
-    expect(tryInsertPareto(bucket, { doneFare: 50, segKm: 30, fare: 200, alive: true })).toBe(true);
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 20, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true })).toBe(true);
+    expect(tryInsertPareto(bucket, { doneFare: 50, segKm: 30, honshuKm: 0, honshuEastKm: 0, fare: 200, alive: true })).toBe(true);
     expect(bucket).toHaveLength(2);
   });
 
   it("完全に同一の状態は重複して増えない（先着ちで既存が残る）", () => {
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true });
+    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true });
     // doneFare・segKm が完全一致 => 相互支配なので既存で弾かれる
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true })).toBe(false);
+    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true })).toBe(false);
     expect(bucket).toHaveLength(1);
   });
 
   it("支配されて追い出された既存エントリは alive が false になる", () => {
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 200, segKm: 20, fare: 250, alive: true });
+    tryInsertPareto(bucket, { doneFare: 200, segKm: 20, honshuKm: 0, honshuEastKm: 0, fare: 250, alive: true });
     const dominated = bucket[0];
-    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true });
+    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true });
     expect(dominated?.alive).toBe(false);
+  });
+
+  it("honshuKm を無視すると、通算距離の大きい状態が小さい状態を誤って握り潰す（反映漏れの再現）", () => {
+    // Task 9: SearchState に honshuKm/honshuEastKm を追加したが、これを
+    // dominates() の比較に反映し忘れると、このプロジェクトで4回繰り返した
+    // 「状態次元の追加が Pareto 判定に反映されない」欠陥類型が再発する。
+    // doneFare・segKm が同じでも honshuKm が異なれば将来の運賃
+    // （calc.estimateHonshuThrough は honshuKm について単調非減少）が変わりうるので、
+    // honshuKm も比較しないと「通算距離が小さい（有利な）」状態が
+    // 「通算距離が大きい（不利な）」状態に誤って支配されてしまう。
+    const bucket: ParetoEntry[] = [];
+    // 先に「通算距離が大きい（不利な）」状態が入る
+    const worse: ParetoEntry = {
+      doneFare: 0,
+      segKm: 10,
+      honshuKm: 40,
+      honshuEastKm: 40,
+      fare: 999,
+      alive: true,
+    };
+    expect(tryInsertPareto(bucket, worse)).toBe(true);
+    // 後から「通算距離が小さい（有利な）」状態が来た場合、honshuKm を見ていれば
+    // worse を支配して追い出し、挿入されるはず。honshuKm を見ていなければ
+    // (doneFare, segKm) が完全一致するため「相互支配」扱いになり、
+    // 先着ちで worse が残ってこちらが拒否されてしまう
+    const better: ParetoEntry = {
+      doneFare: 0,
+      segKm: 10,
+      honshuKm: 0,
+      honshuEastKm: 0,
+      fare: 500,
+      alive: true,
+    };
+    expect(tryInsertPareto(bucket, better)).toBe(true);
+    expect(bucket).toEqual([better]);
+    expect(worse.alive).toBe(false);
   });
 
   it("挿入が拒否された（false が返る）とき、渡した entry 自身の alive は変更されない", () => {
@@ -469,8 +505,8 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
     // （そのエントリはどのbucketにも入らず捨てられるだけ）。ここが誤って
     // false にされていないかを直接確認する。
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true });
-    const rejected: ParetoEntry = { doneFare: 200, segKm: 20, fare: 250, alive: true };
+    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true });
+    const rejected: ParetoEntry = { doneFare: 200, segKm: 20, honshuKm: 0, honshuEastKm: 0, fare: 250, alive: true };
     const inserted = tryInsertPareto(bucket, rejected);
     expect(inserted).toBe(false);
     expect(rejected.alive).toBe(true);
@@ -853,5 +889,222 @@ describe("findReachable の alive フラグ配線（参照実装との一致・�
     for (const e of entries) {
       expect(e.alive).toBe(true);
     }
+  });
+});
+
+// Task 9: JR本州3社（東日本・東海・西日本）をまたぐ場合は会社境界で区間を
+// 確定せず、「基準額（総距離で1回引く）＋加算額（JR東日本区間分。総距離が
+// 100kmを超えるなら0円）」の通し運賃にする。
+// 基準額表・加算額表は JR東海(HONSHU_BASE_OPERATOR)・合成事業者名
+// "__jr-honshu-kasan" のルールから引かれる（lib/fare/calculator.ts 参照）。
+// 非線形（100km境界で加算額の有無が変わる）な運賃表にすることで、
+// 「初乗り二重取り（旧実装）」「通し運賃（新実装）」の結果が必ず異なるようにしている。
+describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加算額方式）", () => {
+  const honshuBaseTable: [number, number][] = [
+    [10, 100],
+    [20, 150],
+    [30, 300],
+    [50, 500],
+    [110, 900],
+  ];
+  const honshuCalc = createFareCalculator([
+    {
+      id: "fallback",
+      operators: [],
+      table: [[10, 999999]],
+      beyond: { fromKm: 10, baseFare: 999999, ratePerKm: 1 },
+    },
+    {
+      // JR東海: 通し運賃の「基準額表」として参照される代表事業者。
+      id: "jr-central",
+      operators: ["JR東海"],
+      table: honshuBaseTable,
+      beyond: { fromKm: 110, baseFare: 900, ratePerKm: 5 },
+    },
+    {
+      // JR西日本: 基準額表と同一の値（本物のデータでも一致が確認済み）。
+      id: "jr-west",
+      operators: ["JR西日本"],
+      table: honshuBaseTable,
+      beyond: { fromKm: 110, baseFare: 900, ratePerKm: 5 },
+    },
+    {
+      // JR東日本: 単独事業者としての自社表はあえて基準額表と異なる（高い）値に
+      // しておく。honshuKm=0（会社境界を跨いでいない）間はこちらが使われる
+      // ことをテストで確認するため。
+      id: "jr-east",
+      operators: ["JR東日本"],
+      table: [
+        [10, 120],
+        [20, 200],
+        [30, 360],
+        [60, 700],
+      ],
+      beyond: { fromKm: 60, baseFare: 700, ratePerKm: 8 },
+    },
+    {
+      id: "jr-honshu-kasan",
+      operators: ["__jr-honshu-kasan"],
+      table: [
+        [10, 10],
+        [20, 20],
+        [30, 30],
+        [60, 70],
+        [100, 110],
+      ],
+      beyond: { fromKm: 100, baseFare: 110, ratePerKm: 0 },
+    },
+    {
+      id: "private-x",
+      operators: ["PrivateX"],
+      table: [[5, 50]],
+      beyond: { fromKm: 5, baseFare: 50, ratePerKm: 10 },
+    },
+  ]);
+
+  const jrNode = (id: string, operator: string) => ({
+    id,
+    groupId: id,
+    name: id,
+    lat: 35,
+    lng: 139,
+    lineId: "L",
+    lineName: "L",
+    operator,
+  });
+
+  it("JR東日本→JR東海（100km以下）: 会社ごとの初乗りではなく通算距離の基準額＋加算額になる", () => {
+    // A --JR東日本10km--> B --JR東海10km--> C。総距離20km・JR東日本区間10km。
+    // 通し: 基準額(20km)=150 + 加算額(10km)=10 = 160円。
+    // 会社ごとの初乗り（旧実装・修正前）だと JR東日本 10km=120（自社表）+
+    // JR東海 10km=100（自社表）= 220円になってしまう。
+    const graph: RailGraph = {
+      nodes: {
+        A: jrNode("A", "JR東日本"),
+        B: jrNode("B", "JR東日本"),
+        C: jrNode("C", "JR東海"),
+      },
+      edges: [
+        { from: "A", to: "B", km: 10, kind: "rail", operator: "JR東日本" },
+        { from: "B", to: "C", km: 10, kind: "rail", operator: "JR東海" },
+      ],
+    };
+    const result = findReachable(graph, honshuCalc, "A", 10000);
+    expect(result.find((r) => r.id === "C")?.fare).toBe(160);
+  });
+
+  it("会社境界が0km transferエッジで表現されていても通し運賃になる（熱海のような実データの構造）", () => {
+    // 実データでは会社境界は同一物理駅を表す2つのノード間の0km transferエッジで
+    // 表現される（例: 熱海）。rail エッジで直接事業者が変わる場合と同じ結果になる
+    // ことを確認する。
+    const graph: RailGraph = {
+      nodes: {
+        A: jrNode("A", "JR東日本"),
+        B: jrNode("B", "JR東日本"),
+        B2: jrNode("B2", "JR東海"),
+        C: jrNode("C", "JR東海"),
+      },
+      edges: [
+        { from: "A", to: "B", km: 10, kind: "rail", operator: "JR東日本" },
+        { from: "B", to: "B2", km: 0, kind: "transfer", operator: "" },
+        { from: "B2", to: "C", km: 10, kind: "rail", operator: "JR東海" },
+      ],
+    };
+    const result = findReachable(graph, honshuCalc, "A", 10000);
+    expect(result.find((r) => r.id === "C")?.fare).toBe(160);
+  });
+
+  it("総距離が100kmを超えると加算額は乗らず基準額のみになる", () => {
+    // A --JR東日本60km--> B --JR東海50km--> C。総距離110km(>100km)。
+    // 通し: 基準額(110km)=900円のみ（加算額は100km超なので0円）。
+    // 会社ごとの初乗りだと JR東日本60km=700（自社表、beyond式）+
+    // JR東海50km=500（自社表）= 1,200円になってしまう。
+    const graph: RailGraph = {
+      nodes: {
+        A: jrNode("A", "JR東日本"),
+        B: jrNode("B", "JR東日本"),
+        C: jrNode("C", "JR東海"),
+      },
+      edges: [
+        { from: "A", to: "B", km: 60, kind: "rail", operator: "JR東日本" },
+        { from: "B", to: "C", km: 50, kind: "rail", operator: "JR東海" },
+      ],
+    };
+    const result = findReachable(graph, honshuCalc, "A", 10000);
+    expect(result.find((r) => r.id === "C")?.fare).toBe(900);
+  });
+
+  it("JR東日本→JR東海→JR西日本（3社またぎ）でも会社境界のたびに確定せず通算が続く", () => {
+    // 総距離30km・JR東日本区間10km。基準額(30km)=300 + 加算額(10km)=10 = 310円。
+    const graph: RailGraph = {
+      nodes: {
+        A: jrNode("A", "JR東日本"),
+        B: jrNode("B", "JR東日本"),
+        C: jrNode("C", "JR東海"),
+        D: jrNode("D", "JR西日本"),
+      },
+      edges: [
+        { from: "A", to: "B", km: 10, kind: "rail", operator: "JR東日本" },
+        { from: "B", to: "C", km: 10, kind: "rail", operator: "JR東海" },
+        { from: "C", to: "D", km: 10, kind: "rail", operator: "JR西日本" },
+      ],
+    };
+    const result = findReachable(graph, honshuCalc, "A", 10000);
+    expect(result.find((r) => r.id === "D")?.fare).toBe(310);
+  });
+
+  it("会社境界を跨がない単一JR会社の乗車は通し方式を使わず、従来どおり自社の運賃表を使う", () => {
+    // A --JR東日本10km--> B（会社境界を跨いでいない＝honshuKm=0のまま）。
+    // 通し方式（基準額表=10km:100円）ではなく、JR東日本の自社表(10km:120円)が
+    // 使われるはず。honshuKm>0の条件を付け忘れて常に通し方式を使ってしまう
+        // 回帰を防ぐ。
+    const graph: RailGraph = {
+      nodes: { A: jrNode("A", "JR東日本"), B: jrNode("B", "JR東日本") },
+      edges: [{ from: "A", to: "B", km: 10, kind: "rail", operator: "JR東日本" }],
+    };
+    const result = findReachable(graph, honshuCalc, "A", 10000);
+    expect(result.find((r) => r.id === "B")?.fare).toBe(120);
+  });
+
+  it("JR⇔私鉄の切り替えは対象外で、従来どおり会社境界で区間を確定する", () => {
+    // A --JR東日本10km--> B --PrivateX5km--> C。
+    // JR東日本区間は自社表(10km=120)、PrivateX区間は自社表(5km=50)で
+    // それぞれ初乗りから計算され、合計170円になるはず（通し方式は使われない）。
+    const graph: RailGraph = {
+      nodes: {
+        A: jrNode("A", "JR東日本"),
+        B: jrNode("B", "JR東日本"),
+        C: jrNode("C", "PrivateX"),
+      },
+      edges: [
+        { from: "A", to: "B", km: 10, kind: "rail", operator: "JR東日本" },
+        { from: "B", to: "C", km: 5, kind: "rail", operator: "PrivateX" },
+      ],
+    };
+    const result = findReachable(graph, honshuCalc, "A", 10000);
+    expect(result.find((r) => r.id === "C")?.fare).toBe(170);
+  });
+
+  it("JR本州3社をまたいだ後に私鉄へ乗り継ぐと、通し運賃が確定してから私鉄区間が加算される", () => {
+    // A --JR東日本10km--> B --JR東海10km--> C --PrivateX5km--> D。
+    // C までは通し運賃 160円（1つ目のテストと同じ）で確定し、
+    // そこから PrivateX 5km=50円が追加されて 210円になるはず。
+    // segmentFare を使わず単純に calc.estimate(直前のJR会社の自社表) で
+    // 確定してしまう回帰があると、ここが 160 にならず別の値になる。
+    const graph: RailGraph = {
+      nodes: {
+        A: jrNode("A", "JR東日本"),
+        B: jrNode("B", "JR東日本"),
+        C: jrNode("C", "JR東海"),
+        D: jrNode("D", "PrivateX"),
+      },
+      edges: [
+        { from: "A", to: "B", km: 10, kind: "rail", operator: "JR東日本" },
+        { from: "B", to: "C", km: 10, kind: "rail", operator: "JR東海" },
+        { from: "C", to: "D", km: 5, kind: "rail", operator: "PrivateX" },
+      ],
+    };
+    const result = findReachable(graph, honshuCalc, "A", 10000);
+    expect(result.find((r) => r.id === "D")?.fare).toBe(210);
   });
 });

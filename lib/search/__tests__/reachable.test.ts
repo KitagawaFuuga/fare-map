@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   findReachable,
   tryInsertPareto,
+  __internalRunSearchForTest,
   type ParetoEntry,
+  type __internalParetoStore,
 } from "@/lib/search/reachable";
+import type { FareCalculator } from "@/lib/fare/calculator";
 import { createFareCalculator } from "@/lib/fare/calculator";
 import type { RailGraph } from "@/lib/graph/types";
 
@@ -459,5 +462,396 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
     const dominated = bucket[0];
     tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true });
     expect(dominated?.alive).toBe(false);
+  });
+
+  it("挿入が拒否された（false が返る）とき、渡した entry 自身の alive は変更されない", () => {
+    // tryInsertPareto は「拒否されたエントリ」を書き換える必要はない
+    // （そのエントリはどのbucketにも入らず捨てられるだけ）。ここが誤って
+    // false にされていないかを直接確認する。
+    const bucket: ParetoEntry[] = [];
+    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, fare: 150, alive: true });
+    const rejected: ParetoEntry = { doneFare: 200, segKm: 20, fare: 250, alive: true };
+    const inserted = tryInsertPareto(bucket, rejected);
+    expect(inserted).toBe(false);
+    expect(rejected.alive).toBe(true);
+  });
+});
+
+// alive フラグは tryInsertPareto 単体では正しく動いても、findReachable 側の
+// 「配線」（next.entry の差し替え、inserted 判定の位置、PENDING_ENTRY の扱い）が
+// 壊れると事故が起きる。tryInsertPareto 単体のテストではこれらの配線ミスを
+// 検出できないため、ここでは (1) 枝刈りを一切行わない素朴な参照実装との
+// 結果一致、(2) 探索後の bucket 内不変条件、の2通りで配線ごと固定する。
+describe("findReachable の alive フラグ配線（参照実装との一致・探索後の不変条件）", () => {
+  // Pareto 支配による枝刈りを一切行わない素朴な参照実装。
+  // findReachable 本体の状態遷移ロジック（rail/transfer/事業者切り替え）だけを
+  // 借りたいところだが、「枝刈りを無効化した参照実装」であることが目的なので
+  // ここで独立に組み直す（本体の実装をそのまま呼ぶと枝刈りごと再利用してしまい、
+  // 配線が壊れたことを検出できなくなる）。
+  // 停止性は budget が有限であることに依る lowerBound カットのみで確保する
+  // （本体のコメント参照。Pareto 支配に依らない）。
+  function naiveFindReachable(
+    graph: RailGraph,
+    calc: FareCalculator,
+    fromId: string,
+    budget: number,
+  ) {
+    type State = {
+      stationId: string;
+      doneFare: number;
+      segOperator: string;
+      segFromId: string;
+      segKm: number;
+      fare: number;
+      // 直前に使った辺そのものを逆走しないようにするための記録。
+      // グラフは無向（両方向にaddAdj）なので、これが無いと「同じ辺を
+      // 行って戻って」を繰り返すだけで segKm が単調増加する状態が
+      // 無限に生成され続け、終了しなくなる（override anchor 区間では
+      // lowerBound が事業者最安値で頭打ちになり km について単調増加しない
+      // ため、budget によるカットも効かない。lib/fare/calculator.ts の
+      // lowerBound コメント参照）。この U ターンは doneFare・現在駅とも
+      // 直前と完全に同じ状態を再生産するだけで新しい到達駅を一切生まない
+      // （区間の起点駅名・現在駅名が変わらない以上 fare も変わらない）ため、
+      // 除外しても最終結果には影響しない。
+      arrivedVia?: {
+        from: string;
+        to: string;
+        kind: "rail" | "transfer";
+        operator: string;
+        km: number;
+      };
+    };
+    const adjacency = new Map<
+      string,
+      { to: string; km: number; kind: "rail" | "transfer"; operator: string }[]
+    >();
+    const addAdj = (
+      from: string,
+      to: string,
+      km: number,
+      kind: "rail" | "transfer",
+      operator: string,
+    ) => {
+      const arr = adjacency.get(from) ?? [];
+      arr.push({ to, km, kind, operator });
+      adjacency.set(from, arr);
+    };
+    for (const e of graph.edges) {
+      addAdj(e.from, e.to, e.km, e.kind, e.operator);
+      addAdj(e.to, e.from, e.km, e.kind, e.operator);
+    }
+    const nameOf = (id: string): string | undefined => graph.nodes[id]?.name;
+
+    const key = (s: State) =>
+      `${s.stationId} ${s.segOperator} ${s.segFromId} ${s.doneFare} ${s.segKm}`;
+
+    const initial: State = {
+      stationId: fromId,
+      doneFare: 0,
+      segOperator: "",
+      segFromId: fromId,
+      segKm: 0,
+      fare: 0,
+    };
+    const visited = new Set<string>([key(initial)]);
+    const queue: State[] = [initial];
+    let head = 0;
+    const byStation = new Map<string, number>();
+
+    while (head < queue.length) {
+      const state = queue[head++];
+      if (state === undefined) continue;
+      if (state.fare <= budget) {
+        const cur = byStation.get(state.stationId) ?? Infinity;
+        if (state.fare < cur) byStation.set(state.stationId, state.fare);
+      }
+      for (const edge of adjacency.get(state.stationId) ?? []) {
+        // 直前に使った辺をそのまま逆走するだけの手は打ち切る（結果に影響しない理由は
+        // 上記コメント参照）。
+        const via = state.arrivedVia;
+        if (
+          via !== undefined &&
+          edge.to === via.from &&
+          edge.kind === via.kind &&
+          edge.operator === via.operator &&
+          edge.km === via.km
+        ) {
+          continue;
+        }
+        const arrivedVia = {
+          from: state.stationId,
+          to: edge.to,
+          kind: edge.kind,
+          operator: edge.operator,
+          km: edge.km,
+        };
+        let next: State;
+        if (edge.kind === "transfer") {
+          next = {
+            stationId: edge.to,
+            doneFare: state.doneFare,
+            segOperator: state.segOperator,
+            segFromId: state.segFromId,
+            segKm: state.segKm,
+            fare:
+              state.doneFare +
+              calc.estimate(
+                state.segOperator,
+                state.segKm,
+                nameOf(state.segFromId),
+                nameOf(edge.to),
+              ),
+            arrivedVia,
+          };
+        } else if (edge.operator === state.segOperator) {
+          const segKm = state.segKm + edge.km;
+          next = {
+            stationId: edge.to,
+            doneFare: state.doneFare,
+            segOperator: state.segOperator,
+            segFromId: state.segFromId,
+            segKm,
+            fare:
+              state.doneFare +
+              calc.estimate(
+                state.segOperator,
+                segKm,
+                nameOf(state.segFromId),
+                nameOf(edge.to),
+              ),
+            arrivedVia,
+          };
+        } else {
+          const doneFare =
+            state.doneFare +
+            calc.estimate(
+              state.segOperator,
+              state.segKm,
+              nameOf(state.segFromId),
+              nameOf(state.stationId),
+            );
+          next = {
+            stationId: edge.to,
+            doneFare,
+            segOperator: edge.operator,
+            segFromId: state.stationId,
+            segKm: edge.km,
+            fare:
+              doneFare +
+              calc.estimate(
+                edge.operator,
+                edge.km,
+                nameOf(state.stationId),
+                nameOf(edge.to),
+              ),
+            arrivedVia,
+          };
+        }
+        const segLowerBound = calc.lowerBound(
+          next.segOperator,
+          next.segKm,
+          nameOf(next.segFromId),
+        );
+        if (next.doneFare + segLowerBound > budget) continue;
+        const k = key(next);
+        if (visited.has(k)) continue;
+        visited.add(k);
+        queue.push(next);
+      }
+    }
+
+    return [...byStation.entries()]
+      .map(([id, fare]) => ({ id, fare }))
+      .sort((a, b) => a.fare - b.fare);
+  }
+
+  const sortResult = (r: { id: string; fare: number }[]) =>
+    [...r].sort((a, b) => (a.id === b.id ? a.fare - b.fare : a.id.localeCompare(b.id)));
+
+  it("由来違いの支配が起きる合成グラフで、findReachable の結果が枝刈り無効の参照実装と一致する", () => {
+    // 「由来（区間の起点駅）が違う同一駅の状態を安易な運賃比較で握り潰さない」
+    // テストと同じグラフを使う。M で迂回状態(160円)が直通状態(200円)より
+    // 一時的に安く、Pareto支配が実際に発生する（迂回はdoneFare・segKmとも
+    // 直通以下ではないので支配はしないが、bucketの非支配集合管理が働く）。
+    const table: [number, number][] = [
+      [5, 80],
+      [10, 200],
+      [15, 250],
+    ];
+    const calc = createFareCalculator(
+      [
+        {
+          id: "test",
+          operators: [],
+          table,
+          beyond: { fromKm: 15, baseFare: 250, ratePerKm: 50 },
+        },
+      ],
+      [
+        {
+          operator: "OpX",
+          pairs: [{ from: "Start", to: "Z", fare: 150 }],
+          source: { url: "", fetchedAt: "2026-08-29", note: "test" },
+        },
+      ],
+    );
+    const node = (id: string, operator = "OpX") => ({
+      id,
+      groupId: id,
+      name: id,
+      lat: 35,
+      lng: 139,
+      lineId: "L",
+      lineName: "L",
+      operator,
+    });
+    const originGraph: RailGraph = {
+      nodes: {
+        Start: node("Start"),
+        Start2: node("Start2", "OpY"),
+        P: node("P", "OpY"),
+        P2: node("P2"),
+        M: node("M"),
+        Z: node("Z"),
+      },
+      edges: [
+        { from: "Start", to: "M", km: 10, kind: "rail", operator: "OpX" },
+        { from: "M", to: "Z", km: 5, kind: "rail", operator: "OpX" },
+        { from: "Start", to: "Start2", km: 0, kind: "transfer", operator: "" },
+        { from: "Start2", to: "P", km: 1, kind: "rail", operator: "OpY" },
+        { from: "P", to: "P2", km: 0, kind: "transfer", operator: "" },
+        { from: "P2", to: "M", km: 2, kind: "rail", operator: "OpX" },
+      ],
+    };
+
+    for (const budget of [50, 100, 150, 160, 200, 250, 280, 10000]) {
+      const actual = findReachable(originGraph, calc, "Start", budget);
+      const expected = naiveFindReachable(originGraph, calc, "Start", budget);
+      expect(sortResult(actual)).toEqual(sortResult(expected));
+    }
+  });
+
+  it("初乗り二重取り抑止・複数事業者・乗り換えを含む一般的なグラフでも参照実装と一致する", () => {
+    const calc = createFareCalculator([
+      {
+        id: "test",
+        operators: [],
+        table: [
+          [10, 100],
+          [20, 150],
+          [30, 300],
+        ],
+        beyond: { fromKm: 30, baseFare: 300, ratePerKm: 10 },
+      },
+      {
+        id: "opb",
+        operators: ["OpB"],
+        table: [[10, 80]],
+        beyond: { fromKm: 10, baseFare: 80, ratePerKm: 5 },
+      },
+    ]);
+    const node = (id: string, operator = "OpA") => ({
+      id,
+      groupId: id,
+      name: id,
+      lat: 35,
+      lng: 139,
+      lineId: "L",
+      lineName: "L",
+      operator,
+    });
+    const graph: RailGraph = {
+      nodes: {
+        A: node("A"),
+        B: node("B"),
+        C: node("C"),
+        D: node("D", "OpB"),
+      },
+      edges: [
+        { from: "A", to: "B", km: 10, kind: "rail", operator: "OpA" },
+        { from: "B", to: "C", km: 10, kind: "rail", operator: "OpA" },
+        { from: "C", to: "D", km: 10, kind: "rail", operator: "OpB" },
+      ],
+    };
+    for (const budget of [100, 150, 200, 250, 10000]) {
+      const actual = findReachable(graph, calc, "A", budget);
+      const expected = naiveFindReachable(graph, calc, "A", budget);
+      expect(sortResult(actual)).toEqual(sortResult(expected));
+    }
+  });
+
+  function allEntries(store: __internalParetoStore): ParetoEntry[] {
+    const entries: ParetoEntry[] = [];
+    for (const byOperator of store.values()) {
+      for (const byFrom of byOperator.values()) {
+        for (const bucket of byFrom.values()) {
+          entries.push(...bucket);
+        }
+      }
+    }
+    return entries;
+  }
+
+  it("探索後、store の全 bucket の全エントリが alive === true である（不変条件）", () => {
+    // tryInsertPareto は支配されたエントリを splice で bucket から取り除く際に
+    // alive=false にする。よって探索終了時点で bucket に残っているエントリは
+    // 全て alive=true でなければならない。ここが崩れる典型的な事故は、
+    // splice のタイミングをずらす／alive の更新を忘れる、といった変更。
+    const table: [number, number][] = [
+      [5, 80],
+      [10, 200],
+      [15, 250],
+    ];
+    const calc = createFareCalculator(
+      [
+        {
+          id: "test",
+          operators: [],
+          table,
+          beyond: { fromKm: 15, baseFare: 250, ratePerKm: 50 },
+        },
+      ],
+      [
+        {
+          operator: "OpX",
+          pairs: [{ from: "Start", to: "Z", fare: 150 }],
+          source: { url: "", fetchedAt: "2026-08-29", note: "test" },
+        },
+      ],
+    );
+    const node = (id: string, operator = "OpX") => ({
+      id,
+      groupId: id,
+      name: id,
+      lat: 35,
+      lng: 139,
+      lineId: "L",
+      lineName: "L",
+      operator,
+    });
+    const originGraph: RailGraph = {
+      nodes: {
+        Start: node("Start"),
+        Start2: node("Start2", "OpY"),
+        P: node("P", "OpY"),
+        P2: node("P2"),
+        M: node("M"),
+        Z: node("Z"),
+      },
+      edges: [
+        { from: "Start", to: "M", km: 10, kind: "rail", operator: "OpX" },
+        { from: "M", to: "Z", km: 5, kind: "rail", operator: "OpX" },
+        { from: "Start", to: "Start2", km: 0, kind: "transfer", operator: "" },
+        { from: "Start2", to: "P", km: 1, kind: "rail", operator: "OpY" },
+        { from: "P", to: "P2", km: 0, kind: "transfer", operator: "" },
+        { from: "P2", to: "M", km: 2, kind: "rail", operator: "OpX" },
+      ],
+    };
+    const store = __internalRunSearchForTest(originGraph, calc, "Start", 10000);
+    const entries = allEntries(store);
+    expect(entries.length).toBeGreaterThan(0);
+    for (const e of entries) {
+      expect(e.alive).toBe(true);
+    }
   });
 });

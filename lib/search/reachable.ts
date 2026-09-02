@@ -54,12 +54,14 @@ function dominates(a: ParetoEntry, b: ParetoEntry): boolean {
 // フィールドを持たせておきたい（後から spread で足すと V8 の隠れクラスが
 // 変わり、余分なオブジェクト生成コストもかかる）。挿入成功後に必ず本物の
 // entry で上書きするので、この値自体が bucket や heap に混入することはない。
-const PENDING_ENTRY: ParetoEntry = {
+// Object.freeze しておくことで、万一 bucket や heap にこの値が誤って
+// 混入し書き込まれた場合に TypeError で即座に露見するようにする（コストゼロ）。
+const PENDING_ENTRY: ParetoEntry = Object.freeze({
   doneFare: 0,
   segKm: 0,
   fare: 0,
   alive: false,
-};
+});
 
 // entry を bucket（同一 (stationId, segOperator, segFromId) の非支配集合）へ挿入する。
 // 既存のいずれかに支配されていれば挿入せず false を返す。
@@ -91,7 +93,14 @@ export function tryInsertPareto(
 }
 
 // 3階層のネスト Map でキーを表現する（文字列結合による区切り文字衝突を避けるため）。
-type ParetoStore = Map<string, Map<string, Map<string, ParetoEntry[]>>>;
+// テストから bucket を直接検査できるよう export するが、これは
+// __internalRunSearchForTest 経由でのみ得られる内部表現であることを示すため
+// 型名にも __internal を付けている。
+export type __internalParetoStore = Map<
+  string,
+  Map<string, Map<string, ParetoEntry[]>>
+>;
+type ParetoStore = __internalParetoStore;
 
 function getBucket(
   store: ParetoStore,
@@ -117,12 +126,15 @@ function getBucket(
   return bucket;
 }
 
-export function findReachable(
+// Pareto 探索の本体。alive フラグの生死判定を含む枝刈りロジックはここに閉じ込め、
+// 結果集約（findReachable）とテスト用の内部検査（__internalRunSearchForTest）の
+// どちらからも同じ探索を再利用できるようにする。
+function runSearch(
   graph: RailGraph,
   calc: FareCalculator,
   fromId: string,
   budget: number,
-): ReachableStation[] {
+): ParetoStore {
   const adjacency = new Map<
     string,
     { to: string; km: number; kind: "rail" | "transfer"; operator: string }[]
@@ -305,6 +317,17 @@ export function findReachable(
     }
   }
 
+  return store;
+}
+
+export function findReachable(
+  graph: RailGraph,
+  calc: FareCalculator,
+  fromId: string,
+  budget: number,
+): ReachableStation[] {
+  const store = runSearch(graph, calc, fromId, budget);
+
   // 同じ駅に複数の状態（由来違い）が残りうるので、駅ごとに最安値へ集約する。
   // budget によるフィルタはここで行う（探索中の fare は非単調なため）。
   const byStation = new Map<string, number>();
@@ -324,4 +347,17 @@ export function findReachable(
   return [...byStation.entries()]
     .map(([id, fare]) => ({ id, fare }))
     .sort((a, b) => a.fare - b.fare);
+}
+
+// テスト専用の内部エクスポート。alive フラグの「配線」（tryInsertPareto の外側、
+// findReachable 本体での next.entry 差し替えや PENDING_ENTRY の扱い）を
+// bucket 単位で直接検査するために ParetoStore をそのまま返す。
+// アプリケーションコードから呼んではいけない。
+export function __internalRunSearchForTest(
+  graph: RailGraph,
+  calc: FareCalculator,
+  fromId: string,
+  budget: number,
+): ParetoStore {
+  return runSearch(graph, calc, fromId, budget);
 }

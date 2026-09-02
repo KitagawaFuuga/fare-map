@@ -699,6 +699,100 @@ describe("FareCalculator", () => {
     });
   });
 
+  describe("lowerBound（探索の枝刈り用下界。締めすぎ・緩めすぎのどちらも危険）", () => {
+    const lbTable: [number, number][] = [
+      [5, 100],
+      [10, 200],
+      [20, 400],
+    ];
+    const calcLb = createFareCalculator(
+      [
+        {
+          id: "test-lb",
+          operators: [],
+          table: lbTable,
+          beyond: { fromKm: 20, baseFare: 400, ratePerKm: 20 },
+        },
+      ],
+      [
+        {
+          operator: "OpLB",
+          pairs: [
+            { from: "Anchor1", to: "Anchor2", fare: 90 },
+            { from: "Anchor2", to: "Anchor3", fare: 50 },
+          ],
+          source: { url: "", fetchedAt: "2026-08-29", note: "test" },
+        },
+      ],
+    );
+
+    it("override 非対象の起点（override ペアに一切登場しない駅）は tableFare(km) と一致する", () => {
+      for (const km of [0, 3, 5, 6, 10, 15, 20, 25]) {
+        expect(calcLb.lowerBound("OpLB", km, "非対象駅")).toBe(
+          calcLb.estimate("OpLB", km),
+        );
+      }
+    });
+
+    it("fromName を省略した場合も tableFare と事業者全体の override 最小値の小さいほう", () => {
+      // 事業者全体の override 最小値は 50（Anchor2-Anchor3）
+      expect(calcLb.lowerBound("OpLB", 20)).toBe(
+        Math.min(calcLb.estimate("OpLB", 20), 50),
+      );
+      expect(calcLb.lowerBound("OpLB", 3)).toBe(
+        Math.min(calcLb.estimate("OpLB", 3), 50),
+      );
+    });
+
+    it("override ペアに from 側として登場する起点は、その駅を含むペアの最小運賃と tableFare の小さいほうになる", () => {
+      // Anchor1 は (Anchor1,Anchor2)=90 のみに登場 => 駅単位の最小値は 90
+      const km = 20; // tableFare=400
+      expect(calcLb.lowerBound("OpLB", km, "Anchor1")).toBe(
+        Math.min(calcLb.estimate("OpLB", km), 90),
+      );
+      expect(calcLb.lowerBound("OpLB", km, "Anchor1")).toBeLessThanOrEqual(
+        calcLb.estimate("OpLB", km),
+      );
+    });
+
+    it("override ペアの to 側にだけ登場する起点でも同様に締まる（pairKey の対称性に依存）", () => {
+      // Anchor3 は (Anchor2,Anchor3)=50 の to 側にしか登場しない。
+      // ここが崩れると本来到達できる駅を誤って刈ってしまう。
+      const km = 20;
+      expect(calcLb.lowerBound("OpLB", km, "Anchor3")).toBe(
+        Math.min(calcLb.estimate("OpLB", km), 50),
+      );
+    });
+
+    it("駅単位の下界は事業者全体の override 最小値以上（締まっている）", () => {
+      for (const station of ["Anchor1", "Anchor2", "Anchor3"]) {
+        for (const km of [0, 5, 10, 20, 30]) {
+          const stationBound = calcLb.lowerBound("OpLB", km, station);
+          const operatorBound = calcLb.lowerBound("OpLB", km);
+          expect(stationBound).toBeGreaterThanOrEqual(operatorBound);
+        }
+      }
+    });
+
+    it("下界性: km' >= km ならどの終点名についても lowerBound(km) <= estimate(km', 終点名)", () => {
+      const kms = [0, 1, 3, 5, 6, 10, 12, 20, 25, 40];
+      const froms = [undefined, "非対象駅", "Anchor1", "Anchor2", "Anchor3"];
+      const tos = [undefined, "非対象駅", "Anchor1", "Anchor2", "Anchor3", "他の駅"];
+      for (const from of froms) {
+        for (const km of kms) {
+          const lb = calcLb.lowerBound("OpLB", km, from);
+          for (const kmPrime of kms) {
+            if (kmPrime < km) continue;
+            for (const to of tos) {
+              const est = calcLb.estimate("OpLB", kmPrime, from, to);
+              expect(lb).toBeLessThanOrEqual(est);
+            }
+          }
+        }
+      }
+    });
+  });
+
   describe("isOverrideAnchor（探索側が区間の起点駅を区別すべきか判定するための API）", () => {
     // 探索側 (lib/search/reachable.ts) は、区間の起点駅の名前がその事業者の
     // override 駅ペアのどちらにも登場しない場合、この区間は将来どの駅で降りても

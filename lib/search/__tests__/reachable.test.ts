@@ -543,7 +543,7 @@ describe("findReachable の alive フラグ配線（参照実装との一致・�
     const nameOf = (id: string): string | undefined => graph.nodes[id]?.name;
 
     const key = (s: State) =>
-      `${s.stationId} ${s.segOperator} ${s.segFromId} ${s.doneFare} ${s.segKm}`;
+      `${s.stationId} ${s.segOperator} ${s.segFromId} ${s.doneFare} ${s.segKm}`;
 
     const initial: State = {
       stationId: fromId,

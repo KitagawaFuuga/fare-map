@@ -42,11 +42,15 @@ export interface FareCalculator {
   // （=状態を安全にマージしてよい）」ケースを判定し、状態空間の爆発を防ぐ。
   isOverrideAnchor(operator: string, stationName: string | undefined): boolean;
   // JR本州3社をまたぐ通し運賃 = 基準額（総営業キロで基準額表を1回引いた額）
-  // + 加算額（JR東日本区間の営業キロ分。ただし総営業キロが100kmを超える場合は
-  // 0円）。加算額が100km超で0になる理由の一次資料は確認できておらず、
-  // 実測3件（新宿→豊橋293.6km・東京→名古屋366km帯・東京→大阪556km帯、
-  // いずれも基準額のみで実運賃と一致）から採用した規則。詳細・限界は
-  // task-9-report.md 参照。
+  // + 加算額（eastKm に対して加算額表を1回引いた額。541km以上は440円固定）。
+  // 100km超で加算額が0円になる、という規則は出典にない誤りだったため廃止した
+  // （加算額表は541km以上の帯まで公式PDFに明記されている。詳細:
+  // .superpowers/sdd/2026-08-24-fare-accuracy/kasan-verified.md）。
+  //
+  // eastKm は「JR東日本区間の営業キロ」だが、呼び出し側（lib/search/reachable.ts）
+  // が既に「東京都区内・山手線内〜東海道方面は東京(品川)〜熱海間を新幹線(JR東海)
+  // 経由として計算する」規則を適用した後の値を渡す前提（この関数自体は単に
+  // 基準額表と加算額表を1回ずつ引くだけで、その特例の判定はしない）。
   estimateHonshuThrough(totalKm: number, eastKm: number): number;
   // 上記の下界。加算額は常に0以上なので基準額のみを返せば安全
   // （距離が伸びても単調非減少で、絶対にこれを下回らない）。
@@ -172,7 +176,6 @@ export function createFareCalculator(
         );
       }
       const base = tableFare(HONSHU_BASE_OPERATOR, totalKm);
-      if (totalKm > 100) return base;
       if (!byOperator.has(HONSHU_KASAN_OPERATOR)) {
         throw new Error(
           `JR本州3社通し運賃の加算額表(${HONSHU_KASAN_OPERATOR})が見つかりません`,

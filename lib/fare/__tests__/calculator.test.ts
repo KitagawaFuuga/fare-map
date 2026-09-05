@@ -847,30 +847,52 @@ describe("FareCalculator", () => {
   });
 
   // JR本州3社（東日本・東海・西日本）をまたぐ通し運賃 = 基準額（総営業キロで
-  // 基準額表を1回引いた額）+ 加算額（JR東日本区間の営業キロ分。ただし総営業キロが
-  // 100kmを超える場合は0円）。基準額表は data/fare-rules/jr-central.json
-  // （JR東海、据え置きの幹線表）を代表として使う。実測3件がいずれも「基準額の
-  // みで実運賃と一致」したことから100km超は加算額0円という規則を採用した
-  // （一次資料でこの閾値の理由は確認できていない。詳細はtask-9-report.md参照）。
+  // 基準額表を1回引いた額）+ 加算額（eastKmに対して加算額表を1回引いた額）。
+  // 基準額表は data/fare-rules/jr-central.json（JR東海、据え置きの幹線表）を
+  // 代表として使う。「100km超は加算額0円」は出典にない誤りだったため廃止した
+  // （加算額表には541km以上の帯まで存在する。詳細は
+  // .superpowers/sdd/2026-08-24-fare-accuracy/kasan-verified.md 参照）。
   describe("estimateHonshuThrough / honshuThroughBaseFare（JR本州3社をまたぐ通し運賃）", () => {
     it("総距離100km以下: 基準額＋加算額（jr-central.json・jr-honshu-kasan.json の実データで検証）", () => {
-      // 90km = jr-central.json の [90, 1520] 帯。加算額表 [30, 30] は26〜30km帯=30円。
-      expect(calc.estimateHonshuThrough(90, 30)).toBe(1520 + 30);
-      // ちょうど100km: 基準額 [100, 1690] + 加算額 [100, 110]（91〜100km帯）
-      expect(calc.estimateHonshuThrough(100, 100)).toBe(1690 + 110);
+      // 90km = jr-central.json の [90, 1520] 帯。加算額表 [30, 20] は26〜30km帯=20円。
+      expect(calc.estimateHonshuThrough(90, 30)).toBe(1520 + 20);
+      // ちょうど100km: 基準額 [100, 1690] + 加算額 [100, 100]（91〜100km帯）
+      expect(calc.estimateHonshuThrough(100, 100)).toBe(1690 + 100);
     });
 
-    it("総距離100km超: 加算額は乗らず基準額のみ（実測3件と一致する規則）", () => {
-      // 101km: jr-central.json では101〜120km帯 [120, 1980] を引く。
-      // 100kmちょうどの場合(1800円)より高いので、加算額を落としても運賃は
-      // 距離とともに単調非減少のまま。
-      expect(calc.estimateHonshuThrough(101, 90)).toBe(1980);
-      // 東京→豊橋（実測293.6km、実運賃5,170円）: 281〜300km帯そのもの
-      expect(calc.estimateHonshuThrough(293.6, 104.6)).toBe(5170);
-      // 東京→名古屋相当（361〜380km帯、実運賃6,380円）
-      expect(calc.estimateHonshuThrough(370, 104.6)).toBe(6380);
-      // 東京→大阪相当（541〜560km帯、実運賃8,910円）
-      expect(calc.estimateHonshuThrough(556.4, 104.6)).toBe(8910);
+    it("総距離100km超でも加算額は0円にならない（長野→名古屋相当、公式4,580円）", () => {
+      // 長野→名古屋相当: 基準額4,510円(241〜260km帯) + 加算額70円(71〜80km帯) = 4,580円。
+      // 修正前の実装は totalKm>100 で加算額を強制的に0円にしていたため 4,510円になっていた。
+      expect(calc.estimateHonshuThrough(250.8, 76.9)).toBe(4580);
+    });
+
+    it("東京→豊橋相当（281〜300km帯、実運賃5,170円）: eastKmが0ならJR東日本分の加算はない", () => {
+      // 東京都区内発の東海道方面は東京〜熱海間を新幹線(JR東海)経由として計算するため
+      // eastKmが0になる（探索側 lib/search/reachable.ts の責務）。ここでは
+      // calculator自体は「eastKm=0を渡されれば加算額表の該当帯(0円)を引くだけ」であることを確認する。
+      expect(calc.estimateHonshuThrough(293.6, 0)).toBe(5170);
+    });
+
+    it("東京→名古屋相当（361〜380km帯、実運賃6,380円）: eastKm=0なら基準額のみ", () => {
+      expect(calc.estimateHonshuThrough(370, 0)).toBe(6380);
+    });
+
+    it("東京→大阪相当（541〜560km帯、実運賃8,910円）: eastKm=0なら基準額のみ", () => {
+      expect(calc.estimateHonshuThrough(556.4, 0)).toBe(8910);
+    });
+
+    it("eastKmが渡されると加算額表の該当帯が乗る（101〜120km帯=110円）", () => {
+      // 104.6km は101〜120km帯なので加算額110円。
+      expect(calc.estimateHonshuThrough(556.4, 104.6)).toBe(8910 + 110);
+    });
+
+    it("eastKmが541km以上でも加算額は440円固定（beyond）", () => {
+      expect(calc.estimateHonshuThrough(3400, 541)).toBe(
+        calc.honshuThroughBaseFare(3400) + 440,
+      );
+      expect(calc.estimateHonshuThrough(3400, 1000)).toBe(
+        calc.honshuThroughBaseFare(3400) + 440,
+      );
     });
 
     it("km<=0 は0円", () => {
@@ -882,6 +904,44 @@ describe("FareCalculator", () => {
       expect(calc.honshuThroughBaseFare(90)).toBe(1520);
       expect(calc.honshuThroughBaseFare(293.6)).toBe(5170);
       expect(calc.honshuThroughBaseFare(0)).toBe(0);
+    });
+
+    // コントローラが確定した加算額表（kasan-verified.md）の算術検証を固定する。
+    // 公式定義「加算額＝改定後のJR東日本運賃－基準額」に従い、
+    // jr-east.json（改定後JR東日本）とjr-central.json（基準額）の差額を
+    // 100km以下の16帯すべてで計算し、jr-honshu-kasan.jsonの値と一致することを確認する。
+    // ここが崩れると「81-90km=100円/91-100km=110円」のような前回の誤転記が再発する。
+    it("加算額表(100kmまでの16帯)がjr-east.json - jr-central.jsonの差額と一致する（算術検証）", () => {
+      const cases: { km: number; east: number; base: number }[] = [
+        { km: 3, east: 160, base: 150 },
+        { km: 6, east: 200, base: 190 },
+        { km: 10, east: 210, base: 200 },
+        { km: 15, east: 260, base: 240 },
+        { km: 20, east: 350, base: 330 },
+        { km: 25, east: 440, base: 420 },
+        { km: 30, east: 530, base: 510 },
+        { km: 35, east: 620, base: 590 },
+        { km: 40, east: 720, base: 680 },
+        { km: 45, east: 810, base: 770 },
+        { km: 50, east: 910, base: 860 },
+        { km: 60, east: 1040, base: 990 },
+        { km: 70, east: 1230, base: 1170 },
+        { km: 80, east: 1410, base: 1340 },
+        { km: 90, east: 1600, base: 1520 },
+        { km: 100, east: 1790, base: 1690 },
+      ];
+      for (const { km, east, base } of cases) {
+        expect(calc.estimate("JR東日本", km)).toBe(east);
+        expect(calc.estimate("JR東海", km)).toBe(base);
+        const kasan = east - base;
+        // eastKm=km・totalKm=kmとして通し運賃を引くと base+kasanになるはず
+        // （同じ距離帯であることを前提とした単純化: 通し運賃自体は
+        // totalKmとeastKmを別々に引く点に注意。ここではkasan額そのものの
+        // 一致だけを検証するため、加算額表を直接引けるkmでestimateHonshuThroughを呼ぶ）。
+        expect(calc.estimateHonshuThrough(km, km) - calc.honshuThroughBaseFare(km)).toBe(
+          kasan,
+        );
+      }
     });
 
     it("基準額表(JR東海)・加算額表が未登録の calculator で呼ぶとエラーになる（サイレントな誤運賃を防ぐ）", () => {

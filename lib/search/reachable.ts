@@ -479,8 +479,22 @@ function runSearch(
   //   絞り込み後も単純に「今の運賃が安い方」だけを残し、(doneFare, segKm) の
   //   Pareto 集合を保持していなかったことが原因だった（C-1 相当の再現テスト参照）。
   //
-  const bucketFromId = (segOperator: string, segFromId: string): string =>
-    calc.isOverrideAnchor(segOperator, nameOf(segFromId)) ? segFromId : "";
+  // 【性能改善(1): ノードIDではなく駅名をキーにする】anchor 該当時のキーには
+  // 以前 segFromId（ノードID）をそのまま使っていたが、探索全体で segFromId が
+  // 実際に使われるのは nameOf(segFromId) を経由した先（segmentFare /
+  // calc.lowerBound / isOverrideAnchor はいずれも「駅名」だけを見て、
+  // ノードIDそのものを見ない）のみ。実データでは同じ物理駅が路線ごとに別
+  // ノードID を持つ（例: 東京10ノード・新宿11ノード・上野7ノード）ため、
+  // ノードIDをそのままキーにすると同じ駅の別ノードが別バケットに分かれて
+  // しまい、運賃計算上まったく区別できないのに bucket 数だけが増えていた。
+  // 駅名をキーにすることで、同名の起点は運賃計算上も本当に区別不要な
+  // ものだけがまとまる（情報は一切失われない）。
+  const bucketFromId = (segOperator: string, segFromId: string): string => {
+    const name = nameOf(segFromId);
+    return name !== undefined && calc.isOverrideAnchor(segOperator, name)
+      ? name
+      : "";
+  };
 
   // honshuThrough・segPureExcludedLine・originEligible はどれも true/false で
   // 運賃計算の実質的な式が変わる（または将来の加算額計算に影響する）ため、

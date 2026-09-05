@@ -8,15 +8,17 @@ import { describe, expect, it } from "vitest";
 // 混入を機械的に検出する回帰テストとして固定する。
 //
 // 対象拡張子: .ts / .tsx / .json / .mjs
-// 除外ディレクトリ: node_modules / .next / .git / data
-//   （data 配下は運賃表など巨大な JSON が大量にあり、キロ程・地理データに
-//   由来する非制御文字のマルチバイト文字を誤検出する意図はないため対象外。
-//   このテストが検出したいのは「意図せず混入した制御文字」であり、
-//   data 配下のファイルはレビュー時に個別に確認されている運賃表データ）
+// 除外ディレクトリ: node_modules / .next / .git
+//   （以前は data も除外していたが、これは技術的に誤り: この正規表現は
+//   C0 制御文字と DEL しかマッチせず、マルチバイト文字を誤検出することはない。
+//   むしろ data/ 配下は運賃表など大量の JSON があり、レビューで差分が読めなく
+//   なると一番困るのがこのディレクトリなので対象に含める。
+//   data/graph.json は約3MBあるが、このテストはバイト単位の走査であり
+//   マルチバイト文字のデコード等は行わないため速度への影響は軽微）
 // 許容する制御文字: タブ(\t, 0x09) / 改行(\n, 0x0A) / 復帰(\r, 0x0D)
 // 検出対象: 上記以外の C0 制御文字 (0x00-0x08, 0x0B, 0x0C, 0x0E-0x1F) と DEL (0x7F)
 const TARGET_EXTENSIONS = new Set([".ts", ".tsx", ".json", ".mjs"]);
-const EXCLUDED_DIRS = new Set(["node_modules", ".next", ".git", "data"]);
+const EXCLUDED_DIRS = new Set(["node_modules", ".next", ".git"]);
 const FORBIDDEN_CONTROL_CHARS = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/;
 
 function collectTargetFiles(dir: string): string[] {

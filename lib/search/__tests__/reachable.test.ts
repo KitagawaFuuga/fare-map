@@ -427,40 +427,40 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
 
   it("doneFare・segKm ともに小さい状態は、両方大きい状態を支配して締め出す", () => {
     const bucket: ParetoEntry[] = [];
-    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true })).toBe(true);
+    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true })).toBe(true);
     // 両方で劣るので挿入されない
-    expect(tryInsertPareto(bucket, { doneFare: 200, totalKm: 20, totalEastKm: 0, fare: 250, alive: true })).toBe(false);
-    expect(bucket).toEqual([{ doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true }]);
+    expect(tryInsertPareto(bucket, { doneFare: 200, totalKm: 20, totalEastKm: 0, pendingEastKm: 0, fare: 250, alive: true })).toBe(false);
+    expect(bucket).toEqual([{ doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true }]);
   });
 
   it("新しい状態がより有利なら、既存の支配される状態を追い出して挿入する", () => {
     const bucket: ParetoEntry[] = [
-      { doneFare: 200, totalKm: 20, totalEastKm: 0, fare: 250, alive: true },
+      { doneFare: 200, totalKm: 20, totalEastKm: 0, pendingEastKm: 0, fare: 250, alive: true },
     ];
-    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true })).toBe(true);
-    expect(bucket).toEqual([{ doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true }]);
+    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true })).toBe(true);
+    expect(bucket).toEqual([{ doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true }]);
   });
 
   it("片方だけ有利（doneFare 小・segKm 大）なトレードオフはどちらも残す", () => {
     const bucket: ParetoEntry[] = [];
-    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 20, totalEastKm: 0, fare: 150, alive: true })).toBe(true);
-    expect(tryInsertPareto(bucket, { doneFare: 50, totalKm: 30, totalEastKm: 0, fare: 200, alive: true })).toBe(true);
+    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 20, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true })).toBe(true);
+    expect(tryInsertPareto(bucket, { doneFare: 50, totalKm: 30, totalEastKm: 0, pendingEastKm: 0, fare: 200, alive: true })).toBe(true);
     expect(bucket).toHaveLength(2);
   });
 
   it("完全に同一の状態は重複して増えない（先着ちで既存が残る）", () => {
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true });
+    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true });
     // doneFare・segKm が完全一致 => 相互支配なので既存で弾かれる
-    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true })).toBe(false);
+    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true })).toBe(false);
     expect(bucket).toHaveLength(1);
   });
 
   it("支配されて追い出された既存エントリは alive が false になる", () => {
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 200, totalKm: 20, totalEastKm: 0, fare: 250, alive: true });
+    tryInsertPareto(bucket, { doneFare: 200, totalKm: 20, totalEastKm: 0, pendingEastKm: 0, fare: 250, alive: true });
     const dominated = bucket[0];
-    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true });
+    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true });
     expect(dominated?.alive).toBe(false);
   });
 
@@ -479,6 +479,7 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
       doneFare: 0,
       totalKm: 50,
       totalEastKm: 40,
+      pendingEastKm: 40,
       fare: 999,
       alive: true,
     };
@@ -489,7 +490,47 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
       doneFare: 0,
       totalKm: 10,
       totalEastKm: 0,
+      pendingEastKm: 0,
       fare: 500,
+      alive: true,
+    };
+    expect(tryInsertPareto(bucket, better)).toBe(true);
+    expect(bucket).toEqual([better]);
+    expect(worse.alive).toBe(false);
+  });
+
+  // レビュー指摘2（Important）: honshuThrough=true かつ eastKm除外が現在
+  // 適用中（加算額対象キロへの寄与が0）のバケットでは、totalEastKm が常に
+  // honshuEastKm（segKmに依存しない）になるため、segKm/honshuKmの内訳が
+  // totalKm/totalEastKmから復元できない。この状態で、除外が後から解除される
+  // （ラチェットが落ちる）同一事業者エッジに当たると、内訳だけが違う2状態が
+  // (doneFare, totalKm, totalEastKm) で完全に一致し相互支配になり、
+  // 先着ちでsegKmの大きい（将来、除外解除時に加算額が多く乗る、不利な）方が
+  // 残りうる。pendingEastKm（= totalEastKm + 除外中に隠れているsegKm）を
+  // 追加の非strict次元として比較することで、segKmが小さい（有利な）方を
+  // 正しく残す。
+  it("pendingEastKm を無視すると、eastKm除外中に隠れた segKm の大小を区別できず、不利な状態が残りうる（反映漏れの再現）", () => {
+    const bucket: ParetoEntry[] = [];
+    // 除外中(totalEastKmはhonshuEastKm=0のまま)だが、隠れているsegKmが45と
+    // 大きい（不利な）状態が先に入る
+    const worse: ParetoEntry = {
+      doneFare: 0,
+      totalKm: 50,
+      totalEastKm: 0,
+      pendingEastKm: 45,
+      fare: 900,
+      alive: true,
+    };
+    expect(tryInsertPareto(bucket, worse)).toBe(true);
+    // doneFare・totalKm・totalEastKmは完全に同じだが、隠れているsegKmが5と
+    // 小さい（有利な）状態。pendingEastKmを見ていれば worse を支配して
+    // 追い出し、挿入されるはず。見ていなければ相互支配で拒否されてしまう。
+    const better: ParetoEntry = {
+      doneFare: 0,
+      totalKm: 50,
+      totalEastKm: 0,
+      pendingEastKm: 5,
+      fare: 900,
       alive: true,
     };
     expect(tryInsertPareto(bucket, better)).toBe(true);
@@ -502,8 +543,8 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
     // （そのエントリはどのbucketにも入らず捨てられるだけ）。ここが誤って
     // false にされていないかを直接確認する。
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true });
-    const rejected: ParetoEntry = { doneFare: 200, totalKm: 20, totalEastKm: 0, fare: 250, alive: true };
+    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true });
+    const rejected: ParetoEntry = { doneFare: 200, totalKm: 20, totalEastKm: 0, pendingEastKm: 0, fare: 250, alive: true };
     const inserted = tryInsertPareto(bucket, rejected);
     expect(inserted).toBe(false);
     expect(rejected.alive).toBe(true);
@@ -1116,10 +1157,17 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
   // https://ameblo.jp/yyrapid/entry-12937999551.html)を、実データの構造
   // （lineId "11301"=JR東海道本線 東京～熱海、"11302"=JR山手線）で再現する。
   describe("eastKm除外規則（東京都区内・山手線内〜東京～熱海間は加算額の対象外）", () => {
-    const tokaidoNode = (id: string, operator: string, lineId: string) => ({
+    // name を id と独立に指定できるようにしている（実データでは同じ物理駅が
+    // 路線ごとに別ノードIDを持つため、id !== name のケースを正しく表現するため）。
+    const tokaidoNode = (
+      id: string,
+      name: string,
+      operator: string,
+      lineId: string,
+    ) => ({
       id,
       groupId: id,
-      name: id,
+      name,
       lat: 35,
       lng: 139,
       lineId,
@@ -1140,9 +1188,9 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
       // 実データの構造どおりに機能することを確認する。
       const graph: RailGraph = {
         nodes: {
-          Tokyo: tokaidoNode("Tokyo", "JR東日本", "11301"),
-          TokyoYamanote: tokaidoNode("Tokyo", "JR東日本", "11302"),
-          Atami: tokaidoNode("Atami", "JR東日本", "11301"),
+          Tokyo: tokaidoNode("Tokyo", "Tokyo", "JR東日本", "11301"),
+          TokyoYamanote: tokaidoNode("TokyoYamanote", "Tokyo", "JR東日本", "11302"),
+          Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
           C: jrNode("C", "JR東海"),
         },
         edges: [
@@ -1157,8 +1205,8 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
     it("山手線内(lineId 11302)からの区間もeastKmから除外される", () => {
       const graph: RailGraph = {
         nodes: {
-          Shinjuku: tokaidoNode("Shinjuku", "JR東日本", "11302"),
-          Tokyo: tokaidoNode("Tokyo", "JR東日本", "11302"),
+          Shinjuku: tokaidoNode("Shinjuku", "Shinjuku", "JR東日本", "11302"),
+          Tokyo: tokaidoNode("Tokyo", "Tokyo", "JR東日本", "11302"),
           C: jrNode("C", "JR東海"),
         },
         edges: [
@@ -1203,9 +1251,9 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
       // トレードオフであり、意図的な近似である（コメント参照）。
       const graph: RailGraph = {
         nodes: {
-          Tokyo: tokaidoNode("Tokyo", "JR東日本", "11301"),
-          TokyoYamanote: tokaidoNode("Tokyo", "JR東日本", "11302"),
-          Atami: tokaidoNode("Atami", "JR東日本", "11301"),
+          Tokyo: tokaidoNode("Tokyo", "Tokyo", "JR東日本", "11301"),
+          TokyoYamanote: tokaidoNode("TokyoYamanote", "Tokyo", "JR東日本", "11302"),
+          Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
           X: jrNode("X", "JR東日本"), // lineId "L"（対象外）
           C: jrNode("C", "JR東海"),
         },
@@ -1230,6 +1278,10 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
     // （過小評価）。まず修正前に失敗することを確認する。
     it("小田原（東京都区内・山手線内ではない）を起点にすると、eastKm除外は発動しない", () => {
       // Odawara(11301)--JR東日本20km-->Atami(11301)--JR東海50km-->C。
+      // グラフ内に別途 Shinjuku(11302) を無関係ノードとして置き、山手線名集合が
+      // 空にならないようにする（「常に false を返す実装」でも通ってしまう、
+      // というレビュー指摘への対応。この集合が空だと isEligibleExclusionName は
+      // 何を渡しても false になり、実装の正しさを検証できていなかった）。
       // 起点が東京都区内・山手線内の駅ではないので、除外は発動せず、
       // eastKm=20kmとして加算額が乗るべき。
       // 総距離70km => 基準額(70km、beyond帯: fromKm=110未満なので110km帯)=900円
@@ -1237,8 +1289,9 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
       // 除外が（誤って）発動するとeastKm=0円になり900円になってしまう。
       const graph: RailGraph = {
         nodes: {
-          Odawara: tokaidoNode("Odawara", "JR東日本", "11301"),
-          Atami: tokaidoNode("Atami", "JR東日本", "11301"),
+          Odawara: tokaidoNode("Odawara", "Odawara", "JR東日本", "11301"),
+          Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
+          Shinjuku: tokaidoNode("Shinjuku", "Shinjuku", "JR東日本", "11302"),
           C: jrNode("C", "JR東海"),
         },
         edges: [
@@ -1252,12 +1305,14 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
 
     it("横浜（東京都区内・山手線内ではない）を起点にすると、eastKm除外は発動しない", () => {
       // Yokohama(11301)--JR東日本30km-->Atami(11301)--JR東海50km-->C。
+      // Shinjuku(11302) を無関係ノードとして置き、山手線名集合を非空にする。
       // 総距離80km => 基準額(80km)=900円 + 加算額(eastKm30km、21〜30km帯)=30円
       // = 930円。除外が（誤って）発動すると900円になってしまう。
       const graph: RailGraph = {
         nodes: {
-          Yokohama: tokaidoNode("Yokohama", "JR東日本", "11301"),
-          Atami: tokaidoNode("Atami", "JR東日本", "11301"),
+          Yokohama: tokaidoNode("Yokohama", "Yokohama", "JR東日本", "11301"),
+          Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
+          Shinjuku: tokaidoNode("Shinjuku", "Shinjuku", "JR東日本", "11302"),
           C: jrNode("C", "JR東海"),
         },
         edges: [
@@ -1267,6 +1322,33 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
       };
       const result = findReachable(graph, honshuCalc, "Yokohama", 10000);
       expect(result.find((r) => r.id === "C")?.fare).toBe(930);
+    });
+
+    // レビュー指摘1（Important）: isEligibleExclusionOrigin は区間の「起点」しか
+    // 見ておらず、上り方向（東京着）で除外が発動しない非対称バグがあった。
+    // 実運賃は方向対称（東京→名古屋 = 名古屋→東京）のはずだが、修正前は
+    // 上り方向で加算額が誤って上乗せされる（過大評価）。
+    it("上り方向（終端が山手線内）でもeastKm除外が発動する（方向対称性の修正）", () => {
+      // C(JR東海)--50km-->Atami(11301)--60km(JR東日本)-->Tokyo(11301)。
+      // TokyoYamanote(11302,同名"Tokyo")を追加し、終端Tokyoが山手線内である
+      // ことを表現する。起点Atami（山手線内ではない）だけを見ていた修正前は
+      // 除外が発動せず、eastKm=60km分の加算額が乗ってしまう
+      // （基準額900+加算額70=970円）。終端も見るようにすると、下り方向の
+      // 「東京～熱海間相当」テストと対称に、eastKm=0円（基準額900円のみ）になる。
+      const graph: RailGraph = {
+        nodes: {
+          C: jrNode("C", "JR東海"),
+          Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
+          Tokyo: tokaidoNode("Tokyo", "Tokyo", "JR東日本", "11301"),
+          TokyoYamanote: tokaidoNode("TokyoYamanote", "Tokyo", "JR東日本", "11302"),
+        },
+        edges: [
+          { from: "C", to: "Atami", km: 50, kind: "rail", operator: "JR東海" },
+          { from: "Atami", to: "Tokyo", km: 60, kind: "rail", operator: "JR東日本" },
+        ],
+      };
+      const result = findReachable(graph, honshuCalc, "C", 10000);
+      expect(result.find((r) => r.id === "Tokyo")?.fare).toBe(900);
     });
   });
 

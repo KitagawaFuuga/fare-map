@@ -820,8 +820,10 @@ describe("findReachable の alive フラグ配線（参照実装との一致・�
     const entries: ParetoEntry[] = [];
     for (const byOperator of store.values()) {
       for (const byFrom of byOperator.values()) {
-        for (const bucket of byFrom.values()) {
-          entries.push(...bucket);
+        for (const byFlags of byFrom.values()) {
+          for (const bucket of byFlags.values()) {
+            entries.push(...bucket);
+          }
         }
       }
     }

@@ -71,7 +71,8 @@ export interface ParetoEntry {
   // （実際の除外キロ数）ではなく粗い真偽値の近似であり、Pareto の実数次元として
   // 混ぜると「除外区間かどうかが違うだけで doneFare・segKm が同じ」状態が
   // 大量に非支配のまま残ってしまう（実測で組み合わせ爆発を確認）。
-  // どちらも bucket キー（segBucketKey）に含めて最初から別バケットに分離する。
+  // どちらも bucket キー（getBucket の flags 引数、flagsKey 参照）に含めて
+  // 最初から別バケットに分離する。
   honshuKm: number; // 小さいほうが有利
   honshuEastKm: number; // 小さいほうが有利
   fare: number; // 今この駅で降りた場合の運賃
@@ -281,21 +282,42 @@ export function tryInsertPareto(
   return true;
 }
 
-// 3階層のネスト Map でキーを表現する（文字列結合による区切り文字衝突を避けるため）。
+// 4階層のネスト Map でキーを表現する（文字列結合による区切り文字衝突を避けるため）。
 // テストから bucket を直接検査できるよう export するが、これは
 // __internalRunSearchForTest 経由でのみ得られる内部表現であることを示すため
 // 型名にも __internal を付けている。
+//
+// 4階層目（honshuThrough・segEastExcluded の組み合わせ）は、以前は
+// segFromId 由来の文字列とテンプレートリテラルで結合した1本の文字列
+// （`${bucketFromId}|${0/1}|${0/1}`）をキーにしていたが、これは
+// エッジを緩和するたびに新しい文字列を確保する（最内ループで走るため
+// 高コスト）。4種類の組み合わせしかないので、あらかじめ4本の固定
+// 文字列リテラル（FLAG_KEY_*）を用意し、それを選んで返すだけにすることで
+// 情報を一切捨てずに確保コストだけを消す（性能改善(a)）。
 export type __internalParetoStore = Map<
   string,
-  Map<string, Map<string, ParetoEntry[]>>
+  Map<string, Map<string, Map<string, ParetoEntry[]>>>
 >;
 type ParetoStore = __internalParetoStore;
+
+const FLAG_KEY_00 = "0|0"; // honshuThrough=false, segEastExcluded=false
+const FLAG_KEY_01 = "0|1"; // honshuThrough=false, segEastExcluded=true
+const FLAG_KEY_10 = "1|0"; // honshuThrough=true,  segEastExcluded=false
+const FLAG_KEY_11 = "1|1"; // honshuThrough=true,  segEastExcluded=true
+
+function flagsKey(honshuThrough: boolean, segEastExcluded: boolean): string {
+  if (honshuThrough) {
+    return segEastExcluded ? FLAG_KEY_11 : FLAG_KEY_10;
+  }
+  return segEastExcluded ? FLAG_KEY_01 : FLAG_KEY_00;
+}
 
 function getBucket(
   store: ParetoStore,
   stationId: string,
   segOperator: string,
-  segFromId: string,
+  bucketFromId: string,
+  flags: string,
 ): ParetoEntry[] {
   let byOperator = store.get(stationId);
   if (byOperator === undefined) {
@@ -307,10 +329,15 @@ function getBucket(
     byFrom = new Map();
     byOperator.set(segOperator, byFrom);
   }
-  let bucket = byFrom.get(segFromId);
+  let byFlags = byFrom.get(bucketFromId);
+  if (byFlags === undefined) {
+    byFlags = new Map();
+    byFrom.set(bucketFromId, byFlags);
+  }
+  let bucket = byFlags.get(flags);
   if (bucket === undefined) {
     bucket = [];
-    byFrom.set(segFromId, bucket);
+    byFlags.set(flags, bucket);
   }
   return bucket;
 }
@@ -362,14 +389,8 @@ function runSearch(
   // honshuThrough・segEastExcluded はどちらも true/false で運賃計算の実質的な
   // 式が変わる（または将来の加算額計算に影響する）ため、大小比較できる次元として
   // dominates() に混ぜず、最初から別バケットに分離する（詳細は ParetoEntry の
-  // コメント参照）。
-  const segBucketKey = (
-    segOperator: string,
-    segFromId: string,
-    honshuThrough: boolean,
-    segEastExcluded: boolean,
-  ): string =>
-    `${bucketFromId(segOperator, segFromId)}|${honshuThrough ? "1" : "0"}|${segEastExcluded ? "1" : "0"}`;
+  // コメント参照）。flagsKey が4種類の固定文字列を返すので、ここでの組み合わせに
+  // 新たな文字列確保は発生しない。
 
   const store: ParetoStore = new Map();
   const initialEntry: ParetoEntry = {
@@ -381,7 +402,7 @@ function runSearch(
     alive: true,
   };
   tryInsertPareto(
-    getBucket(store, fromId, "", segBucketKey("", fromId, false, false)),
+    getBucket(store, fromId, "", bucketFromId("", fromId), flagsKey(false, false)),
     initialEntry,
   );
   const initial: SearchState = {
@@ -591,12 +612,8 @@ function runSearch(
         store,
         next.stationId,
         next.segOperator,
-        segBucketKey(
-          next.segOperator,
-          next.segFromId,
-          next.honshuThrough,
-          next.segEastExcluded,
-        ),
+        bucketFromId(next.segOperator, next.segFromId),
+        flagsKey(next.honshuThrough, next.segEastExcluded),
       );
       const nextEntry: ParetoEntry = {
         doneFare: next.doneFare,
@@ -632,11 +649,13 @@ export function findReachable(
   const byStation = new Map<string, number>();
   for (const [stationId, byOperator] of store) {
     for (const byFrom of byOperator.values()) {
-      for (const bucket of byFrom.values()) {
-        for (const entry of bucket) {
-          if (entry.fare > budget) continue;
-          if (entry.fare < (byStation.get(stationId) ?? Infinity)) {
-            byStation.set(stationId, entry.fare);
+      for (const byFlags of byFrom.values()) {
+        for (const bucket of byFlags.values()) {
+          for (const entry of bucket) {
+            if (entry.fare > budget) continue;
+            if (entry.fare < (byStation.get(stationId) ?? Infinity)) {
+              byStation.set(stationId, entry.fare);
+            }
           }
         }
       }

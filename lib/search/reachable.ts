@@ -13,10 +13,12 @@ interface SearchState {
   segOperator: string; // 進行中区間の事業者（"" = 未乗車）
   segFromId: string; // 進行中区間の開始駅（特定運賃は区間全体の駅ペアに適用するため必要）
   segKm: number; // 進行中区間の距離
-  // 進行中区間が「加算額除外区間（isEastKmExcludedEdge）だけで構成されている」か
+  // 進行中区間が「加算額除外区間（isEastKmExcludedEdge）だけで構成されており、
+  // かつ区間の起点が東京都区内・山手線内の駅（isEligibleExclusionOrigin）」か
   // どうか。segOperator が JR東日本 でこれが true の間は、加算額の対象キロ
   // （eastKm）への寄与は 0 として扱う（東京都区内・山手線内〜東京～熱海間の
-  // JR東日本分は新幹線経由扱いで加算されないため）。
+  // JR東日本分は新幹線経由扱いで加算されないため）。起点条件の詳細・限界は
+  // isEastKmExcludedEdge / isEligibleExclusionOrigin のコメント参照。
   //
   // 除外区間でないエッジを1本でも通ると、この区間の残り全体にわたって
   // 恒久的に false になる（true→false の一方向ラチェット）。これは
@@ -129,15 +131,36 @@ const PENDING_ENTRY: ParetoEntry = Object.freeze({
 // 変える必要がない（実際の経路の距離のまま）ので、ここで除外するのは
 // 加算額の対象キロ（eastKm）の積み上げだけであり、segKm/honshuKm には影響しない。
 //
+// 【過小評価バグの修正】この判定は当初、両端ノードの lineId が 11301/11302 かだけを
+// 見ており、「乗車が東京都区内・山手線内発（着）か」を一切見ていなかった。lineId
+// 11301（JR東海道本線 東京〜熱海、21ノード）には戸塚・大船・藤沢・平塚・小田原・
+// 湯河原・横浜など、東京都区内でも山手線内でもない駅が多数含まれる。そのため
+// 例えば「小田原→熱海(JR東日本)→(JR東海)」のような経路でも除外が発動し、
+// JR東日本区間の加算額が丸ごと0円になる（過小評価）。isEligibleExclusionOrigin
+// で「区間の起点が東京都区内・山手線内の駅か」を追加の必要条件にすることで、
+// 除外の発動条件を規則の適用範囲まで絞った（絞る方向の変更は必ず運賃を
+// 上げる側＝安全側にしか倒れない）。
+//
 // 既知の限界（task-9-report.md にも明記）:
 // - lineId は station.tsv 由来の内部IDであり、グラフ再生成でIDが振り直される
 //   可能性がある。再生成時はこの Set の値を要確認。
-// - 横浜市内発（新横浜〜熱海が新幹線経由扱いになるケース）はこの実装では
-//   対応していない。新横浜〜熱海間は在来線では複数のJR東日本路線（横浜線・
-//   根岸線・東海道線等）をまたぐ乗り換えルートになり、Tokyo-Atami間のような
-//   単一lineIdでは判定できず、対象を安全に絞り込む方法が見つからなかったため。
-//   横浜市内発の東海道方面（例: 横浜→名古屋）はこの規則が適用されず、
-//   実運賃よりJR東日本分の加算額だけ高く見積もられる可能性がある。
+// - isEligibleExclusionOrigin は「東京都区内」を、実データに存在する
+//   山手線（lineId 11302）の駅名集合で近似している。品川・東京は山手線の
+//   物理ループ上にあるため、規則の文言「品川・東京〜山手線内の各駅」とも
+//   自然に一致するが、東京都区内には山手線の物理ループ上にない駅
+//   （中野・亀戸・金町など）も含まれており、それらはこの集合に含まれない。
+//   つまりこの判定は本来の「東京都区内」より狭い（安全側＝過大評価にしか
+//   ならない）。
+// - 逆向きの不完全さ（東京都区内・山手線内の駅でも、11301/11302 以外の
+//   路線経由で東海道方面へ入った場合、例えば京浜東北線の蒲田から乗ると
+//   除外が効かない）は安全側（過大評価にしかならない）なので許容している。
+// - 横浜市内発（新横浜〜熱海が新幹線経由扱いになる規則）はこの実装では
+//   対応していない。横浜は東京都区内・山手線内のどちらの駅名集合にも
+//   含まれないため、isEligibleExclusionOrigin により除外が発動しなくなった
+//   （修正前は逆に、誤って発動し加算額が丸ごと0円になっていた）。
+//   横浜市内発の東海道方面（例: 横浜→名古屋）は規則が適用されず、
+//   実運賃よりJR東日本分の加算額だけ高く見積もられる可能性がある
+//   （安全側の未対応として許容）。
 // - SearchState.segEastExcluded のコメントの通り、除外区間の後に通常区間が
 //   混在する場合は除外区間分の距離も加算額に含めてしまう（安全側の近似）。
 const EAST_KM_EXCLUDED_LINE_IDS = new Set(["11301", "11302"]);
@@ -155,6 +178,33 @@ function isEastKmExcludedEdge(
     EAST_KM_EXCLUDED_LINE_IDS.has(fromLine) &&
     EAST_KM_EXCLUDED_LINE_IDS.has(toLine)
   );
+}
+
+// 「区間の起点が東京都区内・山手線内の駅か」の判定に使う駅名集合。
+// 実データでは同じ物理駅（例: 東京・品川）が路線ごとに別ノード（lineId違い）
+// として存在するため、駅名で照合する（node id では駅の同一性を判定できない）。
+// グラフごとにキャッシュする（同一 graph オブジェクトに対して runSearch が
+// 何度も呼ばれても再計算しないため）。
+const yamanoteStationNamesCache = new WeakMap<RailGraph, Set<string>>();
+
+function getYamanoteStationNames(graph: RailGraph): Set<string> {
+  let cached = yamanoteStationNamesCache.get(graph);
+  if (cached === undefined) {
+    cached = new Set();
+    for (const n of Object.values(graph.nodes)) {
+      if (n.lineId === "11302") cached.add(n.name);
+    }
+    yamanoteStationNamesCache.set(graph, cached);
+  }
+  return cached;
+}
+
+// stationId が「東京都区内・山手線内の駅」（の近似集合）に属するかどうか。
+// isEastKmExcludedEdge が見る lineId とは独立に、区間の起点そのものが
+// この規則の適用対象になりうる駅かどうかを判定する。
+function isEligibleExclusionOrigin(graph: RailGraph, stationId: string): boolean {
+  const name = graph.nodes[stationId]?.name;
+  return name !== undefined && getYamanoteStationNames(graph).has(name);
 }
 
 // 区間を継続する次のエッジを踏まえた segEastExcluded の更新。
@@ -443,10 +493,12 @@ function runSearch(
           state.honshuEastKm +
           segEastKmValue(state.segOperator, state.segKm, state.segEastExcluded);
         const segKm = edge.km;
-        const segEastExcluded = isEastKmExcludedEdge(graph, {
-          ...edge,
-          from: state.stationId,
-        });
+        // 新しく始まる区間の起点は state.stationId（＝この後の segFromId）。
+        // 起点が東京都区内・山手線内の駅でなければ、たとえ lineId が
+        // 11301/11302 であっても除外は発動させない（過小評価バグの修正）。
+        const segEastExcluded =
+          isEastKmExcludedEdge(graph, { ...edge, from: state.stationId }) &&
+          isEligibleExclusionOrigin(graph, state.stationId);
         const eastKm =
           honshuEastKm + segEastKmValue(edge.operator, segKm, segEastExcluded);
         next = {
@@ -490,11 +542,11 @@ function runSearch(
           // 新しい区間の除外フラグ。honshuThrough は false に戻すが、
           // この新区間がのちに別の本州3社会社境界を跨いだ場合に備え、
           // segEastExcluded 自体は正しく計算しておく（honshuThrough=false の間は
-          // segmentFare からは参照されない）。
-          segEastExcluded: isEastKmExcludedEdge(graph, {
-            ...edge,
-            from: state.stationId,
-          }),
+          // segmentFare からは参照されない）。起点（state.stationId）が
+          // 東京都区内・山手線内の駅でなければ発動させない（過小評価バグの修正）。
+          segEastExcluded:
+            isEastKmExcludedEdge(graph, { ...edge, from: state.stationId }) &&
+            isEligibleExclusionOrigin(graph, state.stationId),
           honshuThrough: false,
           honshuKm: 0,
           honshuEastKm: 0,

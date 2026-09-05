@@ -1133,9 +1133,16 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
       // 総距離110km・eastKm=0（東京～熱海間の在来線=lineId 11301のため除外）。
       // 通し: 基準額(110km)=900円のみ（加算額表[0]=対象外のため0円）。
       // 除外がなければ前のテストと同じく970円になってしまう。
+      //
+      // 実データでは同じ物理駅（東京）が lineId 11301（東海道本線）と
+      // 11302（山手線）の両方に別ノードとして存在する。ここでも
+      // TokyoYamanote（lineId 11302・同名"Tokyo"）を無関係ノードとして
+      // 追加し、「起点の駅名が山手線内駅集合に属するか」の判定が
+      // 実データの構造どおりに機能することを確認する。
       const graph: RailGraph = {
         nodes: {
           Tokyo: tokaidoNode("Tokyo", "JR東日本", "11301"),
+          TokyoYamanote: tokaidoNode("Tokyo", "JR東日本", "11302"),
           Atami: tokaidoNode("Atami", "JR東日本", "11301"),
           C: jrNode("C", "JR東海"),
         },
@@ -1198,6 +1205,7 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
       const graph: RailGraph = {
         nodes: {
           Tokyo: tokaidoNode("Tokyo", "JR東日本", "11301"),
+          TokyoYamanote: tokaidoNode("Tokyo", "JR東日本", "11302"),
           Atami: tokaidoNode("Atami", "JR東日本", "11301"),
           X: jrNode("X", "JR東日本"), // lineId "L"（対象外）
           C: jrNode("C", "JR東海"),
@@ -1213,6 +1221,53 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
       // 算入されてしまう安全側の近似)。基準額(110km)=900 + 加算額(70km、
       // 61〜100km帯)=110 = 1010円。
       expect(result.find((r) => r.id === "C")?.fare).toBe(1010);
+    });
+
+    // レビュー指摘（過小評価バグ）: isEastKmExcludedEdge は両端ノードの lineId
+    // だけを見ており、「乗車が東京都区内・山手線内発か」を一切見ていなかった。
+    // lineId "11301"（JR東海道本線 東京〜熱海）には小田原・大船・藤沢・平塚・
+    // 湯河原・横浜など、東京都区内でも山手線内でもない駅が含まれるため、
+    // これらの駅を起点にしても除外が発動し、加算額が丸ごと0円になってしまう
+    // （過小評価）。まず修正前に失敗することを確認する。
+    it("小田原（東京都区内・山手線内ではない）を起点にすると、eastKm除外は発動しない", () => {
+      // Odawara(11301)--JR東日本20km-->Atami(11301)--JR東海50km-->C。
+      // 起点が東京都区内・山手線内の駅ではないので、除外は発動せず、
+      // eastKm=20kmとして加算額が乗るべき。
+      // 総距離70km => 基準額(70km、beyond帯: fromKm=110未満なので110km帯)=900円
+      // + 加算額(eastKm20km、11〜20km帯)=20円 = 920円。
+      // 除外が（誤って）発動するとeastKm=0円になり900円になってしまう。
+      const graph: RailGraph = {
+        nodes: {
+          Odawara: tokaidoNode("Odawara", "JR東日本", "11301"),
+          Atami: tokaidoNode("Atami", "JR東日本", "11301"),
+          C: jrNode("C", "JR東海"),
+        },
+        edges: [
+          { from: "Odawara", to: "Atami", km: 20, kind: "rail", operator: "JR東日本" },
+          { from: "Atami", to: "C", km: 50, kind: "rail", operator: "JR東海" },
+        ],
+      };
+      const result = findReachable(graph, honshuCalc, "Odawara", 10000);
+      expect(result.find((r) => r.id === "C")?.fare).toBe(920);
+    });
+
+    it("横浜（東京都区内・山手線内ではない）を起点にすると、eastKm除外は発動しない", () => {
+      // Yokohama(11301)--JR東日本30km-->Atami(11301)--JR東海50km-->C。
+      // 総距離80km => 基準額(80km)=900円 + 加算額(eastKm30km、21〜30km帯)=30円
+      // = 930円。除外が（誤って）発動すると900円になってしまう。
+      const graph: RailGraph = {
+        nodes: {
+          Yokohama: tokaidoNode("Yokohama", "JR東日本", "11301"),
+          Atami: tokaidoNode("Atami", "JR東日本", "11301"),
+          C: jrNode("C", "JR東海"),
+        },
+        edges: [
+          { from: "Yokohama", to: "Atami", km: 30, kind: "rail", operator: "JR東日本" },
+          { from: "Atami", to: "C", km: 50, kind: "rail", operator: "JR東海" },
+        ],
+      };
+      const result = findReachable(graph, honshuCalc, "Yokohama", 10000);
+      expect(result.find((r) => r.id === "C")?.fare).toBe(930);
     });
   });
 

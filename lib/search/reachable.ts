@@ -55,26 +55,33 @@ interface SearchState {
 // 枝刈り用ラベル。(doneFare, segKm) の組み合わせ次第で将来の運賃（override 込み）
 // が変わりうるため、単純な「今の運賃が安い方を残す」では正しさを保てない。
 // 状態爆発は Pareto 支配（非支配集合のみ残す）で抑える。
+//
+// 【性能改善(b): 3次元への射影】honshuKm・segKm を別々の次元として持つ代わりに、
+// 両者の和である totalKm（総距離）と totalEastKm（加算額対象キロの総和）だけを
+// 保持する。この2つに落とせる理由:
+//
+// - 同一 bucket 内では segOperator・segEastExcluded（bucket キーの一部。
+//   getBucket の segOperator 引数・flagsKey 参照）が全エントリで共通なので、
+//   segEastKmValue(segOperator, segKm, segEastExcluded) は segKm のみの
+//   関数（常に0、または常に segKm と等しい）になる。よって totalEastKm は
+//   totalKm・honshuEastKm から一意に決まり、segKm・honshuKm を個別に
+//   持たなくても運賃計算（estimateHonshuThrough・honshuThroughBaseFare は
+//   どちらも totalKm・eastKm の和にしか依存しない）にも下界計算にも
+//   影響しない。
+// - honshuThrough === false の bucket では honshuKm・honshuEastKm は常に0
+//   （SearchState参照）なので totalKm = segKm・totalEastKm = 従来の
+//   eastKm寄与そのものであり、比較結果は変わらない。
+// - honshuThrough === true の bucket では、以前の実装（segKm <= segKm' かつ
+//   honshuKm <= honshuKm' をそれぞれ要求）より、和だけを比較する今の実装の
+//   ほうが真に強い支配になる（例: segKm=0,honshuKm=10 と segKm=10,honshuKm=0
+//   は総距離が同じ10kmで運賃が完全に同一になるはずなのに、以前の実装では
+//   どちらの内訳が優れているかを比較できず互いに非支配のまま残ってしまう。
+//   和だけを見る今の実装ならこの2つは同値として1本にまとまる）。情報は
+//   一切失われない（運賃計算に必要なのは常に和だけだったため）。
 export interface ParetoEntry {
   doneFare: number; // 小さいほうが有利
-  segKm: number; // 小さいほうが有利
-  // SearchState.honshuKm / honshuEastKm と同じ意味。どちらも将来の運賃
-  // （calc.estimateHonshuThrough は総距離・eastKm について単調非減少）
-  // に対して小さいほうが同等以上に有利なので、segKm と同じ向きで比較してよい。
-  // 反映漏れがあると「JR本州3社をまたぐ通算中の状態」が誤って支配され消える
-  // （このプロジェクトで繰り返した「状態次元の追加が Pareto 判定に反映されない」
-  // 欠陥類型そのもの）。
-  //
-  // honshuThrough・segEastExcluded（SearchState参照）はここには含めない。
-  // honshuThrough は true/false で運賃計算式そのものが変わる別種のモード切り替え
-  // であり、比較すること自体に意味がない。segEastExcluded は連続値
-  // （実際の除外キロ数）ではなく粗い真偽値の近似であり、Pareto の実数次元として
-  // 混ぜると「除外区間かどうかが違うだけで doneFare・segKm が同じ」状態が
-  // 大量に非支配のまま残ってしまう（実測で組み合わせ爆発を確認）。
-  // どちらも bucket キー（getBucket の flags 引数、flagsKey 参照）に含めて
-  // 最初から別バケットに分離する。
-  honshuKm: number; // 小さいほうが有利
-  honshuEastKm: number; // 小さいほうが有利
+  totalKm: number; // honshuKm + segKm。小さいほうが有利
+  totalEastKm: number; // honshuEastKm + セグメントの加算額対象キロ寄与。小さいほうが有利
   fare: number; // 今この駅で降りた場合の運賃
   // 支配されて bucket から取り除かれた（tryInsertPareto の splice 対象になった）
   // ら false にする。SearchState 側がこの entry への参照を直接持つことで、
@@ -98,9 +105,8 @@ export interface ParetoEntry {
 function dominates(a: ParetoEntry, b: ParetoEntry): boolean {
   return (
     a.doneFare <= b.doneFare &&
-    a.segKm <= b.segKm &&
-    a.honshuKm <= b.honshuKm &&
-    a.honshuEastKm <= b.honshuEastKm
+    a.totalKm <= b.totalKm &&
+    a.totalEastKm <= b.totalEastKm
   );
 }
 
@@ -113,9 +119,8 @@ function dominates(a: ParetoEntry, b: ParetoEntry): boolean {
 // 混入し書き込まれた場合に TypeError で即座に露見するようにする（コストゼロ）。
 const PENDING_ENTRY: ParetoEntry = Object.freeze({
   doneFare: 0,
-  segKm: 0,
-  honshuKm: 0,
-  honshuEastKm: 0,
+  totalKm: 0,
+  totalEastKm: 0,
   fare: 0,
   alive: false,
 });
@@ -395,9 +400,8 @@ function runSearch(
   const store: ParetoStore = new Map();
   const initialEntry: ParetoEntry = {
     doneFare: 0,
-    segKm: 0,
-    honshuKm: 0,
-    honshuEastKm: 0,
+    totalKm: 0,
+    totalEastKm: 0,
     fare: 0,
     alive: true,
   };
@@ -617,9 +621,10 @@ function runSearch(
       );
       const nextEntry: ParetoEntry = {
         doneFare: next.doneFare,
-        segKm: next.segKm,
-        honshuKm: next.honshuKm,
-        honshuEastKm: next.honshuEastKm,
+        totalKm: next.honshuKm + next.segKm,
+        totalEastKm:
+          next.honshuEastKm +
+          segEastKmValue(next.segOperator, next.segKm, next.segEastExcluded),
         fare: next.fare,
         alive: true,
       };

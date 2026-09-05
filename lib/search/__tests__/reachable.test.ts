@@ -427,71 +427,68 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
 
   it("doneFare・segKm ともに小さい状態は、両方大きい状態を支配して締め出す", () => {
     const bucket: ParetoEntry[] = [];
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true })).toBe(true);
+    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true })).toBe(true);
     // 両方で劣るので挿入されない
-    expect(tryInsertPareto(bucket, { doneFare: 200, segKm: 20, honshuKm: 0, honshuEastKm: 0, fare: 250, alive: true })).toBe(false);
-    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true }]);
+    expect(tryInsertPareto(bucket, { doneFare: 200, totalKm: 20, totalEastKm: 0, fare: 250, alive: true })).toBe(false);
+    expect(bucket).toEqual([{ doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true }]);
   });
 
   it("新しい状態がより有利なら、既存の支配される状態を追い出して挿入する", () => {
     const bucket: ParetoEntry[] = [
-      { doneFare: 200, segKm: 20, honshuKm: 0, honshuEastKm: 0, fare: 250, alive: true },
+      { doneFare: 200, totalKm: 20, totalEastKm: 0, fare: 250, alive: true },
     ];
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true })).toBe(true);
-    expect(bucket).toEqual([{ doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true }]);
+    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true })).toBe(true);
+    expect(bucket).toEqual([{ doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true }]);
   });
 
   it("片方だけ有利（doneFare 小・segKm 大）なトレードオフはどちらも残す", () => {
     const bucket: ParetoEntry[] = [];
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 20, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true })).toBe(true);
-    expect(tryInsertPareto(bucket, { doneFare: 50, segKm: 30, honshuKm: 0, honshuEastKm: 0, fare: 200, alive: true })).toBe(true);
+    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 20, totalEastKm: 0, fare: 150, alive: true })).toBe(true);
+    expect(tryInsertPareto(bucket, { doneFare: 50, totalKm: 30, totalEastKm: 0, fare: 200, alive: true })).toBe(true);
     expect(bucket).toHaveLength(2);
   });
 
   it("完全に同一の状態は重複して増えない（先着ちで既存が残る）", () => {
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true });
+    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true });
     // doneFare・segKm が完全一致 => 相互支配なので既存で弾かれる
-    expect(tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true })).toBe(false);
+    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true })).toBe(false);
     expect(bucket).toHaveLength(1);
   });
 
   it("支配されて追い出された既存エントリは alive が false になる", () => {
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 200, segKm: 20, honshuKm: 0, honshuEastKm: 0, fare: 250, alive: true });
+    tryInsertPareto(bucket, { doneFare: 200, totalKm: 20, totalEastKm: 0, fare: 250, alive: true });
     const dominated = bucket[0];
-    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true });
+    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true });
     expect(dominated?.alive).toBe(false);
   });
 
-  it("honshuKm を無視すると、通算距離の大きい状態が小さい状態を誤って握り潰す（反映漏れの再現）", () => {
+  it("totalKm を無視すると、通算距離の大きい状態が小さい状態を誤って握り潰す（反映漏れの再現）", () => {
     // Task 9: SearchState に honshuKm/honshuEastKm を追加したが、これを
     // dominates() の比較に反映し忘れると、このプロジェクトで4回繰り返した
     // 「状態次元の追加が Pareto 判定に反映されない」欠陥類型が再発する。
-    // doneFare・segKm が同じでも honshuKm が異なれば将来の運賃
-    // （calc.estimateHonshuThrough は honshuKm について単調非減少）が変わりうるので、
-    // honshuKm も比較しないと「通算距離が小さい（有利な）」状態が
-    // 「通算距離が大きい（不利な）」状態に誤って支配されてしまう。
+    // 性能改善(b)で honshuKm・segKm は totalKm（両者の和）に統合されたが、
+    // 「合計距離が違えば将来の運賃が変わりうる」という性質自体は変わらないため、
+    // totalKm を dominates() で比較しないと「通算距離が小さい（有利な）」状態が
+    // 「通算距離が大きい（不利な）」状態に誤って支配されてしまう、という
+    // 同種の反映漏れが再発しうる。
     const bucket: ParetoEntry[] = [];
     // 先に「通算距離が大きい（不利な）」状態が入る
     const worse: ParetoEntry = {
       doneFare: 0,
-      segKm: 10,
-      honshuKm: 40,
-      honshuEastKm: 40,
+      totalKm: 50,
+      totalEastKm: 40,
       fare: 999,
       alive: true,
     };
     expect(tryInsertPareto(bucket, worse)).toBe(true);
-    // 後から「通算距離が小さい（有利な）」状態が来た場合、honshuKm を見ていれば
-    // worse を支配して追い出し、挿入されるはず。honshuKm を見ていなければ
-    // (doneFare, segKm) が完全一致するため「相互支配」扱いになり、
-    // 先着ちで worse が残ってこちらが拒否されてしまう
+    // 後から「通算距離が小さい（有利な）」状態が来た場合、totalKm を見ていれば
+    // worse を支配して追い出し、挿入されるはず。
     const better: ParetoEntry = {
       doneFare: 0,
-      segKm: 10,
-      honshuKm: 0,
-      honshuEastKm: 0,
+      totalKm: 10,
+      totalEastKm: 0,
       fare: 500,
       alive: true,
     };
@@ -505,8 +502,8 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
     // （そのエントリはどのbucketにも入らず捨てられるだけ）。ここが誤って
     // false にされていないかを直接確認する。
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 100, segKm: 10, honshuKm: 0, honshuEastKm: 0, fare: 150, alive: true });
-    const rejected: ParetoEntry = { doneFare: 200, segKm: 20, honshuKm: 0, honshuEastKm: 0, fare: 250, alive: true };
+    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, fare: 150, alive: true });
+    const rejected: ParetoEntry = { doneFare: 200, totalKm: 20, totalEastKm: 0, fare: 250, alive: true };
     const inserted = tryInsertPareto(bucket, rejected);
     expect(inserted).toBe(false);
     expect(rejected.alive).toBe(true);

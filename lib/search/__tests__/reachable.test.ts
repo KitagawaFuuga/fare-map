@@ -893,12 +893,13 @@ describe("findReachable の alive フラグ配線（参照実装との一致・�
 });
 
 // Task 9: JR本州3社（東日本・東海・西日本）をまたぐ場合は会社境界で区間を
-// 確定せず、「基準額（総距離で1回引く）＋加算額（JR東日本区間分。総距離が
-// 100kmを超えるなら0円）」の通し運賃にする。
+// 確定せず、「基準額（総距離で1回引く）＋加算額（eastKmで1回引く）」の
+// 通し運賃にする。「総距離が100kmを超えると加算額0円」は出典にない誤りだった
+// ため廃止した（レビュー指摘1。詳細は task-9-report.md 参照）。
 // 基準額表・加算額表は JR東海(HONSHU_BASE_OPERATOR)・合成事業者名
 // "__jr-honshu-kasan" のルールから引かれる（lib/fare/calculator.ts 参照）。
-// 非線形（100km境界で加算額の有無が変わる）な運賃表にすることで、
-// 「初乗り二重取り（旧実装）」「通し運賃（新実装）」の結果が必ず異なるようにしている。
+// 非線形な運賃表にすることで、「初乗り二重取り（旧実装）」「通し運賃（新実装）」の
+// 結果が必ず異なるようにしている。
 describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加算額方式）", () => {
   const honshuBaseTable: [number, number][] = [
     [10, 100],
@@ -1014,11 +1015,14 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
     expect(result.find((r) => r.id === "C")?.fare).toBe(160);
   });
 
-  it("総距離が100kmを超えると加算額は乗らず基準額のみになる", () => {
-    // A --JR東日本60km--> B --JR東海50km--> C。総距離110km(>100km)。
-    // 通し: 基準額(110km)=900円のみ（加算額は100km超なので0円）。
+  it("総距離が100kmを超えても加算額は0円にならない（レビュー指摘の修正確認）", () => {
+    // A --JR東日本60km--> B --JR東海50km--> C。総距離110km(>100km)、eastKm=60km。
+    // 通し: 基準額(110km)=900円 + 加算額(60km)=70円 = 970円。
+    // 修正前は totalKm>100 の場合に加算額を強制的に0円にしていたため900円になっていた
+    // （task-9-report.md記載の通り、修正前にこのテストを実行すると
+    // 「expected 970 to be 900」で落ちることを確認済み）。
     // 会社ごとの初乗りだと JR東日本60km=700（自社表、beyond式）+
-    // JR東海50km=500（自社表）= 1,200円になってしまう。
+    // JR東海50km=500（自社表）= 1,200円になってしまう（いずれとも異なることも確認）。
     const graph: RailGraph = {
       nodes: {
         A: jrNode("A", "JR東日本"),
@@ -1031,7 +1035,7 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
       ],
     };
     const result = findReachable(graph, honshuCalc, "A", 10000);
-    expect(result.find((r) => r.id === "C")?.fare).toBe(900);
+    expect(result.find((r) => r.id === "C")?.fare).toBe(970);
   });
 
   it("JR東日本→JR東海→JR西日本（3社またぎ）でも会社境界のたびに確定せず通算が続く", () => {
@@ -1106,5 +1110,147 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
     };
     const result = findReachable(graph, honshuCalc, "A", 10000);
     expect(result.find((r) => r.id === "D")?.fare).toBe(210);
+  });
+
+  // レビュー指摘1: 「東京都区内・山手線内〜東京(品川)～熱海間は新幹線(JR東海)経由と
+  // して計算するためJR東日本分の加算はない」という規則(出典:
+  // https://ameblo.jp/yyrapid/entry-12937999551.html)を、実データの構造
+  // （lineId "11301"=JR東海道本線 東京～熱海、"11302"=JR山手線）で再現する。
+  describe("eastKm除外規則（東京都区内・山手線内〜東京～熱海間は加算額の対象外）", () => {
+    const tokaidoNode = (id: string, operator: string, lineId: string) => ({
+      id,
+      groupId: id,
+      name: id,
+      lat: 35,
+      lng: 139,
+      lineId,
+      lineName: "L",
+      operator,
+    });
+
+    it("東京～熱海間相当のJR東日本区間はeastKmから除外され、加算額に反映されない", () => {
+      // Tokyo(11301)--JR東日本60km-->Atami(11301)--JR東海50km-->C。
+      // 総距離110km・eastKm=0（東京～熱海間の在来線=lineId 11301のため除外）。
+      // 通し: 基準額(110km)=900円のみ（加算額表[0]=対象外のため0円）。
+      // 除外がなければ前のテストと同じく970円になってしまう。
+      const graph: RailGraph = {
+        nodes: {
+          Tokyo: tokaidoNode("Tokyo", "JR東日本", "11301"),
+          Atami: tokaidoNode("Atami", "JR東日本", "11301"),
+          C: jrNode("C", "JR東海"),
+        },
+        edges: [
+          { from: "Tokyo", to: "Atami", km: 60, kind: "rail", operator: "JR東日本" },
+          { from: "Atami", to: "C", km: 50, kind: "rail", operator: "JR東海" },
+        ],
+      };
+      const result = findReachable(graph, honshuCalc, "Tokyo", 10000);
+      expect(result.find((r) => r.id === "C")?.fare).toBe(900);
+    });
+
+    it("山手線内(lineId 11302)からの区間もeastKmから除外される", () => {
+      const graph: RailGraph = {
+        nodes: {
+          Shinjuku: tokaidoNode("Shinjuku", "JR東日本", "11302"),
+          Tokyo: tokaidoNode("Tokyo", "JR東日本", "11302"),
+          C: jrNode("C", "JR東海"),
+        },
+        edges: [
+          { from: "Shinjuku", to: "Tokyo", km: 10, kind: "rail", operator: "JR東日本" },
+          { from: "Tokyo", to: "C", km: 20, kind: "rail", operator: "JR東海" },
+        ],
+      };
+      const result = findReachable(graph, honshuCalc, "Shinjuku", 10000);
+      // 総距離30km・eastKm=0（山手線内のため除外） => 基準額(30km)=300円のみ
+      expect(result.find((r) => r.id === "C")?.fare).toBe(300);
+    });
+
+    it("lineIdが対象外（通常のJR東日本区間）ならeastKmは通常どおり積まれる（回帰確認）", () => {
+      // "L"という無関係のlineIdのJR東日本区間は除外対象ではないので、
+      // 通常どおり加算額の対象になるはず（前段の「100kmを超えても加算額は0円に
+      // ならない」テストと同じ構図をlineId付きノードで再確認する）。
+      const graph: RailGraph = {
+        nodes: {
+          A: jrNode("A", "JR東日本"),
+          B: jrNode("B", "JR東日本"),
+          C: jrNode("C", "JR東海"),
+        },
+        edges: [
+          { from: "A", to: "B", km: 60, kind: "rail", operator: "JR東日本" },
+          { from: "B", to: "C", km: 50, kind: "rail", operator: "JR東海" },
+        ],
+      };
+      const result = findReachable(graph, honshuCalc, "A", 10000);
+      expect(result.find((r) => r.id === "C")?.fare).toBe(970);
+    });
+
+    it("除外区間の後に通常区間が混在すると、除外区間分の距離も加算額に含めてしまう（安全側の近似の限界）", () => {
+      // Tokyo(11301)--JR東日本60km-->Atami(11301)--JR東日本10km-->X(lineId "L")
+      // --JR東海40km--> C。
+      //
+      // 本来の趣旨に忠実に計算するなら、除外されるのはTokyo→Atami分(60km)のみで
+      // eastKmはAtami→X分の10kmだけになるはずだが、本実装のsegEastExcludedは
+      // 「除外区間でないエッジに一度でも当たったら区間の残り全体で恒久的にfalseに
+      // なる」一方向ラチェットのため、Atami→X（除外対象外のlineId）で除外フラグが
+      // 落ちた時点で、それ以前の60km分も含めた区間全体(70km)がeastKmに算入されて
+      // しまう。これは「絶対に安全側（過大評価はしても過小評価はしない）」設計上の
+      // トレードオフであり、意図的な近似である（コメント参照）。
+      const graph: RailGraph = {
+        nodes: {
+          Tokyo: tokaidoNode("Tokyo", "JR東日本", "11301"),
+          Atami: tokaidoNode("Atami", "JR東日本", "11301"),
+          X: jrNode("X", "JR東日本"), // lineId "L"（対象外）
+          C: jrNode("C", "JR東海"),
+        },
+        edges: [
+          { from: "Tokyo", to: "Atami", km: 60, kind: "rail", operator: "JR東日本" },
+          { from: "Atami", to: "X", km: 10, kind: "rail", operator: "JR東日本" },
+          { from: "X", to: "C", km: 40, kind: "rail", operator: "JR東海" },
+        ],
+      };
+      const result = findReachable(graph, honshuCalc, "Tokyo", 10000);
+      // 総距離110km(60+10+40)・eastKm=70km(Tokyo→X全体。除外区間60km分も
+      // 算入されてしまう安全側の近似)。基準額(110km)=900 + 加算額(70km、
+      // 61〜100km帯)=110 = 1010円。
+      expect(result.find((r) => r.id === "C")?.fare).toBe(1010);
+    });
+  });
+
+  // レビュー指摘3: honshuKm を「距離」と「通算中フラグ」の兼用にしていると、
+  // 会社境界を0kmのrailエッジで跨いだ直後（honshuKm+segKm===0）にフラグが
+  // 失われる。honshuThrough を独立フィールドとして分離したことを確認する。
+  describe("honshuThrough フラグの分離（honshuKm===0でも通算モードを見失わない）", () => {
+    it("会社境界を2回続けて0kmで跨ぐと honshuKm は0のままだが、通し運賃方式であり続ける", () => {
+      // A --JR東日本0km--> B --JR東海0km--> C --JR東日本0km--> D --JR東日本10km--> E。
+      //
+      // B→C, C→D はどちらも0kmの会社境界跨ぎ（HONSHU_OPERATORS同士）なので、
+      // honshuKm は「0(直前のsegKm) + 0(直前のsegKm)」の繰り返しでずっと0のまま
+      // だが、honshuThrough は最初の境界跨ぎ（B→C）以降ずっと true のはず。
+      //
+      // honshuKm > 0 を「通算中フラグ」の代わりに使っていた場合（レビュー指摘3の
+      // 修正前の実装）、D→E の時点で honshuKm===0 のため通算中と判定できず、
+      // JR東日本の単独表（このテストでは基準額表よりわざと高い値にしてある）に
+      // 落ちてしまう。honshuThrough を独立フィールドとして持てば、この場合でも
+      // 正しく基準額＋加算額方式（10km: 100円 + 加算額10円 = 110円）が使われる。
+      const graph: RailGraph = {
+        nodes: {
+          A: jrNode("A", "JR東日本"),
+          B: jrNode("B", "JR東日本"),
+          C: jrNode("C", "JR東海"),
+          D: jrNode("D", "JR東日本"),
+          E: jrNode("E", "JR東日本"),
+        },
+        edges: [
+          { from: "A", to: "B", km: 0, kind: "rail", operator: "JR東日本" },
+          { from: "B", to: "C", km: 0, kind: "rail", operator: "JR東海" },
+          { from: "C", to: "D", km: 0, kind: "rail", operator: "JR東日本" },
+          { from: "D", to: "E", km: 10, kind: "rail", operator: "JR東日本" },
+        ],
+      };
+      const result = findReachable(graph, honshuCalc, "A", 10000);
+      // 通し運賃(honshuThrough正しく分離): 基準額(10km)=100 + 加算額(10km)=10 = 110円。
+      // 修正前(honshuKm>0をフラグ代用)なら JR東日本単独表(10km)=120円 になる。
+      expect(result.find((r) => r.id === "E")?.fare).toBe(110);
+    });
   });
 });

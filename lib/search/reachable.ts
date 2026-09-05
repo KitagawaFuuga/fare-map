@@ -13,14 +13,36 @@ interface SearchState {
   segOperator: string; // 進行中区間の事業者（"" = 未乗車）
   segFromId: string; // 進行中区間の開始駅（特定運賃は区間全体の駅ペアに適用するため必要）
   segKm: number; // 進行中区間の距離
-  // JR本州3社（東日本・東海・西日本）間の会社境界を1回以上跨いで通算中の距離
-  // （まだ確定していない、進行中区間 segKm を含まない直前までの合計）。
-  // 0 = まだ跨いでいない（＝通常の単一事業者ルールをそのまま使ってよい）。
-  // 跨いだ瞬間から doneFare の確定を止め、この値に segKm を都度足した合計距離で
-  // 基準額＋加算額方式（calc.estimateHonshuThrough）を使う。
+  // 進行中区間が「加算額除外区間（isEastKmExcludedEdge）だけで構成されている」か
+  // どうか。segOperator が JR東日本 でこれが true の間は、加算額の対象キロ
+  // （eastKm）への寄与は 0 として扱う（東京都区内・山手線内〜東京～熱海間の
+  // JR東日本分は新幹線経由扱いで加算されないため）。
+  //
+  // 除外区間でないエッジを1本でも通ると、この区間の残り全体にわたって
+  // 恒久的に false になる（true→false の一方向ラチェット）。これは
+  // 「除外区間の後に通常区間が混在する」場合、除外できるはずの先頭部分の距離も
+  // 加算額に含めてしまう、という安全側（絶対に過小評価しない）の近似である。
+  // 正確な精算（除外区間の分だけを差し引く）には距離を連続値として保持する
+  // 設計が必要だが、それは Pareto 支配のための次元を1つ増やし、東京都心部の
+  // JR東日本ネットワーク（山手線・中央線等が密に絡み合う）で組み合わせ爆発を
+  // 起こすことを実測で確認した（budget=1500円のような小さな探索でも
+  // 数十倍に悪化）。真偽値としてバケットキーに畳み込む今の設計は、その爆発を
+  // 避けつつ「絶対に安全側（過大評価はしても過小評価はしない）」を保つ。
+  segEastExcluded: boolean;
+  // JR本州3社（東日本・東海・西日本）間の会社境界を1回以上跨いで通算中かどうか。
+  // 跨いだ瞬間に true になり、doneFare の確定を止めて基準額＋加算額方式
+  // （calc.estimateHonshuThrough）を使う。JR以外の事業者へ乗り継いで区間が
+  // 確定したら false に戻る。
+  //
+  // honshuKm（下記）が 0 であることをこのフラグの代わりに使ってはいけない
+  // （レビュー指摘: 距離0のrailエッジで会社境界を跨いだ直後は honshuKm===0 のまま
+  // 通算中になり、「距離」と「通算中か否か」を honshuKm 単体で表せなくなる）。
+  honshuThrough: boolean;
+  // 通算中の距離（まだ確定していない、進行中区間 segKm を含まない直前までの合計）。
+  // honshuThrough が false の間は常に 0。
   honshuKm: number;
-  // 上記のうち JR東日本区間ぶんの距離（加算額表を引くための距離）。honshuKm と
-  // 同じく進行中区間 segKm 分は含まない。
+  // 上記のうち加算額の対象になる距離。honshuKm と同じく進行中区間 segKm 分は
+  // 含まない。honshuThrough が false の間は常に 0。
   honshuEastKm: number;
   fare: number; // doneFare + estimate(segOperator, segKm) を状態生成時に確定したもの
   // この状態が Pareto store に挿入された際のエントリへの参照。pop 時の生死判定
@@ -35,11 +57,19 @@ export interface ParetoEntry {
   doneFare: number; // 小さいほうが有利
   segKm: number; // 小さいほうが有利
   // SearchState.honshuKm / honshuEastKm と同じ意味。どちらも将来の運賃
-  // （calc.estimateHonshuThrough は総距離・JR東日本区間距離について単調非減少）
+  // （calc.estimateHonshuThrough は総距離・eastKm について単調非減少）
   // に対して小さいほうが同等以上に有利なので、segKm と同じ向きで比較してよい。
   // 反映漏れがあると「JR本州3社をまたぐ通算中の状態」が誤って支配され消える
   // （このプロジェクトで繰り返した「状態次元の追加が Pareto 判定に反映されない」
   // 欠陥類型そのもの）。
+  //
+  // honshuThrough・segEastExcluded（SearchState参照）はここには含めない。
+  // honshuThrough は true/false で運賃計算式そのものが変わる別種のモード切り替え
+  // であり、比較すること自体に意味がない。segEastExcluded は連続値
+  // （実際の除外キロ数）ではなく粗い真偽値の近似であり、Pareto の実数次元として
+  // 混ぜると「除外区間かどうかが違うだけで doneFare・segKm が同じ」状態が
+  // 大量に非支配のまま残ってしまう（実測で組み合わせ爆発を確認）。
+  // どちらも bucket キー（segBucketKey）に含めて最初から別バケットに分離する。
   honshuKm: number; // 小さいほうが有利
   honshuEastKm: number; // 小さいほうが有利
   fare: number; // 今この駅で降りた場合の運賃
@@ -87,22 +117,86 @@ const PENDING_ENTRY: ParetoEntry = Object.freeze({
   alive: false,
 });
 
-// 進行中区間を「今この駅で降りた場合の運賃」として評価する。honshuKm > 0
+// 「東京都区内・山手線内から東海道方面へ通し運賃で乗る場合、東京(品川)〜熱海間は
+// 東海道新幹線（JR東海）経由として計算されるため、この区間のJR東日本分の加算額は
+// 発生しない」という規則（出典:
+// https://ameblo.jp/yyrapid/entry-12937999551.html）を、加算額の対象キロ
+// （eastKm）を積む際に反映するための判定。
+//
+// グラフに新幹線データが無いため、対応する在来線区間（JR東海道本線 東京～熱海=
+// lineId "11301"、JR山手線=lineId "11302"）を「加算額非対象」の目印として使う
+// （data/graph.json の該当ノードで確認済み）。総営業キロ（totalKm）自体は
+// 変える必要がない（実際の経路の距離のまま）ので、ここで除外するのは
+// 加算額の対象キロ（eastKm）の積み上げだけであり、segKm/honshuKm には影響しない。
+//
+// 既知の限界（task-9-report.md にも明記）:
+// - lineId は station.tsv 由来の内部IDであり、グラフ再生成でIDが振り直される
+//   可能性がある。再生成時はこの Set の値を要確認。
+// - 横浜市内発（新横浜〜熱海が新幹線経由扱いになるケース）はこの実装では
+//   対応していない。新横浜〜熱海間は在来線では複数のJR東日本路線（横浜線・
+//   根岸線・東海道線等）をまたぐ乗り換えルートになり、Tokyo-Atami間のような
+//   単一lineIdでは判定できず、対象を安全に絞り込む方法が見つからなかったため。
+//   横浜市内発の東海道方面（例: 横浜→名古屋）はこの規則が適用されず、
+//   実運賃よりJR東日本分の加算額だけ高く見積もられる可能性がある。
+// - SearchState.segEastExcluded のコメントの通り、除外区間の後に通常区間が
+//   混在する場合は除外区間分の距離も加算額に含めてしまう（安全側の近似）。
+const EAST_KM_EXCLUDED_LINE_IDS = new Set(["11301", "11302"]);
+
+function isEastKmExcludedEdge(
+  graph: RailGraph,
+  edge: { from: string; to: string; operator: string },
+): boolean {
+  if (edge.operator !== "JR東日本") return false;
+  const fromLine = graph.nodes[edge.from]?.lineId;
+  const toLine = graph.nodes[edge.to]?.lineId;
+  return (
+    fromLine !== undefined &&
+    toLine !== undefined &&
+    EAST_KM_EXCLUDED_LINE_IDS.has(fromLine) &&
+    EAST_KM_EXCLUDED_LINE_IDS.has(toLine)
+  );
+}
+
+// 区間を継続する次のエッジを踏まえた segEastExcluded の更新。
+// 一方向ラチェット（true→falseのみ）: 除外区間でないエッジに一度でも当たったら
+// その区間の残り全体にわたって恒久的に false になる。
+function nextSegEastExcluded(
+  graph: RailGraph,
+  currentlyExcluded: boolean,
+  edge: { from: string; to: string; operator: string },
+): boolean {
+  return currentlyExcluded && isEastKmExcludedEdge(graph, edge);
+}
+
+// 区間（segOperator, segKm, segEastExcluded）が加算額の対象キロ（eastKm）に
+// いくら寄与するかを返す。segOperator が JR東日本 以外なら常に0。
+function segEastKmValue(
+  segOperator: string,
+  segKm: number,
+  segEastExcluded: boolean,
+): number {
+  if (segOperator !== "JR東日本") return 0;
+  return segEastExcluded ? 0 : segKm;
+}
+
+// 進行中区間を「今この駅で降りた場合の運賃」として評価する。honshuThrough
 // （＝ JR本州3社間の会社境界を既に1回以上跨いでいる）なら、進行中区間も含めた
-// 通算距離で基準額＋加算額方式を使う。跨いでいなければ通常どおり単一事業者の
-// 運賃表（override 込み）を使う。
+// 通算距離・通算加算額対象キロで基準額＋加算額方式を使う。跨いでいなければ
+// 通常どおり単一事業者の運賃表（override 込み）を使う。
 function segmentFare(
   calc: FareCalculator,
   segOperator: string,
   segKm: number,
+  segEastExcluded: boolean,
+  honshuThrough: boolean,
   honshuKm: number,
   honshuEastKm: number,
   fromName: string | undefined,
   toName: string | undefined,
 ): number {
-  if (honshuKm > 0) {
+  if (honshuThrough) {
     const totalKm = honshuKm + segKm;
-    const eastKm = honshuEastKm + (segOperator === "JR東日本" ? segKm : 0);
+    const eastKm = honshuEastKm + segEastKmValue(segOperator, segKm, segEastExcluded);
     return calc.estimateHonshuThrough(totalKm, eastKm);
   }
   return calc.estimate(segOperator, segKm, fromName, toName);
@@ -215,6 +309,18 @@ function runSearch(
   const bucketFromId = (segOperator: string, segFromId: string): string =>
     calc.isOverrideAnchor(segOperator, nameOf(segFromId)) ? segFromId : "";
 
+  // honshuThrough・segEastExcluded はどちらも true/false で運賃計算の実質的な
+  // 式が変わる（または将来の加算額計算に影響する）ため、大小比較できる次元として
+  // dominates() に混ぜず、最初から別バケットに分離する（詳細は ParetoEntry の
+  // コメント参照）。
+  const segBucketKey = (
+    segOperator: string,
+    segFromId: string,
+    honshuThrough: boolean,
+    segEastExcluded: boolean,
+  ): string =>
+    `${bucketFromId(segOperator, segFromId)}|${honshuThrough ? "1" : "0"}|${segEastExcluded ? "1" : "0"}`;
+
   const store: ParetoStore = new Map();
   const initialEntry: ParetoEntry = {
     doneFare: 0,
@@ -225,7 +331,7 @@ function runSearch(
     alive: true,
   };
   tryInsertPareto(
-    getBucket(store, fromId, "", bucketFromId("", fromId)),
+    getBucket(store, fromId, "", segBucketKey("", fromId, false, false)),
     initialEntry,
   );
   const initial: SearchState = {
@@ -234,6 +340,8 @@ function runSearch(
     segOperator: "",
     segFromId: fromId,
     segKm: 0,
+    segEastExcluded: false,
+    honshuThrough: false,
     honshuKm: 0,
     honshuEastKm: 0,
     fare: 0,
@@ -273,6 +381,8 @@ function runSearch(
           segOperator: state.segOperator,
           segFromId: state.segFromId,
           segKm: state.segKm,
+          segEastExcluded: state.segEastExcluded,
+          honshuThrough: state.honshuThrough,
           honshuKm: state.honshuKm,
           honshuEastKm: state.honshuEastKm,
           fare:
@@ -281,6 +391,8 @@ function runSearch(
               calc,
               state.segOperator,
               state.segKm,
+              state.segEastExcluded,
+              state.honshuThrough,
               state.honshuKm,
               state.honshuEastKm,
               nameOf(state.segFromId),
@@ -290,12 +402,18 @@ function runSearch(
         };
       } else if (edge.operator === state.segOperator) {
         const segKm = state.segKm + edge.km;
+        const segEastExcluded = nextSegEastExcluded(graph, state.segEastExcluded, {
+          ...edge,
+          from: state.stationId,
+        });
         next = {
           stationId: edge.to,
           doneFare: state.doneFare,
           segOperator: state.segOperator,
           segFromId: state.segFromId,
           segKm,
+          segEastExcluded,
+          honshuThrough: state.honshuThrough,
           honshuKm: state.honshuKm,
           honshuEastKm: state.honshuEastKm,
           fare:
@@ -304,6 +422,8 @@ function runSearch(
               calc,
               state.segOperator,
               segKm,
+              segEastExcluded,
+              state.honshuThrough,
               state.honshuKm,
               state.honshuEastKm,
               nameOf(state.segFromId),
@@ -316,20 +436,27 @@ function runSearch(
         HONSHU_OPERATORS.has(edge.operator)
       ) {
         // JR本州3社（東日本・東海・西日本）どうしの会社境界。区間を確定せず、
-        // 通算距離（honshuKm）とそのうち JR東日本区間の距離（honshuEastKm）を
+        // 通算距離（honshuKm）とそのうち加算額対象キロ（honshuEastKm）を
         // 積み増して継続する。doneFare は据え置き（＝ここではまだ運賃を払わない）。
         const honshuKm = state.honshuKm + state.segKm;
         const honshuEastKm =
-          state.honshuEastKm + (state.segOperator === "JR東日本" ? state.segKm : 0);
+          state.honshuEastKm +
+          segEastKmValue(state.segOperator, state.segKm, state.segEastExcluded);
         const segKm = edge.km;
+        const segEastExcluded = isEastKmExcludedEdge(graph, {
+          ...edge,
+          from: state.stationId,
+        });
         const eastKm =
-          honshuEastKm + (edge.operator === "JR東日本" ? segKm : 0);
+          honshuEastKm + segEastKmValue(edge.operator, segKm, segEastExcluded);
         next = {
           stationId: edge.to,
           doneFare: state.doneFare,
           segOperator: edge.operator,
           segFromId: state.stationId,
           segKm,
+          segEastExcluded,
+          honshuThrough: true,
           honshuKm,
           honshuEastKm,
           fare:
@@ -339,7 +466,7 @@ function runSearch(
       } else {
         // 事業者切り替え（「JR⇔私鉄」または「私鉄⇔私鉄」、あるいは JR本州3社の
         // 通算が終わって非対象の事業者に移る場合）。進行中区間を確定する。
-        // 進行中区間が JR本州3社の通算中（honshuKm > 0）だった場合は
+        // 進行中区間が JR本州3社の通算中（honshuThrough）だった場合は
         // segmentFare が基準額＋加算額方式で確定額を計算する。
         const doneFare =
           state.doneFare +
@@ -347,6 +474,8 @@ function runSearch(
             calc,
             state.segOperator,
             state.segKm,
+            state.segEastExcluded,
+            state.honshuThrough,
             state.honshuKm,
             state.honshuEastKm,
             nameOf(state.segFromId),
@@ -358,6 +487,15 @@ function runSearch(
           segOperator: edge.operator,
           segFromId: state.stationId,
           segKm: edge.km,
+          // 新しい区間の除外フラグ。honshuThrough は false に戻すが、
+          // この新区間がのちに別の本州3社会社境界を跨いだ場合に備え、
+          // segEastExcluded 自体は正しく計算しておく（honshuThrough=false の間は
+          // segmentFare からは参照されない）。
+          segEastExcluded: isEastKmExcludedEdge(graph, {
+            ...edge,
+            from: state.stationId,
+          }),
+          honshuThrough: false,
           honshuKm: 0,
           honshuEastKm: 0,
           fare:
@@ -386,13 +524,13 @@ function runSearch(
       // override 最安値で頭打ちになり得るため、km について単調増加するとは
       // 限らない。isOverrideAnchor 非該当の起点では距離表運賃のみが下界になり
       // km について単調非減少になるため、そちらは実際に単調に効く）。
-      // JR本州3社の通算中（honshuKm > 0）は、進行中区間もまとめた総距離の
+      // JR本州3社の通算中（honshuThrough）は、進行中区間もまとめた総距離の
       // 基準額（加算額抜き）が安全な下界になる。加算額は常に0以上なので、
       // どう乗り継いでも最終運賃がこれを下回ることはない。通常の
       // calc.lowerBound は override 込みの下界だが、通算中は override が
       // 適用されないため使わない。
       const segLowerBound =
-        next.honshuKm > 0
+        next.honshuThrough
           ? calc.honshuThroughBaseFare(next.honshuKm + next.segKm)
           : calc.lowerBound(next.segOperator, next.segKm, nameOf(next.segFromId));
       if (next.doneFare + segLowerBound > budget) continue;
@@ -401,7 +539,12 @@ function runSearch(
         store,
         next.stationId,
         next.segOperator,
-        bucketFromId(next.segOperator, next.segFromId),
+        segBucketKey(
+          next.segOperator,
+          next.segFromId,
+          next.honshuThrough,
+          next.segEastExcluded,
+        ),
       );
       const nextEntry: ParetoEntry = {
         doneFare: next.doneFare,

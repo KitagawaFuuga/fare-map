@@ -46,6 +46,7 @@ import iyotetsuCity from "@/data/fare-rules/iyotetsu-city.json";
 import toyotetsuAtsumi from "@/data/fare-rules/toyotetsu-atsumi.json";
 import toyotetsuCity from "@/data/fare-rules/toyotetsu-city.json";
 import aikan from "@/data/fare-rules/aikan.json";
+import sendaiSubway from "@/data/fare-rules/sendai-subway.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -97,6 +98,7 @@ const rules = [
   toyotetsuAtsumi,
   toyotetsuCity,
   aikan,
+  sendaiSubway,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -861,6 +863,26 @@ describe("FareCalculator", () => {
 
     it("6.0km ちょうどは 270円（6.2km=330円 の1つ下の帯）", () => {
       expect(calc.estimate("愛知環状鉄道", 6.0)).toBe(270);
+    });
+  });
+
+  describe("仙台市営地下鉄（対キロ区間制・5区分）", () => {
+    // 出典: Wikipedia の区分表。公式PDFはゾーン制の路線図形式で距離帯が読めなかった
+    // 実運賃はekitan.com(2026-09-20取得)で照合
+    it("仙台→泉中央 8.5km、実運賃310円", () => {
+      expect(calc.estimate("仙台市交通局", 8.5)).toBe(310);
+    });
+
+    it("仙台→富沢 6.3km、実運賃310円（2区の境界6.0kmのすぐ外側）", () => {
+      expect(calc.estimate("仙台市交通局", 6.3)).toBe(310);
+    });
+
+    it("6.0km ちょうどは 250円（境界が7kmではなく6kmであること）", () => {
+      expect(calc.estimate("仙台市交通局", 6.0)).toBe(250);
+    });
+
+    it("3.0km ちょうどは 210円（初乗り）", () => {
+      expect(calc.estimate("仙台市交通局", 3.0)).toBe(210);
     });
   });
 

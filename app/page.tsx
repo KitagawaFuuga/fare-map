@@ -42,8 +42,10 @@ export default function Home() {
   const runSearch = useCallback(async () => {
     // ボタンの disabled とは別の二重の防御。この行のおかげで以降 from は非 null 扱いになる
     if (!from) return;
-    await search(from.id, budget);
-    setSheet("collapsed"); // 検索後は地図を主役に
+    const ok = await search(from.id, budget);
+    // 成功時だけ畳んで地図を主役にする。失敗時に畳むと、パネル内のエラー表示が
+    // スマホで隠れて「何も起きなかった」ように見える。
+    if (ok) setSheet("collapsed");
   }, [from, budget, search]);
 
   // 同じ操作パネルを、デスクトップでは左サイドバー、モバイルではボトムシートに

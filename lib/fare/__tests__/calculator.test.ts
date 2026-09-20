@@ -32,6 +32,11 @@ import saitamaKosoku from "@/data/fare-rules/saitama-kosoku.json";
 import nishitetsu from "@/data/fare-rules/nishitetsu.json";
 import toyoKosoku from "@/data/fare-rules/toyo-kosoku.json";
 import sotetsu from "@/data/fare-rules/sotetsu.json";
+import hankai from "@/data/fare-rules/hankai.json";
+import keifuku from "@/data/fare-rules/keifuku.json";
+import nagasakiDentetsu from "@/data/fare-rules/nagasaki-dentetsu.json";
+import kumamotoCity from "@/data/fare-rules/kumamoto-city.json";
+import kagoshimaCity from "@/data/fare-rules/kagoshima-city.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -69,6 +74,11 @@ const rules = [
   nishitetsu,
   toyoKosoku,
   sotetsu,
+  hankai,
+  keifuku,
+  nagasakiDentetsu,
+  kumamotoCity,
+  kagoshimaCity,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -697,6 +707,32 @@ describe("FareCalculator", () => {
 
     it("11.0km ちょうどは 210円（14.1km=250円 の1つ下の帯）", () => {
       expect(calc.estimate("相模鉄道", 11.0)).toBe(210);
+    });
+  });
+
+  describe("均一運賃の路面電車（距離によらず同額）", () => {
+    // いずれも各社公式サイトで「全線均一」と金額を確認（2026-09-20取得、source.note参照）。
+    // 汎用私鉄表は距離で運賃が上がるため、構造そのものが誤りになる事業者群。
+    it.each([
+      ["阪堺電気軌道", 240],
+      ["京福電気鉄道", 250],
+      ["長崎電気軌道", 150],
+      ["熊本市交通局", 200],
+      ["鹿児島市交通局", 200],
+    ])("%s は全線均一 %i円", (operator, fare) => {
+      // 短距離・中距離・長距離のいずれでも同額になることが均一運賃の要件
+      expect(calc.estimate(operator, 0.5)).toBe(fare);
+      expect(calc.estimate(operator, 8)).toBe(fare);
+      expect(calc.estimate(operator, 25)).toBe(fare);
+    });
+
+    it("均一運賃は距離が増えても変わらない（汎用表は増える）", () => {
+      expect(calc.estimate("阪堺電気軌道", 2)).toBe(
+        calc.estimate("阪堺電気軌道", 18),
+      );
+      expect(calc.estimate("謎電鉄", 18)).toBeGreaterThan(
+        calc.estimate("謎電鉄", 2),
+      );
     });
   });
 

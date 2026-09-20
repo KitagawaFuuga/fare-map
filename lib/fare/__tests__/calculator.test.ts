@@ -45,6 +45,7 @@ import iyotetsuSuburban from "@/data/fare-rules/iyotetsu-suburban.json";
 import iyotetsuCity from "@/data/fare-rules/iyotetsu-city.json";
 import toyotetsuAtsumi from "@/data/fare-rules/toyotetsu-atsumi.json";
 import toyotetsuCity from "@/data/fare-rules/toyotetsu-city.json";
+import aikan from "@/data/fare-rules/aikan.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -95,6 +96,7 @@ const rules = [
   iyotetsuCity,
   toyotetsuAtsumi,
   toyotetsuCity,
+  aikan,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -843,6 +845,22 @@ describe("FareCalculator", () => {
       expect(calc.estimate("豊橋鉄道", 5.4)).not.toBe(
         calc.estimate("豊橋鉄道(市内線)", 5.4),
       );
+    });
+  });
+
+  describe("愛知環状鉄道（公式PDFの三角運賃表から253点で復元）", () => {
+    // 出典: https://www.aikanrailway.co.jp/pdf/press/PressRelease6_138_2.pdf
+    // scripts/fare/derive-table.ts の方式tri-km で復元し、ekitan.comで2点照合
+    it("岡崎→高蔵寺 45.3km（全線）、実運賃990円", () => {
+      expect(calc.estimate("愛知環状鉄道", 45.3)).toBe(990);
+    });
+
+    it("瀬戸市→高蔵寺 6.2km、実運賃330円", () => {
+      expect(calc.estimate("愛知環状鉄道", 6.2)).toBe(330);
+    });
+
+    it("6.0km ちょうどは 270円（6.2km=330円 の1つ下の帯）", () => {
+      expect(calc.estimate("愛知環状鉄道", 6.0)).toBe(270);
     });
   });
 

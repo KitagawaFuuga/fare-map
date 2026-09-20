@@ -93,12 +93,60 @@ function strategyInline(lines: string[]): KmFarePair[] {
   return out;
 }
 
+// 方式D: 駅別の三角運賃表で、各行の末尾にその駅の営業キロ（起点からの累計）が
+// 付いている形式（愛知環状鉄道の旅客運賃表など）。行に並ぶ運賃は、その行より上に
+// 現れた駅（＝すでに読んだキロ値）への運賃を、近い順に並べたものになる。
+// 起点からの累計キロ同士の差が区間の距離なので、駅名が読めなくても観測点が作れる。
+//
+// 左側に定期運賃の列が入っていることがあるが、定期額は桁区切りのカンマを含むので、
+// 「最後のカンマ付き数値より後ろの整数」だけを普通運賃として拾えば分離できる。
+function strategyTriangleKm(lines: string[]): KmFarePair[] {
+  const out: KmFarePair[] = [];
+  const kmSeen: number[] = [];
+  for (const line of lines) {
+    const tokens = [...line.matchAll(/[\d,]*\d(?:\.\d+)?/g)].map((m) => m[0]);
+    if (tokens.length === 0) continue;
+    const last = tokens[tokens.length - 1];
+    if (last === undefined || !last.includes(".")) continue;
+    // 起点駅のキロは 0.0 になる。ここで弾くと最長区間の観測点を丸ごと失うので、
+    // 0 を許す（区間の距離が0になる組は下で除外される）。
+    const km = Number(last);
+    if (!Number.isFinite(km) || km < 0) continue;
+
+    let lastComma = -1;
+    for (let i = tokens.length - 1; i >= 0; i--) {
+      if (tokens[i]?.includes(",") === true) {
+        lastComma = i;
+        break;
+      }
+    }
+    const fares = tokens
+      .slice(lastComma + 1, tokens.length - 1)
+      .filter((t) => !t.includes(",") && !t.includes("."))
+      .map(Number)
+      .filter((n) => n >= 100 && n <= 99999);
+
+    // 上に現れた駅を近い順に並べたものが運賃の並び順
+    const targets = [...kmSeen].reverse();
+    for (let i = 0; i < fares.length && i < targets.length; i++) {
+      const target = targets[i];
+      const fare = fares[i];
+      if (target === undefined || fare === undefined) continue;
+      const d = Math.abs(km - target);
+      if (d > 0) out.push({ km: Number(d.toFixed(1)), fare });
+    }
+    kmSeen.push(km);
+  }
+  return out;
+}
+
 type Strategy = (lines: string[], column: number) => KmFarePair[];
 
 const STRATEGIES: readonly (readonly [string, Strategy])[] = [
   ["triple", (l) => strategyTriple(l)],
   ["ranges", strategyRanges],
   ["inline", (l) => strategyInline(l)],
+  ["tri-km", (l) => strategyTriangleKm(l)],
 ] as const;
 
 function toText(path: string): string {

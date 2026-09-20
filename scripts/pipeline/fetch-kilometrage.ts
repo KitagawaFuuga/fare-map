@@ -7,11 +7,14 @@ async function main(): Promise<void> {
   mkdirSync("data/raw", { recursive: true });
 
   const res = await fetch(URL);
-  if (!res.ok) throw new Error(`kilometrage.csv の取得に失敗: HTTP ${res.status}`);
+  if (!res.ok)
+    throw new Error(`kilometrage.csv の取得に失敗: HTTP ${res.status}`);
   const buf = new Uint8Array(await res.arrayBuffer());
   // 配布元は Shift_JIS。デコードして UTF-8 として保存する
   const text = new TextDecoder("shift-jis").decode(buf);
-  process.stdout.write(`kilometrage.csv: ${text.split("\n").length - 1} rows\n`);
+  process.stdout.write(
+    `kilometrage.csv: ${text.split("\n").length - 1} rows\n`,
+  );
 
   // fetch-data.ts と同じ原子性の方針: .tmp に書いてから rename で確定させ、
   // 途中で例外が起きても finally で .tmp を必ず片付ける

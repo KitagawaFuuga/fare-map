@@ -50,6 +50,10 @@ export const fareOverrideSchema = z.object({
       fare: z.number().int().positive(),
     }),
   ),
-  source: z.object({ url: z.string(), fetchedAt: z.string(), note: z.string() }),
+  source: z.object({
+    url: z.string(),
+    fetchedAt: z.string(),
+    note: z.string(),
+  }),
 });
 export type FareOverride = z.infer<typeof fareOverrideSchema>;

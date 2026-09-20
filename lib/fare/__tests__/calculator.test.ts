@@ -266,9 +266,7 @@ describe("FareCalculator", () => {
     });
 
     it("特定運賃の無いペアは距離表を引く", () => {
-      expect(calc.estimate("JR西日本", 42.8, "大阪", "存在しない駅")).toBe(
-        770,
-      );
+      expect(calc.estimate("JR西日本", 42.8, "大阪", "存在しない駅")).toBe(770);
     });
 
     it("override 未設定の事業者は駅名を渡しても距離表を引く", () => {
@@ -506,15 +504,13 @@ describe("FareCalculator", () => {
     });
 
     it("御陵→びわ湖浜大津(京津線) 7.5km、実運賃280円（本表なら240円）", () => {
-      expect(calc.estimate("京阪電鉄", 7.5, "御陵", "びわ湖浜大津")).toBe(
-        280,
-      );
+      expect(calc.estimate("京阪電鉄", 7.5, "御陵", "びわ湖浜大津")).toBe(280);
     });
 
     it("坂本比叡山口→石山寺(石山坂本線全線) 14.1km、実運賃380円（本表なら360円）", () => {
-      expect(
-        calc.estimate("京阪電鉄", 14.1, "坂本比叡山口", "石山寺"),
-      ).toBe(380);
+      expect(calc.estimate("京阪電鉄", 14.1, "坂本比叡山口", "石山寺")).toBe(
+        380,
+      );
     });
 
     it("override対象外の駅ペアは京阪線本表を引く", () => {
@@ -607,9 +603,7 @@ describe("FareCalculator", () => {
       ]);
       expect(single.estimate("X", 5)).toBe(999);
       expect(single.estimate("X", 10)).toBe(999);
-      expect(single.estimate("X", 11)).toBe(
-        Math.ceil((999 + 1 * 5) / 10) * 10,
-      );
+      expect(single.estimate("X", 11)).toBe(Math.ceil((999 + 1 * 5) / 10) * 10);
     });
 
     it("空テーブルは常に beyond 外挿に落ちる", () => {
@@ -621,9 +615,7 @@ describe("FareCalculator", () => {
           beyond: { fromKm: 0, baseFare: 150, ratePerKm: 20 },
         },
       ]);
-      expect(empty.estimate("X", 1)).toBe(
-        Math.ceil((150 + 1 * 20) / 10) * 10,
-      );
+      expect(empty.estimate("X", 1)).toBe(Math.ceil((150 + 1 * 20) / 10) * 10);
       expect(empty.estimate("X", 100)).toBe(
         Math.ceil((150 + 100 * 20) / 10) * 10,
       );
@@ -779,7 +771,14 @@ describe("FareCalculator", () => {
     it("下界性: km' >= km ならどの終点名についても lowerBound(km) <= estimate(km', 終点名)", () => {
       const kms = [0, 1, 3, 5, 6, 10, 12, 20, 25, 40];
       const froms = [undefined, "非対象駅", "Anchor1", "Anchor2", "Anchor3"];
-      const tos = [undefined, "非対象駅", "Anchor1", "Anchor2", "Anchor3", "他の駅"];
+      const tos = [
+        undefined,
+        "非対象駅",
+        "Anchor1",
+        "Anchor2",
+        "Anchor3",
+        "他の駅",
+      ];
       for (const from of froms) {
         for (const km of kms) {
           const lb = calcLb.lowerBound("OpLB", km, from);
@@ -938,9 +937,9 @@ describe("FareCalculator", () => {
         // （同じ距離帯であることを前提とした単純化: 通し運賃自体は
         // totalKmとeastKmを別々に引く点に注意。ここではkasan額そのものの
         // 一致だけを検証するため、加算額表を直接引けるkmでestimateHonshuThroughを呼ぶ）。
-        expect(calc.estimateHonshuThrough(km, km) - calc.honshuThroughBaseFare(km)).toBe(
-          kasan,
-        );
+        expect(
+          calc.estimateHonshuThrough(km, km) - calc.honshuThroughBaseFare(km),
+        ).toBe(kasan);
       }
     });
 

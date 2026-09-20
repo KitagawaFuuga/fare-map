@@ -166,7 +166,9 @@ export function createFareCalculator(
     },
     isOverrideAnchor(operator, stationName) {
       if (stationName === undefined) return false;
-      return overrideStationsByOperator.get(operator)?.has(stationName) ?? false;
+      return (
+        overrideStationsByOperator.get(operator)?.has(stationName) ?? false
+      );
     },
     estimateHonshuThrough(totalKm, eastKm) {
       if (totalKm <= 0) return 0;

@@ -3,8 +3,20 @@ import { buildCalibration, calibratedKm } from "@/lib/graph/calibrate";
 import type { RailGraph } from "@/lib/graph/types";
 
 // A-B-C が一直線に並び、直線距離の合計が 10km、実営業キロが 12km の路線
-const node = (id: string, lat: number, lineId = "L1", operator = "テスト鉄道") => ({
-  id, groupId: id, name: id, lat, lng: 139, lineId, lineName: "テスト線", operator,
+const node = (
+  id: string,
+  lat: number,
+  lineId = "L1",
+  operator = "テスト鉄道",
+) => ({
+  id,
+  groupId: id,
+  name: id,
+  lat,
+  lng: 139,
+  lineId,
+  lineName: "テスト線",
+  operator,
 });
 const graph: RailGraph = {
   nodes: { A: node("A", 35.0), B: node("B", 35.045), C: node("C", 35.09) },
@@ -14,7 +26,13 @@ const graph: RailGraph = {
   ],
 };
 const sections = [
-  { operator: "テスト鉄道", line: "テスト線", from: "A", to: "C", officialKm: 12 },
+  {
+    operator: "テスト鉄道",
+    line: "テスト線",
+    from: "A",
+    to: "C",
+    officialKm: 12,
+  },
 ];
 
 describe("buildCalibration", () => {
@@ -40,7 +58,15 @@ describe("buildCalibration", () => {
   });
 
   it("異常な係数（0以下、5超）は採用せず fallback にする", () => {
-    const bad = [{ operator: "テスト鉄道", line: "テスト線", from: "A", to: "C", officialKm: 0 }];
+    const bad = [
+      {
+        operator: "テスト鉄道",
+        line: "テスト線",
+        from: "A",
+        to: "C",
+        officialKm: 0,
+      },
+    ];
     const t = buildCalibration(graph, bad);
     expect(t.byLine["L1"]).toBeUndefined();
   });

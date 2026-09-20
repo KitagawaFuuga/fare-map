@@ -31,6 +31,7 @@ import hanshin from "@/data/fare-rules/hanshin.json";
 import saitamaKosoku from "@/data/fare-rules/saitama-kosoku.json";
 import nishitetsu from "@/data/fare-rules/nishitetsu.json";
 import toyoKosoku from "@/data/fare-rules/toyo-kosoku.json";
+import sotetsu from "@/data/fare-rules/sotetsu.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -67,6 +68,7 @@ const rules = [
   saitamaKosoku,
   nishitetsu,
   toyoKosoku,
+  sotetsu,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -679,6 +681,22 @@ describe("FareCalculator", () => {
       expect(calc.estimate("東葉高速鉄道", 16.2)).toBeGreaterThan(
         calc.estimate("謎電鉄", 16.2),
       );
+    });
+  });
+
+  describe("相模鉄道（2023年3月18日改定後・対キロ区間制）", () => {
+    // 出典: https://jikokuhyo.train-times.net/data/sotetsu_fare
+    // 実運賃はekitan.com(2026-09-20取得)で照合
+    it("横浜→海老名 24.6km、実運賃330円（表の最終帯）", () => {
+      expect(calc.estimate("相模鉄道", 24.6)).toBe(330);
+    });
+
+    it("海老名→二俣川 14.1km、実運賃250円", () => {
+      expect(calc.estimate("相模鉄道", 14.1)).toBe(250);
+    });
+
+    it("11.0km ちょうどは 210円（14.1km=250円 の1つ下の帯）", () => {
+      expect(calc.estimate("相模鉄道", 11.0)).toBe(210);
     });
   });
 

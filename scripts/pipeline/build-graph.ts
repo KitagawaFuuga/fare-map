@@ -52,7 +52,12 @@ for (const edge of graph.edges) {
   edge.km = calibratedKm(calibration, node, edge.km);
 }
 
-writeFileSync("data/calibration.json", JSON.stringify(calibration, null, 2));
+// calibration.json はコミット対象なので prettier の書式（末尾改行あり）に合わせる。
+// 付け忘れると再生成のたびに format:check が落ちる。
+writeFileSync(
+  "data/calibration.json",
+  `${JSON.stringify(calibration, null, 2)}\n`,
+);
 writeFileSync("data/graph.json", JSON.stringify(graph));
 process.stdout.write(
   `nodes: ${Object.keys(graph.nodes).length}, edges: ${graph.edges.length}\n`,

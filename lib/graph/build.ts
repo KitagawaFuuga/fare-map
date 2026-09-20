@@ -8,6 +8,8 @@ export interface EkidataInput {
   joins: Record<string, string>[];
 }
 
+// 別駅扱いでも徒歩で乗り換えられるとみなす距離。大きくすると無関係な駅どうしが
+// 繋がり運賃が不当に安くなるため、実際に乗換案内が案内する範囲に寄せた値。
 const TRANSFER_RADIUS_KM = 0.3;
 
 export function buildGraph(input: EkidataInput): RailGraph {
@@ -64,6 +66,8 @@ export function buildGraph(input: EkidataInput): RailGraph {
   return { nodes, edges };
 }
 
+// 乗換エッジ（距離0・事業者なし）を張る。(a) 同一 groupId の全組と、
+// (b) groupId は違うが徒歩圏内にある駅どうし の2系統。
 function buildTransferEdges(stations: StationNode[]): GraphEdge[] {
   const edges: GraphEdge[] = [];
   const seen = new Set<string>();
@@ -91,7 +95,9 @@ function buildTransferEdges(stations: StationNode[]): GraphEdge[] {
     }
   }
 
-  // (b) 近接駅。グリッド分割で近傍セルのみ比較する
+  // (b) 近接駅。全駅の総当たりは約1万件の2乗で現実的でないため、緯度経度を
+  // 0.01度（約1km）刻みのセルに割り、自セルと周囲8セルだけを比較する。
+  // TRANSFER_RADIUS_KM(0.3km) はセル幅より小さいので、この範囲で取りこぼさない。
   const cell = (s: StationNode) =>
     `${Math.round(s.lat * 100)}:${Math.round(s.lng * 100)}`;
   const grid = new Map<string, StationNode[]>();

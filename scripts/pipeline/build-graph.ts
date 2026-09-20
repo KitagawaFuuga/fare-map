@@ -7,6 +7,9 @@ import {
   type CalibrationSection,
 } from "@/lib/graph/calibrate";
 
+// データ更新時にだけ走る生成スクリプト。ekidata の CSV からグラフを組み、
+// 実営業キロで距離補正をかけて data/graph.json に焼き付ける。
+// 実行時（検索API）はこの出力を読むだけで、このファイルは通らない。
 const raw = (name: string) =>
   parseCsv(readFileSync(`data/raw/${name}`, "utf8"));
 
@@ -42,6 +45,7 @@ const sections: CalibrationSection[] = kmRows
 
 const calibration = buildCalibration(graph, sections);
 for (const edge of graph.edges) {
+  // 補正するのは rail のみ。transfer エッジは距離0の乗換なので係数を掛けない
   if (edge.kind !== "rail") continue;
   const node = graph.nodes[edge.from];
   if (!node) continue;

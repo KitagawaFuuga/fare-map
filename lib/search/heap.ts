@@ -1,3 +1,6 @@
+// 探索の優先度付きキュー。lib/search/reachable.ts が「今の運賃が安い状態から順に
+// 展開する」ために使う。ライブラリを入れず自前なのは、pop が数十万回走る
+// ホットパスで比較関数をインライン化したいため。
 export class MinHeap<T> {
   private items: T[] = [];
   constructor(private compare: (a: T, b: T) => number) {}

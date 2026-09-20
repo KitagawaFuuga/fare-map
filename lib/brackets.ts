@@ -11,6 +11,8 @@ export const BRACKET_COLORS = [
   "#6b7280",
 ] as const;
 
+// 運賃 → 色の添字。BRACKETS の上限を超えた場合は末尾（灰色）を指すので、
+// BRACKET_COLORS は BRACKETS より 1 要素多い。
 export function bracketOf(fare: number): number {
   const i = BRACKETS.findIndex((max) => fare <= max);
   return i === -1 ? BRACKETS.length : i;

@@ -3,6 +3,8 @@ import { z } from "zod";
 import { getGraphStore } from "@/lib/server/graph-store";
 import { nearestStation } from "@/lib/server/api-service";
 
+// 日本国内のおおよその緯度経度範囲。範囲外（海外・不正値）はここで弾き、
+// 全駅総当たりの最寄り駅探索に到達させない。
 const querySchema = z.object({
   lat: z.coerce.number().min(20).max(46),
   lng: z.coerce.number().min(122).max(154),

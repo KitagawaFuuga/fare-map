@@ -12,7 +12,9 @@ import { useReachable } from "@/hooks/use-reachable";
 import type { SheetState } from "@/lib/sheet";
 import type { StationSuggestion } from "@/lib/server/api-service";
 
-// maplibre は window 依存のため SSR 無効
+// maplibre は初期化時に window/document を直接触るため、サーバー側レンダリングで
+// 落ちる。"use client" は「ブラウザでも動く」宣言であって SSR を止めないので、
+// ssr: false を明示する必要がある。副次的に初期バンドルからも外れる。
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 export default function Home() {
@@ -22,6 +24,9 @@ export default function Home() {
   const [sheet, setSheet] = useState<SheetState>("half");
   const { data, loading, error, search } = useReachable();
 
+  // 座標 → 出発駅の変換。地図タップと現在地ボタンはどちらも「緯度経度が得られる」
+  // 点で同じなので同一ハンドラを共有する。範囲外の座標は API が 400 を返し、
+  // ここで何もせず戻るので既存の選択状態は壊れない。
   const setFromByCoords = useCallback(async (lat: number, lng: number) => {
     const res = await fetch(`/api/stations/nearest?lat=${lat}&lng=${lng}`);
     if (!res.ok) return;
@@ -29,15 +34,20 @@ export default function Home() {
       station: StationSuggestion & { lat: number; lng: number };
     };
     setFrom({ id: body.station.id, name: body.station.name });
+    // 地図を寄せるのはタップ座標ではなく「見つかった駅」の座標。
+    // そうしないと表示中の駅名と地図の中心がずれる。
     setFocus({ lat: body.station.lat, lng: body.station.lng });
   }, []);
 
   const runSearch = useCallback(async () => {
+    // ボタンの disabled とは別の二重の防御。この行のおかげで以降 from は非 null 扱いになる
     if (!from) return;
     await search(from.id, budget);
     setSheet("collapsed"); // 検索後は地図を主役に
   }, [from, budget, search]);
 
+  // 同じ操作パネルを、デスクトップでは左サイドバー、モバイルではボトムシートに
+  // 差し込む。JSX を変数に持つことで2箇所に同じマークアップを書かずに済む。
   const panel = (
     <div className="space-y-4">
       <SearchPanel selected={from} onSelect={setFrom} />

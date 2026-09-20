@@ -29,6 +29,9 @@ function isSafeHttpUrl(value: string): boolean {
   }
 }
 
+// 乗換案内へのリンクを作る。駅すぱあと API キーが設定されていれば正確な経路 URL を
+// 取りに行き、キー未設定・通信失敗・レスポンス不正のいずれでも Google マップの
+// 経路検索 URL にフォールバックする（リンクが出ないより必ず何か出るほうを優先）。
 export async function buildRouteUrl(
   fromName: string,
   toName: string,

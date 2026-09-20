@@ -78,6 +78,9 @@ export default function MapView({
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  // 地図の初期化 useEffect は [] で1度きり。その中で登録するイベントハンドラは
+  // 最初の props を閉じ込めてしまうため、最新値を ref 経由で参照する。
+  // 依存配列に入れて作り直すと、地図ごと再生成されて表示が飛ぶ。
   const onMapClickRef = useRef(onMapClick);
   const fromNameRef = useRef(fromName);
   onMapClickRef.current = onMapClick;
@@ -112,6 +115,8 @@ export default function MapView({
         const f = e.features?.[0];
         if (!f) return;
         const p = f.properties as { name: string; line: string; fare: number };
+        // ポップアップは innerHTML ではなく createElement + textContent で組む。
+        // 駅名は外部データ由来なので、HTML として解釈させない。
         const el = document.createElement("div");
         const nameEl = document.createElement("strong");
         nameEl.textContent = p.name;
@@ -137,6 +142,8 @@ export default function MapView({
         new Popup().setLngLat(e.lngLat).setDOMContent(el).addTo(map);
       });
 
+      // 地図の空白クリック = 出発駅の変更。ただし上の駅クリックと同時に発火するので、
+      // その場所に駅の円があるかを調べ、無いときだけ出発駅を差し替える。
       map.on("click", (e: MapMouseEvent) => {
         const hits = map.queryRenderedFeatures(e.point, { layers: [LAYER_ID] });
         if (hits.length === 0)
@@ -150,6 +157,8 @@ export default function MapView({
     };
   }, []);
 
+  // 駅は DOM マーカーではなく GeoJSON ソース + circle レイヤで描く。
+  // 数千件になるため、更新はソースのデータ差し替えだけで済ませる。
   useEffect(() => {
     const src = mapRef.current?.getSource(SOURCE_ID) as
       GeoJSONSource | undefined;

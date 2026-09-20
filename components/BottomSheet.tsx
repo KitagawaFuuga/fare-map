@@ -3,6 +3,8 @@
 import { useRef } from "react";
 import { sheetNext, type SheetState } from "@/lib/sheet";
 
+// スマホ専用のパネル（md:hidden）。デスクトップでは左サイドバーが同じ内容を出す。
+// 高さ3段階を state で切り替え、上下スワイプかつまみのタップで遷移する。
 const HEIGHT: Record<SheetState, string> = {
   collapsed: "h-14",
   half: "h-72",
@@ -31,6 +33,7 @@ export default function BottomSheet({
         const end = e.changedTouches[0]?.clientY;
         if (start === null || end === undefined) return;
         const delta = start - end;
+        // 40px 未満はスワイプではなくタップ時の指ブレとみなして無視する
         if (Math.abs(delta) > 40)
           onStateChange(sheetNext(state, delta > 0 ? "up" : "down"));
         touchStartY.current = null;

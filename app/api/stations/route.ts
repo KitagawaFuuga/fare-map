@@ -3,6 +3,9 @@ import { z } from "zod";
 import { getGraphStore } from "@/lib/server/graph-store";
 import { suggestStations } from "@/lib/server/api-service";
 
+// q は検索語（Web 全体の慣例に合わせた URL パラメータ名）。
+// 未指定だと searchParams.get は null を返すので、min(1) が「空」と「欠落」の
+// 両方をまとめて弾く。max(50) は異常に長い入力で曖昧検索が重くなるのを防ぐ上限。
 const querySchema = z.object({ q: z.string().min(1).max(50) });
 
 export function GET(req: NextRequest) {

@@ -30,6 +30,7 @@ import odakyu from "@/data/fare-rules/odakyu.json";
 import hanshin from "@/data/fare-rules/hanshin.json";
 import saitamaKosoku from "@/data/fare-rules/saitama-kosoku.json";
 import nishitetsu from "@/data/fare-rules/nishitetsu.json";
+import toyoKosoku from "@/data/fare-rules/toyo-kosoku.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -65,6 +66,7 @@ const rules = [
   hanshin,
   saitamaKosoku,
   nishitetsu,
+  toyoKosoku,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -637,6 +639,46 @@ describe("FareCalculator", () => {
 
     it("13.0km ちょうどは 360円（15.2km=420円 の1つ下の帯）", () => {
       expect(calc.estimate("西日本鉄道", 13.0)).toBe(360);
+    });
+  });
+
+  describe("東葉高速鉄道（第三セクター・高運賃）", () => {
+    // 出典: 公式駅別運賃表6駅分 https://www.toyokosoku.co.jp/wp/wp-content/themes/trr/print.php?pid=32&sec=sta_fare 他
+    // 営業キロは https://ja.wikipedia.org/wiki/東葉高速鉄道東葉高速線
+    // 48点の実運賃から帯を復元（source.note参照）
+    it("西船橋→東葉勝田台 16.2km（全線）、実運賃640円", () => {
+      expect(calc.estimate("東葉高速鉄道", 16.2)).toBe(640);
+    });
+
+    it("西船橋→東海神 2.1km（初乗り）、実運賃210円", () => {
+      expect(calc.estimate("東葉高速鉄道", 2.1)).toBe(210);
+    });
+
+    it("西船橋→北習志野 8.1km、実運賃440円", () => {
+      expect(calc.estimate("東葉高速鉄道", 8.1)).toBe(440);
+    });
+
+    // 帯境界6本すべてを上下から挟んで固定する。実運賃がどれも帯の内側にあると
+    // 境界を1km取り違えても気づけないため、境界そのものを検証対象にする。
+    it.each([
+      [2.9, 210, 3.7, 300], // 境界 3km
+      [4.9, 300, 5.2, 370], // 境界 5km
+      [6.4, 370, 7.1, 440], // 境界 7km
+      [8.9, 440, 9.1, 520], // 境界 9km
+      [11.0, 520, 11.7, 580], // 境界 11km
+      [13.8, 580, 14.1, 640], // 境界 14km
+    ])(
+      "%skm=%i円 / %skm=%i円（帯境界を上下から固定）",
+      (lowKm, lowFare, highKm, highFare) => {
+        expect(calc.estimate("東葉高速鉄道", lowKm)).toBe(lowFare);
+        expect(calc.estimate("東葉高速鉄道", highKm)).toBe(highFare);
+      },
+    );
+
+    it("汎用フォールバック表より高い（第三セクターの高運賃を反映できている）", () => {
+      expect(calc.estimate("東葉高速鉄道", 16.2)).toBeGreaterThan(
+        calc.estimate("謎電鉄", 16.2),
+      );
     });
   });
 

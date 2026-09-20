@@ -37,6 +37,8 @@ import keifuku from "@/data/fare-rules/keifuku.json";
 import nagasakiDentetsu from "@/data/fare-rules/nagasaki-dentetsu.json";
 import kumamotoCity from "@/data/fare-rules/kumamoto-city.json";
 import kagoshimaCity from "@/data/fare-rules/kagoshima-city.json";
+import shintetsu from "@/data/fare-rules/shintetsu.json";
+import sanyo from "@/data/fare-rules/sanyo.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -79,6 +81,8 @@ const rules = [
   nagasakiDentetsu,
   kumamotoCity,
   kagoshimaCity,
+  shintetsu,
+  sanyo,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -733,6 +737,59 @@ describe("FareCalculator", () => {
       expect(calc.estimate("謎電鉄", 18)).toBeGreaterThan(
         calc.estimate("謎電鉄", 2),
       );
+    });
+  });
+
+  describe("神戸電鉄（国交省認可資料の「改定後」列）", () => {
+    // 出典: 国土交通省近畿運輸局 運賃上限変更認可資料
+    // https://wwwtb.mlit.go.jp/kinki/content/000339193.pdf （令和6年12月25日認可）
+    // 同資料は現行・改定後の2列組なので、どちらが現行かを実運賃で判定する必要があった
+    it("鈴蘭台→三木 19.3km、実運賃600円（改定前なら530円）", () => {
+      expect(calc.estimate("神戸電鉄", 19.3)).toBe(600);
+    });
+
+    it("鈴蘭台→西鈴蘭台 1.3km、実運賃210円（改定前なら180円）", () => {
+      expect(calc.estimate("神戸電鉄", 1.3)).toBe(210);
+    });
+  });
+
+  describe("山陽電気鉄道（2025年1月19日改定後）", () => {
+    // 転記元の2次情報は45〜49km帯を770円としていたが、実測45.1kmは800円だった。
+    // 40〜44km帯の780円より安くなる逆転が起きており、転記元の誤記と判断して訂正した
+    // （詳細は data/fare-rules/sanyo.json の source.note）。
+    it("西代→山陽垂水 9.6km、実運賃320円", () => {
+      expect(calc.estimate("山陽電気鉄道", 9.6)).toBe(320);
+    });
+
+    it("山陽垂水→山陽姫路 45.1km、実運賃800円（転記元の770円は誤り）", () => {
+      expect(calc.estimate("山陽電気鉄道", 45.1)).toBe(800);
+    });
+
+    it("西代→山陽姫路 54.7km（全線）、実運賃860円", () => {
+      expect(calc.estimate("山陽電気鉄道", 54.7)).toBe(860);
+    });
+  });
+
+  // lib/search/reachable.ts の枝刈りは「override が効かない区間では距離表の運賃が
+  // km について単調非減少」であることを下界の根拠にしている。運賃表に逆転があると
+  // この前提が崩れ、正しい経路を誤って刈る可能性がある。山陽電鉄の転記時に実際に
+  // 逆転した値を取り込みかけたため、全表を機械的に検査する。
+  describe("全運賃表の不変条件", () => {
+    it("運賃は距離について単調非減少（逆転が無い）", () => {
+      const inversions: string[] = [];
+      for (const rule of rules) {
+        for (let i = 1; i < rule.table.length; i++) {
+          const prev = rule.table[i - 1];
+          const cur = rule.table[i];
+          if (prev === undefined || cur === undefined) continue;
+          if (cur[1] < prev[1]) {
+            inversions.push(
+              `${rule.id}: ${prev[0]}km=${prev[1]}円 → ${cur[0]}km=${cur[1]}円`,
+            );
+          }
+        }
+      }
+      expect(inversions).toEqual([]);
     });
   });
 

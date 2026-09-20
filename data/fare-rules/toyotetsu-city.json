@@ -1,0 +1,11 @@
+{
+  "id": "toyotetsu-city",
+  "operators": ["豊橋鉄道(市内線)"],
+  "table": [[1000, 200]],
+  "beyond": { "fromKm": 1000, "baseFare": 200, "ratePerKm": 0 },
+  "source": {
+    "url": "https://www.toyotetsu.com/shinaisen/charges.html",
+    "fetchedAt": "2026-09-20",
+    "note": "豊橋鉄道東田本線（豊鉄市内線）の全線均一運賃。公式サイトで「片道運賃（全線一律）大人200円」を確認（2026-09-20取得。2024年3月16日改定で180円から200円へ）。同社の改定運賃表PDFにも市内線として「200円 / IC180円 / 5.4km」の単独ブロックがあり、全長5.4kmに対して距離によらず200円であることと整合する。渥美線とは運賃体系が別で乗り継ぎ時にそれぞれ初乗りが発生するため、グラフ生成時に事業者を分離している（data/operator-splits.json 参照）。"
+  }
+}

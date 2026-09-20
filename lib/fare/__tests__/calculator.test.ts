@@ -43,6 +43,8 @@ import sapporoSubway from "@/data/fare-rules/sapporo-subway.json";
 import sapporoStreetcar from "@/data/fare-rules/sapporo-streetcar.json";
 import iyotetsuSuburban from "@/data/fare-rules/iyotetsu-suburban.json";
 import iyotetsuCity from "@/data/fare-rules/iyotetsu-city.json";
+import toyotetsuAtsumi from "@/data/fare-rules/toyotetsu-atsumi.json";
+import toyotetsuCity from "@/data/fare-rules/toyotetsu-city.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -91,6 +93,8 @@ const rules = [
   sapporoStreetcar,
   iyotetsuSuburban,
   iyotetsuCity,
+  toyotetsuAtsumi,
+  toyotetsuCity,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -818,6 +822,27 @@ describe("FareCalculator", () => {
     it("伊予鉄道(市内線)は全線均一250円", () => {
       expect(calc.estimate("伊予鉄道(市内線)", 1)).toBe(250);
       expect(calc.estimate("伊予鉄道(市内線)", 10)).toBe(250);
+    });
+
+    // 渥美線は公式の改定運賃表PDFが全駅ペアの「運賃＋営業キロ」を載せており、
+    // 85組から距離帯を復元した（source.note参照）。帯境界は整数で一意に決まる。
+    it("豊橋鉄道(渥美線) 大清水→新豊橋 8.5km、実運賃310円", () => {
+      expect(calc.estimate("豊橋鉄道", 8.5)).toBe(310);
+    });
+
+    it("豊橋鉄道(渥美線) 新豊橋→三河田原 18.0km（全線）、実運賃550円", () => {
+      expect(calc.estimate("豊橋鉄道", 18.0)).toBe(550);
+    });
+
+    it("豊橋鉄道(市内線)は全線均一200円（全長5.4kmでも同額）", () => {
+      expect(calc.estimate("豊橋鉄道(市内線)", 1)).toBe(200);
+      expect(calc.estimate("豊橋鉄道(市内線)", 5.4)).toBe(200);
+    });
+
+    it("同じ距離でも渥美線と市内線で運賃が違う（分離できている証拠）", () => {
+      expect(calc.estimate("豊橋鉄道", 5.4)).not.toBe(
+        calc.estimate("豊橋鉄道(市内線)", 5.4),
+      );
     });
   });
 

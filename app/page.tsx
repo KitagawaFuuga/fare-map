@@ -19,7 +19,7 @@ const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 export default function Home() {
   const [from, setFrom] = useState<{ id: string; name: string } | null>(null);
-  const [budget, setBudget] = useState(1500);
+  const [budget, setBudget] = useState(500);
   const [focus, setFocus] = useState<{ lat: number; lng: number } | null>(null);
   const [sheet, setSheet] = useState<SheetState>("half");
   const { data, loading, error, search } = useReachable();

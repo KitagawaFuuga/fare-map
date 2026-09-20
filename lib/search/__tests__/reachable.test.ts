@@ -169,7 +169,7 @@ describe("findReachable", () => {
     // A -5km- B -5km- C（OpA）。override は (A,B)=999円 と (B,C)=111円 の
     // “途中駅ペア” に設定されているが、A→C は区間全体としては (A,C) ペアであり、
     // これらのどちらとも一致しないため距離表（10km=300円）が採用されるはず。
-    // segFromId を使わず「直前の駅」を from として誤って引くバグがあれば
+    // segmentFromId を使わず「直前の駅」を from として誤って引くバグがあれば
     // (B,C)=111 円になってしまい、このテストで判別できる。
     const calcWithMidOverride = createFareCalculator(
       [
@@ -227,14 +227,14 @@ describe("findReachable", () => {
     //   Start(OpX) --transfer--> Start2(OpY) --rail(OpY,1km)--> P(OpY) --transfer--> P2(OpX) --rail(OpX,2km)--> M(OpX)
     //
     // M には2通りで到達できる:
-    //   - 直通 (OpX を Start から乗り続け): 10km => 200円、segFromId=Start
-    //   - 迂回 (OpY を1駅使って P2 で OpX に乗り換え): 80(OpY 1km) + 80(OpX 2km) = 160円、segFromId=P2
+    //   - 直通 (OpX を Start から乗り続け): 10km => 200円、segmentFromId=Start
+    //   - 迂回 (OpY を1駅使って P2 で OpX に乗り換え): 80(OpY 1km) + 80(OpX 2km) = 160円、segmentFromId=P2
     // 迂回のほうが M での「今の運賃」は安い(160<200)。
-    // stationId だけで枝刈りすると直通側(200円, segFromId=Start)が握り潰される。
+    // stationId だけで枝刈りすると直通側(200円, segmentFromId=Start)が握り潰される。
     //
     // しかし OpX には Start→Z の特定運賃(150円)が override 登録されており、
-    // これは segFromId=Start のまま OpX に乗り続けた場合にしか適用されない。
-    // 迂回側は M で乗り換えているため segFromId=P2 になり、override は適用されず
+    // これは segmentFromId=Start のまま OpX に乗り続けた場合にしか適用されない。
+    // 迂回側は M で乗り換えているため segmentFromId=P2 になり、override は適用されず
     // 距離表で 80+200=280円 になる。
     //
     // 正しい最安値は 150円（直通 + override）。stationId だけで枝刈りすると
@@ -284,10 +284,10 @@ describe("findReachable", () => {
     expect(z?.fare).toBe(150);
   });
 
-  it("C-1再現: override非対象でも (stationId, segOperator) 粒度の枝刈りは初乗り二重取りを握り潰してはいけない", () => {
+  it("C-1再現: override非対象でも (stationId, segmentOperator) 粒度の枝刈りは初乗り二重取りを握り潰してはいけない", () => {
     // 上のテストから override を丸ごと外した版。isOverrideAnchor は override 0件なので
-    // 常に false になり、旧実装は stationId+segOperator 粒度で枝刈りしてしまう。
-    // M では「迂回(OpY経由, 160円, segFromId=P2)」が「直通(OpX, 200円, segFromId=Start)」より
+    // 常に false になり、旧実装は stationId+segmentOperator 粒度で枝刈りしてしまう。
+    // M では「迂回(OpY経由, 160円, segmentFromId=P2)」が「直通(OpX, 200円, segmentFromId=Start)」より
     // 一時的に安いため、旧実装は直通側を握り潰す。
     // しかし真の最安は直通で Start→Z を 15km 通しにした estimate(OpX,15)=250円。
     // 迂回側しか残っていないと Z は 80(OpY)+200(OpX 2km) = 280円 になってしまう。
@@ -364,7 +364,12 @@ describe("findReachable", () => {
     expect(full.find((r) => r.id === "Z")?.fare).toBe(150);
     expect(full.find((r) => r.id === "M")?.fare).toBe(200);
 
-    const limited = findReachable(straightGraph, calcWithOverride, "Start", 190);
+    const limited = findReachable(
+      straightGraph,
+      calcWithOverride,
+      "Start",
+      190,
+    );
     const ids = limited.map((r) => r.id).sort();
     expect(ids).toEqual(["Start", "Z"]); // M(200円) は予算外だが Z(150円) は予算内で残るはず
   });
@@ -374,13 +379,13 @@ describe("findReachable", () => {
     // override: (A,T) = 100円 / 表: 5km以下=200円, 10km以下=300円
     //
     // T には2通りで到達できる:
-    //   - 直通 A->T (5km): override(A,T)=100円、(doneFare=0, segKm=5)
+    //   - 直通 A->T (5km): override(A,T)=100円、(confirmedFare=0, segmentKm=5)
     //   - 迂回 A->S(3km)->transfer->T: stationId が T に変わるだけで fare を
     //     再計算しないと、S 時点の fare=200(表引き、override非該当)が
-    //     そのまま stale に持ち越されてしまう。(doneFare=0, segKm=3, fare=200 stale)
+    //     そのまま stale に持ち越されてしまう。(confirmedFare=0, segmentKm=3, fare=200 stale)
     //
-    // stale な迂回状態は (doneFare=0, segKm=3) が (doneFare=0, segKm=5) を
-    // segKm の小ささで支配してしまい、正しい override 適用済みの直通状態
+    // stale な迂回状態は (confirmedFare=0, segmentKm=3) が (confirmedFare=0, segmentKm=5) を
+    // segmentKm の小ささで支配してしまい、正しい override 適用済みの直通状態
     // (100円) を bucket から追い出す。fare を正しく再計算していれば
     // 迂回状態の実際の fare は estimate(OpX,3,A,T)=override(A,T)=100 になり、
     // 直通と同額（支配し合わない）になるはずで、最終的な T の最安値は 100円 のまま。
@@ -413,62 +418,167 @@ describe("findReachable", () => {
         { from: "T", to: "S", km: 0, kind: "transfer", operator: "" },
       ],
     };
-    const result = findReachable(transferOverrideGraph, calcOverride, "A", 10000);
+    const result = findReachable(
+      transferOverrideGraph,
+      calcOverride,
+      "A",
+      10000,
+    );
     expect(result.find((r) => r.id === "T")?.fare).toBe(100);
   });
 });
 
 describe("tryInsertPareto（同一キー内の非支配集合の管理）", () => {
-  // 同一 (stationId, segOperator, segFromId) キー内では override 適用の可否が
-  // km に依存しないため、doneFare・segKm ともに小さいほうが同等以上に有利になる
+  // 同一 (stationId, segmentOperator, segmentFromId) キー内では override 適用の可否が
+  // km に依存しないため、confirmedFare・segmentKm ともに小さいほうが同等以上に有利になる
   // （運賃表は km について単調非減少で、override は駅名ペアのみで判定されるため）。
-  // 「segKm が大きいほうが有利」という向きにすると、同じ路線を往復するだけで
-  // segKm が単調増加する非支配状態を無限に生成し続け、探索が停止しなくなる。
+  // 「segmentKm が大きいほうが有利」という向きにすると、同じ路線を往復するだけで
+  // segmentKm が単調増加する非支配状態を無限に生成し続け、探索が停止しなくなる。
 
-  it("doneFare・segKm ともに小さい状態は、両方大きい状態を支配して締め出す", () => {
+  it("confirmedFare・segmentKm ともに小さい状態は、両方大きい状態を支配して締め出す", () => {
     const bucket: ParetoEntry[] = [];
-    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true })).toBe(true);
+    expect(
+      tryInsertPareto(bucket, {
+        confirmedFare: 100,
+        totalKm: 10,
+        totalEastKm: 0,
+        pendingEastKm: 0,
+        fare: 150,
+        alive: true,
+      }),
+    ).toBe(true);
     // 両方で劣るので挿入されない
-    expect(tryInsertPareto(bucket, { doneFare: 200, totalKm: 20, totalEastKm: 0, pendingEastKm: 0, fare: 250, alive: true })).toBe(false);
-    expect(bucket).toEqual([{ doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true }]);
+    expect(
+      tryInsertPareto(bucket, {
+        confirmedFare: 200,
+        totalKm: 20,
+        totalEastKm: 0,
+        pendingEastKm: 0,
+        fare: 250,
+        alive: true,
+      }),
+    ).toBe(false);
+    expect(bucket).toEqual([
+      {
+        confirmedFare: 100,
+        totalKm: 10,
+        totalEastKm: 0,
+        pendingEastKm: 0,
+        fare: 150,
+        alive: true,
+      },
+    ]);
   });
 
   it("新しい状態がより有利なら、既存の支配される状態を追い出して挿入する", () => {
     const bucket: ParetoEntry[] = [
-      { doneFare: 200, totalKm: 20, totalEastKm: 0, pendingEastKm: 0, fare: 250, alive: true },
+      {
+        confirmedFare: 200,
+        totalKm: 20,
+        totalEastKm: 0,
+        pendingEastKm: 0,
+        fare: 250,
+        alive: true,
+      },
     ];
-    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true })).toBe(true);
-    expect(bucket).toEqual([{ doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true }]);
+    expect(
+      tryInsertPareto(bucket, {
+        confirmedFare: 100,
+        totalKm: 10,
+        totalEastKm: 0,
+        pendingEastKm: 0,
+        fare: 150,
+        alive: true,
+      }),
+    ).toBe(true);
+    expect(bucket).toEqual([
+      {
+        confirmedFare: 100,
+        totalKm: 10,
+        totalEastKm: 0,
+        pendingEastKm: 0,
+        fare: 150,
+        alive: true,
+      },
+    ]);
   });
 
-  it("片方だけ有利（doneFare 小・segKm 大）なトレードオフはどちらも残す", () => {
+  it("片方だけ有利（confirmedFare 小・segmentKm 大）なトレードオフはどちらも残す", () => {
     const bucket: ParetoEntry[] = [];
-    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 20, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true })).toBe(true);
-    expect(tryInsertPareto(bucket, { doneFare: 50, totalKm: 30, totalEastKm: 0, pendingEastKm: 0, fare: 200, alive: true })).toBe(true);
+    expect(
+      tryInsertPareto(bucket, {
+        confirmedFare: 100,
+        totalKm: 20,
+        totalEastKm: 0,
+        pendingEastKm: 0,
+        fare: 150,
+        alive: true,
+      }),
+    ).toBe(true);
+    expect(
+      tryInsertPareto(bucket, {
+        confirmedFare: 50,
+        totalKm: 30,
+        totalEastKm: 0,
+        pendingEastKm: 0,
+        fare: 200,
+        alive: true,
+      }),
+    ).toBe(true);
     expect(bucket).toHaveLength(2);
   });
 
   it("完全に同一の状態は重複して増えない（先着ちで既存が残る）", () => {
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true });
-    // doneFare・segKm が完全一致 => 相互支配なので既存で弾かれる
-    expect(tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true })).toBe(false);
+    tryInsertPareto(bucket, {
+      confirmedFare: 100,
+      totalKm: 10,
+      totalEastKm: 0,
+      pendingEastKm: 0,
+      fare: 150,
+      alive: true,
+    });
+    // confirmedFare・segmentKm が完全一致 => 相互支配なので既存で弾かれる
+    expect(
+      tryInsertPareto(bucket, {
+        confirmedFare: 100,
+        totalKm: 10,
+        totalEastKm: 0,
+        pendingEastKm: 0,
+        fare: 150,
+        alive: true,
+      }),
+    ).toBe(false);
     expect(bucket).toHaveLength(1);
   });
 
   it("支配されて追い出された既存エントリは alive が false になる", () => {
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 200, totalKm: 20, totalEastKm: 0, pendingEastKm: 0, fare: 250, alive: true });
+    tryInsertPareto(bucket, {
+      confirmedFare: 200,
+      totalKm: 20,
+      totalEastKm: 0,
+      pendingEastKm: 0,
+      fare: 250,
+      alive: true,
+    });
     const dominated = bucket[0];
-    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true });
+    tryInsertPareto(bucket, {
+      confirmedFare: 100,
+      totalKm: 10,
+      totalEastKm: 0,
+      pendingEastKm: 0,
+      fare: 150,
+      alive: true,
+    });
     expect(dominated?.alive).toBe(false);
   });
 
   it("totalKm を無視すると、通算距離の大きい状態が小さい状態を誤って握り潰す（反映漏れの再現）", () => {
-    // Task 9: SearchState に honshuKm/honshuEastKm を追加したが、これを
+    // Task 9: SearchState に honshuThroughKm/honshuThroughEastKm を追加したが、これを
     // dominates() の比較に反映し忘れると、このプロジェクトで4回繰り返した
     // 「状態次元の追加が Pareto 判定に反映されない」欠陥類型が再発する。
-    // 性能改善(b)で honshuKm・segKm は totalKm（両者の和）に統合されたが、
+    // 性能改善(b)で honshuThroughKm・segmentKm は totalKm（両者の和）に統合されたが、
     // 「合計距離が違えば将来の運賃が変わりうる」という性質自体は変わらないため、
     // totalKm を dominates() で比較しないと「通算距離が小さい（有利な）」状態が
     // 「通算距離が大きい（不利な）」状態に誤って支配されてしまう、という
@@ -476,7 +586,7 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
     const bucket: ParetoEntry[] = [];
     // 先に「通算距離が大きい（不利な）」状態が入る
     const worse: ParetoEntry = {
-      doneFare: 0,
+      confirmedFare: 0,
       totalKm: 50,
       totalEastKm: 40,
       pendingEastKm: 40,
@@ -487,7 +597,7 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
     // 後から「通算距離が小さい（有利な）」状態が来た場合、totalKm を見ていれば
     // worse を支配して追い出し、挿入されるはず。
     const better: ParetoEntry = {
-      doneFare: 0,
+      confirmedFare: 0,
       totalKm: 10,
       totalEastKm: 0,
       pendingEastKm: 0,
@@ -499,22 +609,22 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
     expect(worse.alive).toBe(false);
   });
 
-  // レビュー指摘2（Important）: honshuThrough=true かつ eastKm除外が現在
+  // レビュー指摘2（Important）: isHonshuThrough=true かつ eastKm除外が現在
   // 適用中（加算額対象キロへの寄与が0）のバケットでは、totalEastKm が常に
-  // honshuEastKm（segKmに依存しない）になるため、segKm/honshuKmの内訳が
+  // honshuThroughEastKm（segmentKmに依存しない）になるため、segmentKm/honshuThroughKmの内訳が
   // totalKm/totalEastKmから復元できない。この状態で、除外が後から解除される
   // （ラチェットが落ちる）同一事業者エッジに当たると、内訳だけが違う2状態が
-  // (doneFare, totalKm, totalEastKm) で完全に一致し相互支配になり、
-  // 先着ちでsegKmの大きい（将来、除外解除時に加算額が多く乗る、不利な）方が
-  // 残りうる。pendingEastKm（= totalEastKm + 除外中に隠れているsegKm）を
-  // 追加の非strict次元として比較することで、segKmが小さい（有利な）方を
+  // (confirmedFare, totalKm, totalEastKm) で完全に一致し相互支配になり、
+  // 先着ちでsegmentKmの大きい（将来、除外解除時に加算額が多く乗る、不利な）方が
+  // 残りうる。pendingEastKm（= totalEastKm + 除外中に隠れているsegmentKm）を
+  // 追加の非strict次元として比較することで、segmentKmが小さい（有利な）方を
   // 正しく残す。
-  it("pendingEastKm を無視すると、eastKm除外中に隠れた segKm の大小を区別できず、不利な状態が残りうる（反映漏れの再現）", () => {
+  it("pendingEastKm を無視すると、eastKm除外中に隠れた segmentKm の大小を区別できず、不利な状態が残りうる（反映漏れの再現）", () => {
     const bucket: ParetoEntry[] = [];
-    // 除外中(totalEastKmはhonshuEastKm=0のまま)だが、隠れているsegKmが45と
+    // 除外中(totalEastKmはhonshuThroughEastKm=0のまま)だが、隠れているsegmentKmが45と
     // 大きい（不利な）状態が先に入る
     const worse: ParetoEntry = {
-      doneFare: 0,
+      confirmedFare: 0,
       totalKm: 50,
       totalEastKm: 0,
       pendingEastKm: 45,
@@ -522,11 +632,11 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
       alive: true,
     };
     expect(tryInsertPareto(bucket, worse)).toBe(true);
-    // doneFare・totalKm・totalEastKmは完全に同じだが、隠れているsegKmが5と
+    // confirmedFare・totalKm・totalEastKmは完全に同じだが、隠れているsegmentKmが5と
     // 小さい（有利な）状態。pendingEastKmを見ていれば worse を支配して
     // 追い出し、挿入されるはず。見ていなければ相互支配で拒否されてしまう。
     const better: ParetoEntry = {
-      doneFare: 0,
+      confirmedFare: 0,
       totalKm: 50,
       totalEastKm: 0,
       pendingEastKm: 5,
@@ -543,8 +653,22 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
     // （そのエントリはどのbucketにも入らず捨てられるだけ）。ここが誤って
     // false にされていないかを直接確認する。
     const bucket: ParetoEntry[] = [];
-    tryInsertPareto(bucket, { doneFare: 100, totalKm: 10, totalEastKm: 0, pendingEastKm: 0, fare: 150, alive: true });
-    const rejected: ParetoEntry = { doneFare: 200, totalKm: 20, totalEastKm: 0, pendingEastKm: 0, fare: 250, alive: true };
+    tryInsertPareto(bucket, {
+      confirmedFare: 100,
+      totalKm: 10,
+      totalEastKm: 0,
+      pendingEastKm: 0,
+      fare: 150,
+      alive: true,
+    });
+    const rejected: ParetoEntry = {
+      confirmedFare: 200,
+      totalKm: 20,
+      totalEastKm: 0,
+      pendingEastKm: 0,
+      fare: 250,
+      alive: true,
+    };
     const inserted = tryInsertPareto(bucket, rejected);
     expect(inserted).toBe(false);
     expect(rejected.alive).toBe(true);
@@ -572,18 +696,18 @@ describe("findReachable の alive フラグ配線（参照実装との一致・�
   ) {
     type State = {
       stationId: string;
-      doneFare: number;
-      segOperator: string;
-      segFromId: string;
-      segKm: number;
+      confirmedFare: number;
+      segmentOperator: string;
+      segmentFromId: string;
+      segmentKm: number;
       fare: number;
       // 直前に使った辺そのものを逆走しないようにするための記録。
       // グラフは無向（両方向にaddAdj）なので、これが無いと「同じ辺を
-      // 行って戻って」を繰り返すだけで segKm が単調増加する状態が
+      // 行って戻って」を繰り返すだけで segmentKm が単調増加する状態が
       // 無限に生成され続け、終了しなくなる（override anchor 区間では
       // lowerBound が事業者最安値で頭打ちになり km について単調増加しない
       // ため、budget によるカットも効かない。lib/fare/calculator.ts の
-      // lowerBound コメント参照）。この U ターンは doneFare・現在駅とも
+      // lowerBound コメント参照）。この U ターンは confirmedFare・現在駅とも
       // 直前と完全に同じ状態を再生産するだけで新しい到達駅を一切生まない
       // （区間の起点駅名・現在駅名が変わらない以上 fare も変わらない）ため、
       // 除外しても最終結果には影響しない。
@@ -617,14 +741,14 @@ describe("findReachable の alive フラグ配線（参照実装との一致・�
     const nameOf = (id: string): string | undefined => graph.nodes[id]?.name;
 
     const key = (s: State) =>
-      `${s.stationId} ${s.segOperator} ${s.segFromId} ${s.doneFare} ${s.segKm}`;
+      `${s.stationId} ${s.segmentOperator} ${s.segmentFromId} ${s.confirmedFare} ${s.segmentKm}`;
 
     const initial: State = {
       stationId: fromId,
-      doneFare: 0,
-      segOperator: "",
-      segFromId: fromId,
-      segKm: 0,
+      confirmedFare: 0,
+      segmentOperator: "",
+      segmentFromId: fromId,
+      segmentKm: 0,
       fare: 0,
     };
     const visited = new Set<string>([key(initial)]);
@@ -663,55 +787,55 @@ describe("findReachable の alive フラグ配線（参照実装との一致・�
         if (edge.kind === "transfer") {
           next = {
             stationId: edge.to,
-            doneFare: state.doneFare,
-            segOperator: state.segOperator,
-            segFromId: state.segFromId,
-            segKm: state.segKm,
+            confirmedFare: state.confirmedFare,
+            segmentOperator: state.segmentOperator,
+            segmentFromId: state.segmentFromId,
+            segmentKm: state.segmentKm,
             fare:
-              state.doneFare +
+              state.confirmedFare +
               calc.estimate(
-                state.segOperator,
-                state.segKm,
-                nameOf(state.segFromId),
+                state.segmentOperator,
+                state.segmentKm,
+                nameOf(state.segmentFromId),
                 nameOf(edge.to),
               ),
             arrivedVia,
           };
-        } else if (edge.operator === state.segOperator) {
-          const segKm = state.segKm + edge.km;
+        } else if (edge.operator === state.segmentOperator) {
+          const segmentKm = state.segmentKm + edge.km;
           next = {
             stationId: edge.to,
-            doneFare: state.doneFare,
-            segOperator: state.segOperator,
-            segFromId: state.segFromId,
-            segKm,
+            confirmedFare: state.confirmedFare,
+            segmentOperator: state.segmentOperator,
+            segmentFromId: state.segmentFromId,
+            segmentKm,
             fare:
-              state.doneFare +
+              state.confirmedFare +
               calc.estimate(
-                state.segOperator,
-                segKm,
-                nameOf(state.segFromId),
+                state.segmentOperator,
+                segmentKm,
+                nameOf(state.segmentFromId),
                 nameOf(edge.to),
               ),
             arrivedVia,
           };
         } else {
-          const doneFare =
-            state.doneFare +
+          const confirmedFare =
+            state.confirmedFare +
             calc.estimate(
-              state.segOperator,
-              state.segKm,
-              nameOf(state.segFromId),
+              state.segmentOperator,
+              state.segmentKm,
+              nameOf(state.segmentFromId),
               nameOf(state.stationId),
             );
           next = {
             stationId: edge.to,
-            doneFare,
-            segOperator: edge.operator,
-            segFromId: state.stationId,
-            segKm: edge.km,
+            confirmedFare,
+            segmentOperator: edge.operator,
+            segmentFromId: state.stationId,
+            segmentKm: edge.km,
             fare:
-              doneFare +
+              confirmedFare +
               calc.estimate(
                 edge.operator,
                 edge.km,
@@ -721,12 +845,12 @@ describe("findReachable の alive フラグ配線（参照実装との一致・�
             arrivedVia,
           };
         }
-        const segLowerBound = calc.lowerBound(
-          next.segOperator,
-          next.segKm,
-          nameOf(next.segFromId),
+        const segmentLowerBound = calc.lowerBound(
+          next.segmentOperator,
+          next.segmentKm,
+          nameOf(next.segmentFromId),
         );
-        if (next.doneFare + segLowerBound > budget) continue;
+        if (next.confirmedFare + segmentLowerBound > budget) continue;
         const k = key(next);
         if (visited.has(k)) continue;
         visited.add(k);
@@ -740,12 +864,14 @@ describe("findReachable の alive フラグ配線（参照実装との一致・�
   }
 
   const sortResult = (r: { id: string; fare: number }[]) =>
-    [...r].sort((a, b) => (a.id === b.id ? a.fare - b.fare : a.id.localeCompare(b.id)));
+    [...r].sort((a, b) =>
+      a.id === b.id ? a.fare - b.fare : a.id.localeCompare(b.id),
+    );
 
   it("由来違いの支配が起きる合成グラフで、findReachable の結果が枝刈り無効の参照実装と一致する", () => {
     // 「由来（区間の起点駅）が違う同一駅の状態を安易な運賃比較で握り潰さない」
     // テストと同じグラフを使う。M で迂回状態(160円)が直通状態(200円)より
-    // 一時的に安く、Pareto支配が実際に発生する（迂回はdoneFare・segKmとも
+    // 一時的に安く、Pareto支配が実際に発生する（迂回はconfirmedFare・segmentKmとも
     // 直通以下ではないので支配はしないが、bucketの非支配集合管理が働く）。
     const table: [number, number][] = [
       [5, 80],
@@ -971,7 +1097,7 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
     },
     {
       // JR東日本: 単独事業者としての自社表はあえて基準額表と異なる（高い）値に
-      // しておく。honshuKm=0（会社境界を跨いでいない）間はこちらが使われる
+      // しておく。honshuThroughKm=0（会社境界を跨いでいない）間はこちらが使われる
       // ことをテストで確認するため。
       id: "jr-east",
       operators: ["JR東日本"],
@@ -1098,13 +1224,15 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
   });
 
   it("会社境界を跨がない単一JR会社の乗車は通し方式を使わず、従来どおり自社の運賃表を使う", () => {
-    // A --JR東日本10km--> B（会社境界を跨いでいない＝honshuKm=0のまま）。
+    // A --JR東日本10km--> B（会社境界を跨いでいない＝honshuThroughKm=0のまま）。
     // 通し方式（基準額表=10km:100円）ではなく、JR東日本の自社表(10km:120円)が
-    // 使われるはず。honshuKm>0の条件を付け忘れて常に通し方式を使ってしまう
-        // 回帰を防ぐ。
+    // 使われるはず。honshuThroughKm>0の条件を付け忘れて常に通し方式を使ってしまう
+    // 回帰を防ぐ。
     const graph: RailGraph = {
       nodes: { A: jrNode("A", "JR東日本"), B: jrNode("B", "JR東日本") },
-      edges: [{ from: "A", to: "B", km: 10, kind: "rail", operator: "JR東日本" }],
+      edges: [
+        { from: "A", to: "B", km: 10, kind: "rail", operator: "JR東日本" },
+      ],
     };
     const result = findReachable(graph, honshuCalc, "A", 10000);
     expect(result.find((r) => r.id === "B")?.fare).toBe(120);
@@ -1133,7 +1261,7 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
     // A --JR東日本10km--> B --JR東海10km--> C --PrivateX5km--> D。
     // C までは通し運賃 160円（1つ目のテストと同じ）で確定し、
     // そこから PrivateX 5km=50円が追加されて 210円になるはず。
-    // segmentFare を使わず単純に calc.estimate(直前のJR会社の自社表) で
+    // evaluateSegmentFare を使わず単純に calc.estimate(直前のJR会社の自社表) で
     // 確定してしまう回帰があると、ここが 160 にならず別の値になる。
     const graph: RailGraph = {
       nodes: {
@@ -1189,12 +1317,23 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
       const graph: RailGraph = {
         nodes: {
           Tokyo: tokaidoNode("Tokyo", "Tokyo", "JR東日本", "11301"),
-          TokyoYamanote: tokaidoNode("TokyoYamanote", "Tokyo", "JR東日本", "11302"),
+          TokyoYamanote: tokaidoNode(
+            "TokyoYamanote",
+            "Tokyo",
+            "JR東日本",
+            "11302",
+          ),
           Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
           C: jrNode("C", "JR東海"),
         },
         edges: [
-          { from: "Tokyo", to: "Atami", km: 60, kind: "rail", operator: "JR東日本" },
+          {
+            from: "Tokyo",
+            to: "Atami",
+            km: 60,
+            kind: "rail",
+            operator: "JR東日本",
+          },
           { from: "Atami", to: "C", km: 50, kind: "rail", operator: "JR東海" },
         ],
       };
@@ -1210,7 +1349,13 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
           C: jrNode("C", "JR東海"),
         },
         edges: [
-          { from: "Shinjuku", to: "Tokyo", km: 10, kind: "rail", operator: "JR東日本" },
+          {
+            from: "Shinjuku",
+            to: "Tokyo",
+            km: 10,
+            kind: "rail",
+            operator: "JR東日本",
+          },
           { from: "Tokyo", to: "C", km: 20, kind: "rail", operator: "JR東海" },
         ],
       };
@@ -1252,14 +1397,31 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
       const graph: RailGraph = {
         nodes: {
           Tokyo: tokaidoNode("Tokyo", "Tokyo", "JR東日本", "11301"),
-          TokyoYamanote: tokaidoNode("TokyoYamanote", "Tokyo", "JR東日本", "11302"),
+          TokyoYamanote: tokaidoNode(
+            "TokyoYamanote",
+            "Tokyo",
+            "JR東日本",
+            "11302",
+          ),
           Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
           X: jrNode("X", "JR東日本"), // lineId "L"（対象外）
           C: jrNode("C", "JR東海"),
         },
         edges: [
-          { from: "Tokyo", to: "Atami", km: 60, kind: "rail", operator: "JR東日本" },
-          { from: "Atami", to: "X", km: 10, kind: "rail", operator: "JR東日本" },
+          {
+            from: "Tokyo",
+            to: "Atami",
+            km: 60,
+            kind: "rail",
+            operator: "JR東日本",
+          },
+          {
+            from: "Atami",
+            to: "X",
+            km: 10,
+            kind: "rail",
+            operator: "JR東日本",
+          },
           { from: "X", to: "C", km: 40, kind: "rail", operator: "JR東海" },
         ],
       };
@@ -1295,7 +1457,13 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
           C: jrNode("C", "JR東海"),
         },
         edges: [
-          { from: "Odawara", to: "Atami", km: 20, kind: "rail", operator: "JR東日本" },
+          {
+            from: "Odawara",
+            to: "Atami",
+            km: 20,
+            kind: "rail",
+            operator: "JR東日本",
+          },
           { from: "Atami", to: "C", km: 50, kind: "rail", operator: "JR東海" },
         ],
       };
@@ -1316,7 +1484,13 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
           C: jrNode("C", "JR東海"),
         },
         edges: [
-          { from: "Yokohama", to: "Atami", km: 30, kind: "rail", operator: "JR東日本" },
+          {
+            from: "Yokohama",
+            to: "Atami",
+            km: 30,
+            kind: "rail",
+            operator: "JR東日本",
+          },
           { from: "Atami", to: "C", km: 50, kind: "rail", operator: "JR東海" },
         ],
       };
@@ -1340,11 +1514,22 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
           C: jrNode("C", "JR東海"),
           Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
           Tokyo: tokaidoNode("Tokyo", "Tokyo", "JR東日本", "11301"),
-          TokyoYamanote: tokaidoNode("TokyoYamanote", "Tokyo", "JR東日本", "11302"),
+          TokyoYamanote: tokaidoNode(
+            "TokyoYamanote",
+            "Tokyo",
+            "JR東日本",
+            "11302",
+          ),
         },
         edges: [
           { from: "C", to: "Atami", km: 50, kind: "rail", operator: "JR東海" },
-          { from: "Atami", to: "Tokyo", km: 60, kind: "rail", operator: "JR東日本" },
+          {
+            from: "Atami",
+            to: "Tokyo",
+            km: 60,
+            kind: "rail",
+            operator: "JR東日本",
+          },
         ],
       };
       const result = findReachable(graph, honshuCalc, "C", 10000);
@@ -1352,21 +1537,21 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
     });
   });
 
-  // レビュー指摘3: honshuKm を「距離」と「通算中フラグ」の兼用にしていると、
-  // 会社境界を0kmのrailエッジで跨いだ直後（honshuKm+segKm===0）にフラグが
-  // 失われる。honshuThrough を独立フィールドとして分離したことを確認する。
-  describe("honshuThrough フラグの分離（honshuKm===0でも通算モードを見失わない）", () => {
-    it("会社境界を2回続けて0kmで跨ぐと honshuKm は0のままだが、通し運賃方式であり続ける", () => {
+  // レビュー指摘3: honshuThroughKm を「距離」と「通算中フラグ」の兼用にしていると、
+  // 会社境界を0kmのrailエッジで跨いだ直後（honshuThroughKm+segmentKm===0）にフラグが
+  // 失われる。isHonshuThrough を独立フィールドとして分離したことを確認する。
+  describe("isHonshuThrough フラグの分離（honshuThroughKm===0でも通算モードを見失わない）", () => {
+    it("会社境界を2回続けて0kmで跨ぐと honshuThroughKm は0のままだが、通し運賃方式であり続ける", () => {
       // A --JR東日本0km--> B --JR東海0km--> C --JR東日本0km--> D --JR東日本10km--> E。
       //
       // B→C, C→D はどちらも0kmの会社境界跨ぎ（HONSHU_OPERATORS同士）なので、
-      // honshuKm は「0(直前のsegKm) + 0(直前のsegKm)」の繰り返しでずっと0のまま
-      // だが、honshuThrough は最初の境界跨ぎ（B→C）以降ずっと true のはず。
+      // honshuThroughKm は「0(直前のsegmentKm) + 0(直前のsegmentKm)」の繰り返しでずっと0のまま
+      // だが、isHonshuThrough は最初の境界跨ぎ（B→C）以降ずっと true のはず。
       //
-      // honshuKm > 0 を「通算中フラグ」の代わりに使っていた場合（レビュー指摘3の
-      // 修正前の実装）、D→E の時点で honshuKm===0 のため通算中と判定できず、
+      // honshuThroughKm > 0 を「通算中フラグ」の代わりに使っていた場合（レビュー指摘3の
+      // 修正前の実装）、D→E の時点で honshuThroughKm===0 のため通算中と判定できず、
       // JR東日本の単独表（このテストでは基準額表よりわざと高い値にしてある）に
-      // 落ちてしまう。honshuThrough を独立フィールドとして持てば、この場合でも
+      // 落ちてしまう。isHonshuThrough を独立フィールドとして持てば、この場合でも
       // 正しく基準額＋加算額方式（10km: 100円 + 加算額10円 = 110円）が使われる。
       const graph: RailGraph = {
         nodes: {
@@ -1385,7 +1570,7 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
       };
       const result = findReachable(graph, honshuCalc, "A", 10000);
       // 通し運賃(honshuThrough正しく分離): 基準額(10km)=100 + 加算額(10km)=10 = 110円。
-      // 修正前(honshuKm>0をフラグ代用)なら JR東日本単独表(10km)=120円 になる。
+      // 修正前(honshuThroughKm>0をフラグ代用)なら JR東日本単独表(10km)=120円 になる。
       expect(result.find((r) => r.id === "E")?.fare).toBe(110);
     });
   });

@@ -12,28 +12,36 @@ export interface StationSuggestion {
   operator: string;
 }
 
+// 全駅（約1万件）の曖昧検索インデックスは構築コストが高いので、GraphStore ごとに
+// 1度だけ作って使い回す。WeakMap にしているのは、store が破棄されたらインデックスも
+// 一緒に回収させるため（テストで store を何度も作り直してもリークしない）。
 const fuseCache = new WeakMap<GraphStore, Fuse<StationNode>>();
 
 function getFuse(store: GraphStore): Fuse<StationNode> {
   let fuse = fuseCache.get(store);
   if (!fuse) {
     fuse = new Fuse(Object.values(store.graph.nodes), {
-      keys: ["name"],
-      threshold: 0.3,
+      keys: ["name"], // 駅名だけを検索対象にする（路線名まで含めるとノイズが増える）
+      threshold: 0.3, // 0=完全一致, 1=何でもヒット。打ち間違いは拾いつつ無関係な駅は出さない値
     });
     fuseCache.set(store, fuse);
   }
   return fuse;
 }
 
+// 駅名の曖昧検索。実データでは同じ物理駅が路線ごとに別ノードとして存在する
+// （例: 新宿は JR山手線・JR中央線・小田急・京王… で11ノード）ため、そのまま返すと
+// 候補が同名駅で埋まる。groupId（同一駅なら同じ値）で重複を除き、1駅1件にする。
 export function suggestStations(
   store: GraphStore,
-  q: string,
+  query: string,
   limit = 10,
 ): StationSuggestion[] {
   const seen = new Set<string>();
   const out: StationSuggestion[] = [];
-  for (const { item } of getFuse(store).search(q, { limit: limit * 3 })) {
+  // limit の3倍を要求するのは、重複除去で件数が減るのを見込んだ余裕分
+  // （ちょうど limit 件だけ取ると、全部が同一駅の別路線で1件しか残らないことがある）。
+  for (const { item } of getFuse(store).search(query, { limit: limit * 3 })) {
     if (seen.has(item.groupId)) continue;
     seen.add(item.groupId);
     out.push({
@@ -47,6 +55,9 @@ export function suggestStations(
   return out;
 }
 
+// 座標から最寄り駅を1件返す（地図タップ・現在地ボタンの着地点）。
+// 空間インデックスを持たず全ノードを総当たりするが、1万件の距離計算は
+// 数ミリ秒で終わり、呼ばれる頻度も低いので最適化していない。
 export function nearestStation(
   store: GraphStore,
   lat: number,
@@ -101,6 +112,8 @@ export function reachable(
     const g = store.graph.nodes[r.id]?.groupId;
     if (g !== undefined && !byGroup.has(g)) byGroup.set(g, r);
   }
+  // 出発駅そのものを結果から除く。ここで消すのは id ではなく groupId である点が重要で、
+  // 出発ノード以外の同一駅ノード（別路線ホーム）も一緒に消える。
   byGroup.delete(fromNode.groupId);
 
   const stations = [...byGroup.values()].map(({ id, fare }) => {

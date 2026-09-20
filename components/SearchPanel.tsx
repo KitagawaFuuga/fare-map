@@ -9,36 +9,36 @@ export interface SearchPanelProps {
 }
 
 export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
-  const [q, setQ] = useState("");
+  const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<StationSuggestion[]>([]);
   const [open, setOpen] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (timer.current) clearTimeout(timer.current);
-    if (q.trim() === "") {
+    if (query.trim() === "") {
       setSuggestions([]);
       return;
     }
     // 入力中の連打を 200ms デバウンス
     timer.current = setTimeout(async () => {
-      const res = await fetch(`/api/stations?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`/api/stations?q=${encodeURIComponent(query)}`);
       if (res.ok) {
         const body = (await res.json()) as { stations: StationSuggestion[] };
         setSuggestions(body.stations);
         setOpen(true);
       }
     }, 200);
-  }, [q]);
+  }, [query]);
 
   return (
     <div className="relative">
       <label className="block text-sm font-medium">出発駅</label>
       <input
         type="text"
-        value={q}
+        value={query}
         placeholder={selected?.name ?? "駅名を入力"}
-        onChange={(e) => setQ(e.target.value)}
+        onChange={(e) => setQuery(e.target.value)}
         onFocus={() => setOpen(suggestions.length > 0)}
         className="mt-1 w-full rounded border border-gray-300 px-3 py-2"
       />
@@ -51,7 +51,7 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
                 className="w-full px-3 py-2 text-left hover:bg-gray-100"
                 onClick={() => {
                   onSelect({ id: s.id, name: s.name });
-                  setQ("");
+                  setQuery("");
                   setOpen(false);
                 }}
               >

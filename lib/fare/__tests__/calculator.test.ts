@@ -39,6 +39,10 @@ import kumamotoCity from "@/data/fare-rules/kumamoto-city.json";
 import kagoshimaCity from "@/data/fare-rules/kagoshima-city.json";
 import shintetsu from "@/data/fare-rules/shintetsu.json";
 import sanyo from "@/data/fare-rules/sanyo.json";
+import sapporoSubway from "@/data/fare-rules/sapporo-subway.json";
+import sapporoStreetcar from "@/data/fare-rules/sapporo-streetcar.json";
+import iyotetsuSuburban from "@/data/fare-rules/iyotetsu-suburban.json";
+import iyotetsuCity from "@/data/fare-rules/iyotetsu-city.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -83,6 +87,10 @@ const rules = [
   kagoshimaCity,
   shintetsu,
   sanyo,
+  sapporoSubway,
+  sapporoStreetcar,
+  iyotetsuSuburban,
+  iyotetsuCity,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -767,6 +775,49 @@ describe("FareCalculator", () => {
 
     it("西代→山陽姫路 54.7km（全線）、実運賃860円", () => {
       expect(calc.estimate("山陽電気鉄道", 54.7)).toBe(860);
+    });
+  });
+
+  // 1事業者が運賃体系の異なる路線群を持つケース。グラフ生成時に事業者名を分けて
+  // いるため（data/operator-splits.json）、運賃表も別々に引かれる。分離前は
+  // 「均一運賃の市電と対キロ制の地下鉄」が1区間として通算され、実際には2回払う
+  // 初乗りが1回分になっていた。
+  describe("運賃体系が分かれる事業者（グラフ生成時に分割済み）", () => {
+    it("札幌市営地下鉄は区数制（3km以下210円、21km以下380円）", () => {
+      expect(calc.estimate("札幌市交通局", 3)).toBe(210);
+      expect(calc.estimate("札幌市交通局", 7)).toBe(250);
+      expect(calc.estimate("札幌市交通局", 20)).toBe(380);
+    });
+
+    it("札幌市電は全線均一230円（距離によらない）", () => {
+      expect(calc.estimate("札幌市交通局(市電)", 1)).toBe(230);
+      expect(calc.estimate("札幌市交通局(市電)", 8)).toBe(230);
+    });
+
+    it("同じ距離でも地下鉄と市電で運賃が違う（分離できている証拠）", () => {
+      expect(calc.estimate("札幌市交通局", 8)).not.toBe(
+        calc.estimate("札幌市交通局(市電)", 8),
+      );
+    });
+
+    // 伊予鉄道の郊外電車は公式が距離帯表を出しておらず、改定前の表に公式告知の
+    // 引き上げ幅（5.0kmまで+20円、5.1kmから+30円）を適用して復元した導出値。
+    // そのため実運賃での検証が必須だった。
+    it("伊予鉄道(郊外電車) 松山市→高浜 9.4km、実運賃520円", () => {
+      expect(calc.estimate("伊予鉄道", 9.4)).toBe(520);
+    });
+
+    it("伊予鉄道(郊外電車) 松山市→横河原 13.2km、実運賃640円", () => {
+      expect(calc.estimate("伊予鉄道", 13.2)).toBe(640);
+    });
+
+    it("伊予鉄道(郊外電車) 初乗り3kmは250円（公式告知と一致）", () => {
+      expect(calc.estimate("伊予鉄道", 3)).toBe(250);
+    });
+
+    it("伊予鉄道(市内線)は全線均一250円", () => {
+      expect(calc.estimate("伊予鉄道(市内線)", 1)).toBe(250);
+      expect(calc.estimate("伊予鉄道(市内線)", 10)).toBe(250);
     });
   });
 

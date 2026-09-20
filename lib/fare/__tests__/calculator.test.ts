@@ -1,3 +1,4 @@
+import { readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createFareCalculator } from "@/lib/fare/calculator";
 import { fareOverrideSchema, fareRuleSchema } from "@/lib/fare/types";
@@ -25,6 +26,10 @@ import keikyu from "@/data/fare-rules/keikyu.json";
 import keisei from "@/data/fare-rules/keisei.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
+import odakyu from "@/data/fare-rules/odakyu.json";
+import hanshin from "@/data/fare-rules/hanshin.json";
+import saitamaKosoku from "@/data/fare-rules/saitama-kosoku.json";
+import nishitetsu from "@/data/fare-rules/nishitetsu.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -56,6 +61,10 @@ const rules = [
   keisei,
   keihan,
   tokyu,
+  odakyu,
+  hanshin,
+  saitamaKosoku,
+  nishitetsu,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -65,6 +74,21 @@ const overrides = [
   keihanOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 const calc = createFareCalculator(rules, overrides);
+
+// 本番(lib/server/graph-store.ts)は data/fare-rules/ をディレクトリごと読むが、この
+// テストは import を1本ずつ並べている。運賃表を追加して import を足し忘れると、
+// 本番だけ新しい表を使いテストは汎用フォールバックを引く、という食い違いが起きる。
+// しかもテストは「落ちない」ので気づけない。ファイル一覧と突き合わせて検出する。
+describe("運賃表の読み込み漏れ検出", () => {
+  it("data/fare-rules/ の全ファイルがこのテストの rules に含まれている", () => {
+    const onDisk = readdirSync("data/fare-rules")
+      .filter((f) => f.endsWith(".json"))
+      .map((f) => f.replace(/\.json$/, ""))
+      .sort();
+    const loaded = rules.map((r) => r.id).sort();
+    expect(loaded).toEqual(onDisk);
+  });
+});
 
 // 実区間照合テストは、加算運賃・特定運賃のかからない一般区間を選び実運賃と toBe で完全一致検証する
 // （brief参照）。一致しない区間は「表で表現できない特殊運賃が乗っている」ことを意味するため、
@@ -531,6 +555,88 @@ describe("FareCalculator", () => {
 
     it("渋谷→中央林間(田園都市線) 31.5km、実運賃390円", () => {
       expect(calc.estimate("東急電鉄", 31.5)).toBe(390);
+    });
+  });
+
+  describe("小田急電鉄（2023年3月18日改定後・対キロ区間制）", () => {
+    // 出典: https://jikokuhyo.train-times.net/data/odakyu_fare
+    // 実運賃はekitan.com(2026-09-20取得)で照合
+    it("新宿→小田原 82.5km、実運賃910円（表の最終帯）", () => {
+      expect(calc.estimate("小田急電鉄", 82.5)).toBe(910);
+    });
+
+    it("新百合ケ丘→新宿 21.5km、実運賃330円", () => {
+      expect(calc.estimate("小田急電鉄", 21.5)).toBe(330);
+    });
+
+    // 21.5km が 330円 になるのは「18〜21km帯(300円)の上限が21.0km」だから。
+    // 帯の境界を取り違えると 21.5km が 300円 になってしまうため、境界の
+    // 内側(21.0km)も固定して取り違えを検出できるようにする。
+    it("21.0km ちょうどは 300円（帯の上限側の境界）", () => {
+      expect(calc.estimate("小田急電鉄", 21.0)).toBe(300);
+    });
+  });
+
+  describe("阪神電鉄（2023年4月1日改定後・対キロ区間制）", () => {
+    // 出典: https://jikokuhyo.train-times.net/data/hanshin_fare
+    // 実運賃はekitan.com(2026-09-20取得)で照合
+    it("大阪梅田→神戸三宮 31.2km、実運賃330円", () => {
+      expect(calc.estimate("阪神電鉄", 31.2)).toBe(330);
+    });
+
+    it("大阪梅田→甲子園 14.1km、実運賃280円", () => {
+      expect(calc.estimate("阪神電鉄", 14.1)).toBe(280);
+    });
+
+    it("13.0km ちょうどは 250円（14.1km=280円 の1つ下の帯）", () => {
+      expect(calc.estimate("阪神電鉄", 13.0)).toBe(250);
+    });
+  });
+
+  describe("埼玉高速鉄道（第三セクター・汎用表では大幅に過小評価になる）", () => {
+    // 出典: 公式駅別運賃表 https://www.s-rail.co.jp/line/akabaneiwabuchi.php 他2駅
+    // 営業キロは https://ja.wikipedia.org/wiki/埼玉高速鉄道線
+    // 3駅ぶんの運賃表から全21ペアを距離と突き合わせて帯を復元した（source.note参照）
+    it("赤羽岩淵→浦和美園 14.6km（全線）、実運賃480円", () => {
+      expect(calc.estimate("埼玉高速鉄道", 14.6)).toBe(480);
+    });
+
+    it("赤羽岩淵→鳩ヶ谷 5.9km、実運賃310円", () => {
+      expect(calc.estimate("埼玉高速鉄道", 5.9)).toBe(310);
+    });
+
+    it("浦和美園→東川口 2.4km（初乗り）、実運賃210円", () => {
+      expect(calc.estimate("埼玉高速鉄道", 2.4)).toBe(210);
+    });
+
+    // 帯の復元が正しいことの要。鳩ヶ谷→浦和美園 8.7km は 350円 で、
+    // 赤羽岩淵→戸塚安行 10.0km の 400円 とは別の帯に入る。
+    it("8.7km は350円、10.0km は400円（9km の帯境界）", () => {
+      expect(calc.estimate("埼玉高速鉄道", 8.7)).toBe(350);
+      expect(calc.estimate("埼玉高速鉄道", 10.0)).toBe(400);
+    });
+
+    // この表を入れた動機。汎用私鉄表なら同じ距離でずっと安くなる
+    it("汎用フォールバック表より高い（第三セクターの高運賃を反映できている）", () => {
+      expect(calc.estimate("埼玉高速鉄道", 14.6)).toBeGreaterThan(
+        calc.estimate("謎電鉄", 14.6),
+      );
+    });
+  });
+
+  describe("西日本鉄道（2026年4月1日改定後・対キロ区間制）", () => {
+    // 出典: https://jikokuhyo.train-times.net/data/nishitetsu_fare
+    // 実運賃はekitan.com(2026-09-20取得)で照合
+    it("西鉄福岡(天神)→大牟田 74.8km、実運賃1,140円（表の最終帯）", () => {
+      expect(calc.estimate("西日本鉄道", 74.8)).toBe(1140);
+    });
+
+    it("西鉄二日市→西鉄福岡(天神) 15.2km、実運賃420円", () => {
+      expect(calc.estimate("西日本鉄道", 15.2)).toBe(420);
+    });
+
+    it("13.0km ちょうどは 360円（15.2km=420円 の1つ下の帯）", () => {
+      expect(calc.estimate("西日本鉄道", 13.0)).toBe(360);
     });
   });
 

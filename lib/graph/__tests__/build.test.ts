@@ -101,3 +101,90 @@ describe("buildGraph", () => {
     expect(touchesBroken).toBe(false);
   });
 });
+
+// 1事業者が運賃体系の異なる路線群を持つ場合の分割（札幌市電と地下鉄など）。
+// lineId は station.csv 由来の内部IDで再生成時に振り直されうるため、
+// 定義が実データと合わないときは黙って無効化されず例外になることを確認する。
+describe("buildGraph の事業者分割 (operator-splits)", () => {
+  const twoLines = {
+    companies: [{ company_cd: "1", company_name: "テスト市交通局" }],
+    lines: [
+      { line_cd: "L1", company_cd: "1", line_name: "テスト地下鉄" },
+      { line_cd: "L2", company_cd: "1", line_name: "テスト市電" },
+    ],
+    stations: [
+      {
+        station_cd: "S1",
+        station_g_cd: "G1",
+        station_name: "あ駅",
+        line_cd: "L1",
+        lon: "139.70",
+        lat: "35.69",
+      },
+      {
+        station_cd: "S2",
+        station_g_cd: "G2",
+        station_name: "い駅",
+        line_cd: "L2",
+        lon: "139.75",
+        lat: "35.69",
+      },
+    ],
+    joins: [],
+  };
+
+  it("指定した lineId のノードだけ事業者名が置き換わる", () => {
+    const g = buildGraph(twoLines, [
+      { lineId: "L2", from: "テスト市交通局", to: "テスト市交通局(市電)" },
+    ]);
+    expect(g.nodes["S1"]?.operator).toBe("テスト市交通局");
+    expect(g.nodes["S2"]?.operator).toBe("テスト市交通局(市電)");
+  });
+
+  it("分割後の事業者名は rail エッジにも伝播する", () => {
+    const withJoin = {
+      ...twoLines,
+      stations: [
+        twoLines.stations[0]!,
+        { ...twoLines.stations[1]!, station_cd: "S2" },
+        {
+          station_cd: "S3",
+          station_g_cd: "G3",
+          station_name: "う駅",
+          line_cd: "L2",
+          lon: "139.76",
+          lat: "35.69",
+        },
+      ],
+      joins: [{ line_cd: "L2", station_cd1: "S2", station_cd2: "S3" }],
+    };
+    const g = buildGraph(withJoin, [
+      { lineId: "L2", from: "テスト市交通局", to: "テスト市交通局(市電)" },
+    ]);
+    const rail = g.edges.filter((e) => e.kind === "rail");
+    expect(rail).toHaveLength(1);
+    expect(rail[0]?.operator).toBe("テスト市交通局(市電)");
+  });
+
+  it("実データに存在しない lineId を指定したら例外（振り直しの検出）", () => {
+    expect(() =>
+      buildGraph(twoLines, [
+        { lineId: "L99", from: "テスト市交通局", to: "テスト市交通局(市電)" },
+      ]),
+    ).toThrow(/存在しない lineId/);
+  });
+
+  it("lineId は実在するが事業者が想定と違う場合も例外", () => {
+    expect(() =>
+      buildGraph(twoLines, [
+        { lineId: "L2", from: "別の会社", to: "テスト市交通局(市電)" },
+      ]),
+    ).toThrow(/事業者が想定と違います/);
+  });
+
+  it("分割定義が空なら従来どおり（既存の挙動を変えない）", () => {
+    const g = buildGraph(twoLines);
+    expect(g.nodes["S1"]?.operator).toBe("テスト市交通局");
+    expect(g.nodes["S2"]?.operator).toBe("テスト市交通局");
+  });
+});

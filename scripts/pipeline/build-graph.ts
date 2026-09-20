@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { parseCsv } from "@/lib/graph/csv";
-import { buildGraph } from "@/lib/graph/build";
+import { buildGraph, type OperatorSplit } from "@/lib/graph/build";
 import {
   buildCalibration,
   calibratedKm,
@@ -13,12 +13,21 @@ import {
 const raw = (name: string) =>
   parseCsv(readFileSync(`data/raw/${name}`, "utf8"));
 
-const graph = buildGraph({
-  companies: raw("company.csv"),
-  lines: raw("line.csv"),
-  stations: raw("station.csv"),
-  joins: raw("join.csv"),
-});
+const splits = (
+  JSON.parse(readFileSync("data/operator-splits.json", "utf8")) as {
+    splits: OperatorSplit[];
+  }
+).splits;
+
+const graph = buildGraph(
+  {
+    companies: raw("company.csv"),
+    lines: raw("line.csv"),
+    stations: raw("station.csv"),
+    joins: raw("join.csv"),
+  },
+  splits,
+);
 
 // kilometrage.csv は引用符で囲まれているが埋め込みカンマは無いため、
 // 引用符を除去してから parseCsv（単純 split 実装）に通せる

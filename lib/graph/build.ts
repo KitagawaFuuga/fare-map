@@ -8,11 +8,29 @@ export interface EkidataInput {
   joins: Record<string, string>[];
 }
 
+// 1事業者が運賃体系の異なる路線群を持つ場合に、グラフ生成時点で事業者名を分ける定義。
+// 運賃表は事業者単位で引かれ、探索も事業者が変わったところで区間を確定するため、
+// ここで分けないと「均一運賃の市電と対キロ制の地下鉄」が1区間として通算されてしまう。
+export interface OperatorSplit {
+  lineId: string;
+  from: string; // 分割前の事業者名。実データと食い違えば例外にするための検証用
+  to: string;
+}
+
 // 別駅扱いでも徒歩で乗り換えられるとみなす距離。大きくすると無関係な駅どうしが
 // 繋がり運賃が不当に安くなるため、実際に乗換案内が案内する範囲に寄せた値。
 const TRANSFER_RADIUS_KM = 0.3;
 
-export function buildGraph(input: EkidataInput): RailGraph {
+export function buildGraph(
+  input: EkidataInput,
+  splits: OperatorSplit[] = [],
+): RailGraph {
+  const splitByLine = new Map(splits.map((s) => [s.lineId, s]));
+  // 定義された lineId が実在し、期待どおりの事業者に属しているかを記録する。
+  // lineId は station.csv 由来の内部IDで再生成時に振り直されうるため、
+  // 黙って分割が効かなくなる（＝運賃が静かに間違う）事態を防ぐ。
+  const matched = new Set<string>();
+
   const companyName = new Map(
     input.companies.map((c) => [c.company_cd ?? "", c.company_name ?? ""]),
   );
@@ -36,16 +54,39 @@ export function buildGraph(input: EkidataInput): RailGraph {
     const lat = Number(s.lat);
     const lng = Number(s.lon);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+    const lineId = s.line_cd ?? "";
+    const split = splitByLine.get(lineId);
+    let operator = line.operator;
+    if (split !== undefined) {
+      if (split.from !== line.operator) {
+        throw new Error(
+          `operator-splits: lineId=${lineId} の事業者が想定と違います ` +
+            `(定義: "${split.from}" / 実データ: "${line.operator}")。` +
+            `lineId が振り直された可能性があるため data/operator-splits.json を確認してください`,
+        );
+      }
+      operator = split.to;
+      matched.add(lineId);
+    }
     nodes[s.station_cd] = {
       id: s.station_cd,
       groupId: s.station_g_cd ?? s.station_cd,
       name: s.station_name ?? "",
       lat,
       lng,
-      lineId: s.line_cd ?? "",
+      lineId,
       lineName: line.name,
-      operator: line.operator,
+      operator,
     };
+  }
+
+  const unmatched = splits.filter((s) => !matched.has(s.lineId));
+  if (unmatched.length > 0) {
+    throw new Error(
+      `operator-splits: 実データに存在しない lineId があります ` +
+        `(${unmatched.map((s) => `${s.lineId}→${s.to}`).join(", ")})。` +
+        `lineId が振り直された可能性があるため data/operator-splits.json を確認してください`,
+    );
   }
 
   const edges: GraphEdge[] = [];

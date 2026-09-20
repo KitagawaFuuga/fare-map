@@ -239,6 +239,11 @@ function main(): void {
         `観測${String(b.observed).padStart(3)}点  ${b.pinned ? "確定" : "未確定"}  ${range}\n`,
     );
   }
+  for (const w of result.warnings) {
+    process.stdout.write(`
+【要注意】${w}
+`);
+  }
   if (result.unpinned > 0) {
     process.stdout.write(
       `\n上限が未確定の帯が ${result.unpinned} 本ある。` +

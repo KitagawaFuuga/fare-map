@@ -113,3 +113,35 @@ describe("deriveFareTable", () => {
     ]);
   });
 });
+
+// 富山地方鉄道で実際に踏んだ失敗の再現。単一の起点（電鉄富山）からの観測点だけで
+// 復元すると、その起点から到達しない距離の帯がまるごと抜け落ちる。自己検証は
+// 通ってしまうので、警告として別に報告する必要がある。
+describe("deriveFareTable の警告（観測点の粗さ）", () => {
+  it("観測点の間隔が広い帯は、間に別の帯が隠れている可能性として警告する", () => {
+    // 49.5km=1980円 と 53.3km=2160円 しか観測していないと、間の
+    // 50.8km=2020円（実在する）を見落とす
+    const r = deriveFareTable([
+      { km: 48.7, fare: 1880 },
+      { km: 49.5, fare: 1980 },
+      { km: 53.3, fare: 2160 },
+    ]);
+    expect(r.ok).toBe(true); // 自己検証自体は通ってしまう
+    expect(r.warnings.join("")).toMatch(/隠れている可能性/);
+  });
+
+  it("観測点が密なら警告は出ない", () => {
+    const r = deriveFareTable([
+      { km: 2.9, fare: 210 },
+      { km: 3.7, fare: 300 },
+      { km: 4.9, fare: 300 },
+      { km: 5.2, fare: 370 },
+      { km: 6.4, fare: 370 },
+      { km: 7.1, fare: 440 },
+      { km: 8.9, fare: 440 },
+      { km: 9.1, fare: 520 },
+      { km: 10.0, fare: 520 },
+    ]);
+    expect(r.warnings.filter((w) => w.includes("隠れている"))).toEqual([]);
+  });
+});

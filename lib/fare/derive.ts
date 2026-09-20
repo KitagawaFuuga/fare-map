@@ -30,6 +30,9 @@ export interface DeriveResult {
   table: [number, number][];
   bands: DerivedBand[];
   problems: string[];
+  // ok を false にはしないが、そのまま採用すると危険な兆候。
+  // 特に「観測点の間隔が広く、その間に帯がまるごと隠れている可能性」を報告する。
+  warnings: string[];
   pairCount: number;
   // 上限が一意に決まらなかった帯の数。0 でなければ観測点を増やすべき
   unpinned: number;
@@ -54,6 +57,7 @@ export function deriveFareTable(pairs: KmFarePair[]): DeriveResult {
       table: [],
       bands: [],
       problems: ["観測点が0件"],
+      warnings: [],
       pairCount: 0,
       unpinned: 0,
     };
@@ -151,12 +155,36 @@ export function deriveFareTable(pairs: KmFarePair[]): DeriveResult {
     );
   }
 
+  // 隣り合う観測点の距離が離れていると、その隙間に別の帯がまるごと入っていても
+  // 気づけない。復元した表は「観測した距離では正しいが、間の距離では粗い」ものに
+  // なりうる。実例: 富山地方鉄道で単一の起点からの40点だけで復元したところ、
+  // 観測済みの21.8km/30.2kmは実運賃と一致したのに、観測していない50.8kmは
+  // 2,020円が抜け落ちて2,160円になった。
+  const warnings: string[] = [];
+  for (const b of bands) {
+    if (b.boundaryRange === null || b.pinned) continue;
+    const [lo, hi] = b.boundaryRange;
+    const gap = hi - lo;
+    if (gap >= 2) {
+      warnings.push(
+        `${b.fare}円 の上限が ${lo}〜${hi}km の範囲に絞れていない。` +
+          `この間に別の帯が隠れている可能性がある`,
+      );
+    }
+  }
+  if (bands.some((b) => b.observed <= 1)) {
+    warnings.push(
+      "観測点が1点しかない帯がある。単一の起点からのデータだけで復元していないか確認すること",
+    );
+  }
+
   const unpinned = bands.filter((b) => !b.pinned).length;
   return {
     ok: problems.length === 0,
     table,
     bands,
     problems,
+    warnings,
     pairCount: clean.length,
     unpinned,
   };

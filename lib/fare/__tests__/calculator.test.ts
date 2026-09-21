@@ -1,7 +1,12 @@
-import { readdirSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createFareCalculator } from "@/lib/fare/calculator";
-import { fareOverrideSchema, fareRuleSchema } from "@/lib/fare/types";
+import type { RailGraph } from "@/lib/graph/types";
+import {
+  fareOverrideSchema,
+  fareRuleSchema,
+  type FareOverride,
+} from "@/lib/fare/types";
 import jrEast from "@/data/fare-rules/jr-east.json";
 import jrCentral from "@/data/fare-rules/jr-central.json";
 import jrWest from "@/data/fare-rules/jr-west.json";
@@ -145,57 +150,66 @@ const overrides = [
   tokitetsuOverride,
   shinanoOverride,
 ].map((o) => fareOverrideSchema.parse(o));
-// 富山地鉄本線の営業キロ（電鉄富山起点。出典: Wikipedia「富山地方鉄道本線」駅一覧）。
-// 距離表が実運賃を上回らないことを全ペアで確かめるために使う
-const CHITETSU_KM: Record<string, number> = {
-  電鉄富山: 0.0,
-  稲荷町: 1.6,
-  新庄田中: 2.5,
-  東新庄: 3.6,
-  越中荏原: 4.7,
-  越中三郷: 7.0,
-  越中舟橋: 8.5,
-  寺田: 9.8,
-  越中泉: 10.5,
-  相ノ木: 11.3,
-  新相ノ木: 12.1,
-  上市: 13.3,
-  新宮川: 15.1,
-  中加積: 17.1,
-  西加積: 18.7,
-  西滑川: 19.8,
-  中滑川: 20.6,
-  滑川: 21.8,
-  浜加積: 23.2,
-  早月加積: 24.4,
-  越中中村: 25.6,
-  西魚津: 27.6,
-  電鉄魚津: 28.9,
-  新魚津: 30.2,
-  経田: 32.9,
-  電鉄石田: 34.9,
-  電鉄黒部: 37.2,
-  東三日市: 37.8,
-  荻生: 38.6,
-  長屋: 39.6,
-  新黒部: 40.7,
-  舌山: 41.0,
-  若栗: 41.7,
-  栃屋: 42.8,
-  浦山: 44.3,
-  下立口: 45.6,
-  下立: 46.3,
-  愛本: 47.6,
-  内山: 48.7,
-  音沢: 49.5,
-  宇奈月温泉: 53.3,
-};
-function chitetsuKm(from: string, to: string): number {
-  const a = CHITETSU_KM[from];
-  const b = CHITETSU_KM[to];
-  if (a === undefined || b === undefined)
-    throw new Error(`営業キロ未登録: ${from} / ${to}`);
-  return Math.round(Math.abs(b - a) * 10) / 10;
+// data/fare-rules/chitetsu.json の距離表は枝刈りの下界専用で、公表営業キロではなく
+// graph.json の駅間距離（座標から求めて実営業キロで補正した値）で帯を切ってある。
+// 探索が calculator に渡すのもこの距離なので、検証も同じ距離でなければ意味がない
+// （公表営業キロで検証していたときは、実際には5ペアで下界が破れているのに緑だった）。
+function chitetsuGraphKm(): Map<string, number> {
+  const graph = JSON.parse(
+    readFileSync("data/graph.json", "utf8"),
+  ) as RailGraph;
+  const ids = Object.values(graph.nodes)
+    .filter((n) => n.operator === "富山地方鉄道")
+    .map((n) => n.id);
+  const inSet = new Set(ids);
+  const adj = new Map<string, [string, number][]>();
+  const link = (a: string, b: string, km: number) => {
+    let l = adj.get(a);
+    if (!l) adj.set(a, (l = []));
+    l.push([b, km]);
+  };
+  for (const e of graph.edges) {
+    if (!inSet.has(e.from) || !inSet.has(e.to)) continue;
+    // transfer は区間を確定しないので、同一事業者内のものは距離0の辺として含める
+    if (e.kind === "rail" && e.operator !== "富山地方鉄道") continue;
+    link(e.from, e.to, e.km);
+    link(e.to, e.from, e.km);
+  }
+  const byName = new Map<string, string[]>();
+  for (const id of ids) {
+    const nm = graph.nodes[id]!.name;
+    let l = byName.get(nm);
+    if (!l) byName.set(nm, (l = []));
+    l.push(id);
+  }
+  const out = new Map<string, number>();
+  for (const [from, starts] of byName) {
+    const dist = new Map<string, number>();
+    const pq: [number, string][] = [];
+    for (const id of starts) {
+      dist.set(id, 0);
+      pq.push([0, id]);
+    }
+    while (pq.length > 0) {
+      pq.sort((a, b) => a[0] - b[0]);
+      const head = pq.shift()!;
+      const [d, cur] = head;
+      if (d > (dist.get(cur) ?? Infinity)) continue;
+      for (const [nx, km] of adj.get(cur) ?? []) {
+        const nd = d + km;
+        if (nd < (dist.get(nx) ?? Infinity)) {
+          dist.set(nx, nd);
+          pq.push([nd, nx]);
+        }
+      }
+    }
+    for (const [to, targets] of byName) {
+      if (from === to) continue;
+      const km = Math.min(...targets.map((id) => dist.get(id) ?? Infinity));
+      if (Number.isFinite(km)) out.set([from, to].sort().join("\u0000"), km);
+    }
+  }
+  return out;
 }
 
 const calc = createFareCalculator(rules, overrides);
@@ -216,13 +230,21 @@ describe("運賃表の読み込み漏れ検出", () => {
 
   // 特定運賃(data/fare-overrides/)も本番はディレクトリごと読む。こちらを足し忘れると
   // 本番だけ上書きが効きテストは距離表のままになる、という逆向きの食い違いが起きる。
+  // ファイル数だけ比べると「1つ足し忘れて別の1つを二重に import」したときに
+  // 件数が相殺されて通ってしまうので、operator の集合で突き合わせる。
   it("data/fare-overrides/ の全ファイルがこのテストの overrides に含まれている", () => {
     const onDisk = readdirSync("data/fare-overrides")
       .filter((f) => f.endsWith(".json"))
-      .map((f) => f.replace(/\.json$/, ""))
+      .map(
+        (f) =>
+          (
+            JSON.parse(
+              readFileSync(`data/fare-overrides/${f}`, "utf8"),
+            ) as FareOverride
+          ).operator,
+      )
       .sort();
-    // ファイル名と operator 名は対応していないので、ファイル数で突き合わせる
-    expect(overrides.length).toBe(onDisk.length);
+    expect(overrides.map((o) => o.operator).sort()).toEqual(onDisk);
   });
 });
 
@@ -1193,10 +1215,41 @@ describe("FareCalculator", () => {
     });
 
     // 距離表は「各距離での最小運賃」の階段。枝刈りの下界に使うので実運賃を超えてはいけない
-    it("距離表は全820ペアの実運賃を上回らない", () => {
+    // 枝刈りの下界としての正しさ。graph を再生成して駅間距離が動くと帯の境界を
+    // またいで壊れうる（境界の余裕は最小6m）ので、実距離で全ペアを検査する
+    it("距離表は全820ペアの実運賃を上回らない（graph.json の実距離で検証）", () => {
+      const km = chitetsuGraphKm();
+      expect(chitetsuOverride.pairs).toHaveLength(820);
+      let checked = 0;
       for (const p of chitetsuOverride.pairs) {
-        const km = chitetsuKm(p.from, p.to);
-        expect(calc.estimate("富山地方鉄道", km)).toBeLessThanOrEqual(p.fare);
+        const d = km.get([p.from, p.to].sort().join("\u0000"));
+        expect(
+          d,
+          `${p.from}-${p.to} の距離が graph.json から取れない`,
+        ).toBeDefined();
+        expect(
+          calc.estimate("富山地方鉄道", d!),
+          `${p.from}→${p.to} ${d!.toFixed(3)}km`,
+        ).toBeLessThanOrEqual(p.fare);
+        checked++;
+      }
+      expect(checked).toBe(820);
+    });
+
+    // override が丸ごと消えても距離表が同じ値を返すペアが多く、代表値のテストでは
+    // 欠落を検出できない。件数と、距離表と食い違う値が実際に引けることの両方を見る
+    it("override は全820ペア揃っていて、距離表と違う値が引ける", () => {
+      const km = chitetsuGraphKm();
+      const differing = chitetsuOverride.pairs.filter((p) => {
+        const d = km.get([p.from, p.to].sort().join("\u0000"));
+        return d !== undefined && calc.estimate("富山地方鉄道", d) !== p.fare;
+      });
+      expect(differing.length).toBeGreaterThan(100);
+      for (const p of differing.slice(0, 50)) {
+        expect(
+          calc.estimate("富山地方鉄道", 0.1, p.from, p.to),
+          `${p.from}→${p.to}`,
+        ).toBe(p.fare);
       }
     });
   });
@@ -1292,7 +1345,90 @@ describe("FareCalculator", () => {
   // km について単調非減少」であることを下界の根拠にしている。運賃表に逆転があると
   // この前提が崩れ、正しい経路を誤って刈る可能性がある。山陽電鉄の転記時に実際に
   // 逆転した値を取り込みかけたため、全表を機械的に検査する。
+  // 運賃表・特定運賃と data/graph.json の結合はすべて手打ちの日本語（事業者名・駅名）で、
+  // 1文字でも違うと calculator は黙って汎用フォールバック表に落ちる。zod もファイル読み込み
+  // 漏れ検出テストもこの食い違いは見ないので、ここで実データと突き合わせる。
+  describe("運賃データと graph.json の整合", () => {
+    const graph = JSON.parse(
+      readFileSync("data/graph.json", "utf8"),
+    ) as RailGraph;
+    const nodes = Object.values(graph.nodes);
+    const operators = new Set(nodes.map((n) => n.operator));
+    const stationsByOperator = new Map<string, Set<string>>();
+    for (const n of nodes) {
+      let s = stationsByOperator.get(n.operator);
+      if (!s) stationsByOperator.set(n.operator, (s = new Set()));
+      s.add(n.name);
+    }
+
+    it("運賃表が宣言する事業者名はすべて graph.json に実在する", () => {
+      const missing = rules
+        .flatMap((r) => r.operators)
+        .filter((op) => !op.startsWith("__") && !operators.has(op));
+      expect(missing).toEqual([]);
+    });
+
+    it("特定運賃の事業者名と駅名はすべて graph.json に実在する", () => {
+      const missing: string[] = [];
+      for (const o of overrides) {
+        const stations = stationsByOperator.get(o.operator);
+        if (!stations) {
+          missing.push(`事業者 ${o.operator}`);
+          continue;
+        }
+        for (const p of o.pairs) {
+          if (!stations.has(p.from)) missing.push(`${o.operator}/${p.from}`);
+          if (!stations.has(p.to)) missing.push(`${o.operator}/${p.to}`);
+        }
+      }
+      expect([...new Set(missing)]).toEqual([]);
+    });
+
+    it("同じ事業者を宣言する運賃表が2つ以上ない（後勝ちで静かに上書きされる）", () => {
+      const seen = new Map<string, string[]>();
+      for (const r of rules)
+        for (const op of r.operators) {
+          let l = seen.get(op);
+          if (!l) seen.set(op, (l = []));
+          l.push(r.id);
+        }
+      expect([...seen].filter(([, ids]) => ids.length > 1)).toEqual([]);
+    });
+
+    it("特定運賃に同じ駅ペアの重複がない（後勝ちで静かに上書きされる）", () => {
+      const dup: string[] = [];
+      for (const o of overrides) {
+        const seen = new Set<string>();
+        for (const p of o.pairs) {
+          const key = [p.from, p.to].sort().join("\u0000");
+          if (seen.has(key)) dup.push(`${o.operator}: ${p.from}-${p.to}`);
+          seen.add(key);
+          if (p.from === p.to) dup.push(`${o.operator}: 同一駅 ${p.from}`);
+        }
+      }
+      expect(dup).toEqual([]);
+    });
+  });
+
   describe("全運賃表の不変条件", () => {
+    // beyond は table の範囲外で使われる線形外挿。最終帯より安くなると km について
+    // 単調でなくなり、枝刈りの下界の前提が壊れる。
+    it("beyond は最終帯から接続していて、そこで運賃が下がらない", () => {
+      for (const r of rules) {
+        const last = r.table[r.table.length - 1];
+        if (last === undefined) continue;
+        expect(r.beyond.fromKm, `${r.id} の beyond.fromKm`).toBe(last[0]);
+        expect(
+          r.beyond.baseFare,
+          `${r.id} の beyond.baseFare`,
+        ).toBeGreaterThanOrEqual(last[1]);
+        expect(
+          r.beyond.ratePerKm,
+          `${r.id} の ratePerKm`,
+        ).toBeGreaterThanOrEqual(0);
+      }
+    });
+
     it("運賃は距離について単調非減少（逆転が無い）", () => {
       const inversions: string[] = [];
       for (const rule of rules) {

@@ -2,10 +2,14 @@
   "id": "chitetsu-tram",
   "operators": ["富山地方鉄道(軌道線)"],
   "table": [[100, 240]],
-  "beyond": { "fromKm": 100, "baseFare": 240, "ratePerKm": 0 },
+  "beyond": {
+    "fromKm": 100,
+    "baseFare": 240,
+    "ratePerKm": 0
+  },
   "source": {
     "url": "https://www.chitetsu.co.jp/?p=76618",
     "fetchedAt": "2026-09-21",
-    "note": "富山地方鉄道の軌道線（市内線1・2系統、富山都心線3系統、富山港線）の全線均一運賃。2025年4月1日改定で210円→240円。均一運賃なので距離帯は1本だけ置き、全線（最長でも十数km）を確実に覆うよう上限を100kmにしてある。鉄道線（本線・立山線・不二越上滝線）は別体系で data/fare-rules/chitetsu.json が未整備のため汎用フォールバックのまま。事業者の分割定義は data/operator-splits.json 参照。"
+    "note": "富山地方鉄道の軌道線（市内線1・2系統、富山都心線3系統、富山港線）の全線均一運賃。2025年4月1日改定で210円→240円。均一運賃なので距離帯は1本だけ置き、全線（最長でも十数km）を確実に覆うよう上限を100kmにしてある。鉄道線（本線・立山線・不二越上滝線）は別体系で data/fare-rules/chitetsu.json と data/fare-overrides/chitetsu.json に分けてある（本線41駅は全820ペアを実額で登録済み、立山線・不二越上滝線は距離表による近似）。事業者の分割定義は data/operator-splits.json 参照。"
   }
 }

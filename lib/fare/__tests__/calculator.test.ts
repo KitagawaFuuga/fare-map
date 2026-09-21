@@ -54,12 +54,14 @@ import tarumi from "@/data/fare-rules/tarumi.json";
 import fukuokaSubway from "@/data/fare-rules/fukuoka-subway.json";
 import nagaden from "@/data/fare-rules/nagaden.json";
 import manyosen from "@/data/fare-rules/manyosen.json";
+import hokutetsu from "@/data/fare-rules/hokutetsu.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
 import tokyuOverride from "@/data/fare-overrides/tokyu.json";
 import keihanOverride from "@/data/fare-overrides/keihan.json";
 import manyosenOverride from "@/data/fare-overrides/manyosen.json";
+import hokutetsuOverride from "@/data/fare-overrides/hokutetsu.json";
 
 const rules = [
   jrEast,
@@ -114,6 +116,7 @@ const rules = [
   fukuokaSubway,
   nagaden,
   manyosen,
+  hokutetsu,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -122,6 +125,7 @@ const overrides = [
   tokyuOverride,
   keihanOverride,
   manyosenOverride,
+  hokutetsuOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 const calc = createFareCalculator(rules, overrides);
 
@@ -1050,6 +1054,37 @@ describe("FareCalculator", () => {
 
     it("中伏木→東新湊 4.1km は override が効かず 300円", () => {
       expect(calc.estimate("万葉線", 4.1, "中伏木", "東新湊")).toBe(300);
+    });
+  });
+
+  describe("北陸鉄道（公式運賃表の全202ペアから復元）", () => {
+    it("野町→鶴来 13.8km（石川線全線）は 540円", () => {
+      expect(calc.estimate("北陸鉄道", 13.8, "野町", "鶴来")).toBe(540);
+    });
+
+    it("押野→鶴来 10.4km は 540円", () => {
+      expect(calc.estimate("北陸鉄道", 10.4, "押野", "鶴来")).toBe(540);
+    });
+
+    it("10.0km ちょうどは 490円（10.4km=540円 の1つ下の帯）", () => {
+      expect(calc.estimate("北陸鉄道", 10.0)).toBe(490);
+    });
+
+    it("馬替→押野 2.1km は距離表どおり 290円", () => {
+      expect(calc.estimate("北陸鉄道", 2.1, "馬替", "押野")).toBe(290);
+    });
+
+    // 金沢側ターミナル寄りの駅発だけ同距離の他区間より安い
+    it("野町→新西金沢 2.1km は override で 210円", () => {
+      expect(calc.estimate("北陸鉄道", 2.1, "野町", "新西金沢")).toBe(210);
+    });
+
+    it("北鉄金沢→内灘 6.8km（浅野川線全線）は override で 400円", () => {
+      expect(calc.estimate("北陸鉄道", 6.8, "北鉄金沢", "内灘")).toBe(400);
+    });
+
+    it("乙丸→鶴来 7.0km は距離表どおり 440円", () => {
+      expect(calc.estimate("北陸鉄道", 7.0, "乙丸", "鶴来")).toBe(440);
     });
   });
 

@@ -1,0 +1,18 @@
+{
+  "id": "hokutetsu",
+  "operators": ["北陸鉄道"],
+  "table": [
+    [2, 200],
+    [4, 290],
+    [6, 370],
+    [8, 440],
+    [10, 490],
+    [13.8, 540]
+  ],
+  "beyond": { "fromKm": 13.8, "baseFare": 540, "ratePerKm": 0 },
+  "source": {
+    "url": "https://www.hokutetsu.co.jp/railway/ishikawasen/fare/ , https://www.hokutetsu.co.jp/railway/asanogawasen/fare/",
+    "fetchedAt": "2026-09-21",
+    "note": "北陸鉄道の鉄道線（石川線 野町〜鶴来 13.8km・17駅、浅野川線 北鉄金沢〜内灘 6.8km・12駅）の普通運賃。公式運賃表は両線とも画像の三角表なので、画像を直接読んで全202ペアを書き起こし、営業キロ（Wikipedia の駅一覧）と突き合わせて距離帯を復元した。2km刻みで200/290/370/440/490/540円の6帯。ただし金沢側ターミナル寄りの駅を発着する35ペアだけは同じ距離の他区間より安く、距離帯では再現できないため data/fare-overrides/hokutetsu.json で補正している（両方合わせると公式表と全202ペアが一致する）。2023年10月の改定で全区間一律40円値上げ。両線は線路がつながっておらず通し乗車は発生しないので、全線13.8kmを超える beyond は使われない。"
+  }
+}

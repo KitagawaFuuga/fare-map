@@ -50,6 +50,7 @@ import sendaiSubway from "@/data/fare-rules/sendai-subway.json";
 import chichibu from "@/data/fare-rules/chichibu.json";
 import yokohamaSubway from "@/data/fare-rules/yokohama-subway.json";
 import nagaragawa from "@/data/fare-rules/nagaragawa.json";
+import tarumi from "@/data/fare-rules/tarumi.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -105,6 +106,7 @@ const rules = [
   chichibu,
   yokohamaSubway,
   nagaragawa,
+  tarumi,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -940,6 +942,26 @@ describe("FareCalculator", () => {
     it("帯は3km刻み（3.0km=210円、3.1km=310円）", () => {
       expect(calc.estimate("長良川鉄道", 3.0)).toBe(210);
       expect(calc.estimate("長良川鉄道", 3.1)).toBe(310);
+    });
+  });
+
+  describe("樽見鉄道（公式PDFの三角表全体から128点で復元）", () => {
+    // PDFは1行1数値で大人と小児が交互。大人分171個が19駅の三角表と一致し、
+    // 小児が全件その半額であることも確認したうえで営業キロと突き合わせた
+    it("大垣→樽見 34.5km（全線）、実運賃1,000円", () => {
+      expect(calc.estimate("樽見鉄道", 34.5)).toBe(1000);
+    });
+
+    it("神海→大垣 23.6km、実運賃750円", () => {
+      expect(calc.estimate("樽見鉄道", 23.6)).toBe(750);
+    });
+
+    it("樽見→本巣 18.3km、実運賃680円（610円帯の上限18kmのすぐ外側）", () => {
+      expect(calc.estimate("樽見鉄道", 18.3)).toBe(680);
+    });
+
+    it("18.0km ちょうどは 610円", () => {
+      expect(calc.estimate("樽見鉄道", 18.0)).toBe(610);
     });
   });
 

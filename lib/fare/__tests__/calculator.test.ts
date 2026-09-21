@@ -51,6 +51,7 @@ import chichibu from "@/data/fare-rules/chichibu.json";
 import yokohamaSubway from "@/data/fare-rules/yokohama-subway.json";
 import nagaragawa from "@/data/fare-rules/nagaragawa.json";
 import tarumi from "@/data/fare-rules/tarumi.json";
+import fukuokaSubway from "@/data/fare-rules/fukuoka-subway.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -107,6 +108,7 @@ const rules = [
   yokohamaSubway,
   nagaragawa,
   tarumi,
+  fukuokaSubway,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -962,6 +964,26 @@ describe("FareCalculator", () => {
 
     it("18.0km ちょうどは 610円", () => {
       expect(calc.estimate("樽見鉄道", 18.0)).toBe(610);
+    });
+  });
+
+  describe("福岡市地下鉄（区数制・公式サイトに全区分の記載あり）", () => {
+    it("姪浜→福岡空港 13.1km、実運賃340円（4区）", () => {
+      expect(calc.estimate("福岡市交通局", 13.1)).toBe(340);
+    });
+
+    it("天神→姪浜 7.3km、実運賃300円（2区の上限7kmのすぐ外側）", () => {
+      expect(calc.estimate("福岡市交通局", 7.3)).toBe(300);
+    });
+
+    it("7.0km ちょうどは 260円（2区）", () => {
+      expect(calc.estimate("福岡市交通局", 7.0)).toBe(260);
+    });
+
+    // 6区は本来上限なし。表の上限30kmを超えても380円のままになること
+    it("19kmを超えたらどこまで乗っても380円", () => {
+      expect(calc.estimate("福岡市交通局", 20)).toBe(380);
+      expect(calc.estimate("福岡市交通局", 50)).toBe(380);
     });
   });
 

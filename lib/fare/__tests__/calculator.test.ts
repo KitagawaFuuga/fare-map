@@ -1270,6 +1270,22 @@ describe("FareCalculator", () => {
       expect(calc.estimate("しなの鉄道", 5.0, "長野", "川中島")).toBe(200);
       expect(calc.estimate("しなの鉄道", 5.0)).toBe(240);
     });
+
+    // 北しなの線はしなの鉄道線と賃率が違うので、こちらも override で実額を持つ
+    it("長野→牟礼 19.1km は北しなの線の 430円（しなの鉄道線の距離表なら460円）", () => {
+      expect(calc.estimate("しなの鉄道", 19.1, "長野", "牟礼")).toBe(430);
+      expect(calc.estimate("しなの鉄道", 19.1)).toBe(460);
+    });
+
+    it("長野→妙高高原 37.3km（北しなの線全線）は 850円", () => {
+      expect(calc.estimate("しなの鉄道", 37.3, "長野", "妙高高原")).toBe(850);
+    });
+
+    it("軽井沢→妙高高原 は両線をまたいで 2,490円", () => {
+      expect(calc.estimate("しなの鉄道", 102.4, "軽井沢", "妙高高原")).toBe(
+        2490,
+      );
+    });
   });
 
   // lib/search/reachable.ts の枝刈りは「override が効かない区間では距離表の運賃が

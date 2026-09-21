@@ -56,6 +56,7 @@ import nagaden from "@/data/fare-rules/nagaden.json";
 import manyosen from "@/data/fare-rules/manyosen.json";
 import hokutetsu from "@/data/fare-rules/hokutetsu.json";
 import chitetsuTram from "@/data/fare-rules/chitetsu-tram.json";
+import chitetsu from "@/data/fare-rules/chitetsu.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -63,6 +64,7 @@ import tokyuOverride from "@/data/fare-overrides/tokyu.json";
 import keihanOverride from "@/data/fare-overrides/keihan.json";
 import manyosenOverride from "@/data/fare-overrides/manyosen.json";
 import hokutetsuOverride from "@/data/fare-overrides/hokutetsu.json";
+import chitetsuOverride from "@/data/fare-overrides/chitetsu.json";
 
 const rules = [
   jrEast,
@@ -119,6 +121,7 @@ const rules = [
   manyosen,
   hokutetsu,
   chitetsuTram,
+  chitetsu,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -128,7 +131,61 @@ const overrides = [
   keihanOverride,
   manyosenOverride,
   hokutetsuOverride,
+  chitetsuOverride,
 ].map((o) => fareOverrideSchema.parse(o));
+// 富山地鉄本線の営業キロ（電鉄富山起点。出典: Wikipedia「富山地方鉄道本線」駅一覧）。
+// 距離表が実運賃を上回らないことを全ペアで確かめるために使う
+const CHITETSU_KM: Record<string, number> = {
+  電鉄富山: 0.0,
+  稲荷町: 1.6,
+  新庄田中: 2.5,
+  東新庄: 3.6,
+  越中荏原: 4.7,
+  越中三郷: 7.0,
+  越中舟橋: 8.5,
+  寺田: 9.8,
+  越中泉: 10.5,
+  相ノ木: 11.3,
+  新相ノ木: 12.1,
+  上市: 13.3,
+  新宮川: 15.1,
+  中加積: 17.1,
+  西加積: 18.7,
+  西滑川: 19.8,
+  中滑川: 20.6,
+  滑川: 21.8,
+  浜加積: 23.2,
+  早月加積: 24.4,
+  越中中村: 25.6,
+  西魚津: 27.6,
+  電鉄魚津: 28.9,
+  新魚津: 30.2,
+  経田: 32.9,
+  電鉄石田: 34.9,
+  電鉄黒部: 37.2,
+  東三日市: 37.8,
+  荻生: 38.6,
+  長屋: 39.6,
+  新黒部: 40.7,
+  舌山: 41.0,
+  若栗: 41.7,
+  栃屋: 42.8,
+  浦山: 44.3,
+  下立口: 45.6,
+  下立: 46.3,
+  愛本: 47.6,
+  内山: 48.7,
+  音沢: 49.5,
+  宇奈月温泉: 53.3,
+};
+function chitetsuKm(from: string, to: string): number {
+  const a = CHITETSU_KM[from];
+  const b = CHITETSU_KM[to];
+  if (a === undefined || b === undefined)
+    throw new Error(`営業キロ未登録: ${from} / ${to}`);
+  return Math.round(Math.abs(b - a) * 10) / 10;
+}
+
 const calc = createFareCalculator(rules, overrides);
 
 // 本番(lib/server/graph-store.ts)は data/fare-rules/ をディレクトリごと読むが、この
@@ -1096,6 +1153,39 @@ describe("FareCalculator", () => {
     it("均一運賃なのでどの距離でも 240円", () => {
       expect(calc.estimate("富山地方鉄道(軌道線)", 1.0)).toBe(240);
       expect(calc.estimate("富山地方鉄道(軌道線)", 7.6)).toBe(240);
+    });
+  });
+
+  describe("富山地方鉄道（本線は全820ペアをoverrideで登録）", () => {
+    it("電鉄富山→宇奈月温泉（全線53.3km）は 2,160円", () => {
+      expect(
+        calc.estimate("富山地方鉄道", 53.3, "電鉄富山", "宇奈月温泉"),
+      ).toBe(2160);
+    });
+
+    // 同じ営業キロでも区間によって運賃が違う。距離表では表せないので全ペアを持つ
+    it("電鉄富山→新相ノ木 12.1km は 700円", () => {
+      expect(calc.estimate("富山地方鉄道", 12.1, "電鉄富山", "新相ノ木")).toBe(
+        700,
+      );
+    });
+
+    it("越中舟橋→中滑川 も 12.1km だが 720円", () => {
+      expect(calc.estimate("富山地方鉄道", 12.1, "越中舟橋", "中滑川")).toBe(
+        720,
+      );
+    });
+
+    it("寺田→越中泉 0.7km は初乗りの 240円", () => {
+      expect(calc.estimate("富山地方鉄道", 0.7, "寺田", "越中泉")).toBe(240);
+    });
+
+    // 距離表は「各距離での最小運賃」の階段。枝刈りの下界に使うので実運賃を超えてはいけない
+    it("距離表は全820ペアの実運賃を上回らない", () => {
+      for (const p of chitetsuOverride.pairs) {
+        const km = chitetsuKm(p.from, p.to);
+        expect(calc.estimate("富山地方鉄道", km)).toBeLessThanOrEqual(p.fare);
+      }
     });
   });
 

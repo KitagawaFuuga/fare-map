@@ -58,6 +58,7 @@ import hokutetsu from "@/data/fare-rules/hokutetsu.json";
 import chitetsuTram from "@/data/fare-rules/chitetsu-tram.json";
 import chitetsu from "@/data/fare-rules/chitetsu.json";
 import echizen from "@/data/fare-rules/echizen.json";
+import tokitetsu from "@/data/fare-rules/tokitetsu.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -67,6 +68,7 @@ import manyosenOverride from "@/data/fare-overrides/manyosen.json";
 import hokutetsuOverride from "@/data/fare-overrides/hokutetsu.json";
 import chitetsuOverride from "@/data/fare-overrides/chitetsu.json";
 import echizenOverride from "@/data/fare-overrides/echizen.json";
+import tokitetsuOverride from "@/data/fare-overrides/tokitetsu.json";
 
 const rules = [
   jrEast,
@@ -125,6 +127,7 @@ const rules = [
   chitetsuTram,
   chitetsu,
   echizen,
+  tokitetsu,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -136,6 +139,7 @@ const overrides = [
   hokutetsuOverride,
   chitetsuOverride,
   echizenOverride,
+  tokitetsuOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地鉄本線の営業キロ（電鉄富山起点。出典: Wikipedia「富山地方鉄道本線」駅一覧）。
 // 距離表が実運賃を上回らないことを全ペアで確かめるために使う
@@ -1218,6 +1222,28 @@ describe("FareCalculator", () => {
 
     it("override のない 2.1km は距離表どおり 240円", () => {
       expect(calc.estimate("えちぜん鉄道", 2.1)).toBe(240);
+    });
+  });
+
+  describe("えちごトキめき鉄道（2025年10月1日改定）", () => {
+    it("妙高高原→直江津 37.7km（妙高はねうまライン全線）は 1,070円", () => {
+      expect(calc.estimate("えちごトキめき鉄道", 37.7)).toBe(1070);
+    });
+
+    it("直江津→市振 59.3km（日本海ひすいライン全線）は 1,540円", () => {
+      expect(calc.estimate("えちごトキめき鉄道", 59.3)).toBe(1540);
+    });
+
+    it("20.0km ちょうどは 510円、20.1km は次の帯の 650円", () => {
+      expect(calc.estimate("えちごトキめき鉄道", 20.0)).toBe(510);
+      expect(calc.estimate("えちごトキめき鉄道", 20.1)).toBe(650);
+    });
+
+    // 公表されている営業キロが丸められているため、差が境界をまたぐか判定できない区間がある
+    it("市振→糸魚川 は公表キロ差20.0kmだが実額の 650円", () => {
+      expect(calc.estimate("えちごトキめき鉄道", 20.0, "市振", "糸魚川")).toBe(
+        650,
+      );
     });
   });
 

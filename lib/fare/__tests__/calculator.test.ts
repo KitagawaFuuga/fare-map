@@ -55,6 +55,7 @@ import fukuokaSubway from "@/data/fare-rules/fukuoka-subway.json";
 import nagaden from "@/data/fare-rules/nagaden.json";
 import manyosen from "@/data/fare-rules/manyosen.json";
 import hokutetsu from "@/data/fare-rules/hokutetsu.json";
+import chitetsuTram from "@/data/fare-rules/chitetsu-tram.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -117,6 +118,7 @@ const rules = [
   nagaden,
   manyosen,
   hokutetsu,
+  chitetsuTram,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -1085,6 +1087,15 @@ describe("FareCalculator", () => {
 
     it("乙丸→鶴来 7.0km は距離表どおり 440円", () => {
       expect(calc.estimate("北陸鉄道", 7.0, "乙丸", "鶴来")).toBe(440);
+    });
+  });
+
+  describe("富山地方鉄道(軌道線)", () => {
+    // 市内線・富山都心線・富山港線は全線均一。鉄道線とは別体系なので
+    // data/operator-splits.json で事業者を分けている
+    it("均一運賃なのでどの距離でも 240円", () => {
+      expect(calc.estimate("富山地方鉄道(軌道線)", 1.0)).toBe(240);
+      expect(calc.estimate("富山地方鉄道(軌道線)", 7.6)).toBe(240);
     });
   });
 

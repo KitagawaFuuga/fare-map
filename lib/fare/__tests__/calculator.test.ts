@@ -59,6 +59,7 @@ import chitetsuTram from "@/data/fare-rules/chitetsu-tram.json";
 import chitetsu from "@/data/fare-rules/chitetsu.json";
 import echizen from "@/data/fare-rules/echizen.json";
 import tokitetsu from "@/data/fare-rules/tokitetsu.json";
+import shinano from "@/data/fare-rules/shinano.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -69,6 +70,7 @@ import hokutetsuOverride from "@/data/fare-overrides/hokutetsu.json";
 import chitetsuOverride from "@/data/fare-overrides/chitetsu.json";
 import echizenOverride from "@/data/fare-overrides/echizen.json";
 import tokitetsuOverride from "@/data/fare-overrides/tokitetsu.json";
+import shinanoOverride from "@/data/fare-overrides/shinano.json";
 
 const rules = [
   jrEast,
@@ -128,6 +130,7 @@ const rules = [
   chitetsu,
   echizen,
   tokitetsu,
+  shinano,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -140,6 +143,7 @@ const overrides = [
   chitetsuOverride,
   echizenOverride,
   tokitetsuOverride,
+  shinanoOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地鉄本線の営業キロ（電鉄富山起点。出典: Wikipedia「富山地方鉄道本線」駅一覧）。
 // 距離表が実運賃を上回らないことを全ペアで確かめるために使う
@@ -1244,6 +1248,27 @@ describe("FareCalculator", () => {
       expect(calc.estimate("えちごトキめき鉄道", 20.0, "市振", "糸魚川")).toBe(
         650,
       );
+    });
+  });
+
+  describe("しなの鉄道（2026年3月14日改定）", () => {
+    it("軽井沢→篠ノ井 65.1km（しなの鉄道線全線）は 1,470円", () => {
+      expect(calc.estimate("しなの鉄道", 65.1, "軽井沢", "篠ノ井")).toBe(1470);
+    });
+
+    it("上田→小諸 18.0km は 410円", () => {
+      expect(calc.estimate("しなの鉄道", 18.0, "上田", "小諸")).toBe(410);
+    });
+
+    it("18.0km と 18.1km で帯が変わる（1km刻み）", () => {
+      expect(calc.estimate("しなの鉄道", 18.0)).toBe(410);
+      expect(calc.estimate("しなの鉄道", 18.1)).toBe(430);
+    });
+
+    // 篠ノ井〜長野はJRの線路で、運賃もJR賃率との連絡運賃になる
+    it("長野→川中島 5.0km は連絡運賃の 200円（しなの鉄道線内なら240円）", () => {
+      expect(calc.estimate("しなの鉄道", 5.0, "長野", "川中島")).toBe(200);
+      expect(calc.estimate("しなの鉄道", 5.0)).toBe(240);
     });
   });
 

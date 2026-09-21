@@ -49,6 +49,7 @@ import aikan from "@/data/fare-rules/aikan.json";
 import sendaiSubway from "@/data/fare-rules/sendai-subway.json";
 import chichibu from "@/data/fare-rules/chichibu.json";
 import yokohamaSubway from "@/data/fare-rules/yokohama-subway.json";
+import nagaragawa from "@/data/fare-rules/nagaragawa.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -103,6 +104,7 @@ const rules = [
   sendaiSubway,
   chichibu,
   yokohamaSubway,
+  nagaragawa,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -919,6 +921,25 @@ describe("FareCalculator", () => {
 
     it("あざみ野→湘南台 40.4km、実運賃530円（IC524円の切り上げ）", () => {
       expect(calc.estimate("横浜市交通局", 40.4)).toBe(530);
+    });
+  });
+
+  describe("長良川鉄道（公式PDFの三角表全体から431点で復元）", () => {
+    // 駅名もキロも無い三角表だが、行 i が駅(i+1)→駅1..i という素直な三角形で
+    // あることを要素数で確認し、Wikipediaの営業キロと突き合わせた。
+    // 単一起点ではなく三角表全体を使っているので、富山地方鉄道で踏んだ
+    // 「帯が隠れる」問題を避けている
+    it("美濃太田→郡上八幡 46.9km、実運賃1,380円", () => {
+      expect(calc.estimate("長良川鉄道", 46.9)).toBe(1380);
+    });
+
+    it("北濃→美濃市 54.4km、実運賃1,540円（美濃太田起点でない組）", () => {
+      expect(calc.estimate("長良川鉄道", 54.4)).toBe(1540);
+    });
+
+    it("帯は3km刻み（3.0km=210円、3.1km=310円）", () => {
+      expect(calc.estimate("長良川鉄道", 3.0)).toBe(210);
+      expect(calc.estimate("長良川鉄道", 3.1)).toBe(310);
     });
   });
 

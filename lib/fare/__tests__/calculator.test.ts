@@ -52,6 +52,7 @@ import yokohamaSubway from "@/data/fare-rules/yokohama-subway.json";
 import nagaragawa from "@/data/fare-rules/nagaragawa.json";
 import tarumi from "@/data/fare-rules/tarumi.json";
 import fukuokaSubway from "@/data/fare-rules/fukuoka-subway.json";
+import nagaden from "@/data/fare-rules/nagaden.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -109,6 +110,7 @@ const rules = [
   nagaragawa,
   tarumi,
   fukuokaSubway,
+  nagaden,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -984,6 +986,22 @@ describe("FareCalculator", () => {
     it("19kmを超えたらどこまで乗っても380円", () => {
       expect(calc.estimate("福岡市交通局", 20)).toBe(380);
       expect(calc.estimate("福岡市交通局", 50)).toBe(380);
+    });
+  });
+
+  describe("長野電鉄（令和7年12月1日改定）", () => {
+    // 公式PDFはキロ程の範囲が連結表記(1112=11〜12km)で出てくるため、
+    // 帯が1kmから連続する性質を使って切り直した
+    it("長野→湯田中 33.1km（全線）、実運賃1,660円", () => {
+      expect(calc.estimate("長野電鉄", 33.1)).toBe(1660);
+    });
+
+    it("須坂→長野 12.5km、実運賃680円", () => {
+      expect(calc.estimate("長野電鉄", 12.5)).toBe(680);
+    });
+
+    it("12.0km ちょうどは 600円（12.5km=680円 の1つ下の帯）", () => {
+      expect(calc.estimate("長野電鉄", 12.0)).toBe(600);
     });
   });
 

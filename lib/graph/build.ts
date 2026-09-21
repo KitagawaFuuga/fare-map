@@ -17,6 +17,17 @@ export interface OperatorSplit {
   to: string;
 }
 
+// 元データ(join.csv)に無い駅間接続を補う定義。ekidata は「他社の線路に乗り入れる区間」を
+// 駅としては登録するが駅間接続は登録しない流儀で、そのままだと乗り入れ先の駅が線路を
+// 1本も持たない孤立点になる（実例: しなの鉄道線の篠ノ井〜長野。station.csv には23駅
+// あるのに join.csv は篠ノ井までの18接続しかない）。孤立すると探索がその区間を
+// 通れず、事業者をまたぐ通し運賃が引けなくなるため、ここで接続を補う。
+export interface ExtraJoin {
+  lineId: string; // 接続を足す路線。両駅がこの路線に属していることを検証する
+  from: string; // station_cd
+  to: string;
+}
+
 // 別駅扱いでも徒歩で乗り換えられるとみなす距離。大きくすると無関係な駅どうしが
 // 繋がり運賃が不当に安くなるため、実際に乗換案内が案内する範囲に寄せた値。
 const TRANSFER_RADIUS_KM = 0.3;
@@ -24,6 +35,7 @@ const TRANSFER_RADIUS_KM = 0.3;
 export function buildGraph(
   input: EkidataInput,
   splits: OperatorSplit[] = [],
+  extraJoins: ExtraJoin[] = [],
 ): RailGraph {
   const splitByLine = new Map(splits.map((s) => [s.lineId, s]));
   // 定義された lineId が実在し、期待どおりの事業者に属しているかを記録する。
@@ -90,10 +102,48 @@ export function buildGraph(
   }
 
   const edges: GraphEdge[] = [];
+  const joined = new Set<string>();
+  const joinKey = (a: string, b: string) => (a < b ? `${a}:${b}` : `${b}:${a}`);
   for (const j of input.joins) {
     const a = nodes[j.station_cd1 ?? ""];
     const b = nodes[j.station_cd2 ?? ""];
     if (!a || !b) continue;
+    joined.add(joinKey(a.id, b.id));
+    edges.push({
+      from: a.id,
+      to: b.id,
+      km: haversineKm(a, b),
+      kind: "rail",
+      operator: a.operator,
+    });
+  }
+
+  // 補った接続。駅IDが実在しない・指定した路線に属していない・既に元データに
+  // 存在する、のいずれも「定義が現実と合っていない」ので例外にする。黙って
+  // 無視すると運賃が静かに間違うため（operator-splits と同じ方針）。
+  for (const j of extraJoins) {
+    const a = nodes[j.from];
+    const b = nodes[j.to];
+    const where = `extra-joins: lineId=${j.lineId} ${j.from}-${j.to}`;
+    if (!a || !b) {
+      throw new Error(
+        `${where} の駅が station.csv に存在しません。` +
+          `station_cd が振り直された可能性があるため data/extra-joins.json を確認してください`,
+      );
+    }
+    if (a.lineId !== j.lineId || b.lineId !== j.lineId) {
+      throw new Error(
+        `${where} の駅が指定の路線に属していません ` +
+          `(${a.name}=${a.lineId} / ${b.name}=${b.lineId})`,
+      );
+    }
+    if (joined.has(joinKey(a.id, b.id))) {
+      throw new Error(
+        `${where} は join.csv に既に存在します。` +
+          `元データが更新された可能性があるため data/extra-joins.json から削除してください`,
+      );
+    }
+    joined.add(joinKey(a.id, b.id));
     edges.push({
       from: a.id,
       to: b.id,

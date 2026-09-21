@@ -1,6 +1,10 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { parseCsv } from "@/lib/graph/csv";
-import { buildGraph, type OperatorSplit } from "@/lib/graph/build";
+import {
+  buildGraph,
+  type ExtraJoin,
+  type OperatorSplit,
+} from "@/lib/graph/build";
 import {
   buildCalibration,
   calibratedKm,
@@ -19,6 +23,12 @@ const splits = (
   }
 ).splits;
 
+const extraJoins = (
+  JSON.parse(readFileSync("data/extra-joins.json", "utf8")) as {
+    joins: ExtraJoin[];
+  }
+).joins;
+
 const graph = buildGraph(
   {
     companies: raw("company.csv"),
@@ -27,6 +37,7 @@ const graph = buildGraph(
     joins: raw("join.csv"),
   },
   splits,
+  extraJoins,
 );
 
 // kilometrage.csv は引用符で囲まれているが埋め込みカンマは無いため、

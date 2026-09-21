@@ -188,3 +188,63 @@ describe("buildGraph の事業者分割 (operator-splits)", () => {
     expect(g.nodes["S2"]?.operator).toBe("テスト市交通局");
   });
 });
+
+// ekidata は他社の線路に乗り入れる区間を、駅としては登録するが駅間接続は
+// 登録しない。そのままだと乗り入れ先の駅が線路を1本も持たない孤立点になり、
+// 探索がその区間を通れず通し運賃が引けなくなる（実例: しなの鉄道線の篠ノ井〜長野）。
+describe("buildGraph の駅間接続の補完 (extra-joins)", () => {
+  it("元データに無い接続を rail エッジとして足す", () => {
+    const g = buildGraph(input, [], [{ lineId: "L1", from: "S2", to: "S3" }]);
+    const rail = g.edges.filter((e) => e.kind === "rail");
+    expect(rail).toHaveLength(2);
+    const added = rail.find((e) => e.from === "S2" && e.to === "S3");
+    expect(added?.operator).toBe("テスト鉄道");
+    expect(added?.km).toBeGreaterThan(0);
+  });
+
+  it("補完しなければ孤立したままであることを示す（対比）", () => {
+    const g = buildGraph(input);
+    const rail = g.edges.filter(
+      (e) => e.kind === "rail" && (e.from === "S3" || e.to === "S3"),
+    );
+    expect(rail).toHaveLength(0);
+  });
+
+  it("駅が存在しなければ例外（station_cd の振り直しを検出する）", () => {
+    expect(() =>
+      buildGraph(input, [], [{ lineId: "L1", from: "S1", to: "S99" }]),
+    ).toThrow(/station.csv に存在しません/);
+  });
+
+  it("駅が指定した路線に属していなければ例外", () => {
+    const twoLines = {
+      ...input,
+      lines: [
+        ...input.lines,
+        { line_cd: "L2", company_cd: "1", line_name: "別線" },
+      ],
+      stations: [
+        ...input.stations,
+        {
+          station_cd: "S4",
+          station_g_cd: "G4",
+          station_name: "う駅",
+          line_cd: "L2",
+          lon: "139.80",
+          lat: "35.69",
+        },
+      ],
+    };
+    expect(() =>
+      buildGraph(twoLines, [], [{ lineId: "L1", from: "S1", to: "S4" }]),
+    ).toThrow(/指定の路線に属していません/);
+  });
+
+  // 元データが更新されて接続が追加されたら、補完定義は不要になる。
+  // 気づかず二重にエッジを張ると距離が狂うので例外にする。
+  it("元データに既にある接続を重ねて定義したら例外", () => {
+    expect(() =>
+      buildGraph(input, [], [{ lineId: "L1", from: "S1", to: "S2" }]),
+    ).toThrow(/join.csv に既に存在します/);
+  });
+});

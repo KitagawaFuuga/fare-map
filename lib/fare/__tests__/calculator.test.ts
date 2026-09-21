@@ -47,6 +47,8 @@ import toyotetsuAtsumi from "@/data/fare-rules/toyotetsu-atsumi.json";
 import toyotetsuCity from "@/data/fare-rules/toyotetsu-city.json";
 import aikan from "@/data/fare-rules/aikan.json";
 import sendaiSubway from "@/data/fare-rules/sendai-subway.json";
+import chichibu from "@/data/fare-rules/chichibu.json";
+import yokohamaSubway from "@/data/fare-rules/yokohama-subway.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -99,6 +101,8 @@ const rules = [
   toyotetsuCity,
   aikan,
   sendaiSubway,
+  chichibu,
+  yokohamaSubway,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -883,6 +887,38 @@ describe("FareCalculator", () => {
 
     it("3.0km ちょうどは 210円（初乗り）", () => {
       expect(calc.estimate("仙台市交通局", 3.0)).toBe(210);
+    });
+  });
+
+  describe("秩父鉄道（2024年10月1日改定後）", () => {
+    // 公式PDFは画像、国交省の認可資料もテキストが崩れていたため2次情報から復元。
+    // 実運賃はekitan.com(2026-09-21取得)で照合
+    it("熊谷→秩父 44.1km、実運賃950円", () => {
+      expect(calc.estimate("秩父鉄道", 44.1)).toBe(950);
+    });
+
+    it("行田市→熊谷 6.6km、実運賃400円（300円帯の上限6kmのすぐ外側）", () => {
+      expect(calc.estimate("秩父鉄道", 6.6)).toBe(400);
+    });
+
+    it("6.0km ちょうどは 300円", () => {
+      expect(calc.estimate("秩父鉄道", 6.0)).toBe(300);
+    });
+  });
+
+  describe("横浜市営地下鉄（IC運賃を10円切り上げてきっぷ運賃に変換）", () => {
+    // 転記元がIC運賃(1円単位)だったため変換が必要だった。
+    // 変換が正しいことをekitan.com(2026-09-21取得)の実運賃3点で確認している
+    it("桜木町→横浜 2.1km、実運賃210円", () => {
+      expect(calc.estimate("横浜市交通局", 2.1)).toBe(210);
+    });
+
+    it("センター南→横浜 13.9km、実運賃310円（IC304円の切り上げ）", () => {
+      expect(calc.estimate("横浜市交通局", 13.9)).toBe(310);
+    });
+
+    it("あざみ野→湘南台 40.4km、実運賃530円（IC524円の切り上げ）", () => {
+      expect(calc.estimate("横浜市交通局", 40.4)).toBe(530);
     });
   });
 

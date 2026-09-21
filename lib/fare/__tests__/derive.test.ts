@@ -145,3 +145,32 @@ describe("deriveFareTable の警告（観測点の粗さ）", () => {
     expect(r.warnings.filter((w) => w.includes("隠れている"))).toEqual([]);
   });
 });
+
+// 秩父鉄道の認可資料PDFでテキスト抽出が崩れ、拾えた2点から
+// 「211kmまで45円」という無意味な表ができたのに ok=true になった。
+// 観測点が少ないと自己検証は無条件に通るので、別途警告する必要がある。
+describe("deriveFareTable の警告（観測点が少なすぎる）", () => {
+  it("観測点が数点しかないときは信用できない旨を警告する", () => {
+    const r = deriveFareTable([
+      { km: 211, fare: 45 },
+      { km: 4, fare: 45 },
+    ]);
+    expect(r.ok).toBe(true); // 自己検証は通ってしまう
+    expect(r.warnings.join("")).toMatch(/信用してはいけない/);
+  });
+
+  it("観測点が十分あれば少なすぎ警告は出ない", () => {
+    const r = deriveFareTable([
+      { km: 1, fare: 200 },
+      { km: 2, fare: 200 },
+      { km: 4, fare: 300 },
+      { km: 5, fare: 300 },
+      { km: 7, fare: 400 },
+      { km: 8, fare: 400 },
+      { km: 10, fare: 500 },
+    ]);
+    expect(r.warnings.filter((w) => w.includes("信用してはいけない"))).toEqual(
+      [],
+    );
+  });
+});

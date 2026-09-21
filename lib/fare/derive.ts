@@ -161,6 +161,15 @@ export function deriveFareTable(pairs: KmFarePair[]): DeriveResult {
   // 観測済みの21.8km/30.2kmは実運賃と一致したのに、観測していない50.8kmは
   // 2,020円が抜け落ちて2,160円になった。
   const warnings: string[] = [];
+  // 観測点が極端に少ないと、どんな並びでも自己検証は通ってしまう（2点なら必ず通る）。
+  // 実例: 秩父鉄道の認可資料PDFはテキスト抽出が崩れており、拾えた2点から
+  // 「211kmまで45円」という明らかに無意味な表ができたが ok=true になった。
+  if (clean.length < 6 || bands.length < 3) {
+    warnings.push(
+      `観測点が ${clean.length} 点・帯が ${bands.length} 本しかない。` +
+        `この規模では自己検証はほぼ無条件に通るため、復元結果を信用してはいけない`,
+    );
+  }
   for (const b of bands) {
     if (b.boundaryRange === null || b.pinned) continue;
     const [lo, hi] = b.boundaryRange;

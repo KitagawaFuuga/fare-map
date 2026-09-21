@@ -53,11 +53,13 @@ import nagaragawa from "@/data/fare-rules/nagaragawa.json";
 import tarumi from "@/data/fare-rules/tarumi.json";
 import fukuokaSubway from "@/data/fare-rules/fukuoka-subway.json";
 import nagaden from "@/data/fare-rules/nagaden.json";
+import manyosen from "@/data/fare-rules/manyosen.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
 import tokyuOverride from "@/data/fare-overrides/tokyu.json";
 import keihanOverride from "@/data/fare-overrides/keihan.json";
+import manyosenOverride from "@/data/fare-overrides/manyosen.json";
 
 const rules = [
   jrEast,
@@ -111,6 +113,7 @@ const rules = [
   tarumi,
   fukuokaSubway,
   nagaden,
+  manyosen,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -118,6 +121,7 @@ const overrides = [
   keikyuOverride,
   tokyuOverride,
   keihanOverride,
+  manyosenOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 const calc = createFareCalculator(rules, overrides);
 
@@ -133,6 +137,17 @@ describe("運賃表の読み込み漏れ検出", () => {
       .sort();
     const loaded = rules.map((r) => r.id).sort();
     expect(loaded).toEqual(onDisk);
+  });
+
+  // 特定運賃(data/fare-overrides/)も本番はディレクトリごと読む。こちらを足し忘れると
+  // 本番だけ上書きが効きテストは距離表のままになる、という逆向きの食い違いが起きる。
+  it("data/fare-overrides/ の全ファイルがこのテストの overrides に含まれている", () => {
+    const onDisk = readdirSync("data/fare-overrides")
+      .filter((f) => f.endsWith(".json"))
+      .map((f) => f.replace(/\.json$/, ""))
+      .sort();
+    // ファイル名と operator 名は対応していないので、ファイル数で突き合わせる
+    expect(overrides.length).toBe(onDisk.length);
   });
 });
 
@@ -1002,6 +1017,39 @@ describe("FareCalculator", () => {
 
     it("12.0km ちょうどは 600円（12.5km=680円 の1つ下の帯）", () => {
       expect(calc.estimate("長野電鉄", 12.0)).toBe(600);
+    });
+  });
+
+  describe("万葉線（公式運賃表の全300ペアから復元）", () => {
+    it("高岡駅→越ノ潟 12.9km（全線）は 400円", () => {
+      expect(calc.estimate("万葉線", 12.9)).toBe(400);
+    });
+
+    it("高岡駅→市民病院前 2.4km は 250円", () => {
+      expect(calc.estimate("万葉線", 2.4)).toBe(250);
+    });
+
+    it("2.0km ちょうどは 200円（2.4km=250円 の1つ下の帯）", () => {
+      expect(calc.estimate("万葉線", 2.0)).toBe(200);
+    });
+
+    // 同じ2.1kmでも高岡駅発だけ1段安い。距離表では表現できないので override で補正する
+    it("坂下町→江尻 2.1km は距離表どおり 250円", () => {
+      expect(calc.estimate("万葉線", 2.1, "坂下町", "江尻")).toBe(250);
+    });
+
+    it("高岡駅→志貴野中学校前 2.1km は override で 200円", () => {
+      expect(calc.estimate("万葉線", 2.1, "高岡駅", "志貴野中学校前")).toBe(
+        200,
+      );
+    });
+
+    it("高岡駅→新能町 4.1km は override で 250円", () => {
+      expect(calc.estimate("万葉線", 4.1, "高岡駅", "新能町")).toBe(250);
+    });
+
+    it("中伏木→東新湊 4.1km は override が効かず 300円", () => {
+      expect(calc.estimate("万葉線", 4.1, "中伏木", "東新湊")).toBe(300);
     });
   });
 

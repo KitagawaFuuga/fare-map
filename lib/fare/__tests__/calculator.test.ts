@@ -57,6 +57,7 @@ import manyosen from "@/data/fare-rules/manyosen.json";
 import hokutetsu from "@/data/fare-rules/hokutetsu.json";
 import chitetsuTram from "@/data/fare-rules/chitetsu-tram.json";
 import chitetsu from "@/data/fare-rules/chitetsu.json";
+import echizen from "@/data/fare-rules/echizen.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -65,6 +66,7 @@ import keihanOverride from "@/data/fare-overrides/keihan.json";
 import manyosenOverride from "@/data/fare-overrides/manyosen.json";
 import hokutetsuOverride from "@/data/fare-overrides/hokutetsu.json";
 import chitetsuOverride from "@/data/fare-overrides/chitetsu.json";
+import echizenOverride from "@/data/fare-overrides/echizen.json";
 
 const rules = [
   jrEast,
@@ -122,6 +124,7 @@ const rules = [
   hokutetsu,
   chitetsuTram,
   chitetsu,
+  echizen,
 ].map((r) => fareRuleSchema.parse(r));
 const overrides = [
   jrWestOverride,
@@ -132,6 +135,7 @@ const overrides = [
   manyosenOverride,
   hokutetsuOverride,
   chitetsuOverride,
+  echizenOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地鉄本線の営業キロ（電鉄富山起点。出典: Wikipedia「富山地方鉄道本線」駅一覧）。
 // 距離表が実運賃を上回らないことを全ペアで確かめるために使う
@@ -1186,6 +1190,34 @@ describe("FareCalculator", () => {
         const km = chitetsuKm(p.from, p.to);
         expect(calc.estimate("富山地方鉄道", km)).toBeLessThanOrEqual(p.fare);
       }
+    });
+  });
+
+  describe("えちぜん鉄道（公式運賃表の全946ペアから復元）", () => {
+    it("福井→勝山 27.8km（勝山永平寺線全線）は 820円", () => {
+      expect(calc.estimate("えちぜん鉄道", 27.8, "福井", "勝山")).toBe(820);
+    });
+
+    it("勝山→三国港 51.5km（両線をまたぐ最長区間）は 1,070円", () => {
+      expect(calc.estimate("えちぜん鉄道", 51.5, "勝山", "三国港")).toBe(1070);
+    });
+
+    it("福井→永平寺口 10.9km は 490円", () => {
+      expect(calc.estimate("えちぜん鉄道", 10.9, "福井", "永平寺口")).toBe(490);
+    });
+
+    it("12.0km ちょうどは 490円、12.1km は次の帯の 560円", () => {
+      expect(calc.estimate("えちぜん鉄道", 12.0)).toBe(490);
+      expect(calc.estimate("えちぜん鉄道", 12.1)).toBe(560);
+    });
+
+    // 6.4km以下には同じ距離でも1段安い区間がある。距離表では表せないので override で持つ
+    it("福井口→田原町 2.1km は override で 180円", () => {
+      expect(calc.estimate("えちぜん鉄道", 2.1, "福井口", "田原町")).toBe(180);
+    });
+
+    it("override のない 2.1km は距離表どおり 240円", () => {
+      expect(calc.estimate("えちぜん鉄道", 2.1)).toBe(240);
     });
   });
 

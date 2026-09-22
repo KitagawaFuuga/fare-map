@@ -71,3 +71,57 @@ describe("buildCalibration", () => {
     expect(t.byLine["L1"]).toBeUndefined();
   });
 });
+
+// data/operator-splits.json で事業者名を分けた路線は、実営業キロのデータ側の事業者名
+// （分割前）とグラフ側の事業者名（分割後）が食い違う。別名を渡さないと区間が解決できず、
+// その路線だけ補正係数が路線・事業者のどちらにも載らないまま全国中央値に落ちる。
+// 実際に富山地鉄の軌道線を分割したときこれが起きて、3路線の係数が静かに消えていた。
+describe("buildCalibration と事業者分割", () => {
+  const splitGraph: RailGraph = {
+    nodes: {
+      A: node("A", 35.0, "L1", "テスト鉄道(市内線)"),
+      B: node("B", 35.045, "L1", "テスト鉄道(市内線)"),
+      C: node("C", 35.09, "L1", "テスト鉄道(市内線)"),
+    },
+    edges: [
+      {
+        from: "A",
+        to: "B",
+        km: 5,
+        kind: "rail",
+        operator: "テスト鉄道(市内線)",
+      },
+      {
+        from: "B",
+        to: "C",
+        km: 5,
+        kind: "rail",
+        operator: "テスト鉄道(市内線)",
+      },
+    ],
+  };
+
+  it("別名を渡さないと、分割した路線の係数が作られない", () => {
+    const table = buildCalibration(splitGraph, sections);
+    expect(table.byLine["L1"]).toBeUndefined();
+    expect(table.byOperator["テスト鉄道(市内線)"]).toBeUndefined();
+    // 係数が無いので全国中央値（この入力では1）に落ちる
+    expect(calibratedKm(table, splitGraph.nodes["A"]!, 10)).toBe(10);
+  });
+
+  it("別名を渡せば、分割後の事業者名で係数が作られる", () => {
+    const table = buildCalibration(splitGraph, sections, [
+      { from: "テスト鉄道", to: "テスト鉄道(市内線)" },
+    ]);
+    expect(table.byLine["L1"]).toBeCloseTo(1.2, 5);
+    expect(table.byOperator["テスト鉄道(市内線)"]).toBeCloseTo(1.2, 5);
+    expect(calibratedKm(table, splitGraph.nodes["A"]!, 10)).toBeCloseTo(12, 5);
+  });
+
+  it("分割していない事業者は別名を渡しても従来どおり", () => {
+    const table = buildCalibration(graph, sections, [
+      { from: "テスト鉄道", to: "テスト鉄道(市内線)" },
+    ]);
+    expect(table.byLine["L1"]).toBeCloseTo(1.2, 5);
+  });
+});

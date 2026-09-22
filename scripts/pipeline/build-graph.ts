@@ -63,7 +63,9 @@ const sections: CalibrationSection[] = kmRows
       s.officialKm > 0,
   );
 
-const calibration = buildCalibration(graph, sections);
+// operator-splits で分けた事業者名は実営業キロのデータ側には存在しないので、
+// 分割前の名前で分割後のノードを引けるよう別名として渡す
+const calibration = buildCalibration(graph, sections, splits);
 for (const edge of graph.edges) {
   // 補正するのは rail のみ。transfer エッジは距離0の乗換なので係数を掛けない
   if (edge.kind !== "rail") continue;

@@ -12,6 +12,15 @@ export interface CalibrationTable {
   meta: { source: string; fetchedAt: string; sections: number };
 }
 
+// data/operator-splits.json で事業者名を分けた路線は、実営業キロ側の事業者名（分割前）と
+// グラフ側の事業者名（分割後）が食い違う。分割前の名前で分割後のノードも引けるように
+// 別名を渡す。これが無いと分割した路線だけ区間を解決できず、補正係数が路線・事業者の
+// どちらにも載らないまま全国中央値に落ちる（距離で運賃が決まる事業者を分割したときに効く）。
+export interface OperatorAlias {
+  from: string; // 分割前（実営業キロのデータに出てくる名前）
+  to: string; // 分割後（グラフのノードが持つ名前）
+}
+
 export interface CalibrationSection {
   operator: string;
   line: string;
@@ -94,14 +103,18 @@ function resolveSectionKm(
   graph: RailGraph,
   railEdgesByLine: Map<string, GraphEdge[]>,
   section: CalibrationSection,
+  aliases: Map<string, Set<string>>,
 ): { lineId: string; operator: string; rawKm: number } | undefined {
   const allNodes = Object.values(graph.nodes);
+  const sameOperator = (n: StationNode) =>
+    n.operator === section.operator ||
+    (aliases.get(section.operator)?.has(n.operator) ?? false);
   const fromCandidates = allNodes.filter(
-    (n) => n.name === section.from && n.operator === section.operator,
+    (n) => n.name === section.from && sameOperator(n),
   );
   const toCandidates = new Map(
     allNodes
-      .filter((n) => n.name === section.to && n.operator === section.operator)
+      .filter((n) => n.name === section.to && sameOperator(n))
       .map((n) => [n.lineId, n] as const),
   );
 
@@ -133,7 +146,15 @@ function resolveSectionKm(
 export function buildCalibration(
   graph: RailGraph,
   sections: CalibrationSection[],
+  operatorAliases: OperatorAlias[] = [],
 ): CalibrationTable {
+  const aliases = new Map<string, Set<string>>();
+  for (const a of operatorAliases) {
+    let set = aliases.get(a.from);
+    if (!set) aliases.set(a.from, (set = new Set()));
+    set.add(a.to);
+  }
+
   const railEdgesByLine = new Map<string, GraphEdge[]>();
   for (const e of graph.edges) {
     if (e.kind !== "rail") continue;
@@ -151,7 +172,7 @@ export function buildCalibration(
   let unresolved = 0;
 
   for (const section of sections) {
-    const resolved = resolveSectionKm(graph, railEdgesByLine, section);
+    const resolved = resolveSectionKm(graph, railEdgesByLine, section, aliases);
     if (!resolved || resolved.rawKm <= 0) {
       unresolved++;
       continue;

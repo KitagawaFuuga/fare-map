@@ -1190,7 +1190,7 @@ describe("FareCalculator", () => {
     });
   });
 
-  describe("富山地方鉄道（本線は全820ペアをoverrideで登録）", () => {
+  describe("富山地方鉄道（鉄道線67駅の全2211ペアをoverrideで登録）", () => {
     it("電鉄富山→宇奈月温泉（全線53.3km）は 2,160円", () => {
       expect(
         calc.estimate("富山地方鉄道", 53.3, "電鉄富山", "宇奈月温泉"),
@@ -1217,9 +1217,9 @@ describe("FareCalculator", () => {
     // 距離表は「各距離での最小運賃」の階段。枝刈りの下界に使うので実運賃を超えてはいけない
     // 枝刈りの下界としての正しさ。graph を再生成して駅間距離が動くと帯の境界を
     // またいで壊れうる（境界の余裕は最小6m）ので、実距離で全ペアを検査する
-    it("距離表は全820ペアの実運賃を上回らない（graph.json の実距離で検証）", () => {
+    it("距離表は全2211ペアの実運賃を上回らない（graph.json の実距離で検証）", () => {
       const km = chitetsuGraphKm();
-      expect(chitetsuOverride.pairs).toHaveLength(820);
+      expect(chitetsuOverride.pairs).toHaveLength(2211);
       let checked = 0;
       for (const p of chitetsuOverride.pairs) {
         const d = km.get([p.from, p.to].sort().join("\u0000"));
@@ -1233,12 +1233,12 @@ describe("FareCalculator", () => {
         ).toBeLessThanOrEqual(p.fare);
         checked++;
       }
-      expect(checked).toBe(820);
+      expect(checked).toBe(2211);
     });
 
     // override が丸ごと消えても距離表が同じ値を返すペアが多く、代表値のテストでは
     // 欠落を検出できない。件数と、距離表と食い違う値が実際に引けることの両方を見る
-    it("override は全820ペア揃っていて、距離表と違う値が引ける", () => {
+    it("override は全2211ペア揃っていて、距離表と違う値が引ける", () => {
       const km = chitetsuGraphKm();
       const differing = chitetsuOverride.pairs.filter((p) => {
         const d = km.get([p.from, p.to].sort().join("\u0000"));

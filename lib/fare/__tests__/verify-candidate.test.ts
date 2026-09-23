@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { verifyFareCandidate, type Finding } from "@/lib/fare/verify-candidate";
 import type { RailGraph } from "@/lib/graph/types";
@@ -108,9 +108,12 @@ describe("運賃額の所属", () => {
 });
 
 describe("距離単調性", () => {
-  // 一直線に 1km 間隔で並ぶ駅。運賃は距離に比例させる。
-  const line = ["A", "B", "C", "D", "E", "F"];
-  const pos = new Map(line.map((n, i) => [n, i]));
+  // 一直線に並ぶ駅。駅間隔は不均一にする。等間隔かつ運賃が距離に完全比例する表は
+  // 駅を1つずらしても単調性が保たれてしまい（運賃が1区間ぶん平行移動するだけ）、
+  // 実在の路線から乖離する。
+  const line = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+  const cumulative = [0, 1.2, 3.5, 4.1, 7.8, 9.0, 13.4, 14.2, 19.6, 21.0];
+  const pos = new Map(line.map((n, i) => [n, cumulative[i] as number]));
   const kmBetween = (a: string, b: string) => {
     const x = pos.get(a);
     const y = pos.get(b);
@@ -123,7 +126,7 @@ describe("距離単調性", () => {
         pairs.push({
           from: line[i] as string,
           to: line[j] as string,
-          fare: fare(j - i),
+          fare: fare((cumulative[j] as number) - (cumulative[i] as number)),
         });
     return pairs;
   };
@@ -134,6 +137,29 @@ describe("距離単調性", () => {
       { kmBetween },
     );
     expect(errors(findings, "distance-monotonicity")).toHaveLength(0);
+  });
+
+  it("運賃が距離をほとんど区別しない場合は「検査が無力」と警告する", () => {
+    // 路面電車の均一運賃。距離を変えても運賃が動かないので、行がずれても
+    // 距離単調性では見抜けない。所見なしを「検証できた」と誤読させないため、
+    // 無力であること自体を所見として出す。
+    const findings = verifyFareCandidate(
+      { operator: "テスト軌道", pairs: allPairs(() => 200) },
+      { kmBetween },
+    );
+    const f = findings.filter((x) => x.check === "distance-check-ineffective");
+    expect(f).toHaveLength(1);
+    expect(f[0]?.severity).toBe("warn");
+  });
+
+  it("距離で運賃が動く表では「検査が無力」とは言わない", () => {
+    const findings = verifyFareCandidate(
+      { operator: "テスト鉄道", pairs: allPairs((km) => 100 + km * 50) },
+      { kmBetween },
+    );
+    expect(
+      findings.filter((x) => x.check === "distance-check-ineffective"),
+    ).toHaveLength(0);
   });
 
   it("距離が離れるほど安くなる駅を検出する", () => {
@@ -171,7 +197,11 @@ describe("距離単調性", () => {
 // 荻生→宇奈月温泉が 740円 のところ 840円 になる、という実例が残っている。
 // PDF の中だけで閉じた検査ではこれを見抜けないため、グラフの座標という
 // 独立した情報を使う距離単調性がゲートの本体になる。
-describe("富山地方鉄道の実データ（受け入れ条件）", () => {
+//
+// 1事業者だけで閾値を決めると他社で破綻するため、手元にある全ペアの揃った
+// 運賃表6事業者すべてにかける。万葉線(均一運賃)だけは距離検査が原理的に
+// 効かず、検出側ではなく「無力」を警告する側に回る。
+describe("実データ6事業者（受け入れ条件）", () => {
   const graph = JSON.parse(
     readFileSync("data/graph.json", "utf8"),
   ) as RailGraph;
@@ -244,41 +274,79 @@ describe("富山地方鉄道の実データ（受け入れ条件）", () => {
       table.get(a)?.get(b) ?? null;
   };
 
-  const kmBetween = buildKm(override.operator);
-
-  it("正しい実データは距離単調性で落ちない", () => {
-    const findings = verifyFareCandidate(
-      { operator: override.operator, pairs: override.pairs },
-      { kmBetween },
-    );
-    expect(errors(findings, "distance-monotonicity")).toHaveLength(0);
-  });
-
-  it("駅を1つずらすと距離単調性が検出する", () => {
-    // 基準駅からの距離順に駅を並べ、発駅のラベルを1つ後ろへずらす。
-    // PDF の行と駅の対応を1つ取り違えた状態にあたる。
-    const stations = [
-      ...new Set(override.pairs.flatMap((p) => [p.from, p.to])),
-    ];
+  // 基準駅からの距離順に駅を並べ、発駅のラベルを1つ後ろへずらす。
+  // PDF の行と駅の対応を1つ取り違えた状態にあたる。
+  const shiftStations = (
+    pairs: { from: string; to: string; fare: number }[],
+    kmBetween: (a: string, b: string) => number | null,
+  ) => {
+    const stations = [...new Set(pairs.flatMap((p) => [p.from, p.to]))];
     const anchor = stations[0] as string;
     const ordered = stations
       .map((s) => ({ s, d: kmBetween(anchor, s) }))
       .filter((x) => x.d !== null)
       .sort((a, b) => (a.d as number) - (b.d as number))
       .map((x) => x.s);
-    const shifted = new Map<string, string>();
+    const moved = new Map<string, string>();
     ordered.forEach((s, i) => {
-      shifted.set(s, ordered[(i + 1) % ordered.length] as string);
+      moved.set(s, ordered[(i + 1) % ordered.length] as string);
     });
-    const pairs = override.pairs.map((p) => ({
-      ...p,
-      from: shifted.get(p.from) ?? p.from,
-    }));
+    return pairs.map((p) => ({ ...p, from: moved.get(p.from) ?? p.from }));
+  };
 
+  // 全ペアが揃っている運賃表。距離が運賃を区別する事業者（万葉線以外）は
+  // ずらしたときに検出できなければならない。
+  const complete = readdirSync("data/fare-sources")
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => {
+      const j = JSON.parse(readFileSync(`data/fare-sources/${f}`, "utf8")) as {
+        operator: string;
+        pairs: { from: string; to: string; fare: number }[];
+      };
+      return { label: f, ...j };
+    })
+    .concat([{ label: "chitetsu.json", ...override }]);
+
+  it.each(complete)("$label の正しいデータはエラーにならない", (set) => {
     const findings = verifyFareCandidate(
-      { operator: override.operator, pairs },
+      { operator: set.operator, pairs: set.pairs },
+      { kmBetween: buildKm(set.operator) },
+    );
+    expect(errors(findings, "distance-monotonicity")).toHaveLength(0);
+  });
+
+  // 万葉線は路面電車で運賃が5種しかなく、距離を変えても運賃がほとんど動かない。
+  // 距離単調性は原理的に効かないので、検出ではなく「無力」の警告が出る側に回る。
+  const detectable = complete.filter((s) => s.operator !== "万葉線");
+
+  it.each(detectable)("$label は駅を1つずらすと検出できる", (set) => {
+    const kmBetween = buildKm(set.operator);
+    const findings = verifyFareCandidate(
+      { operator: set.operator, pairs: shiftStations(set.pairs, kmBetween) },
       { kmBetween },
     );
     expect(errors(findings, "distance-monotonicity").length).toBeGreaterThan(0);
+  });
+
+  it("万葉線は距離検査が無力だと警告する（黙って通さない）", () => {
+    const set = complete.find((s) => s.operator === "万葉線");
+    expect(set).toBeDefined();
+    const findings = verifyFareCandidate(
+      { operator: "万葉線", pairs: set?.pairs ?? [] },
+      { kmBetween: buildKm("万葉線") },
+    );
+    expect(
+      findings.filter((f) => f.check === "distance-check-ineffective"),
+    ).toHaveLength(1);
+  });
+
+  it("距離で運賃が動く事業者には無力の警告を出さない", () => {
+    const findings = verifyFareCandidate(
+      { operator: override.operator, pairs: override.pairs },
+      { kmBetween: buildKm(override.operator) },
+    );
+    expect(
+      findings.filter((f) => f.check === "distance-check-ineffective"),
+    ).toHaveLength(0);
   });
 });

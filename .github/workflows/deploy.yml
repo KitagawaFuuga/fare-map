@@ -48,7 +48,47 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push image
+      # いったんローカルに読み込むだけにして、動作確認が通ってから push する。
+      # イメージが起動しないまま latest が更新されるのを防ぐ。
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: fare-map:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # コンテナを実際に起動して API を叩く。ここは next start ではなく本番と同じ
+      # standalone サーバー(node server.js)が動く。Dockerfile の COPY 漏れや
+      # 起動時クラッシュは、ビルドが成功しても起動して初めて表面化する
+      # （data/fare-overrides の COPY 漏れで実際に起きた）。
+      - name: Smoke test the image
+        run: |
+          docker run -d --name fare-map-ci -p 3000:3000 fare-map:ci
+          for i in $(seq 1 30); do
+            if curl -fsS "http://127.0.0.1:3000/api/stations?q=%E6%96%B0%E5%AE%BF" -o /tmp/stations.json; then
+              break
+            fi
+            sleep 2
+          done
+          if ! test -s /tmp/stations.json; then
+            echo "::error::コンテナが応答しませんでした"
+            docker logs fare-map-ci
+            exit 1
+          fi
+          node -e '
+            const b = require("/tmp/stations.json");
+            if (!Array.isArray(b.stations) || b.stations.length === 0) {
+              console.error("駅が返らなかった:", JSON.stringify(b).slice(0, 300));
+              process.exit(1);
+            }
+            console.log("OK:", b.stations.length, "件");
+          '
+          docker rm -f fare-map-ci
+
+      - name: Push image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -57,7 +97,6 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/fare-map:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/fare-map:${{ steps.meta.outputs.tag }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Login to Azure
         uses: azure/login@v2

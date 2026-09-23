@@ -150,16 +150,19 @@ const overrides = [
   tokitetsuOverride,
   shinanoOverride,
 ].map((o) => fareOverrideSchema.parse(o));
-// data/fare-rules/chitetsu.json の距離表は枝刈りの下界専用で、公表営業キロではなく
+// 富山地方鉄道・しなの鉄道の距離表は枝刈りの下界専用で、公表営業キロではなく
 // graph.json の駅間距離（座標から求めて実営業キロで補正した値）で帯を切ってある。
 // 探索が calculator に渡すのもこの距離なので、検証も同じ距離でなければ意味がない
 // （公表営業キロで検証していたときは、実際には5ペアで下界が破れているのに緑だった）。
-function chitetsuGraphKm(): Map<string, number> {
+const graphKmCache = new Map<string, Map<string, number>>();
+function graphKmOf(operator: string): Map<string, number> {
+  const hit = graphKmCache.get(operator);
+  if (hit) return hit;
   const graph = JSON.parse(
     readFileSync("data/graph.json", "utf8"),
   ) as RailGraph;
   const ids = Object.values(graph.nodes)
-    .filter((n) => n.operator === "富山地方鉄道")
+    .filter((n) => n.operator === operator)
     .map((n) => n.id);
   const inSet = new Set(ids);
   const adj = new Map<string, [string, number][]>();
@@ -171,7 +174,7 @@ function chitetsuGraphKm(): Map<string, number> {
   for (const e of graph.edges) {
     if (!inSet.has(e.from) || !inSet.has(e.to)) continue;
     // transfer は区間を確定しないので、同一事業者内のものは距離0の辺として含める
-    if (e.kind === "rail" && e.operator !== "富山地方鉄道") continue;
+    if (e.kind === "rail" && e.operator !== operator) continue;
     link(e.from, e.to, e.km);
     link(e.to, e.from, e.km);
   }
@@ -1218,7 +1221,7 @@ describe("FareCalculator", () => {
     // 枝刈りの下界としての正しさ。graph を再生成して駅間距離が動くと帯の境界を
     // またいで壊れうる（境界の余裕は最小6m）ので、実距離で全ペアを検査する
     it("距離表は全2211ペアの実運賃を上回らない（graph.json の実距離で検証）", () => {
-      const km = chitetsuGraphKm();
+      const km = graphKmOf("富山地方鉄道");
       expect(chitetsuOverride.pairs).toHaveLength(2211);
       let checked = 0;
       for (const p of chitetsuOverride.pairs) {
@@ -1239,7 +1242,7 @@ describe("FareCalculator", () => {
     // override が丸ごと消えても距離表が同じ値を返すペアが多く、代表値のテストでは
     // 欠落を検出できない。件数と、距離表と食い違う値が実際に引けることの両方を見る
     it("override は全2211ペア揃っていて、距離表と違う値が引ける", () => {
-      const km = chitetsuGraphKm();
+      const km = graphKmOf("富山地方鉄道");
       const differing = chitetsuOverride.pairs.filter((p) => {
         const d = km.get([p.from, p.to].sort().join("\u0000"));
         return d !== undefined && calc.estimate("富山地方鉄道", d) !== p.fare;
@@ -1313,15 +1316,32 @@ describe("FareCalculator", () => {
       expect(calc.estimate("しなの鉄道", 18.0, "上田", "小諸")).toBe(410);
     });
 
-    it("18.0km と 18.1km で帯が変わる（1km刻み）", () => {
-      expect(calc.estimate("しなの鉄道", 18.0)).toBe(410);
-      expect(calc.estimate("しなの鉄道", 18.1)).toBe(430);
+    // 距離表は下界専用。実運賃は override から引く
+    it("距離表は全435ペアの実運賃を上回らない（graph.json の実距離で検証）", () => {
+      const km = graphKmOf("しなの鉄道");
+      expect(shinanoOverride.pairs).toHaveLength(435);
+      for (const p of shinanoOverride.pairs) {
+        const d = km.get([p.from, p.to].sort().join("\u0000"));
+        expect(
+          d,
+          `${p.from}-${p.to} の距離が graph.json から取れない`,
+        ).toBeDefined();
+        expect(
+          calc.estimate("しなの鉄道", d!),
+          `${p.from}→${p.to} ${d!.toFixed(3)}km`,
+        ).toBeLessThanOrEqual(p.fare);
+      }
     });
 
-    // 篠ノ井〜長野はJRの線路で、運賃もJR賃率との連絡運賃になる
-    it("長野→川中島 5.0km は連絡運賃の 200円（しなの鉄道線内なら240円）", () => {
+    // 1つの事業者名の中に賃率の違う3つの体系が同居する。同じ距離でも値が違うので
+    // 距離表では表せず、全ペアを override で持っている
+    it("同じ5.0km前後でも、線によって運賃が違う", () => {
+      // 篠ノ井〜長野はJRの線路で、運賃もJR賃率との連絡運賃
       expect(calc.estimate("しなの鉄道", 5.0, "長野", "川中島")).toBe(200);
-      expect(calc.estimate("しなの鉄道", 5.0)).toBe(240);
+      // しなの鉄道線内
+      expect(calc.estimate("しなの鉄道", 4.7, "軽井沢", "中軽井沢")).toBe(240);
+      // 北しなの線
+      expect(calc.estimate("しなの鉄道", 3.9, "長野", "北長野")).toBe(240);
     });
 
     // 北しなの線はしなの鉄道線と賃率が違うので、こちらも override で実額を持つ

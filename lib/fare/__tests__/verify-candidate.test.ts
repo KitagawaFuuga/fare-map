@@ -178,6 +178,61 @@ describe("距離単調性", () => {
     expect(f.map((x) => x.samples.join()).join()).toContain("D");
   });
 
+  it("均一運賃の路線が混ざっていると、その駅を名指しして警告する", () => {
+    // ODPT の都営で実際にあった構造。地下鉄4線(距離制)と都電荒川線(均一170円)が
+    // 同じ事業者にあり、両者をまたぐ運賃ペアは存在しない。全体で見ると地下鉄の
+    // ペアに薄められて、荒川線の870ペアが検証されないまま所見なしで通る。
+    const tram = ["P", "Q", "R", "S", "T"];
+    const tramPos = new Map(tram.map((n, i) => [n, i * 1.5]));
+    const mixedKm = (a: string, b: string) => {
+      const t1 = tramPos.get(a);
+      const t2 = tramPos.get(b);
+      if (t1 !== undefined && t2 !== undefined) return Math.abs(t1 - t2);
+      if (t1 !== undefined || t2 !== undefined) return null; // 線をまたぐ運賃は無い
+      return kmBetween(a, b);
+    };
+    const pairs = [...allPairs((km) => 100 + km * 50)];
+    for (let i = 0; i < tram.length; i++)
+      for (let j = i + 1; j < tram.length; j++)
+        pairs.push({
+          from: tram[i] as string,
+          to: tram[j] as string,
+          fare: 170,
+        });
+
+    const findings = verifyFareCandidate(
+      { operator: "テスト交通局", pairs },
+      { kmBetween: mixedKm },
+    );
+    const f = findings.filter((x) => x.check === "unverifiable-stations");
+    expect(f).toHaveLength(1);
+    expect(f[0]?.severity).toBe("warn");
+    expect(f[0]?.samples.join()).toMatch(/[PQRST]/);
+  });
+
+  it("全駅の運賃が距離で動くなら駅名指しの警告は出さない", () => {
+    const findings = verifyFareCandidate(
+      { operator: "テスト鉄道", pairs: allPairs((km) => 100 + km * 50) },
+      { kmBetween },
+    );
+    expect(
+      findings.filter((x) => x.check === "unverifiable-stations"),
+    ).toHaveLength(0);
+  });
+
+  it("表全体が無力なら全体の警告だけ出し、駅名指しは重ねない", () => {
+    const findings = verifyFareCandidate(
+      { operator: "テスト軌道", pairs: allPairs(() => 200) },
+      { kmBetween },
+    );
+    expect(
+      findings.filter((x) => x.check === "distance-check-ineffective"),
+    ).toHaveLength(1);
+    expect(
+      findings.filter((x) => x.check === "unverifiable-stations"),
+    ).toHaveLength(0);
+  });
+
   it("距離が取れないペアは距離の検査から除外する", () => {
     // 距離不明の駅 Z を足しても、既存の単調な表は落ちない
     const pairs = [

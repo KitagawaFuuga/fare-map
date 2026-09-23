@@ -138,11 +138,11 @@ function countInversions(sorted: { km: number; fare: number }[]): number {
   return inversions;
 }
 
-/** 駅ごとの逆行率を出す。行がずれると、その行の運賃だけが別の駅のものになる */
-function inversionRates(
+/** 駅ごとに「その駅を含み、距離が取れるペア」を集める */
+function buildFans(
   pairs: CandidatePair[],
   kmBetween: VerifyContext["kmBetween"],
-): { station: string; rate: number; n: number }[] {
+): Map<string, { km: number; fare: number }[]> {
   const fans = new Map<string, { km: number; fare: number }[]>();
   for (const p of pairs) {
     const km = kmBetween(p.from, p.to);
@@ -153,6 +153,15 @@ function inversionRates(
       fans.set(station, fan);
     }
   }
+  return fans;
+}
+
+/** 駅ごとの逆行率を出す。行がずれると、その行の運賃だけが別の駅のものになる */
+function inversionRates(
+  pairs: CandidatePair[],
+  kmBetween: VerifyContext["kmBetween"],
+): { station: string; rate: number; n: number }[] {
+  const fans = buildFans(pairs, kmBetween);
   const rates: { station: string; rate: number; n: number }[] = [];
   for (const [station, fan] of fans) {
     if (fan.length < 3) continue;
@@ -228,20 +237,47 @@ function checkDistanceMonotonicity(
   // 距離を変えても運賃が動かないので、行がずれてもこの検査では見抜けない。
   // 「所見なし」を「検証できた」と誤読させないため、無力であることを明示する。
   const shifted = shiftStationLabels(pairs, ctx.kmBetween);
-  if (!shifted) return [];
-  const base = maxRate(rates);
-  const worst = maxRate(inversionRates(shifted, ctx.kmBetween));
-  if (worst > Math.max(base * ratio, SENSITIVITY_FLOOR)) return [];
+  if (shifted) {
+    const base = maxRate(rates);
+    const worst = maxRate(inversionRates(shifted, ctx.kmBetween));
+    if (worst <= Math.max(base * ratio, SENSITIVITY_FLOOR)) {
+      return [
+        {
+          check: "distance-check-ineffective",
+          severity: "warn",
+          message:
+            "運賃が距離をほとんど区別しないため、距離単調性では行ズレを検出できない。別の方法で検証すること",
+          samples: [
+            `正データの逆行 ${(base * 100).toFixed(2)}% / 駅を1つずらしても ${(worst * 100).toFixed(2)}%`,
+            `運賃の種類 ${new Set(pairs.map((p) => p.fare)).size} 種`,
+          ],
+        },
+      ];
+    }
+  }
+
+  // 表全体では距離が効いていても、均一運賃の路線を併営している事業者では
+  // その路線の駅だけ検証されないまま通ってしまう（実例: 東京都交通局は
+  // 地下鉄4線が距離制、都電荒川線が均一170円で、両者をまたぐ運賃ペアが無い。
+  // 全体で見ると地下鉄のペアに薄められて荒川線の870ペアが素通りする）。
+  // 駅単位で見て、運賃が1種類しかない駅は距離では検証できないと明示する。
+  const blind = [...buildFans(pairs, ctx.kmBetween)]
+    .filter(([, fan]) => fan.length >= 3)
+    .map(([station, fan]) => ({
+      station,
+      fares: new Set(fan.map((x) => x.fare)).size,
+      n: fan.length,
+    }))
+    .filter((x) => x.fares <= 1);
+  if (blind.length === 0) return [];
   return [
     {
-      check: "distance-check-ineffective",
+      check: "unverifiable-stations",
       severity: "warn",
-      message:
-        "運賃が距離をほとんど区別しないため、距離単調性では行ズレを検出できない。別の方法で検証すること",
-      samples: [
-        `正データの逆行 ${(base * 100).toFixed(2)}% / 駅を1つずらしても ${(worst * 100).toFixed(2)}%`,
-        `運賃の種類 ${new Set(pairs.map((p) => p.fare)).size} 種`,
-      ],
+      message: `運賃が1種類しかなく、距離では検証できない駅がある: ${blind.length} 駅`,
+      samples: blind
+        .slice(0, MAX_SAMPLES)
+        .map((b) => `${b.station}: ${b.n} ペアすべて同額`),
     },
   ];
 }

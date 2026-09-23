@@ -28,9 +28,9 @@ async function selectShinjuku(page: Page): Promise<void> {
 }
 
 test.describe("予算の境界値", () => {
-  // API は 100〜100000 を受け付ける。数値入力は同じ範囲、スライダーは上限 10000。
+  // API・スライダー・数値入力はすべて 100〜10000（lib/budget.ts）。
   // 画面から実際にその値を入れて、結果が出るか・エラーが出るかを確かめる。
-  for (const budget of ["100", "100000"]) {
+  for (const budget of ["100", "10000"]) {
     test(`予算 ${budget} 円で結果が出る`, async ({ page }) => {
       await stubTiles(page);
       await page.goto("/");
@@ -47,7 +47,7 @@ test.describe("予算の境界値", () => {
     });
   }
 
-  // 100 未満は API が 400 を返す。画面にエラーが出て、かつ黙って固まらないこと。
+  // 範囲外は API が 400 を返す。画面にエラーが出て、かつ黙って固まらないこと。
   test("予算 99 円はエラー表示になり、検索ボタンが復帰する", async ({
     page,
   }) => {
@@ -64,6 +64,25 @@ test.describe("予算の境界値", () => {
       timeout: 15_000,
     });
     // 「検索中…」のまま固まらないこと
+    await expect(panel.getByRole("button", { name: "検索" })).toBeEnabled();
+  });
+
+  test("予算 10001 円はエラー表示になり、検索ボタンが復帰する", async ({
+    page,
+  }) => {
+    // number 入力の max は手入力や貼り付けを止めないので、API 側の上限が
+    // 効いていることを画面から確かめる。
+    await stubTiles(page);
+    await page.goto("/");
+    await selectShinjuku(page);
+
+    const panel = sidebar(page);
+    await panel.locator('input[type="number"]').fill("10001");
+    await panel.getByRole("button", { name: /検索/ }).click();
+
+    await expect(panel.locator("p.text-red-600")).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(panel.getByRole("button", { name: "検索" })).toBeEnabled();
   });
 

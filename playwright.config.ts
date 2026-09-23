@@ -18,6 +18,10 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     command: `npm run build && npx next start -p ${PORT}`,
+    // E2E は全テストが同じ IP からサーバーを叩くので、既定のレート制限
+    // (app/api/reachable/config.ts)に当たって落ちる。制限そのものは
+    // lib/server/__tests__ で検証しているため、ここでは緩めておく。
+    env: { RATE_LIMIT_CAPACITY: "1000" },
     url: `http://127.0.0.1:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

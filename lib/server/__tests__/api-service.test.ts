@@ -96,3 +96,55 @@ describe("reachable", () => {
     expect(yoyogiEntries[0]?.fare).toBe(150);
   });
 });
+
+// 徒歩連絡（groupId が異なる駅どうしの transfer エッジ）を含むグラフ。
+// A社の終点 W1 から、別の駅 W2 まで歩いて B 社に乗り継げる形にする。
+const walkGraph: RailGraph = {
+  nodes: {
+    W0: node("W0", "起点", 35.69, 139.7, "G_W0"),
+    W1: node("W1", "乗換元", 35.683, 139.702, "G_W1"),
+    W2: node("W2", "乗換先", 35.6832, 139.7022, "G_W2"),
+    W3: node("W3", "目的地", 35.68, 139.71, "G_W3"),
+    // 徒歩を使わずに W3 へ着く迂回路（高くつく）
+    W4: node("W4", "迂回", 35.7, 139.72, "G_W4"),
+  },
+  edges: [
+    { from: "W0", to: "W1", km: 0.5, kind: "rail", operator: "テスト鉄道" },
+    // 徒歩連絡: groupId が異なる 0km transfer
+    { from: "W1", to: "W2", km: 0, kind: "transfer", operator: "" },
+    { from: "W2", to: "W3", km: 0.5, kind: "rail", operator: "テスト鉄道" },
+    // 迂回路は距離が長く、同じ W3 に高い運賃で着く
+    { from: "W0", to: "W4", km: 2.5, kind: "rail", operator: "テスト鉄道" },
+    { from: "W4", to: "W3", km: 2.5, kind: "rail", operator: "テスト鉄道" },
+  ],
+};
+const walkStore = createGraphStore(walkGraph, rules);
+
+describe("reachable の viaWalk 判定", () => {
+  const res = reachable(walkStore, "W0", 2000);
+  const byName = new Map(res.stations.map((s) => [s.name, s]));
+
+  it("徒歩連絡を通らないと同じ運賃で行けない駅に viaWalk が立つ", () => {
+    const dest = byName.get("目的地");
+    expect(dest).toBeDefined();
+    expect(dest?.viaWalk).toBe(true);
+  });
+
+  it("徒歩を使わずに着ける駅には viaWalk が立たない", () => {
+    expect(byName.get("乗換元")?.viaWalk).toBe(false);
+    expect(byName.get("迂回")?.viaWalk).toBe(false);
+  });
+
+  it("meta.viaWalkCount が viaWalk の件数と一致する", () => {
+    expect(res.meta.viaWalkCount).toBe(
+      res.stations.filter((s) => s.viaWalk).length,
+    );
+    expect(res.meta.viaWalkCount).toBeGreaterThan(0);
+  });
+
+  it("徒歩連絡が無いグラフでは誰にも viaWalk が立たない", () => {
+    const r = reachable(store, "S1", 2000);
+    expect(r.stations.every((s) => !s.viaWalk)).toBe(true);
+    expect(r.meta.viaWalkCount).toBe(0);
+  });
+});

@@ -93,3 +93,27 @@ test("予算を入れて検索すると到達可能駅が出る", async ({ page 
   });
   await expect(page.locator("canvas.maplibregl-canvas")).toBeVisible();
 });
+
+test("徒歩連絡を前提とする運賃には印が付く", async ({ page }) => {
+  await stubTiles(page);
+  await page.goto("/");
+
+  const panel = sidebar(page);
+  await panel.getByPlaceholder("駅名を入力").fill("新宿");
+  await panel.getByRole("button", { name: /^新宿/ }).first().click();
+  await panel.locator('input[type="number"]').fill("500");
+  await panel.getByRole("button", { name: "検索" }).click();
+
+  await expect(panel.getByText(/\d+ 駅に到達可能/)).toBeVisible({
+    timeout: 30_000,
+  });
+
+  // 新宿から500円圏には徒歩連絡でしか同じ運賃にならない駅が含まれる（代々木など）。
+  // 印が付くこと、かつ全件には付かないこと（付けすぎていないこと）を確かめる。
+  const badges = panel.getByText("徒歩あり");
+  const rows = panel.locator("ul li");
+  const badgeCount = await badges.count();
+  const rowCount = await rows.count();
+  expect(badgeCount).toBeGreaterThan(0);
+  expect(badgeCount).toBeLessThan(rowCount);
+});

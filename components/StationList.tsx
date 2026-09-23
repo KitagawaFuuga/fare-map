@@ -28,6 +28,16 @@ export default function StationList({ stations, onPick }: StationListProps) {
               <span className="flex-1">
                 {s.name}
                 <span className="ml-1 text-xs text-gray-500">{s.line}</span>
+                {/* この運賃は別駅どうしの徒歩連絡を通る経路のもの。乗り通しでは
+                    この額にならないので、金額の隣ではなく駅名の側に出す */}
+                {s.viaWalk && (
+                  <span
+                    className="ml-1 rounded bg-amber-100 px-1 text-xs text-amber-800"
+                    title="別の駅まで歩いて乗り継ぐ経路の運賃です"
+                  >
+                    徒歩あり
+                  </span>
+                )}
               </span>
               <span className="tabular-nums">{s.fare}円</span>
             </button>

@@ -42,6 +42,7 @@ function toGeoJson(stations: MapViewProps["stations"]): FeatureCollection {
         line: s.line,
         fare: s.fare,
         bracket: s.bracket,
+        viaWalk: s.viaWalk,
       },
     })),
   };
@@ -113,7 +114,12 @@ export default function MapView({
       map.on("click", LAYER_ID, (e: MapLayerMouseEvent) => {
         const f = e.features?.[0];
         if (!f) return;
-        const p = f.properties as { name: string; line: string; fare: number };
+        const p = f.properties as {
+          name: string;
+          line: string;
+          fare: number;
+          viaWalk: boolean;
+        };
         // ポップアップは innerHTML ではなく createElement + textContent で組む。
         // 駅名は外部データ由来なので、HTML として解釈させない。
         const el = document.createElement("div");
@@ -125,6 +131,15 @@ export default function MapView({
         el.appendChild(document.createElement("br"));
         el.appendChild(document.createTextNode(`概算 ${p.fare}円`));
         el.appendChild(document.createElement("br"));
+        // 別駅への徒歩連絡を含む経路の運賃であることを明示する。
+        // 乗り通しではこの額にならない
+        if (p.viaWalk) {
+          const note = document.createElement("span");
+          note.textContent = "別の駅まで歩く経路です";
+          note.className = "text-amber-700";
+          el.appendChild(note);
+          el.appendChild(document.createElement("br"));
+        }
         const a = document.createElement("a");
         a.textContent = "経路を見る";
         a.className = "underline text-blue-600 cursor-pointer";

@@ -2,7 +2,7 @@ import Fuse from "fuse.js";
 import { haversineKm } from "@/lib/geo";
 import { bracketOf } from "@/lib/brackets";
 import { findReachable } from "@/lib/search/reachable";
-import type { StationNode } from "@/lib/graph/types";
+import type { RailGraph, StationNode } from "@/lib/graph/types";
 import type { GraphStore } from "@/lib/server/graph-store";
 
 export interface StationSuggestion {
@@ -93,8 +93,35 @@ export interface ReachableResult {
     line: string;
     operator: string;
     bracket: number;
+    // この運賃が徒歩連絡（別駅どうしを徒歩で乗り継ぐ）を前提にしているか。
+    // 西武秩父→御花畑のように実在する連絡もあれば、代々木と南新宿のように
+    // 近いだけで誰も乗換とみなさない組もある。区別する情報が元データに無いため
+    // 画面に出して利用者に判断してもらう。
+    viaWalk: boolean;
   }[];
-  meta: { from: string; budget: number; count: number };
+  meta: { from: string; budget: number; count: number; viaWalkCount: number };
+}
+
+// 徒歩連絡を取り除いたグラフ。groupId が同じ transfer（同一駅の別路線ホーム）は
+// 残し、groupId が異なる transfer だけを落とす。
+// 元グラフごとにキャッシュする（リクエストのたびに1万件のエッジを走査しないため）。
+const noWalkGraphCache = new WeakMap<RailGraph, RailGraph>();
+
+function getNoWalkGraph(graph: RailGraph): RailGraph {
+  let cached = noWalkGraphCache.get(graph);
+  if (!cached) {
+    cached = {
+      nodes: graph.nodes,
+      edges: graph.edges.filter((e) => {
+        if (e.kind !== "transfer") return true;
+        const a = graph.nodes[e.from];
+        const b = graph.nodes[e.to];
+        return !a || !b || a.groupId === b.groupId;
+      }),
+    };
+    noWalkGraphCache.set(graph, cached);
+  }
+  return cached;
 }
 
 export function reachable(
@@ -105,6 +132,25 @@ export function reachable(
   const fromNode = store.graph.nodes[fromId];
   if (!fromNode) throw new Error(`未知の駅: ${fromId}`);
   const raw = findReachable(store.graph, store.calc, fromId, budget);
+
+  // 徒歩連絡を抜いたグラフでもう一度探索し、運賃が上がる（または到達できなくなる）
+  // 駅を「徒歩前提」と判定する。探索側に真偽値の次元を足すと Pareto のバケットが
+  // 倍になり状態数が跳ねるため、運賃計算に影響しないこの情報は外で差分を取る。
+  // 比較は駅グループ単位で行う。同じ駅でも路線ごとにノードが分かれており、
+  // 代表ノード1件だけを見ると「この路線のホームには徒歩でしか着けないが、
+  // 同じ駅の別ホームには徒歩なしで着ける」場合に誤って徒歩前提と判定してしまう。
+  const noWalkFare = new Map<string, number>();
+  for (const r of findReachable(
+    getNoWalkGraph(store.graph),
+    store.calc,
+    fromId,
+    budget,
+  )) {
+    const g = store.graph.nodes[r.id]?.groupId;
+    if (g === undefined) continue;
+    const prev = noWalkFare.get(g);
+    if (prev === undefined || r.fare < prev) noWalkFare.set(g, r.fare);
+  }
 
   // 同一駅グループは最小運賃の代表 1 件に集約（raw は fare 昇順なので先勝ち）
   const byGroup = new Map<string, { id: string; fare: number }>();
@@ -119,6 +165,7 @@ export function reachable(
   const stations = [...byGroup.values()].map(({ id, fare }) => {
     const n = store.graph.nodes[id];
     if (!n) throw new Error(`未知の駅: ${id}`);
+    const without = noWalkFare.get(n.groupId);
     return {
       id: n.id,
       name: n.name,
@@ -128,7 +175,16 @@ export function reachable(
       line: n.lineName,
       operator: n.operator,
       bracket: bracketOf(fare),
+      viaWalk: without === undefined || without > fare,
     };
   });
-  return { stations, meta: { from: fromId, budget, count: stations.length } };
+  return {
+    stations,
+    meta: {
+      from: fromId,
+      budget,
+      count: stations.length,
+      viaWalkCount: stations.filter((s) => s.viaWalk).length,
+    },
+  };
 }

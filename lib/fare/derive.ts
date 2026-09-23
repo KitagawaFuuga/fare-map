@@ -1,14 +1,6 @@
-// 実運賃の観測点「(営業キロ, 運賃)」の集合から、対キロ区間制の距離帯テーブルを復元する。
-//
-// 各社の公式運賃表はPDFの形式がばらばらで、駅名が読めなかったり行が折り返しで
-// 崩れたりする。一方で「全駅ペアの運賃と営業キロ」さえ拾えれば、駅名が分からなくても
-// 距離帯は決まる。この関数はその復元と、復元結果が本当に観測点を再現するかの
-// 自己検証を担う。
-//
-// 自己検証が重要な理由: PDFの解析を誤ると運賃が静かに間違う（実際に北総鉄道と
-// 長良川鉄道で行と駅の対応を誤りかけた）。観測点が「距離の単調非減少な階段関数」に
-// 乗らない場合は解析ミスか、そもそも対キロ制でないかのどちらかなので、
-// テーブルを出さずに問題として報告する。
+// 観測点「(営業キロ, 運賃)」の集合から距離帯テーブルを復元する。駅名が読めないPDFでも
+// 全駅ペアの運賃とキロさえ拾えれば帯は決まる。解析ミスは運賃を静かに間違えるので、
+// 観測点が単調非減少な階段関数に乗らなければ表を出さず problems に報告する。
 
 export interface KmFarePair {
   km: number;
@@ -18,8 +10,7 @@ export interface KmFarePair {
 export interface DerivedBand {
   maxKm: number;
   fare: number;
-  // この帯の上限が取りうる範囲 [この帯で観測した最大キロ, 次の帯で観測した最小キロ)。
-  // 範囲に整数がちょうど1つだけ含まれるとき pinned=true（上限が一意に決まった）。
+  // 上限の取りうる範囲 [この帯の最大キロ, 次の帯の最小キロ)。整数が1つなら pinned
   boundaryRange: [number, number] | null;
   pinned: boolean;
   observed: number; // この帯を支える観測点の数
@@ -30,17 +21,14 @@ export interface DeriveResult {
   table: [number, number][];
   bands: DerivedBand[];
   problems: string[];
-  // ok を false にはしないが、そのまま採用すると危険な兆候。
-  // 特に「観測点の間隔が広く、その間に帯がまるごと隠れている可能性」を報告する。
+  // ok は false にしないが、そのまま採用すると危険な兆候
   warnings: string[];
   pairCount: number;
   // 上限が一意に決まらなかった帯の数。0 でなければ観測点を増やすべき
   unpinned: number;
 }
 
-// derive した table を lib/fare/calculator.ts の tableFare と同じ規則で引く。
-// 復元結果が観測点を再現するかの検証に使う（calculator を import すると
-// FareRule 全体を組み立てる必要があるため、ここでは同じ規則を最小限で再現する）。
+// calculator.ts の tableFare と同じ引き方。FareRule を組まずに自己検証したいので再掲
 function lookup(table: [number, number][], km: number): number | undefined {
   for (const row of table) {
     if (km <= row[0]) return row[1];
@@ -63,8 +51,7 @@ export function deriveFareTable(pairs: KmFarePair[]): DeriveResult {
     };
   }
 
-  // 同一キロで運賃が食い違う観測点は、対キロ制では起こりえない。
-  // 解析ミスか、特定運賃・加算運賃が混ざっているかのどちらか。
+  // 対キロ制では起こりえない。解析ミスか、特定運賃が混ざっている
   const fareByKm = new Map<number, Set<number>>();
   for (const p of clean) {
     const set = fareByKm.get(p.km) ?? new Set<number>();
@@ -79,7 +66,6 @@ export function deriveFareTable(pairs: KmFarePair[]): DeriveResult {
     }
   }
 
-  // 運賃ごとの観測キロの最小・最大
   const byFare = new Map<number, { min: number; max: number; count: number }>();
   for (const p of clean) {
     const cur = byFare.get(p.fare);
@@ -123,7 +109,6 @@ export function deriveFareTable(pairs: KmFarePair[]): DeriveResult {
       continue;
     }
 
-    // 上限は [cur.max, next.min) のどこか。この範囲の整数を候補にする
     const lo = cur.max;
     const hi = next.min;
     const firstInt = Math.ceil(lo);
@@ -143,8 +128,7 @@ export function deriveFareTable(pairs: KmFarePair[]): DeriveResult {
 
   const table: [number, number][] = bands.map((b) => [b.maxKm, b.fare]);
 
-  // 復元したテーブルが観測点を全部再現するかの自己検証。
-  // ここが通らないテーブルは採用してはいけない。
+  // 自己検証。ここが通らない表は採用してはいけない
   let mismatches = 0;
   for (const p of clean) {
     if (lookup(table, p.km) !== p.fare) mismatches++;
@@ -155,15 +139,9 @@ export function deriveFareTable(pairs: KmFarePair[]): DeriveResult {
     );
   }
 
-  // 隣り合う観測点の距離が離れていると、その隙間に別の帯がまるごと入っていても
-  // 気づけない。復元した表は「観測した距離では正しいが、間の距離では粗い」ものに
-  // なりうる。実例: 富山地方鉄道で単一の起点からの40点だけで復元したところ、
-  // 観測済みの21.8km/30.2kmは実運賃と一致したのに、観測していない50.8kmは
-  // 2,020円が抜け落ちて2,160円になった。
+  // 以下は ok を落とさない警告。観測点が粗い/少ないと自己検証は通ってしまう
+  // （2点なら必ず通る）。踏んだ実例は derive.test.ts にテストとして残してある
   const warnings: string[] = [];
-  // 観測点が極端に少ないと、どんな並びでも自己検証は通ってしまう（2点なら必ず通る）。
-  // 実例: 秩父鉄道の認可資料PDFはテキスト抽出が崩れており、拾えた2点から
-  // 「211kmまで45円」という明らかに無意味な表ができたが ok=true になった。
   if (clean.length < 6 || bands.length < 3) {
     warnings.push(
       `観測点が ${clean.length} 点・帯が ${bands.length} 本しかない。` +

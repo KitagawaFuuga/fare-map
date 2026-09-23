@@ -3,6 +3,11 @@ import { describe, expect, it } from "vitest";
 import type { ExtraJoin, OperatorSplit } from "@/lib/graph/build";
 import type { RailGraph } from "@/lib/graph/types";
 import { parseCsv } from "@/lib/graph/csv";
+import {
+  EAST_KM_EXCLUDED_LINES,
+  EAST_KM_OPERATOR,
+  YAMANOTE_LINE_ID,
+} from "@/lib/search/reachable";
 
 // data/graph.json はコミット済みの生成物で、生成は scripts/pipeline/build-graph.ts が
 // 手元で走ったときにしか行われない。つまり data/operator-splits.json や
@@ -110,5 +115,45 @@ describe("data/extra-joins.json と graph.json の整合", () => {
       .filter((j) => inRaw.has([j.from, j.to].sort().join("\u0000")))
       .map((j) => `${j.lineId} ${j.from}-${j.to}`);
     expect(redundant).toEqual([]);
+  });
+});
+
+// EAST_KM_EXCLUDED_LINES は加算額の除外規則を lineId で表す。lineId は ekidata 側の
+// 内部IDで再生成時に振り直されうるが、振り直されても運賃は「それらしい」値のまま
+// 出てしまい、規則が無効化されたこと（または無関係な路線に適用されたこと）に
+// 気づけない。定数に併記した路線名を graph.json と突き合わせて検出する。
+describe("加算額の除外区間 lineId と graph.json の整合", () => {
+  it("定義された lineId が実在し、併記した路線名・事業者と一致する", () => {
+    const wrong: string[] = [];
+    for (const [lineId, expectedName] of Object.entries(
+      EAST_KM_EXCLUDED_LINES,
+    )) {
+      const ns = nodes.filter((n) => n.lineId === lineId);
+      if (ns.length === 0) {
+        wrong.push(`${lineId} が graph に存在しない`);
+        continue;
+      }
+      for (const n of [...new Set(ns.map((n) => n.lineName))]) {
+        if (n !== expectedName)
+          wrong.push(`${lineId}: ${n} (期待 ${expectedName})`);
+      }
+      for (const op of [...new Set(ns.map((n) => n.operator))]) {
+        if (op !== EAST_KM_OPERATOR)
+          wrong.push(`${lineId}: 事業者 ${op} (期待 ${EAST_KM_OPERATOR})`);
+      }
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  // 除外規則の適格駅（東京都区内・山手線内の近似）はこの lineId の駅名で決まる。
+  // 山手線でない路線を指していると、適格判定が丸ごと別の駅集合になる。
+  it("YAMANOTE_LINE_ID が山手線を指しており、主要駅を含む", () => {
+    const names = new Set(
+      nodes.filter((n) => n.lineId === YAMANOTE_LINE_ID).map((n) => n.name),
+    );
+    expect(EAST_KM_EXCLUDED_LINES[YAMANOTE_LINE_ID]).toBe("JR山手線");
+    for (const name of ["東京", "品川", "新宿", "上野"]) {
+      expect(names, `${name} が山手線の駅集合に含まれること`).toContain(name);
+    }
   });
 });

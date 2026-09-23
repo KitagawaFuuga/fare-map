@@ -69,14 +69,29 @@ const PENDING_ENTRY: ParetoEntry = Object.freeze({
 // として計算され JR東日本分の加算額が発生しない」規則の目印。グラフに新幹線が
 // 無いので在来線の lineId で代用する。出典・既知の限界は
 // docs/search-design.md「2. 加算額の除外区間（東京〜熱海）」。
-// ※ lineId はグラフ再生成で振り直されうるため、再生成時はこの値を要確認。
-const EAST_KM_EXCLUDED_LINE_IDS = new Set(["11301", "11302"]);
+//
+// lineId はグラフ再生成で振り直されうる。振り直されると規則が静かに無効化される
+// （または無関係な路線に適用される）ため、期待する路線名を値に持たせて
+// lib/graph/__tests__/data-integrity.test.ts が graph.json と突き合わせる。
+export const EAST_KM_EXCLUDED_LINES = {
+  "11301": "JR東海道本線(東京～熱海)",
+  "11302": "JR山手線",
+} as const;
+
+// 加算額の対象になる事業者。除外規則も eastKm の集計もこの事業者の区間だけが対象。
+export const EAST_KM_OPERATOR = "JR東日本";
+export const YAMANOTE_LINE_ID =
+  "11302" satisfies keyof typeof EAST_KM_EXCLUDED_LINES;
+
+const EAST_KM_EXCLUDED_LINE_IDS = new Set<string>(
+  Object.keys(EAST_KM_EXCLUDED_LINES),
+);
 
 function isEastKmExcludedEdge(
   graph: RailGraph,
   edge: { from: string; to: string; operator: string },
 ): boolean {
-  if (edge.operator !== "JR東日本") return false;
+  if (edge.operator !== EAST_KM_OPERATOR) return false;
   const fromLine = graph.nodes[edge.from]?.lineId;
   const toLine = graph.nodes[edge.to]?.lineId;
   return (
@@ -96,7 +111,7 @@ function getYamanoteStationNames(graph: RailGraph): Set<string> {
   if (cached === undefined) {
     cached = new Set();
     for (const n of Object.values(graph.nodes)) {
-      if (n.lineId === "11302") cached.add(n.name);
+      if (n.lineId === YAMANOTE_LINE_ID) cached.add(n.name);
     }
     yamanoteStationNamesCache.set(graph, cached);
   }
@@ -131,7 +146,7 @@ function segmentEastKmContribution(
   fromName: string | undefined,
   toName: string | undefined,
 ): number {
-  if (segmentOperator !== "JR東日本") return 0;
+  if (segmentOperator !== EAST_KM_OPERATOR) return 0;
   if (!segmentOnlyExcludedLines) return segmentKm;
   const exempt =
     isEligibleExclusionName(graph, fromName) ||
@@ -533,7 +548,7 @@ function runSearch(
       // totalEastKm に現れていない segmentKm を支配判定に残すための次元。
       const pendingEastKm =
         next.honshuThroughEastKm +
-        (next.segmentOperator === "JR東日本" ? next.segmentKm : 0);
+        (next.segmentOperator === EAST_KM_OPERATOR ? next.segmentKm : 0);
       const nextEntry: ParetoEntry = {
         confirmedFare: next.confirmedFare,
         totalKm: next.honshuThroughKm + next.segmentKm,

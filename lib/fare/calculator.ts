@@ -1,19 +1,11 @@
 import type { FareOverride, FareRule } from "@/lib/fare/types";
 
-// JR本州3社（東日本・東海・西日本）をまたぐ乗車の場合、会社境界で運賃を
-// 分割せず「基準額＋加算額」の通し運賃方式を使う（2026年3月14日改定で新設）。
-// この3社間の切り替えだけを特別扱いし、三島会社（北海道・四国・九州）や
-// 私鉄との切り替えは対象外（従来どおり区間を確定して初乗りからやり直す）。
-// 三島会社は加算額表の数値が未確認のため対象外とした
-// （詳細: .superpowers/sdd/2026-08-24-fare-accuracy/task-9-report.md）。
+// この3社をまたぐ乗車だけ、会社境界で分割せず通し運賃で計算する（docs/search-design.md）
 export const HONSHU_OPERATORS = new Set(["JR東日本", "JR東海", "JR西日本"]);
 
-// 通し運賃の「基準額」表として使う代表事業者。基準額表は JR東海・JR西日本の
-// 単独運賃表（改定前から据え置き）と同一の値であることが確認済み
-// （data/fare-rules/jr-central.json, jr-west.json の source.note 参照）。
+// 基準額表は JR東海・JR西日本の単独運賃表と同一（各 source.note 参照）
 const HONSHU_BASE_OPERATOR = "JR東海";
-// 「加算額」表（JR東日本区間の営業キロに対する上乗せ額）は、実在のどの事業者名
-// とも衝突しない合成事業者名で data/fare-rules/jr-honshu-kasan.json に登録する。
+// 加算額表は実在の事業者名と衝突しない合成名で登録してある
 const HONSHU_KASAN_OPERATOR = "__jr-honshu-kasan";
 
 export interface FareCalculator {
@@ -23,42 +15,20 @@ export interface FareCalculator {
     fromName?: string,
     toName?: string,
   ): number;
-  // 探索の枝刈り用。この事業者・この距離で「今後どう乗り継いでも絶対に
-  // これより安くはならない」運賃の下界を返す（override 込みで安全側に見積もる）。
-  // fromName を渡すと isOverrideAnchor と同じ論拠で下界を締められる:
-  // fromName がその事業者の override 駅ペアのどちらにも登場しない場合、この区間は
-  // どの駅で降りても override を絶対に引けないため、距離表の運賃（km について
-  // 単調非減少）がそのまま有効な下界になる。fromName を渡さない、または anchor の
-  // 場合は override が効く可能性があるので、距離表運賃とその事業者の override
-  // 最安値の小さいほうを返す（この場合、下界は事業者単位の override 最安値で
-  // 頭打ちになり km について単調増加しなくなる点に注意。停止性は下界の単調性では
-  // なく、budget が有限で運賃が整数であることに依っている。詳細は
-  // lib/search/reachable.ts のコメント参照）。
+  // 探索の枝刈り用。「この先どう乗り継いでも これより安くならない」額を返す。
+  // fromName を渡すと下界を締められる（根拠と限界: docs/search-design.md）
   lowerBound(operator: string, km: number, fromName?: string): number;
-  // stationName がその事業者の override 駅ペアのどちらか一方に登場するか。
-  // 登場しない駅を区間の起点にしている限り、この区間はどの駅で降りても override を
-  // 引けない（override は fromName が登録ペアのどちらかと一致する場合にしか
-  // マッチしないため）。探索側はこれを使って「区間の起点駅を区別する必要が無い
-  // （=状態を安全にマージしてよい）」ケースを判定し、状態空間の爆発を防ぐ。
+  // stationName がその事業者の override 駅ペアに登場するか。
+  // 探索はこれで状態をマージしてよいか判定する（docs/search-design.md）
   isOverrideAnchor(operator: string, stationName: string | undefined): boolean;
-  // JR本州3社をまたぐ通し運賃 = 基準額（総営業キロで基準額表を1回引いた額）
-  // + 加算額（eastKm に対して加算額表を1回引いた額。541km以上は440円固定）。
-  // 100km超で加算額が0円になる、という規則は出典にない誤りだったため廃止した
-  // （加算額表は541km以上の帯まで公式PDFに明記されている。詳細:
-  // .superpowers/sdd/2026-08-24-fare-accuracy/kasan-verified.md）。
-  //
-  // eastKm は「JR東日本区間の営業キロ」だが、呼び出し側（lib/search/reachable.ts）
-  // が既に「東京都区内・山手線内〜東海道方面は東京(品川)〜熱海間を新幹線(JR東海)
-  // 経由として計算する」規則を適用した後の値を渡す前提（この関数自体は単に
-  // 基準額表と加算額表を1回ずつ引くだけで、その特例の判定はしない）。
+  // 通し運賃 = 基準額(総営業キロ) + 加算額(eastKm)。eastKm は呼び出し側が
+  // 東京〜熱海の特例を適用した後の値を渡す（docs/search-design.md）
   estimateHonshuThrough(totalKm: number, eastKm: number): number;
-  // 上記の下界。加算額は常に0以上なので基準額のみを返せば安全
-  // （距離が伸びても単調非減少で、絶対にこれを下回らない）。
+  // 上記の下界。加算額は常に0以上なので基準額だけ返せば安全
   honshuThroughBaseFare(totalKm: number): number;
 }
 
-// 事業者ごとの特定運賃（駅ペア単位）を方向を問わず引けるようにするためのキー生成。
-// 区間全体（乗車区間の始点・終点）に対してのみ適用し、途中駅ペアには適用しない。
+// 方向を問わず引けるよう並べ替えてから繋ぐ。区切りは駅名に現れない文字
 function pairKey(a: string, b: string): string {
   return [a, b].sort().join("\u0000");
 }
@@ -80,9 +50,7 @@ export function createFareCalculator(
   const overrideByOperator = new Map<string, Map<string, number>>();
   const minOverrideByOperator = new Map<string, number>();
   const overrideStationsByOperator = new Map<string, Set<string>>();
-  // 下界の締め上げ用: 事業者ごとに「その駅を含む override ペアの最小運賃」。
-  // 事業者単位の最小値（minOverrideByOperator）より必ず大きいか等しいので、
-  // anchor 駅がわかっている場合はこちらを使うほうが下界が締まる。
+  // 駅ごとの最小値。事業者単位より必ず大きいか等しいので下界が締まる
   const minOverrideByOperatorStation = new Map<string, Map<string, number>>();
   for (const o of overrides ?? []) {
     const map = overrideByOperator.get(o.operator) ?? new Map<string, number>();
@@ -112,8 +80,7 @@ export function createFareCalculator(
   function tableFare(operator: string, km: number): number {
     if (km <= 0) return 0;
     const rule = byOperator.get(operator) ?? fb;
-    // table は maxKm 昇順（fare/types.ts のスキーマコメント参照）なので二分探索できる。
-    // 「km <= maxKm を満たす最初の行」を探す＝線形走査と同じ結果。
+    // maxKm 昇順なので「km <= maxKm の最初の行」を二分探索で探せる（昇順は zod が強制）
     const table = rule.table;
     let lo = 0;
     let hi = table.length;
@@ -152,13 +119,10 @@ export function createFareCalculator(
           .get(operator)
           ?.get(fromName);
         if (stationMin === undefined) {
-          // fromName が override 駅ペアのどちらにも登場しない = この区間は
-          // どの駅で降りても override を絶対に引けない。距離表運賃だけが
-          // 有効な下界であり、これは km について単調非減少（下界が頭打ちしない）。
+          // この区間はどの駅で降りても override を引けないので、距離表が有効な下界
           return table;
         }
-        // fromName を含む override ペアの最小値まで締める（事業者全体の最小値
-        // より必ず大きいか等しい＝下界としてより厳しくても安全）。
+        // この駅を含む override の最小値まで締める（事業者全体の最小値以上なので安全）
         return Math.min(table, stationMin);
       }
       const minOverride = minOverrideByOperator.get(operator) ?? Infinity;

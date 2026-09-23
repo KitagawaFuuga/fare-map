@@ -82,8 +82,30 @@ curl "http://localhost:3000/api/reachable?from=<上で得た駅 id>&budget=500"
 4. 以後は `main` への push で `.github/workflows/deploy.yml` が自動デプロイする
 5. （任意）駅すぱあと API フリープランのキーを取得済みなら、Container App の環境変数に `EKISPERT_API_KEY` を設定する。
    未設定の場合は経路検索リンクが Google Maps へのフォールバックになる。
+6. （任意）レート制限とキャッシュの既定値は `.env.example` 参照。既定のままで動く。
 
-CI（`.github/workflows/ci.yml`）は push / PR ごとに lint / format:check / typecheck / test を実行する。
+`--min-replicas 0` は課金を抑えるが、レプリカが増えるとレート制限と結果キャッシュは
+レプリカごとに独立する（どちらもプロセス内のメモリに載る）。`--max-replicas` を絞るか、
+共有ストアに移すかを、スケールさせる前に決めること。
+
+### デプロイ前のローカル確認
+
+CI（`deploy.yml`）と同じく、本番と同じ standalone サーバーを起動して確かめられる。
+
+```
+docker build -t fare-map:verify .
+docker run -d --name fare-map-verify -p 3125:3000 fare-map:verify
+curl -s -D - -o /dev/null http://127.0.0.1:3125/ | grep -i content-security-policy
+curl -s "http://127.0.0.1:3125/api/stations?q=%E6%96%B0%E5%AE%BF"
+docker rm -f fare-map-verify
+```
+
+`npm run e2e` は `next start` を使うが、`output: standalone` とは組み合わせられない
+（Next.js が警告を出す）。standalone 側の COPY 漏れや起動時クラッシュはこの Docker 経路か
+`deploy.yml` のスモークでしか出ない。
+
+CI（`.github/workflows/ci.yml`）は push / PR ごとに lint / format:check / typecheck / test と、
+デスクトップ・モバイル両方の E2E を実行する。
 
 ## 出典・ライセンス
 

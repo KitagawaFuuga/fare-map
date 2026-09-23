@@ -14,6 +14,38 @@ http://localhost:3000 で起動する。
 データ（`data/graph.json`）はコミット済みなのでそのまま動く。
 更新・再生成する場合は `scripts/pipeline/README.md` の手順に従う。
 
+### テスト
+
+```
+npm run test    # ロジック（374件・約3秒）
+npm run e2e     # ブラウザ実機のスモーク3本
+```
+
+`npm run e2e` は本番ビルドを作ってから Chromium で触る。`next dev` ではなく
+本番ビルドなのは、maplibre のワーカー解決が dev と本番で挙動が違い、
+検出したいのが本番側の 404 だから。初回は
+`npx playwright install chromium` が必要。
+
+繰り返し回すときはサーバーを立てたままにすると速い（18秒 → 5秒）。
+`reuseExistingServer` が効いてビルドを飛ばす。
+
+```
+npx next start -p 3100     # 別ターミナルで起動しっぱなしにする
+npm run e2e
+```
+
+ただしこの方法ではコードを変えても再ビルドされない。UI を触ったら
+サーバーを立て直すこと。
+
+デバッグ用:
+
+```
+npm run e2e:ui                    # タイムライン付きの GUI
+npx playwright test --headed      # ブラウザを表示して実行
+npx playwright test --debug       # ステップ実行
+npx playwright show-report        # 失敗後にレポートを開く
+```
+
 ### TypeScript 6 / 7 の併用
 
 `package.json` の依存が2本のエイリアスに分かれているのは、型検査を TS 7（Go 実装）で

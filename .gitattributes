@@ -1,0 +1,4 @@
+# 作業ディレクトリでも LF に統一する。Windows の core.autocrlf=true だと
+# チェックアウトのたびに CRLF になり、prettier（既定は LF）と衝突して
+# 「git checkout すると format:check が落ちる」状態になるため。
+* text=auto eol=lf

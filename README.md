@@ -14,6 +14,21 @@ http://localhost:3000 で起動する。
 データ（`data/graph.json`）はコミット済みなのでそのまま動く。
 更新・再生成する場合は `scripts/pipeline/README.md` の手順に従う。
 
+### TypeScript 6 / 7 の併用
+
+`package.json` の依存が2本のエイリアスに分かれているのは、型検査を TS 7（Go 実装）で
+行いつつ、TS 7 未対応の typescript-eslint には TS 6 の API を渡すため。
+
+| 依存                 | 実体                      | 使う側                                           |
+| -------------------- | ------------------------- | ------------------------------------------------ |
+| `@typescript/native` | `typescript@7`            | `tsc`（`npm run typecheck`）、Next.js のビルド   |
+| `typescript`         | `@typescript/typescript6` | `import "typescript"` する側 = typescript-eslint |
+
+typescript-eslint は TS 7 を検出すると警告ではなく throw するため、素直に TS 7 を入れると
+`npm run lint` が動かない（typescript-eslint#10940 で対応を追跡中）。
+`tsc6` で TS 6 側の型検査も実行できる。将来 typescript-eslint が TS 7 に対応したら、
+この2本を `"typescript": "^7"` の1本に戻す。
+
 ## Docker
 
 ```

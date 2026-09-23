@@ -87,6 +87,18 @@ CI（`.github/workflows/ci.yml`）は push / PR ごとに lint / format:check / 
 
 ## 出典・ライセンス
 
-- 地図: OpenStreetMap contributors / OpenFreeMap
-- 駅・路線データ: 駅データ.jp
-- 運賃は概算です。正確な運賃は各社の経路検索で確認してください。
+このアプリのソースコードは MIT License（`LICENSE`）。`data/` 配下のデータは
+対象外で、それぞれ以下の条件に従う。
+
+- 地図: (C) [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors /
+  タイル配信 [OpenFreeMap](https://openfreemap.org/)
+- 駅・路線データ（`data/graph.json` の駅・路線・接続）:
+  [駅データ.jp](https://ekidata.jp/)（[利用規約](https://ekidata.jp/agreement.php)）。
+  第5条により加工可、第6条により加工済みデータの第三者提供可。取得は再配布ミラー
+  [ny-a/ekidata](https://github.com/ny-a/ekidata) 経由。
+- 実営業キロ（`data/calibration.json`、および `graph.json` の `km` への距離補正）:
+  [全国鉄道運行本数データ](https://gtfs-gis.jp/railway_honsu/) / CC BY 4.0。
+- 運賃表・特定運賃（`data/fare-rules`、`data/fare-overrides`）: 各鉄道事業者が公表する
+  運賃表から作成。抽出手順は `scripts/fare/extract/README.md` を参照。
+
+運賃は概算です。正確な運賃は各社の経路検索で確認してください。

@@ -11,6 +11,8 @@ export default tseslint.config(
       // scripts/copy-maplibre-worker.mjs が npm install / dev / build 前に node_modules からコピーする実体
       "public/maplibre-gl-worker.mjs",
       "public/maplibre-gl-shared.mjs",
+      "test-results/**",
+      "playwright-report/**",
     ],
   },
   ...tseslint.configs.recommended,

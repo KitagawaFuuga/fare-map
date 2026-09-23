@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { FeatureCollection } from "geojson";
 import {
   Map as MapLibreMap,
   Popup,
@@ -30,9 +31,7 @@ const LAYER_ID = "reachable-circles";
 // (scripts/copy-maplibre-worker.mjs が npm install / dev / build 前にコピーする)。
 setWorkerUrl("/maplibre-gl-worker.mjs");
 
-function toGeoJson(
-  stations: MapViewProps["stations"],
-): GeoJSON.FeatureCollection {
+function toGeoJson(stations: MapViewProps["stations"]): FeatureCollection {
   return {
     type: "FeatureCollection",
     features: stations.map((s) => ({

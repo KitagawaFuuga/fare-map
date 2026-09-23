@@ -30,7 +30,7 @@ export const fareRuleSchema = fareRuleShape.superRefine((rule, ctx) => {
     if (prev === undefined || cur === undefined) continue;
     if (prev[0] >= cur[0]) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ["table", i, 0],
         message:
           `fareRuleSchema: table は maxKm の厳密な昇順である必要があります ` +

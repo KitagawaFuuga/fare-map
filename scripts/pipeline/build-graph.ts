@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { parseCsv } from "@/lib/graph/csv";
 import {
   buildGraph,
@@ -10,6 +10,10 @@ import {
   calibratedKm,
   type CalibrationSection,
 } from "@/lib/graph/calibrate";
+import {
+  applyStationKm,
+  type StationKmEdge,
+} from "@/lib/graph/apply-station-km";
 
 // データ更新時にだけ走る生成スクリプト。ekidata の CSV からグラフを組み、
 // 実営業キロで距離補正をかけて data/graph.json に焼き付ける。
@@ -72,6 +76,29 @@ for (const edge of graph.edges) {
   const node = graph.nodes[edge.from];
   if (!node) continue;
   edge.km = calibratedKm(calibration, node, edge.km);
+}
+
+// 駅一覧から取れた実営業キロがある区間は、推定値を置き換える。
+// 補正の後でなければならない（補正は推定値と実キロの比を路線・事業者ごとに
+// 出しているので、先に一部を実キロにすると比の母数が歪む）。
+if (existsSync("data/station-km.json")) {
+  const stationKm = JSON.parse(
+    readFileSync("data/station-km.json", "utf8"),
+  ) as { edges: StationKmEdge[] };
+  const applied = applyStationKm(graph, stationKm.edges);
+  process.stdout.write(
+    `station-km: ${applied.replaced} エッジを実営業キロに置き換え` +
+      `（推定との差の合計 ${applied.totalDelta.toFixed(1)}km、` +
+      `平均 ${(applied.totalDelta / Math.max(applied.replaced, 1)).toFixed(3)}km）、` +
+      `グラフに無い駅間 ${applied.unmatched}
+`,
+  );
+  for (const w of applied.worst.slice(0, 5)) {
+    process.stdout.write(
+      `  差が大きい: ${w.from}–${w.to} ${w.before.toFixed(2)} → ${w.after.toFixed(2)}km
+`,
+    );
+  }
 }
 
 // calibration.json はコミット対象なので prettier の書式（末尾改行あり）に合わせる。

@@ -80,6 +80,9 @@ import tokitetsuOverride from "@/data/fare-overrides/tokitetsu.json";
 import shinanoOverride from "@/data/fare-overrides/shinano.json";
 import toeiSubwayOverride from "@/data/fare-overrides/toei-subway.json";
 import toeiToneriOverride from "@/data/fare-overrides/toei-toneri.json";
+import kotodenOverride from "@/data/fare-overrides/kotoden.json";
+import yuiRailOverride from "@/data/fare-overrides/yui-rail.json";
+import sapporoOverride from "@/data/fare-overrides/sapporo.json";
 
 const rules = [
   jrEast,
@@ -157,6 +160,9 @@ const overrides = [
   shinanoOverride,
   toeiSubwayOverride,
   toeiToneriOverride,
+  kotodenOverride,
+  yuiRailOverride,
+  sapporoOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地方鉄道・しなの鉄道の距離表は枝刈りの下界専用で、公表営業キロではなく
 // graph.json の駅間距離（座標から求めて実営業キロで補正した値）で帯を切ってある。

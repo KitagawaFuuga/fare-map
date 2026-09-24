@@ -128,5 +128,12 @@ CI（`.github/workflows/ci.yml`）は push / PR ごとに lint / format:check / 
   再取得は `npx tsx scripts/fare/ingest/odpt-toei.ts --write`。
   なお ODPT の「基本ライセンス」データは再配布が禁止されているため、この
   リポジトリが取り込んでよいのは CC BY 4.0 で公開されている事業者のみ。
+- 各社の公開 GTFS から起こした全駅ペア運賃（`data/fare-sources/kotoden.json`、
+  `yui-rail.json`、`sapporo.json` と対応する `data/fare-overrides/`）:
+  [高松琴平電気鉄道](https://www.kotoden.co.jp/)、
+  [沖縄都市モノレール](https://www.yui-rail.co.jp/)、
+  [札幌市交通局](https://www.city.sapporo.jp/st/) / いずれも CC BY 4.0。
+  対象の定義は `data/gtfs-sources.json`、再取得は
+  `npx tsx scripts/fare/ingest/gtfs-fares.ts --write`。
 
 運賃は概算です。正確な運賃は各社の経路検索で確認してください。

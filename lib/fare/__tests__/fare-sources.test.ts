@@ -84,10 +84,28 @@ describe("公式運賃表の再現", () => {
     });
   }
 
-  it("運賃表を持つ事業者の元データは、その事業者名で引ける", () => {
-    const operators = new Set(rules.flatMap((r) => r.operators));
+  // 事業者専用の距離帯が無いと、元データは全国共通のフォールバック表（generic-private）と
+  // 突き合わされることになる。それでも上のテストが通るのは、全ペアが特定運賃で
+  // 覆われている場合だけ。どちらでもないのに通っていたら、たまたま一致しているだけなので
+  // ここで落とす。
+  it("専用の距離帯を持たない事業者は、全ペアを特定運賃で覆っている", () => {
+    const withTable = new Set(rules.flatMap((r) => r.operators));
+    const overridden = new Map(
+      overrides.map((o) => [
+        o.operator,
+        new Set(o.pairs.map((p) => [p.from, p.to].sort().join("\u0000"))),
+      ]),
+    );
     for (const s of sources) {
-      expect(operators.has(s.operator), `${s.operator} の運賃表`).toBe(true);
+      if (withTable.has(s.operator)) continue;
+      const covered = overridden.get(s.operator) ?? new Set<string>();
+      const naked = s.pairs.filter(
+        (p) => !covered.has([p.from, p.to].sort().join("\u0000")),
+      );
+      expect(
+        naked.slice(0, 5),
+        `${s.operator} の距離表に頼っているペア`,
+      ).toEqual([]);
     }
   });
 });

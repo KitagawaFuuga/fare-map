@@ -1,0 +1,38 @@
+{
+  "feeds": [
+    {
+      "id": "kotoden",
+      "url": "https://www.kotoden.co.jp/publichtm/gtfs/gtfsdata/latest/gtfs_kd.zip",
+      "license": "CC BY 4.0",
+      "attribution": "高松琴平電気鉄道",
+      "operators": ["高松琴平電気鉄道"],
+      "aliases": {
+        "綾川": "綾川（イオンモール綾川）"
+      },
+      "note": "琴平線・長尾線・志度線の全駅ペア。fare_rules.txt が origin_id/destination_id で全組を持つ。"
+    },
+    {
+      "id": "yui-rail",
+      "url": "https://api3.ottop.org/download/gtfs/ooXuXei4op7y/4360001000447",
+      "license": "CC BY 4.0",
+      "attribution": "沖縄都市モノレール",
+      "operators": ["沖縄都市モノレール"],
+      "aliases": {},
+      "note": "ゆいレール全19駅の全ペア。"
+    },
+    {
+      "id": "sapporo",
+      "url": "https://ckan.hoda.jp/dataset/24d1dd70-5395-4d6b-b41f-0d83e8eabdb9/resource/3efff7e5-b604-4850-8888-38f0e60bb238/download/gtfs_sapporo1.000.zip",
+      "license": "CC BY 4.0",
+      "attribution": "札幌市交通局（北海道オープンデータポータル経由）",
+      "operators": ["札幌市交通局"],
+      "aliases": {},
+      "note": "地下鉄3線。fare_rules.txt が路線ごとに作られているため、路線をまたぐペア（南北線→東西線など）は含まれない。含まれるぶんだけ実額で持つ。市電は fare_rules.txt の origin_id/destination_id が空の均一運賃1件だけなので駅ペアが取れず、data/fare-rules/sapporo-streetcar.json の均一200円のままでよい。"
+    }
+  ],
+  "source": {
+    "url": "https://github.com/tshimada291/gtfs-jp-list",
+    "fetchedAt": "2026-09-24",
+    "note": "国内のGTFS公開データ一覧(gtfs-jp-list.csv)から、グラフに存在する鉄道事業者かつ fare_rules.txt を持ち、再配布可能なライセンスのものを選んだ。CC BY 4.0 は表示が条件なので attribution を README とアプリのフッターに出すこと。神戸市営地下鉄(Code for Kobe)は運賃ファイルが無く、山形鉄道・明知鉄道・福岡市地下鉄は配布URLが 404 だったため対象外。"
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "operator": "札幌市交通局",
+  "pairs": [
+    {
+      "from": "さっぽろ",
+      "to": "福住",
+      "fare": 250
+    },
+    {
+      "from": "さっぽろ",
+      "to": "幌平橋",
+      "fare": 210
+    },
+    {
+      "from": "すすきの",
+      "to": "平岸",
+      "fare": 210
+    },
+    {
+      "from": "バスセンター前",
+      "to": "新さっぽろ",
+      "fare": 290
+    },
+    {
+      "from": "円山公園",
+      "to": "大通",
+      "fare": 210
+    },
+    {
+      "from": "円山公園",
+      "to": "白石",
+      "fare": 250
+    },
+    {
+      "from": "宮の沢",
+      "to": "ひばりが丘",
+      "fare": 360
+    },
+    {
+      "from": "澄川",
+      "to": "真駒内",
+      "fare": 210
+    },
+    {
+      "from": "大通",
+      "to": "東札幌",
+      "fare": 250
+    },
+    {
+      "from": "大通",
+      "to": "豊平公園",
+      "fare": 250
+    },
+    {
+      "from": "発寒南",
+      "to": "新さっぽろ",
+      "fare": 360
+    },
+    {
+      "from": "発寒南",
+      "to": "大通",
+      "fare": 250
+    },
+    {
+      "from": "発寒南",
+      "to": "南郷１８丁目",
+      "fare": 330
+    },
+    {
+      "from": "北１２条",
+      "to": "中島公園",
+      "fare": 210
+    },
+    {
+      "from": "北１８条",
+      "to": "すすきの",
+      "fare": 210
+    },
+    {
+      "from": "北１８条",
+      "to": "南平岸",
+      "fare": 250
+    },
+    {
+      "from": "北２４条",
+      "to": "平岸",
+      "fare": 250
+    },
+    {
+      "from": "北３４条",
+      "to": "幌平橋",
+      "fare": 250
+    },
+    {
+      "from": "麻生",
+      "to": "中島公園",
+      "fare": 250
+    }
+  ],
+  "source": {
+    "url": "https://ckan.hoda.jp/dataset/24d1dd70-5395-4d6b-b41f-0d83e8eabdb9/resource/3efff7e5-b604-4850-8888-38f0e60bb238/download/gtfs_sapporo1.000.zip （一覧: https://github.com/tshimada291/gtfs-jp-list）",
+    "fetchedAt": "2026-09-24",
+    "note": "data/fare-rules/ の距離帯では引けないペア（19/381）。札幌市交通局（北海道オープンデータポータル経由） が公開する GTFS の fare_rules.txt / fare_attributes.txt から起こした実額。地下鉄3線。fare_rules.txt が路線ごとに作られているため、路線をまたぐペア（南北線→東西線など）は含まれない。含まれるぶんだけ実額で持つ。市電は fare_rules.txt の origin_id/destination_id が空の均一運賃1件だけなので駅ペアが取れず、data/fare-rules/sapporo-streetcar.json の均一200円のままでよい。 ライセンスは CC BY 4.0。GTFS は origin_id/destination_id で駅を明示するため、運賃表PDFのような行ズレは起こりえない（距離単調性が無力という警告が出ても、それは検査が効かないという意味であって誤りの兆候ではない）。営業キロは data/graph.json の自社線最短経路（実測ではなく補正済みの推定値）。再生成は npx tsx scripts/fare/ingest/gtfs-fares.ts --only=sapporo --write data/fare-sources/sapporo.json と合わせて lib/fare/__tests__/fare-sources.test.ts が全ペア一致を検証する。"
+  }
+}

@@ -65,9 +65,12 @@ export default function Home() {
       {error && <p className="text-sm text-red-600">{error}</p>}
       <FareLegend />
       <StationList stations={data?.stations ?? []} onPick={setFocus} />
+      {/* CC BY 4.0 のデータ（運行本数データ・公共交通オープンデータセンター）は
+          表示が条件なので、出典から外さないこと。詳細は README の出典節 */}
       <footer className="pt-4 text-xs text-gray-400">
-        出典: OpenStreetMap / OpenFreeMap /
-        駅データ.jp。運賃は距離ベースの概算です。
+        出典: OpenStreetMap / OpenFreeMap / 駅データ.jp / 全国鉄道運行本数データ
+        (CC BY 4.0) / 公共交通オープンデータセンター (CC BY 4.0)。
+        運賃は概算です。
       </footer>
     </div>
   );

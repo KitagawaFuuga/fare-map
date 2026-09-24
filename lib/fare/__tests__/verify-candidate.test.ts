@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { verifyFareCandidate, type Finding } from "@/lib/fare/verify-candidate";
+import { buildOperatorKmTable } from "@/lib/graph/operator-distance";
 import type { RailGraph } from "@/lib/graph/types";
 
 // 距離を返さない文脈。距離に依存しない検査だけを見たいとき用。
@@ -267,67 +268,7 @@ describe("実データ6事業者（受け入れ条件）", () => {
     pairs: { from: string; to: string; fare: number }[];
   };
 
-  // 事業者内の rail エッジだけを辿り、駅名どうしの距離を先に全件求めておく。
-  // 1ペアずつ都度探索すると 2,211 ペアぶんで数十秒かかる。
-  const buildKm = (operator: string) => {
-    const nodes = Object.values(graph.nodes).filter(
-      (n) => n.operator === operator,
-    );
-    const inOp = new Set(nodes.map((n) => n.id));
-    const idsByName = new Map<string, string[]>();
-    for (const n of nodes) {
-      const l = idsByName.get(n.name) ?? [];
-      l.push(n.id);
-      idsByName.set(n.name, l);
-    }
-    const adj = new Map<string, { to: string; km: number }[]>();
-    const push = (a: string, b: string, km: number) => {
-      const l = adj.get(a) ?? [];
-      l.push({ to: b, km });
-      adj.set(a, l);
-    };
-    for (const e of graph.edges) {
-      if (!inOp.has(e.from) || !inOp.has(e.to)) continue;
-      if (e.kind === "rail" && e.operator !== operator) continue;
-      push(e.from, e.to, e.kind === "rail" ? e.km : 0);
-      push(e.to, e.from, e.kind === "rail" ? e.km : 0);
-    }
-    const nameOf = new Map(nodes.map((n) => [n.id, n.name]));
-
-    // 駅名ごとに1回だけ全域へのダイクストラを回す
-    const table = new Map<string, Map<string, number>>();
-    for (const [name, starts] of idsByName) {
-      const dist = new Map<string, number>();
-      const queue: [number, string][] = [];
-      for (const s of starts) {
-        dist.set(s, 0);
-        queue.push([0, s]);
-      }
-      while (queue.length) {
-        queue.sort((x, y) => x[0] - y[0]);
-        const next = queue.shift();
-        if (!next) break;
-        const [d, id] = next;
-        if (d > (dist.get(id) ?? Infinity)) continue;
-        for (const e of adj.get(id) ?? []) {
-          const nd = d + e.km;
-          if (nd < (dist.get(e.to) ?? Infinity)) {
-            dist.set(e.to, nd);
-            queue.push([nd, e.to]);
-          }
-        }
-      }
-      const byName = new Map<string, number>();
-      for (const [id, d] of dist) {
-        const n = nameOf.get(id);
-        if (n === undefined) continue;
-        if (d < (byName.get(n) ?? Infinity)) byName.set(n, d);
-      }
-      table.set(name, byName);
-    }
-    return (a: string, b: string): number | null =>
-      table.get(a)?.get(b) ?? null;
-  };
+  const buildKm = (operator: string) => buildOperatorKmTable(graph, operator);
 
   // 基準駅からの距離順に駅を並べ、発駅のラベルを1つ後ろへずらす。
   // PDF の行と駅の対応を1つ取り違えた状態にあたる。
@@ -370,9 +311,13 @@ describe("実データ6事業者（受け入れ条件）", () => {
     expect(errors(findings, "distance-monotonicity")).toHaveLength(0);
   });
 
-  // 万葉線は路面電車で運賃が5種しかなく、距離を変えても運賃がほとんど動かない。
-  // 距離単調性は原理的に効かないので、検出ではなく「無力」の警告が出る側に回る。
-  const detectable = complete.filter((s) => s.operator !== "万葉線");
+  // 距離を変えても運賃がほとんど動かない事業者は、距離単調性が原理的に効かない。
+  // 検出できる側ではなく「無力」の警告が出る側に回る。
+  // 万葉線は路面電車で運賃が5種しかなく、都電荒川線は全線均一170円の1種。
+  const FLAT_FARE_OPERATORS = ["万葉線", "東京都交通局(都電)"];
+  const detectable = complete.filter(
+    (s) => !FLAT_FARE_OPERATORS.includes(s.operator),
+  );
 
   it.each(detectable)("$label は駅を1つずらすと検出できる", (set) => {
     const kmBetween = buildKm(set.operator);
@@ -383,17 +328,20 @@ describe("実データ6事業者（受け入れ条件）", () => {
     expect(errors(findings, "distance-monotonicity").length).toBeGreaterThan(0);
   });
 
-  it("万葉線は距離検査が無力だと警告する（黙って通さない）", () => {
-    const set = complete.find((s) => s.operator === "万葉線");
-    expect(set).toBeDefined();
-    const findings = verifyFareCandidate(
-      { operator: "万葉線", pairs: set?.pairs ?? [] },
-      { kmBetween: buildKm("万葉線") },
-    );
-    expect(
-      findings.filter((f) => f.check === "distance-check-ineffective"),
-    ).toHaveLength(1);
-  });
+  it.each(FLAT_FARE_OPERATORS)(
+    "%s は距離検査が無力だと警告する（黙って通さない）",
+    (operator) => {
+      const set = complete.find((s) => s.operator === operator);
+      expect(set).toBeDefined();
+      const findings = verifyFareCandidate(
+        { operator, pairs: set?.pairs ?? [] },
+        { kmBetween: buildKm(operator) },
+      );
+      expect(
+        findings.filter((f) => f.check === "distance-check-ineffective"),
+      ).toHaveLength(1);
+    },
+  );
 
   it("距離で運賃が動く事業者には無力の警告を出さない", () => {
     const findings = verifyFareCandidate(

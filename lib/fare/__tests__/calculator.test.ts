@@ -65,6 +65,8 @@ import chitetsu from "@/data/fare-rules/chitetsu.json";
 import echizen from "@/data/fare-rules/echizen.json";
 import tokitetsu from "@/data/fare-rules/tokitetsu.json";
 import shinano from "@/data/fare-rules/shinano.json";
+import toeiToden from "@/data/fare-rules/toei-toden.json";
+import toeiToneri from "@/data/fare-rules/toei-toneri.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -76,6 +78,8 @@ import chitetsuOverride from "@/data/fare-overrides/chitetsu.json";
 import echizenOverride from "@/data/fare-overrides/echizen.json";
 import tokitetsuOverride from "@/data/fare-overrides/tokitetsu.json";
 import shinanoOverride from "@/data/fare-overrides/shinano.json";
+import toeiSubwayOverride from "@/data/fare-overrides/toei-subway.json";
+import toeiToneriOverride from "@/data/fare-overrides/toei-toneri.json";
 
 const rules = [
   jrEast,
@@ -91,6 +95,8 @@ const rules = [
   generic,
   tokyoMetro,
   toei,
+  toeiToden,
+  toeiToneri,
   osakaMetro,
   nagoyaCity,
   nankai,
@@ -149,6 +155,8 @@ const overrides = [
   echizenOverride,
   tokitetsuOverride,
   shinanoOverride,
+  toeiSubwayOverride,
+  toeiToneriOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地方鉄道・しなの鉄道の距離表は枝刈りの下界専用で、公表営業キロではなく
 // graph.json の駅間距離（座標から求めて実営業キロで補正した値）で帯を切ってある。

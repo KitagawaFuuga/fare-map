@@ -1,0 +1,16 @@
+{
+  "id": "toei-toneri",
+  "operators": ["東京都交通局(日暮里・舎人ライナー)"],
+  "table": [
+    [2, 170],
+    [4, 240],
+    [7, 290],
+    [10, 340]
+  ],
+  "beyond": { "fromKm": 10, "baseFare": 340, "ratePerKm": 0 },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/%E6%9D%B1%E4%BA%AC%E9%83%BD%E4%BA%A4%E9%80%9A%E5%B1%80%E6%97%A5%E6%9A%AE%E9%87%8C%E3%83%BB%E8%88%8E%E4%BA%BA%E3%83%A9%E3%82%A4%E3%83%8A%E3%83%BC, https://api-public.odpt.org/api/v4/odpt:RailwayFare?odpt:operator=odpt.Operator:Toei",
+    "fetchedAt": "2026-09-24",
+    "note": "日暮里・舎人ライナーの普通旅客運賃（きっぷ・大人）。初乗り2kmまで170円、3〜4km 240円、5〜7km 290円、8〜10km 340円。全長9.7kmなので340円が最高額（beyond は届かないが安全側に同額を置く）。運賃の実額は ODPT の odpt:RailwayFare（全78ペア）と一致することを data/fare-sources/toei-toneri.json 経由で検証している。地下鉄4線とは別体系のため data/operator-splits.json で事業者を分けている。"
+  }
+}

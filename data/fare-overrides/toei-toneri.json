@@ -1,0 +1,50 @@
+{
+  "operator": "東京都交通局(日暮里・舎人ライナー)",
+  "pairs": [
+    {
+      "from": "熊野前",
+      "to": "西日暮里",
+      "fare": 170
+    },
+    {
+      "from": "見沼代親水公園",
+      "to": "舎人公園",
+      "fare": 170
+    },
+    {
+      "from": "高野",
+      "to": "西日暮里",
+      "fare": 240
+    },
+    {
+      "from": "西新井大師西",
+      "to": "扇大橋",
+      "fare": 170
+    },
+    {
+      "from": "西日暮里",
+      "to": "舎人公園",
+      "fare": 290
+    },
+    {
+      "from": "赤土小学校前",
+      "to": "舎人",
+      "fare": 290
+    },
+    {
+      "from": "足立小台",
+      "to": "見沼代親水公園",
+      "fare": 290
+    },
+    {
+      "from": "日暮里",
+      "to": "谷在家",
+      "fare": 290
+    }
+  ],
+  "source": {
+    "url": "https://api-public.odpt.org/api/v4/odpt:RailwayFare?odpt:operator=odpt.Operator:Toei",
+    "fetchedAt": "2026-09-24",
+    "note": "data/fare-rules/ の距離帯では引けないペア（8/78）。都営の距離帯は公式の区分そのものなので、これは運賃側ではなく data/graph.json の営業キロ（座標から推定し実営業キロで補正した値）の誤差で 帯の境界をまたいだぶんである。実額は ODPT の odpt:RailwayFare。data/fare-sources/toei-toneri.json と合わせて lib/fare/__tests__/fare-sources.test.ts が全ペア一致を検証する。"
+  }
+}

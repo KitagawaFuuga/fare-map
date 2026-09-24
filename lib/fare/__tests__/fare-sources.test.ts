@@ -40,6 +40,9 @@ const overrides = readAll<unknown>("data/fare-overrides").map((o) =>
 const calc = createFareCalculator(rules, overrides);
 const sources = readAll<FareSource>("data/fare-sources");
 
+// 全線均一運賃の事業者。運賃額が1種類しかないのが正しい状態
+const FLAT_FARE_IDS = new Set(["toei-toden"]);
+
 describe("公式運賃表の再現", () => {
   it("data/fare-sources/ が読み込めている", () => {
     expect(sources.length).toBeGreaterThan(0);
@@ -72,8 +75,10 @@ describe("公式運賃表の再現", () => {
         const levels = [...new Set(s.pairs.map((p) => p.fare))].sort(
           (a, b) => a - b,
         );
-        // 抽出しなおしたとき、階梯そのものが変わっていれば改定を疑う手がかりになる
-        expect(levels.length).toBeGreaterThan(1);
+        // 抽出しなおしたとき、階梯そのものが変わっていれば改定を疑う手がかりになる。
+        // 均一運賃の事業者だけは1種で正しいので、そこだけ下限を緩める
+        // （緩めた事業者を明示しておかないと、対キロの表が1種に潰れても気づけない）。
+        expect(levels.length).toBeGreaterThan(FLAT_FARE_IDS.has(s.id) ? 0 : 1);
         expect(levels[0]).toBeGreaterThan(0);
       });
     });

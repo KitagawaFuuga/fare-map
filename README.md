@@ -122,5 +122,11 @@ CI（`.github/workflows/ci.yml`）は push / PR ごとに lint / format:check / 
   [全国鉄道運行本数データ](https://gtfs-gis.jp/railway_honsu/) / CC BY 4.0。
 - 運賃表・特定運賃（`data/fare-rules`、`data/fare-overrides`）: 各鉄道事業者が公表する
   運賃表から作成。抽出手順は `scripts/fare/extract/README.md` を参照。
+- 東京都交通局の全駅ペア運賃（`data/fare-sources/toei-*.json` および対応する
+  `data/fare-overrides/toei-*.json`）:
+  [公共交通オープンデータセンター](https://www.odpt.org/)（東京都交通局提供） / CC BY 4.0。
+  再取得は `npx tsx scripts/fare/ingest/odpt-toei.ts --write`。
+  なお ODPT の「基本ライセンス」データは再配布が禁止されているため、この
+  リポジトリが取り込んでよいのは CC BY 4.0 で公開されている事業者のみ。
 
 運賃は概算です。正確な運賃は各社の経路検索で確認してください。

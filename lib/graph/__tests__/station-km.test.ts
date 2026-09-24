@@ -78,13 +78,15 @@ describe("extractStationKm", () => {
     expect(r.edgeKm.get(edgeKey("甲", "乙"))).toBeCloseTo(3.0);
   });
 
+  // 記号は駅名の後ろに付くので、先に落とさないと「駅」を外せず一致しない。
+  // # は近鉄名古屋線の「伊勢中川駅#」、↷ は近鉄京都線の「京都駅↷」で実際に踏んだ
   it("駅名の脚注・記号・かっこ書きを落として突き合わせる", () => {
     const noisy = [
       ["駅名", "累計"],
       ["甲駅[1]", "0.0"],
-      ["乙駅※", "3.0"],
+      ["乙駅↷", "3.0"],
       ["丙駅（仮称）", "7.5"],
-      ["丁駅", "10.0"],
+      ["丁駅#", "10.0"],
     ];
     const r = extractStationKm([noisy], { stationNames: names, sections });
     expect(r.edgeKm.get(edgeKey("乙", "丙"))).toBeCloseTo(4.5);

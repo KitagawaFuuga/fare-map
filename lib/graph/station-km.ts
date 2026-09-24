@@ -43,15 +43,26 @@ const MIN_STATIONS = 2;
 export const edgeKey = (a: string, b: string): string =>
   [a, b].sort().join("\u0000");
 
-/** 脚注・記号・かっこ書きを落として、グラフ側の駅名表記に寄せる */
+/**
+ * 脚注・記号・かっこ書きを落として、グラフ側の駅名表記に寄せる。
+ *
+ * 記号は駅名の後ろに付く（「伊勢中川駅#」「京都駅↷」「乙駅※」）ので、記号を先に
+ * 落とさないと末尾の「駅」を外せず、その行がまるごと突き合わせから漏れる。
+ * 記号の種類は記事ごとに増えるため列挙で追いかけず、末尾にある
+ * 「かな・漢字・英数字以外」をまとめて落とす。
+ */
 export function normalizeStationName(raw: string): string {
+  const trailingJunk =
+    /[^\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9ー]+$/u;
   return raw
     .replace(/\[[^\]]*\]/g, "")
-    .replace(/[※＊*†‡]/g, "")
     .replace(/（[^）]*）/g, "")
     .replace(/\([^)]*\)/g, "")
     .trim()
-    .replace(/駅$/, "");
+    .replace(trailingJunk, "")
+    .replace(/駅$/, "")
+    .replace(trailingJunk, "")
+    .trim();
 }
 
 function numberIn(cell: string): number | null {

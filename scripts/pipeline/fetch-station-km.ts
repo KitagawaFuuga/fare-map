@@ -39,11 +39,45 @@ function arg(name: string): string | undefined {
 // 路線名の突き合わせはこの形に寄せてから行う
 export function normalizeLineKey(name: string): string {
   return name
-    .replace(/^JR/, "")
     .replace(/[（(].*/, "")
     .replace(/\s/g, "")
     .replace(/本線$/, "線")
     .trim();
+}
+
+// グラフの路線名は事業者の略称で始まる（近鉄名古屋線・東武伊勢崎線）が、
+// 実営業キロのデータ側は略称を落としている（名古屋線・伊勢崎線）。
+// 事業者ごとに略称を1つ決めて剥がし、そのうえで完全一致で突き合わせる。
+//
+// endsWith で緩く照合してはいけない。「近鉄南大阪線」が「大阪線」に一致してしまい、
+// 別路線の区間キロを正解として使うことになる（近鉄には大阪線と南大阪線が両方ある）。
+export function operatorLinePrefix(lineNames: string[]): string {
+  const covers = (prefix: string) =>
+    lineNames.filter((n) => n.startsWith(prefix)).length;
+  let best = "";
+  // 空文字は全路線に前方一致してしまうので、比較の初期値に使ってはいけない
+  let bestCount = 0;
+  for (const name of lineNames) {
+    for (let len = 1; len <= 6 && len < name.length; len++) {
+      const candidate = name.slice(0, len);
+      const count = covers(candidate);
+      // 過半数の路線が持つ接頭辞のうち、いちばん長いものを採る
+      if (count < Math.max(2, lineNames.length / 2)) continue;
+      if (count > bestCount || (count === bestCount && len > best.length)) {
+        best = candidate;
+        bestCount = count;
+      }
+    }
+  }
+  return best;
+}
+
+/** 実営業キロ側の路線名は「南大阪線・吉野線」のように束ねられていることがある */
+export function csvLineKeys(name: string): string[] {
+  return name
+    .split(/[・／/]/)
+    .map((part) => normalizeLineKey(part))
+    .filter((part) => part !== "");
 }
 
 // 記事名は正式路線名。graph の lineName から括弧の区間表記などを落とす
@@ -144,6 +178,29 @@ async function main(): Promise<void> {
     readFileSync("data/raw/kilometrage.csv", "utf8").replace(/"/g, ""),
   );
 
+  // 事業者ごとの路線名の接頭辞（近鉄・東武・JR など）を先に決める。
+  // --operator で絞っても接頭辞は全路線から決める（絞ると母数が偏る）
+  const lineNamesByOperator = new Map<string, Set<string>>();
+  for (const n of Object.values(graph.nodes)) {
+    const set = lineNamesByOperator.get(n.operator) ?? new Set<string>();
+    set.add(n.lineName);
+    lineNamesByOperator.set(n.operator, set);
+  }
+  const prefixOf = new Map(
+    [...lineNamesByOperator].map(([operator, names]) => [
+      operator,
+      operatorLinePrefix([...names]),
+    ]),
+  );
+  const graphLineKey = (operator: string, lineName: string): string => {
+    const prefix = prefixOf.get(operator) ?? "";
+    const stripped =
+      prefix !== "" && lineName.startsWith(prefix)
+        ? lineName.slice(prefix.length)
+        : lineName;
+    return normalizeLineKey(stripped);
+  };
+
   // 路線ごとに、グラフの駅名と、正解に使う実営業キロの区間を集める
   const lines = new Map<
     string,
@@ -151,7 +208,7 @@ async function main(): Promise<void> {
   >();
   for (const n of Object.values(graph.nodes)) {
     if (onlyOperator !== undefined && n.operator !== onlyOperator) continue;
-    const key = `${n.operator}\u0000${normalizeLineKey(n.lineName)}`;
+    const key = `${n.operator}\u0000${graphLineKey(n.operator, n.lineName)}`;
     const entry = lines.get(key) ?? {
       operator: n.operator,
       lineName: n.lineName,
@@ -182,8 +239,9 @@ async function main(): Promise<void> {
       .filter(
         (r) =>
           (r["事業者名"] ?? "") === target.operator &&
-          normalizeLineKey(r["路線名"] ?? "") ===
-            normalizeLineKey(target.lineName) &&
+          csvLineKeys(r["路線名"] ?? "").includes(
+            graphLineKey(target.operator, target.lineName),
+          ) &&
           target.names.has(r["起点駅"] ?? "") &&
           target.names.has(r["終点駅"] ?? ""),
       )

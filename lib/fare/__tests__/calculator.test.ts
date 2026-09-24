@@ -1330,8 +1330,17 @@ describe("FareCalculator", () => {
       expect(calc.estimate("しなの鉄道", 18.0, "上田", "小諸")).toBe(410);
     });
 
-    // 距離表は下界専用。実運賃は override から引く
-    it("距離表は全435ペアの実運賃を上回らない（graph.json の実距離で検証）", () => {
+    // 探索は confirmedFare + lowerBound で枝を刈るので、lowerBound が実運賃を
+    // 上回ると予算内の経路を取りこぼす。ここで守るのはその不変条件。
+    //
+    // 距離表そのものは下界になっていない。しなの鉄道は1つの事業者名の下に
+    // 賃率の違う3体系（しなの鉄道線・北しなの線・JR直通）を持ち、体系をまたぐ
+    // 通し運賃はしなの鉄道線の賃率で引いた額より安いため、長距離の52ペアで
+    // 距離表が実額を最大90円上回る。lowerBound は override の駅別最小額と
+    // min を取るので、そちらは全ペアで安全側に収まる。
+    // （data/station-km.json で実営業キロを入れる前は距離が短めに出ていたため
+    //   距離表も偶然下界になっていたが、それは距離の誤差に依存した性質だった）
+    it("lowerBound は全435ペアの実運賃を上回らない（graph.json の実距離で検証）", () => {
       const km = graphKmOf("しなの鉄道");
       expect(shinanoOverride.pairs).toHaveLength(435);
       for (const p of shinanoOverride.pairs) {
@@ -1341,7 +1350,7 @@ describe("FareCalculator", () => {
           `${p.from}-${p.to} の距離が graph.json から取れない`,
         ).toBeDefined();
         expect(
-          calc.estimate("しなの鉄道", d!),
+          calc.lowerBound("しなの鉄道", d!, p.from),
           `${p.from}→${p.to} ${d!.toFixed(3)}km`,
         ).toBeLessThanOrEqual(p.fare);
       }

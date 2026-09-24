@@ -83,6 +83,7 @@ import toeiToneriOverride from "@/data/fare-overrides/toei-toneri.json";
 import kotodenOverride from "@/data/fare-overrides/kotoden.json";
 import yuiRailOverride from "@/data/fare-overrides/yui-rail.json";
 import sapporoOverride from "@/data/fare-overrides/sapporo.json";
+import kintetsuKasanOverride from "@/data/fare-overrides/kintetsu-kasan.json";
 
 const rules = [
   jrEast,
@@ -163,6 +164,7 @@ const overrides = [
   kotodenOverride,
   yuiRailOverride,
   sapporoOverride,
+  kintetsuKasanOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地方鉄道・しなの鉄道の距離表は枝刈りの下界専用で、公表営業キロではなく
 // graph.json の駅間距離（座標から求めて実営業キロで補正した値）で帯を切ってある。
@@ -420,6 +422,47 @@ describe("FareCalculator", () => {
 
     it("初乗り運賃(1〜3km)が180円", () => {
       expect(calc.estimate("近畿日本鉄道", 2)).toBe(180);
+    });
+
+    it("100kmを超えても公式の帯どおり（外挿していない）", () => {
+      // 近鉄名古屋→大阪難波 189.7km。181〜190km帯の2,860円
+      expect(calc.estimate("近畿日本鉄道", 189.7)).toBe(2860);
+      // 賃率14円/kmで外挿すると2,370円になってしまう区間
+      expect(calc.estimate("近畿日本鉄道", 150)).toBe(2310);
+    });
+
+    // 鳥羽線・けいはんな線・吉野線・湯の山線・志摩線には加算運賃がかかる。
+    // 距離帯表は加算前の額なので、入れないと実額より安く出る（到達できない駅を
+    // 到達できると言う側の誤り）。data/fare-overrides/kintetsu-kasan.json に
+    // 「距離帯の額＋加算額」を焼いてある。
+    //
+    // この3点は加算額表の対象路線を特定するのに使った実運賃そのもの。
+    // 生成の過程が変わっても、ここが合わなくなったら気づける。
+    describe("加算運賃（実運賃で照合した3区間）", () => {
+      it("大阪難波→賢島 は 2,770円（表2,710＋鳥羽線30＋志摩線30）", () => {
+        expect(calc.estimate("近畿日本鉄道", 195.2, "大阪難波", "賢島")).toBe(
+          2770,
+        );
+      });
+
+      it("近鉄四日市→湯の山温泉 は 460円（表430＋湯の山線30）", () => {
+        expect(
+          calc.estimate("近畿日本鉄道", 15.4, "近鉄四日市", "湯の山温泉"),
+        ).toBe(460);
+      });
+
+      it("大阪阿部野橋→吉野 は 1,170円（表1,140＋吉野線30）", () => {
+        expect(
+          calc.estimate("近畿日本鉄道", 64.9, "大阪阿部野橋", "吉野"),
+        ).toBe(1170);
+      });
+
+      it("加算対象を通らない区間には加算しない", () => {
+        // 大阪難波→近鉄奈良は奈良線だけで完結する
+        expect(
+          calc.estimate("近畿日本鉄道", 32.8, "大阪難波", "近鉄奈良"),
+        ).toBe(680);
+      });
     });
   });
 

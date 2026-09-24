@@ -1,0 +1,56 @@
+{
+  "surcharges": [
+    {
+      "id": "kintetsu-toba",
+      "operator": "近畿日本鉄道",
+      "lines": ["近鉄鳥羽線"],
+      "table": [
+        [6, 10],
+        [12, 20],
+        [14, 30]
+      ],
+      "beyond": 30,
+      "source": {
+        "url": "https://www.kintetsu.co.jp/gyoumu/kippu/kasan/kasan.html, https://www.kintetsu.co.jp/gyoumu/kippu/pdf/kirotei_20260314.pdf",
+        "fetchedAt": "2026-09-24",
+        "note": "鳥羽線（1970年3月開業）の加算運賃。公式の加算運賃ページと旅客運賃表PDFの両方に同じ表があり、二重に裏が取れている。"
+      }
+    },
+    {
+      "id": "kintetsu-keihanna",
+      "operator": "近畿日本鉄道",
+      "lines": ["近鉄けいはんな線"],
+      "stations": ["長田", "荒本", "吉田", "新石切", "生駒"],
+      "table": [
+        [3, 40],
+        [6, 60],
+        [10, 70],
+        [14, 90],
+        [18, 110]
+      ],
+      "beyond": 130,
+      "source": {
+        "url": "https://www.kintetsu.co.jp/gyoumu/kippu/kasan/kasan.html, https://www.kintetsu.co.jp/gyoumu/kippu/pdf/kirotei_20260314.pdf",
+        "fetchedAt": "2026-09-24",
+        "note": "けいはんな線の長田〜生駒間（1986年10月開業）の加算運賃。公式ページとPDFで一致。生駒〜学研奈良登美ヶ丘間（2006年3月開業）にも加算運賃があるが、公式ページに額の記載が無いため入れていない。そのぶん学研奈良登美ヶ丘方面の運賃は実額より安く出る。"
+      }
+    },
+    {
+      "id": "kintetsu-yoshino-yunoyama-shima",
+      "operator": "近畿日本鉄道",
+      "lines": ["近鉄吉野線", "近鉄湯の山線", "近鉄志摩線"],
+      "table": [
+        [10, 20],
+        [30, 30],
+        [50, 40]
+      ],
+      "beyond": 40,
+      "source": {
+        "url": "https://www.kintetsu.co.jp/gyoumu/kippu/pdf/kirotei_20260314.pdf, https://ekitan.com/transit/fare/sf-5007/st-9072",
+        "fetchedAt": "2026-09-24",
+        "note": "旅客運賃表PDFに載っている3本目の加算額表。PDFは見出しの日本語が抽出できず対象路線が読めないため、実運賃3点で対象を特定した。大阪阿部野橋→吉野 64.9km は表1,140円＋吉野線25.2km分30円＝1,170円、近鉄四日市→湯の山温泉 15.4km は430円＋30円＝460円、大阪難波→賢島は2,710円＋鳥羽線13.2km分30円＋志摩線24.5km分30円＝2,770円で、いずれも実額と一致する。"
+      }
+    }
+  ],
+  "note": "路線単位でかかる加算運賃。運賃計算器は事業者単位で表を引くため実行時には扱えない。scripts/fare/ingest/apply-surcharges.ts が生成時に「距離帯の額＋加算額」を計算し、data/fare-overrides/ に実額として書き出す。"
+}

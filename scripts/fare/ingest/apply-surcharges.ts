@@ -13,7 +13,11 @@
 // 到達できない駅を到達できると言うことになる。
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createFareCalculator } from "@/lib/fare/calculator";
-import { surchargeAmount, surchargeSchema } from "@/lib/fare/surcharge";
+import {
+  surchargeAmount,
+  surchargePairAmount,
+  surchargeSchema,
+} from "@/lib/fare/surcharge";
 import type { Surcharge } from "@/lib/fare/surcharge";
 import { fareRuleSchema } from "@/lib/fare/types";
 import type { RailGraph, StationNode } from "@/lib/graph/types";
@@ -23,8 +27,15 @@ const FETCHED_AT = new Date().toISOString().slice(0, 10);
 interface Leg {
   to: string;
   km: number;
-  /** この区間で加算対象になる距離（対象外なら 0） */
+  /** この辺が加算対象になる定義の id と、その辺の距離 */
   surchargedKm: Map<string, number>;
+}
+
+/** 加算定義ごとの「乗った距離」と「乗り入れ駅・降りた駅」 */
+interface Ridden {
+  km: number;
+  entry: string;
+  exit: string;
 }
 
 /** 辺がどの路線に属するか。両端が同じ路線名ならそれ、違えば不明 */
@@ -47,6 +58,13 @@ function main(write: boolean): void {
       surcharges: unknown[];
     }
   ).surcharges.map((s) => surchargeSchema.parse(s) as Surcharge);
+  // pending は「額は分かっているが実運賃と合わない原因が未特定」のもの。
+  // 焼くと実額より安いデータが入るので飛ばす（理由は各定義の source.note）
+  const pending = surcharges.filter((s) => s.pending === true);
+  for (const s of pending) {
+    process.stdout.write(`保留: ${s.id}（${s.lines.join("・")}）
+`);
+  }
 
   // 加算前の額を引くため、距離帯だけの計算器を使う
   const tableOnly = createFareCalculator(
@@ -60,7 +78,7 @@ function main(write: boolean): void {
   );
 
   const byOperator = new Map<string, Surcharge[]>();
-  for (const s of surcharges) {
+  for (const s of surcharges.filter((x) => x.pending !== true)) {
     byOperator.set(s.operator, [...(byOperator.get(s.operator) ?? []), s]);
   }
 
@@ -110,9 +128,9 @@ function main(write: boolean): void {
     for (const [origin, starts] of idsByName) {
       const best = new Map<
         string,
-        { km: number; surcharged: Map<string, number> }
+        { km: number; surcharged: Map<string, Ridden> }
       >();
-      const queue: { id: string; km: number; s: Map<string, number> }[] = [];
+      const queue: { id: string; km: number; s: Map<string, Ridden> }[] = [];
       for (const id of starts) {
         best.set(id, { km: 0, surcharged: new Map() });
         queue.push({ id, km: 0, s: new Map() });
@@ -132,7 +150,13 @@ function main(write: boolean): void {
           if (km >= (best.get(leg.to)?.km ?? Infinity)) continue;
           const s = new Map(cur.s);
           for (const [id, add] of leg.surchargedKm) {
-            s.set(id, (s.get(id) ?? 0) + add);
+            const prev = s.get(id);
+            // 乗り入れ駅は最初に対象路線の辺を踏んだところ、降りた駅は最後
+            s.set(id, {
+              km: (prev?.km ?? 0) + add,
+              entry: prev?.entry ?? nameOf.get(cur.id) ?? "",
+              exit: nameOf.get(leg.to) ?? "",
+            });
           }
           best.set(leg.to, { km, surcharged: s });
           queue.push({ id: leg.to, km, s });
@@ -142,7 +166,7 @@ function main(write: boolean): void {
       // 同名ノードのうち最短のものを採る
       const byName = new Map<
         string,
-        { km: number; surcharged: Map<string, number> }
+        { km: number; surcharged: Map<string, Ridden> }
       >();
       for (const [id, v] of best) {
         const name = nameOf.get(id);
@@ -154,7 +178,11 @@ function main(write: boolean): void {
       for (const [destination, v] of byName) {
         let extra = 0;
         for (const s of list) {
-          extra += surchargeAmount(s, v.surcharged.get(s.id) ?? 0);
+          const ridden = v.surcharged.get(s.id);
+          extra +=
+            s.pairs !== undefined
+              ? surchargePairAmount(s, ridden?.entry, ridden?.exit)
+              : surchargeAmount(s, ridden?.km ?? 0);
         }
         if (extra === 0) continue;
         surchargedPairs++;

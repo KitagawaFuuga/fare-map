@@ -201,7 +201,24 @@ async function main(): Promise<void> {
     return normalizeLineKey(stripped);
   };
 
-  // 路線ごとに、グラフの駅名と、正解に使う実営業キロの区間を集める
+  // 駅の候補は路線ではなく事業者の全駅から採る。
+  //
+  // グラフの lineName は運転系統なので、正式な所属路線とずれる。名鉄常滑線には
+  // 直通する名古屋本線の駅（名鉄名古屋・山王・金山）が入っており、常滑線の記事には
+  // 当然その3駅が無いため、路線で絞ると3区間が推定値のまま残って路線全体が
+  // 5.8km長くなっていた。
+  //
+  // 広げても誤対応は起きない。突き合わせはセルの完全一致で、接続路線の欄は
+  // 長い文章なのでどの駅名とも一致しないため。加えて採用には実営業キロの
+  // 区間との一致が要る。
+  const namesByOperator = new Map<string, Set<string>>();
+  for (const n of Object.values(graph.nodes)) {
+    const set = namesByOperator.get(n.operator) ?? new Set<string>();
+    set.add(n.name);
+    namesByOperator.set(n.operator, set);
+  }
+
+  // 路線ごとに、正解に使う実営業キロの区間を集める
   const lines = new Map<
     string,
     { operator: string; lineName: string; names: Set<string> }
@@ -212,9 +229,8 @@ async function main(): Promise<void> {
     const entry = lines.get(key) ?? {
       operator: n.operator,
       lineName: n.lineName,
-      names: new Set<string>(),
+      names: namesByOperator.get(n.operator) ?? new Set<string>(),
     };
-    entry.names.add(n.name);
     lines.set(key, entry);
   }
 

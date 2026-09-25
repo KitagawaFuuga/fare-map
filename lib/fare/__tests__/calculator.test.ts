@@ -83,7 +83,8 @@ import toeiToneriOverride from "@/data/fare-overrides/toei-toneri.json";
 import kotodenOverride from "@/data/fare-overrides/kotoden.json";
 import yuiRailOverride from "@/data/fare-overrides/yui-rail.json";
 import sapporoOverride from "@/data/fare-overrides/sapporo.json";
-import kintetsuKasanOverride from "@/data/fare-overrides/kintetsu-kasan.json";
+import kintetsuComputedOverride from "@/data/fare-overrides/kintetsu-computed.json";
+import meitetsuComputedOverride from "@/data/fare-overrides/meitetsu-computed.json";
 
 const rules = [
   jrEast,
@@ -164,7 +165,8 @@ const overrides = [
   kotodenOverride,
   yuiRailOverride,
   sapporoOverride,
-  kintetsuKasanOverride,
+  kintetsuComputedOverride,
+  meitetsuComputedOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地方鉄道・しなの鉄道の距離表は枝刈りの下界専用で、公表営業キロではなく
 // graph.json の駅間距離（座標から求めて実営業キロで補正した値）で帯を切ってある。
@@ -433,7 +435,7 @@ describe("FareCalculator", () => {
 
     // 鳥羽線・けいはんな線・吉野線・湯の山線・志摩線には加算運賃がかかる。
     // 距離帯表は加算前の額なので、入れないと実額より安く出る（到達できない駅を
-    // 到達できると言う側の誤り）。data/fare-overrides/kintetsu-kasan.json に
+    // 到達できると言う側の誤り）。data/fare-overrides/kintetsu-computed.json に
     // 「距離帯の額＋加算額」を焼いてある。
     //
     // この3点は加算額表の対象路線を特定するのに使った実運賃そのもの。
@@ -471,8 +473,31 @@ describe("FareCalculator", () => {
     // 名鉄名古屋～犬山（犬山線）は加算運賃対象路線（知多新線・豊田線・羽島線・空港線）にも
     // 特定運賃区間（名古屋本線の金山〜一宮系統）にも該当しない一般区間。
     // 実運賃はekitan.comの運賃検索(2026-08-29取得)で照合し表と完全一致
-    it("名鉄名古屋→犬山 28.2km、実運賃630円（犬山線）", () => {
-      expect(calc.estimate("名古屋鉄道", 28.2)).toBe(630);
+    // 名鉄は線区ごとに擬制率をかけた運賃計算キロで運賃を決める（A線区=名古屋本線は
+    // そのまま、B線区15%増、C線区25%増）。営業キロのまま距離帯を引くと安く出る。
+    // data/fare-overrides/meitetsu-computed.json に計算済みの実額を焼いてある。
+    //
+    // この4点は実運賃そのもの。距離はグラフの営業キロを渡して、
+    // 生成の過程が変わったら落ちるようにしてある。
+    it("名鉄名古屋→犬山 は 630円（営業キロ27.9のままだと570円）", () => {
+      const km = graphKmOf("名古屋鉄道");
+      const d = km.get(["名鉄名古屋", "犬山"].sort().join("\u0000"));
+      expect(d).toBeDefined();
+      expect(calc.estimate("名古屋鉄道", d!, "名鉄名古屋", "犬山")).toBe(630);
+      expect(calc.estimate("名古屋鉄道", d!)).toBe(570);
+    });
+
+    it.each([
+      ["常滑", "中部国際空港", 330],
+      ["太田川", "中部国際空港", 650],
+      ["名鉄名古屋", "中部国際空港", 980],
+    ])("%s→%s は %i円（擬制キロ＋空港線の加算運賃）", (from, to, fare) => {
+      const km = graphKmOf("名古屋鉄道");
+      const d = km.get([from, to].sort().join("\u0000"));
+      expect(d).toBeDefined();
+      expect(
+        calc.estimate("名古屋鉄道", d!, from as string, to as string),
+      ).toBe(fare);
     });
 
     it("初乗り運賃(1〜3km)が180円", () => {

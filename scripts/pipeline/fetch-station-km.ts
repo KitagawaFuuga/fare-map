@@ -80,12 +80,35 @@ export function csvLineKeys(name: string): string[] {
     .filter((part) => part !== "");
 }
 
-// 記事名は正式路線名。graph の lineName から括弧の区間表記などを落とす
-function articleTitle(lineName: string): string {
-  return lineName
+// 通称と正式名が別物で、事業者名の置き換えでは辿りつけない路線。
+// 熊本電鉄の「本線」は正式には菊池線、「上熊本線」は藤崎線。
+const LINE_ALIASES: Record<string, string> = {
+  熊本電鉄本線: "熊本電気鉄道菊池線",
+  熊本電鉄上熊本線: "熊本電気鉄道藤崎線",
+};
+
+// 記事名の候補を、試す順に返す。
+//
+// 1つに決められない。記事名は正式路線名（富山地方鉄道本線）だが graph の
+// lineName は運転系統の略称表記（富山地鉄本線）で、しかも JR のように
+// 略称を落とすだけで当たる事業者と、正式な事業者名に置き換えないと
+// 当たらない事業者が混在している。
+export function articleTitles(
+  lineName: string,
+  operator: string,
+  prefix: string,
+): string[] {
+  const base = lineName
     .replace(/^JR/, "")
     .replace(/[（(].*/, "")
     .trim();
+  const titles = [base];
+  if (prefix !== "" && prefix !== operator && base.startsWith(prefix)) {
+    titles.push(operator + base.slice(prefix.length));
+  }
+  const alias = LINE_ALIASES[base];
+  if (alias !== undefined) titles.unshift(alias);
+  return [...new Set(titles)];
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -154,6 +177,22 @@ async function fetchArticleHtml(
     return { kind: "ok", html };
   }
   return { kind: "failed", reason: "再試行しても弾かれた" };
+}
+
+// 候補を順に試す。1つでも「弾かれた」があればそれを返す。記事が無いのと
+// こちらが弾かれたのを混ぜると、レート制限のぶんを「記事なし」と誤読する
+async function fetchArticle(
+  titles: string[],
+  cacheDir: string,
+): Promise<{ outcome: FetchOutcome; title: string }> {
+  let failed: { outcome: FetchOutcome; title: string } | undefined;
+  for (const title of titles) {
+    const outcome = await fetchArticleHtml(title, cacheDir);
+    if (outcome.kind === "ok") return { outcome, title };
+    if (outcome.kind === "failed" && failed === undefined)
+      failed = { outcome, title };
+  }
+  return failed ?? { outcome: { kind: "missing" }, title: titles[0] ?? "" };
 }
 
 interface OutputEdge {
@@ -235,13 +274,20 @@ async function main(): Promise<void> {
   }
 
   const targets = [...lines.values()]
-    .map((l) => ({ ...l, title: articleTitle(l.lineName) }))
-    .filter((l) => onlyLine === undefined || l.title === onlyLine)
+    .map((l) => ({
+      ...l,
+      titles: articleTitles(
+        l.lineName,
+        l.operator,
+        prefixOf.get(l.operator) ?? "",
+      ),
+    }))
+    .filter((l) => onlyLine === undefined || l.titles.includes(onlyLine))
     // 同じ記事を何度も引かないよう、記事名で重複を畳む
     .filter(
       (l, i, all) =>
         all.findIndex(
-          (x) => x.title === l.title && x.operator === l.operator,
+          (x) => x.titles[0] === l.titles[0] && x.operator === l.operator,
         ) === i,
     );
 
@@ -271,16 +317,16 @@ async function main(): Promise<void> {
     if (sections.length === 0) {
       noSections++;
       report.push(
-        `- ${target.operator} ${target.title}: 正解に使える区間が無い`,
+        `- ${target.operator} ${target.titles[0]}: 正解に使える区間が無い`,
       );
       continue;
     }
 
-    const outcome = await fetchArticleHtml(target.title, cacheDir);
+    const { outcome, title } = await fetchArticle(target.titles, cacheDir);
     if (outcome.kind !== "ok") {
       missingArticle++;
       report.push(
-        `- ${target.operator} ${target.title}: ` +
+        `- ${target.operator} ${title}: ` +
           (outcome.kind === "missing"
             ? "記事が無い"
             : `取得失敗 (${outcome.reason})`),
@@ -304,7 +350,7 @@ async function main(): Promise<void> {
       });
     }
     report.push(
-      `  ${target.operator} ${target.title}: 駅${target.names.size} 区間${sections.length} ` +
+      `  ${target.operator} ${title}: 駅${target.names.size} 区間${sections.length} ` +
         `→ 駅間${result.edgeKm.size} (採用表${result.accepted.length})`,
     );
   }

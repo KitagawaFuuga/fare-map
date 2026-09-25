@@ -300,11 +300,15 @@ describe("extractStationKm: 一致と矛盾の比で判定する", () => {
   });
 });
 
-// 矛盾の大きさは二極化する。実データでは別経路によるものが 1.2〜25.3km、
-// 資料の食い違いによるものが 0.2〜0.8km で、間が空いていた。
-// 0.2km の差は別経路では説明できない（経路が違えばキロは大きく変わる）ので、
-// 小さい矛盾は従来どおり棄却する。
-describe("extractStationKm: 小さい矛盾は別経路では説明できない", () => {
+// 矛盾の大きさは二極化する（別経路によるものが 1.2〜25.3km、資料の食い違いが
+// 0.2〜0.8km）。以前は後者を「別経路では説明できない」として棄却していたが、
+// それは誤りだった。棄却すると路線全体が推定値のまま残り、失うキロ数のほうが
+// ずっと大きい。豊肥本線（阿蘇高原線）は一致7に対し0.2kmの矛盾が2つあるだけで
+// 棄却されており、その結果 熊本〜大分が公式148.0kmに対し143.8kmとなって、
+// 実額3,740円が3,300円になっていた（記事の累計は熊本で148.0kmに達し、
+// JR九州のガイドブックの公表値と完全に一致する）。
+// いまは大小を問わず「一致が矛盾の3倍以上」で判定する。
+describe("extractStationKm: 矛盾は大小を問わず比で判定する", () => {
   const chain = [
     ["駅名", "累計"],
     ["甲駅", "0.0"],
@@ -326,10 +330,23 @@ describe("extractStationKm: 小さい矛盾は別経路では説明できない"
     expect(r.accepted).toHaveLength(1);
   });
 
-  it("1km未満の矛盾があれば採用しない（資料の食い違い）", () => {
+  it("1km未満の矛盾も、一致が3倍以上あれば許す（棄却するほうが失うキロが大きい）", () => {
     const r = extractStationKm([chain], {
       stationNames: names,
       sections: [...agreeing, { from: "甲", to: "丁", officialKm: 10.3 }],
+    });
+    expect(r.accepted).toHaveLength(1);
+    expect(r.accepted[0]?.contradicted).toBe(1);
+  });
+
+  it("一致が矛盾の3倍に届かなければ、矛盾が小さくても採用しない", () => {
+    const r = extractStationKm([chain], {
+      stationNames: names,
+      sections: [
+        { from: "甲", to: "乙", officialKm: 3.0 },
+        { from: "甲", to: "丙", officialKm: 7.3 },
+        { from: "甲", to: "丁", officialKm: 10.3 },
+      ],
     });
     expect(r.edgeKm.size).toBe(0);
     expect(r.rejected).toBeGreaterThan(0);

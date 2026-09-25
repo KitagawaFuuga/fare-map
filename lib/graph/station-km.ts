@@ -179,25 +179,27 @@ function longestMonotoneRun(
   return best;
 }
 
+// 一致が矛盾の何倍あれば採用するか。
+//
+// 矛盾の大小で区別してはいけない。0.2km級の小さい矛盾（資料同士の丸め差）を
+// 理由に棄却すると、路線全体が推定値のまま残り、失うキロ数のほうがずっと大きい。
+// 豊肥本線（阿蘇高原線）は一致7に対し0.2kmの矛盾が2つあるだけで棄却されており、
+// その結果 熊本〜大分が公式148.0kmに対し143.8kmとなって、実額3,740円が3,300円に
+// なっていた（記事の累計は熊本で148.0kmに達し、JR九州のガイドブック掲載の
+// 公表値と完全に一致する）。
+//
+// 列の取り違えはこの比では通らない。全国の表を数えたとき、矛盾を含む340列は
+// すべて「一致0」だった。
 const MATCH_RATIO = 3;
-// 経路が違えばキロは大きく変わる。これ未満の差は別経路では説明がつかないので、
-// 資料の食い違い（または列の取り違え）として棄却する。実データでは別経路による
-// 矛盾が 1.2〜25.3km、資料の食い違いが 0.2〜0.8km で、間が空いていた。
-const ROUTE_DIFF_KM = 1.0;
 
-/**
- * この並びが説明できた区間の数と、食い違った駅ペア。
- *
- * small が1つでもあれば失格。large は MATCH_RATIO の比で判定する。
- */
+/** この並びが説明できた区間の数と、食い違った駅ペア */
 function scoreChain(
   chain: Chain,
   known: Map<string, number>,
   tolerance: number,
-): { matched: number; large: Set<string>; small: number } {
+): { matched: number; contradicted: Set<string> } {
   let matched = 0;
-  let small = 0;
-  const large = new Set<string>();
+  const contradicted = new Set<string>();
   for (let i = 0; i < chain.points.length; i++) {
     for (let j = i + 1; j < chain.points.length; j++) {
       const a = chain.points[i];
@@ -206,13 +208,11 @@ function scoreChain(
       const key = edgeKey(a.station, b.station);
       const expected = known.get(key);
       if (expected === undefined) continue;
-      const gap = Math.abs(b.km - a.km - expected);
-      if (gap <= tolerance) matched++;
-      else if (gap >= ROUTE_DIFF_KM) large.add(key);
-      else small++;
+      if (Math.abs(b.km - a.km - expected) <= tolerance) matched++;
+      else contradicted.add(key);
     }
   }
-  return { matched, large, small };
+  return { matched, contradicted };
 }
 
 /**
@@ -277,11 +277,11 @@ export function extractStationKm(
       for (let column = 0; column < width; column++) {
         const chain = readChain(table, column, lookup, tableIndex);
         if (chain === null) continue;
-        const { matched, large, small } = scoreChain(chain, known, tolerance);
-        if (matched === 0 || small > 0) continue;
-        if (matched < large.size * MATCH_RATIO) continue;
+        const { matched, contradicted } = scoreChain(chain, known, tolerance);
+        if (matched === 0) continue;
+        if (matched < contradicted.size * MATCH_RATIO) continue;
         if (best === null || matched > best.matched)
-          best = { chain, matched, contradicted: large };
+          best = { chain, matched, contradicted };
       }
       if (best === null) continue;
 

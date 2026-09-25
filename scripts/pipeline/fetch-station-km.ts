@@ -23,6 +23,10 @@ import {
   operatorAliasesSchema,
 } from "@/lib/graph/operator-alias";
 import { extractStationKm, type KmSection } from "@/lib/graph/station-km";
+import {
+  buildKilometrageFix,
+  kilometrageCorrectionsSchema,
+} from "@/lib/graph/kilometrage";
 import { buildNameLookup, matchKey } from "@/lib/graph/station-name";
 import { extractTables } from "@/scripts/fare/ingest/html-table";
 import type { RailGraph } from "@/lib/graph/types";
@@ -101,6 +105,12 @@ export function buildSections(
   rows: Record<string, string>[],
   operator: string,
   names: Set<string>,
+  fix: (operator: string, from: string, to: string, km: number) => number = (
+    _o,
+    _f,
+    _t,
+    km,
+  ) => km,
 ): KmSection[] {
   // 駅名の表記が資料とグラフで食い違う（箱根ヶ崎/箱根ケ崎、ＪＲ松山駅前、
   // 明治神宮前〈原宿〉、松山市駅）。寄せないと2,139区間のうち79区間を捨てる
@@ -112,8 +122,10 @@ export function buildSections(
     const from = lookup.get(matchKey(r["起点駅"] ?? "")) ?? "";
     const to = lookup.get(matchKey(r["終点駅"] ?? "")) ?? "";
     if (from === "" || to === "" || from === to) continue;
-    const officialKm = Number(r["営業キロ"]);
-    if (!Number.isFinite(officialKm) || officialKm <= 0) continue;
+    const raw = Number(r["営業キロ"]);
+    if (!Number.isFinite(raw) || raw <= 0) continue;
+    // 一次資料と食い違うことを確認した行を差し替える（data/kilometrage-corrections.json）
+    const officialKm = fix(operator, from, to, raw);
     const key = [from, to].sort().join("\u0000");
     byPair.set(key, [...(byPair.get(key) ?? []), { from, to, officialKm }]);
   }
@@ -320,11 +332,16 @@ async function main(): Promise<void> {
   const aliases = operatorAliasesSchema.parse(
     JSON.parse(readFileSync("data/operator-aliases.json", "utf8")),
   ).aliases;
+  const fix = buildKilometrageFix(
+    kilometrageCorrectionsSchema.parse(
+      JSON.parse(readFileSync("data/kilometrage-corrections.json", "utf8")),
+    ).corrections,
+  );
   const sectionsByOperator = new Map<string, KmSection[]>();
   for (const [operator, names] of namesByOperator) {
     sectionsByOperator.set(
       operator,
-      buildSections(kmRows, csvOperatorOf(aliases, operator), names),
+      buildSections(kmRows, csvOperatorOf(aliases, operator), names, fix),
     );
   }
 

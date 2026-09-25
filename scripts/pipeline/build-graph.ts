@@ -14,6 +14,10 @@ import {
   applyStationKm,
   type StationKmEdge,
 } from "@/lib/graph/apply-station-km";
+import {
+  buildKilometrageFix,
+  kilometrageCorrectionsSchema,
+} from "@/lib/graph/kilometrage";
 import { operatorAliasesSchema } from "@/lib/graph/operator-alias";
 
 // データ更新時にだけ走る生成スクリプト。ekidata の CSV からグラフを組み、
@@ -50,13 +54,25 @@ const graph = buildGraph(
 const kmRows = parseCsv(
   readFileSync("data/raw/kilometrage.csv", "utf8").replace(/"/g, ""),
 );
+// 一次資料と食い違うことを確認した区間営業キロを差し替える。
+// このCSVは距離補正と駅間キロの検証の両方で正解に使うため、1行の誤りが両方に効く
+const fixKm = buildKilometrageFix(
+  kilometrageCorrectionsSchema.parse(
+    JSON.parse(readFileSync("data/kilometrage-corrections.json", "utf8")),
+  ).corrections,
+);
 const sections: CalibrationSection[] = kmRows
   .map((r) => ({
     operator: r["事業者名"] ?? "",
     line: r["路線名"] ?? "",
     from: r["起点駅"] ?? "",
     to: r["終点駅"] ?? "",
-    officialKm: Number(r["営業キロ"]),
+    officialKm: fixKm(
+      r["事業者名"] ?? "",
+      r["起点駅"] ?? "",
+      r["終点駅"] ?? "",
+      Number(r["営業キロ"]),
+    ),
   }))
   .filter(
     (s) =>

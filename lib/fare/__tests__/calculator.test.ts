@@ -11,6 +11,8 @@ import jrEast from "@/data/fare-rules/jr-east.json";
 import jrCentral from "@/data/fare-rules/jr-central.json";
 import jrWest from "@/data/fare-rules/jr-west.json";
 import jrHonshuKasan from "@/data/fare-rules/jr-honshu-kasan.json";
+import jrKyushuKasan from "@/data/fare-rules/jr-kyushu-kasan.json";
+import jrShikokuKasan from "@/data/fare-rules/jr-shikoku-kasan.json";
 import jrKyushu from "@/data/fare-rules/jr-kyushu.json";
 import jrHokkaido from "@/data/fare-rules/jr-hokkaido.json";
 import jrShikoku from "@/data/fare-rules/jr-shikoku.json";
@@ -91,6 +93,8 @@ const rules = [
   jrCentral,
   jrWest,
   jrHonshuKasan,
+  jrKyushuKasan,
+  jrShikokuKasan,
   jrKyushu,
   jrHokkaido,
   jrShikoku,
@@ -404,6 +408,21 @@ describe("FareCalculator", () => {
 
     it("初乗り運賃(1〜3km)が210円", () => {
       expect(calc.estimate("JR北海道", 2)).toBe(210);
+    });
+
+    // 100km超は公式の普通旅客運賃PDF（幹線61帯・1400kmまで）から入れた。
+    // 以前は100kmまでの16帯と22.0円/kmの線形外挿で、348.5kmでは7,710円と
+    // 実額より560円高く出ていた（到達できる駅を落とす側の誤り）。
+    // 出典: ekitan.com (2026-09-25取得、乗車券のみ)
+    it("札幌→釧路 348.5km は 7,150円", () => {
+      expect(calc.estimate("JR北海道", 348.5)).toBe(7150);
+    });
+
+    it("100kmを超えても線形には増えない（賃率が下がる）", () => {
+      // 200km→400kmで運賃は2倍にならない
+      const a = calc.estimate("JR北海道", 200);
+      const b = calc.estimate("JR北海道", 400);
+      expect(b).toBeLessThan(a * 2);
     });
   });
 

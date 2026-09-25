@@ -86,6 +86,8 @@ import toeiToneriOverride from "@/data/fare-overrides/toei-toneri.json";
 import kotodenOverride from "@/data/fare-overrides/kotoden.json";
 import yuiRailOverride from "@/data/fare-overrides/yui-rail.json";
 import sapporoOverride from "@/data/fare-overrides/sapporo.json";
+import jrKyushuComputedOverride from "@/data/fare-overrides/jr-kyushu-computed.json";
+import jrWestSetoComputedOverride from "@/data/fare-overrides/jr-west-seto-computed.json";
 import kintetsuComputedOverride from "@/data/fare-overrides/kintetsu-computed.json";
 import meitetsuComputedOverride from "@/data/fare-overrides/meitetsu-computed.json";
 
@@ -171,6 +173,8 @@ const overrides = [
   kotodenOverride,
   yuiRailOverride,
   sapporoOverride,
+  jrKyushuComputedOverride,
+  jrWestSetoComputedOverride,
   kintetsuComputedOverride,
   meitetsuComputedOverride,
 ].map((o) => fareOverrideSchema.parse(o));
@@ -425,6 +429,49 @@ describe("FareCalculator", () => {
       const a = calc.estimate("JR北海道", 200);
       const b = calc.estimate("JR北海道", 400);
       expect(b).toBeLessThan(a * 2);
+    });
+  });
+
+  describe("加算運賃（JR）", () => {
+    // 出典: JR九州 運賃改定ガイドブック p4「加算運賃」。
+    // 宮崎空港線 田吉〜宮崎空港の130円。ガイドブックの例では宮崎〜宮崎空港が
+    // 運賃計算キロ6.2kmで普通運賃270円＋加算130円＝400円。
+    // 本実装は370円で30円低い。原因は加算運賃ではなく、graph.json が同じ物理区間を
+    // 運転系統名ごとに重複して持っており（南宮崎〜田吉が「JR宮崎空港線」＝幹線と
+    // 「JR日南線」＝地方交通線の2本）、最短経路が擬制キロの小さいほうを選ぶこと。
+    // 加算運賃を入れる前は240円だったので、改善してはいる。
+    it("宮崎→宮崎空港に加算運賃130円が乗る", () => {
+      const km = graphFareKmOf("JR九州").get(
+        ["宮崎", "宮崎空港"].sort().join("\u0000"),
+      );
+      expect(km).toBeDefined();
+      expect(
+        calc.estimate("JR九州", km!, "宮崎", "宮崎空港") -
+          calc.estimate("JR九州", km!),
+      ).toBe(130);
+    });
+
+    it("宮崎空港を通らない区間には加算運賃が乗らない", () => {
+      const km = graphFareKmOf("JR九州").get(
+        ["宮崎", "田吉"].sort().join("\u0000"),
+      );
+      expect(km).toBeDefined();
+      expect(calc.estimate("JR九州", km!, "宮崎", "田吉")).toBe(
+        calc.estimate("JR九州", km!),
+      );
+    });
+
+    // 出典: JR四国の公開加算額表（本四備讃線 児島〜宇多津18.1kmの110円を含む）。
+    // graph.json ではこの区間が瀬戸大橋線としてJR西日本のエッジになっている。
+    it("岡山→宇多津に本四備讃線の加算運賃110円が乗る", () => {
+      const km = graphFareKmOf("JR西日本").get(
+        ["岡山", "宇多津"].sort().join("\u0000"),
+      );
+      expect(km).toBeDefined();
+      expect(
+        calc.estimate("JR西日本", km!, "岡山", "宇多津") -
+          calc.estimate("JR西日本", km!),
+      ).toBe(110);
     });
   });
 

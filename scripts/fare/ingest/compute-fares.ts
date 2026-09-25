@@ -32,6 +32,15 @@ import type { RailGraph, StationNode } from "@/lib/graph/types";
 
 const FETCHED_AT = new Date().toISOString().slice(0, 10);
 
+// 事業者名 → 書き出すファイル名。data/fare-surcharges.json に事業者を足したら
+// ここにも足す（決め打ちのままだと別の事業者のファイルを上書きしてしまう）
+const OUTPUT_IDS: Record<string, string> = {
+  近畿日本鉄道: "kintetsu",
+  名古屋鉄道: "meitetsu",
+  JR九州: "jr-kyushu",
+  JR西日本: "jr-west-seto",
+};
+
 interface DistanceClass {
   operator: string;
   rates: Record<string, number>;
@@ -236,7 +245,13 @@ function main(write: boolean, onlyOperator: string | undefined): void {
     );
     if (!write || pairs.size === 0) continue;
 
-    const id = `${operator === "名古屋鉄道" ? "meitetsu" : "kintetsu"}-computed`;
+    const id = `${OUTPUT_IDS[operator] ?? ""}-computed`;
+    if (id === "-computed") {
+      throw new Error(
+        `${operator} の出力ファイル名が OUTPUT_IDS に無い（data/fare-surcharges.json に` +
+          `事業者を足したら、ここにも名前を足す）`,
+      );
+    }
     const urls = [
       ...new Set(
         [

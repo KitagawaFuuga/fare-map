@@ -27,8 +27,13 @@ export interface StationKmOptions {
 export interface StationKmResult {
   /** 隣接駅間の営業キロ。キーは駅名2つを並べ替えて NUL で繋いだもの */
   edgeKm: Map<string, number>;
-  /** 採用した (表, 列) と、それが説明できた区間の数 */
-  accepted: { table: number; column: number; matched: number }[];
+  /** 採用した (表, 列) と、それが説明できた区間の数・食い違った数 */
+  accepted: {
+    table: number;
+    column: number;
+    matched: number;
+    contradicted: number;
+  }[];
   /** 検証で落とした (表, 列) の数 */
   rejected: number;
   /** 正解に使える区間が無く、判断そのものができなかった */
@@ -112,28 +117,57 @@ function readChain(
   return { table: tableIndex, column, points };
 }
 
-/** この並びが正解の駅間距離をいくつ説明できるか。矛盾が1つでもあれば失格 */
+// 正しい列でも数個だけ正解と食い違うことがある。累計の差は「その路線に沿った
+// 距離」だが、正解の営業キロは運賃の経路（＝最短）なので、環状線を遠回りに回った
+// 区間や短絡線がある区間では両者が一致しない。実例: 山手線は東京-田町が公表4.6km
+// （東海道線経由）に対し表は遠回りの29.9kmで、これ1つで30駅ぶんの表を落としていた。
+//
+// 一方、列の取り違えは必ず「一致0」になる。全国の表を調べると、矛盾を含む340列は
+// すべて一致0で、一致がありつつ矛盾もある列は57列しかなかった。したがって
+// 「矛盾0」ではなく「一致が矛盾より十分多い」を条件にする。
+const MATCH_RATIO = 3;
+// 経路が違えばキロは大きく変わる。これ未満の差は別経路では説明がつかないので、
+// 資料の食い違い（または列の取り違え）として棄却する。実データでは別経路による
+// 矛盾が 1.2〜25.3km、資料の食い違いが 0.2〜0.8km で、間が空いていた。
+const ROUTE_DIFF_KM = 1.0;
+
+/**
+ * この並びが説明できた区間の数と、食い違った駅ペア。
+ *
+ * small が1つでもあれば失格。large は MATCH_RATIO の比で判定する。
+ */
 function scoreChain(
   chain: Chain,
   known: Map<string, number>,
   tolerance: number,
-): number | null {
+): { matched: number; large: Set<string>; small: number } {
   let matched = 0;
+  let small = 0;
+  const large = new Set<string>();
   for (let i = 0; i < chain.points.length; i++) {
     for (let j = i + 1; j < chain.points.length; j++) {
       const a = chain.points[i];
       const b = chain.points[j];
       if (a === undefined || b === undefined) continue;
-      const expected = known.get(edgeKey(a.station, b.station));
+      const key = edgeKey(a.station, b.station);
+      const expected = known.get(key);
       if (expected === undefined) continue;
-      if (Math.abs(b.km - a.km - expected) > tolerance) return null;
-      matched++;
+      const gap = Math.abs(b.km - a.km - expected);
+      if (gap <= tolerance) matched++;
+      else if (gap >= ROUTE_DIFF_KM) large.add(key);
+      else small++;
     }
   }
-  return matched;
+  return { matched, large, small };
 }
 
-/** 採用した並びから、その中の全駅ペアの距離を正解に足す */
+/**
+ * 採用した並びから、その中の全駅ペアの距離を正解に足す。
+ *
+ * 食い違ったペアを除く必要は無い。食い違ったということは既に正解を持っている
+ * ということなので、下の !known.has で自然に残る（環状線の遠回りのような値で
+ * 上書きしない）。
+ */
 function addKnownPairs(chain: Chain, known: Map<string, number>): void {
   for (let i = 0; i < chain.points.length; i++) {
     for (let j = i + 1; j < chain.points.length; j++) {
@@ -180,7 +214,11 @@ export function extractStationKm(
       const width = Math.max(0, ...table.map((r) => r.length));
       // 1つの表の中で複数の列が通ることがある（累計が2本ある表）。
       // 差はどちらも同じなので、説明できた組が最多の列を1本だけ採る。
-      let best: { chain: Chain; matched: number } | null = null;
+      let best: {
+        chain: Chain;
+        matched: number;
+        contradicted: Set<string>;
+      } | null = null;
       for (let column = 0; column < width; column++) {
         const chain = readChain(
           table,
@@ -189,9 +227,11 @@ export function extractStationKm(
           tableIndex,
         );
         if (chain === null) continue;
-        const matched = scoreChain(chain, known, tolerance);
-        if (matched === null || matched === 0) continue;
-        if (best === null || matched > best.matched) best = { chain, matched };
+        const { matched, large, small } = scoreChain(chain, known, tolerance);
+        if (matched === 0 || small > 0) continue;
+        if (matched < large.size * MATCH_RATIO) continue;
+        if (best === null || matched > best.matched)
+          best = { chain, matched, contradicted: large };
       }
       if (best === null) continue;
 
@@ -201,6 +241,7 @@ export function extractStationKm(
         table: tableIndex,
         column: best.chain.column,
         matched: best.matched,
+        contradicted: best.contradicted.size,
       });
       addKnownPairs(best.chain, known);
       const points = best.chain.points;
@@ -210,8 +251,9 @@ export function extractStationKm(
         if (prev === undefined || cur === undefined) continue;
         const key = edgeKey(prev.station, cur.station);
         const km = Number((cur.km - prev.km).toFixed(2));
-        // 採用済みと食い違う表は scoreChain で落ちているので、ここに来る値は
-        // 既存と一致する。先に入ったほうを残す
+        // 食い違ったペアは出さない（環状線の遠回りなど、路線に沿った距離が
+        // 公表営業キロと違う区間）。先に入ったほうを残す
+        if (best.contradicted.has(key)) continue;
         if (!result.edgeKm.has(key)) result.edgeKm.set(key, km);
       }
     }

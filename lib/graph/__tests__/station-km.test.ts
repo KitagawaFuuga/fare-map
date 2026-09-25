@@ -176,3 +176,105 @@ describe("extractStationKm", () => {
     expect(r.edgeKm.has(edgeKey("丁", "戊"))).toBe(false);
   });
 });
+
+// 列の取り違えは必ず「正解との一致0」になる（実データ1,106列のうち矛盾を含む
+// 340列はすべて一致0だった）。一方、環状線を遠回りに回った累計や別経路が
+// あるぶんは、正しい列でも数個だけ正解と食い違う。山手線は30駅・一致10に対して
+// 矛盾1（東京-田町が公表4.6kmに対し表は遠回りの29.9km）で棄却されていた。
+describe("extractStationKm: 一致と矛盾の比で判定する", () => {
+  const loop = [
+    ["駅名", "累計"],
+    ["甲駅", "0.0"],
+    ["乙駅", "3.0"],
+    ["丙駅", "7.5"],
+    ["丁駅", "10.0"],
+  ];
+
+  it("一致が矛盾の3倍以上あれば採用する（環状線の遠回りなどを許す）", () => {
+    const r = extractStationKm([loop], {
+      stationNames: names,
+      sections: [
+        { from: "甲", to: "乙", officialKm: 3.0 },
+        { from: "乙", to: "丙", officialKm: 4.5 },
+        { from: "丙", to: "丁", officialKm: 2.5 },
+        // 環状線の短い側。表は遠回りの10.0を持つ
+        { from: "甲", to: "丁", officialKm: 1.5 },
+      ],
+    });
+    expect(r.edgeKm.get(edgeKey("乙", "丙"))).toBeCloseTo(4.5);
+    expect(r.accepted[0]?.contradicted).toBe(1);
+  });
+
+  it("一致が矛盾の3倍に届かなければ採用しない", () => {
+    const r = extractStationKm([loop], {
+      stationNames: names,
+      sections: [
+        { from: "甲", to: "乙", officialKm: 3.0 },
+        { from: "甲", to: "丙", officialKm: 2.0 },
+        { from: "甲", to: "丁", officialKm: 1.5 },
+      ],
+    });
+    expect(r.edgeKm.size).toBe(0);
+    expect(r.rejected).toBeGreaterThan(0);
+  });
+
+  it("食い違った隣接駅間は出さない（公表営業キロを上書きしてしまう）", () => {
+    const withBranch = [
+      ["駅名", "累計"],
+      ["甲駅", "0.0"],
+      ["乙駅", "3.0"],
+      ["丙駅", "7.5"],
+      ["丁駅", "10.0"],
+      ["戊駅", "12.0"],
+    ];
+    const r = extractStationKm([withBranch], {
+      stationNames: new Set([...names, "戊"]),
+      sections: [
+        { from: "甲", to: "乙", officialKm: 3.0 },
+        { from: "甲", to: "丙", officialKm: 7.5 },
+        { from: "甲", to: "丁", officialKm: 10.0 },
+        // 丁-戊 は公表5.0km。表の累計の差は2.0で食い違う
+        { from: "丁", to: "戊", officialKm: 5.0 },
+      ],
+    });
+    expect(r.accepted).toHaveLength(1);
+    expect(r.edgeKm.get(edgeKey("甲", "乙"))).toBeCloseTo(3.0);
+    expect(r.edgeKm.get(edgeKey("丁", "戊"))).toBeUndefined();
+  });
+});
+
+// 矛盾の大きさは二極化する。実データでは別経路によるものが 1.2〜25.3km、
+// 資料の食い違いによるものが 0.2〜0.8km で、間が空いていた。
+// 0.2km の差は別経路では説明できない（経路が違えばキロは大きく変わる）ので、
+// 小さい矛盾は従来どおり棄却する。
+describe("extractStationKm: 小さい矛盾は別経路では説明できない", () => {
+  const chain = [
+    ["駅名", "累計"],
+    ["甲駅", "0.0"],
+    ["乙駅", "3.0"],
+    ["丙駅", "7.5"],
+    ["丁駅", "10.0"],
+  ];
+  const agreeing: KmSection[] = [
+    { from: "甲", to: "乙", officialKm: 3.0 },
+    { from: "甲", to: "丙", officialKm: 7.5 },
+    { from: "乙", to: "丙", officialKm: 4.5 },
+  ];
+
+  it("1km以上の矛盾は別経路として許す", () => {
+    const r = extractStationKm([chain], {
+      stationNames: names,
+      sections: [...agreeing, { from: "甲", to: "丁", officialKm: 1.5 }],
+    });
+    expect(r.accepted).toHaveLength(1);
+  });
+
+  it("1km未満の矛盾があれば採用しない（資料の食い違い）", () => {
+    const r = extractStationKm([chain], {
+      stationNames: names,
+      sections: [...agreeing, { from: "甲", to: "丁", officialKm: 10.3 }],
+    });
+    expect(r.edgeKm.size).toBe(0);
+    expect(r.rejected).toBeGreaterThan(0);
+  });
+});

@@ -101,6 +101,38 @@ if (existsSync("data/station-km.json")) {
   }
 }
 
+// 運賃計算キロが営業キロと違う線区に fareKm を入れる。
+// 距離補正と実営業キロの置き換えが終わったあとで行う（倍率の母数は営業キロ）。
+const distanceClasses = (
+  JSON.parse(readFileSync("data/fare-distance-classes.json", "utf8")) as {
+    classes: { operator: string; rates: Record<string, number> }[];
+  }
+).classes;
+const rateOf = new Map<string, number>();
+for (const c of distanceClasses) {
+  for (const [line, rate] of Object.entries(c.rates)) {
+    if (rate !== 1) rateOf.set(`${c.operator}\u0000${line}`, rate);
+  }
+}
+let weighted = 0;
+for (const edge of graph.edges) {
+  if (edge.kind !== "rail") continue;
+  const from = graph.nodes[edge.from];
+  const to = graph.nodes[edge.to];
+  // 両端の路線名が一致する辺だけを対象にする（乗り入れで路線をまたぐ辺は
+  // どちらの線区か決まらないので営業キロのまま）
+  if (from === undefined || to === undefined) continue;
+  if (from.lineName !== to.lineName) continue;
+  const rate = rateOf.get(`${edge.operator}\u0000${from.lineName}`);
+  if (rate === undefined) continue;
+  edge.fareKm = Number((edge.km * rate).toFixed(3));
+  weighted++;
+}
+process.stdout.write(
+  `fareKm: ${weighted} エッジに運賃計算キロを設定（擬制キロ・換算キロ）
+`,
+);
+
 // calibration.json はコミット対象なので prettier の書式（末尾改行あり）に合わせる。
 // 付け忘れると再生成のたびに format:check が落ちる。
 writeFileSync(

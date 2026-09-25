@@ -293,9 +293,14 @@ function runSearch(
     arr.push({ to, km, kind, operator });
     adjacency.set(from, arr);
   };
+  // 探索が扱う距離は運賃計算キロ（fareKm）。運賃を引くのも枝刈りの次元も距離は
+  // ここだけで、外に出すのは運賃だけ（ReachableStation は距離を持たない）なので、
+  // 隣接表を作る時点で入れ替えれば足りる。営業キロと違う事業者の根拠は
+  // lib/graph/types.ts の GraphEdge.fareKm 参照。
   for (const e of graph.edges) {
-    addAdj(e.from, e.to, e.km, e.kind, e.operator);
-    addAdj(e.to, e.from, e.km, e.kind, e.operator);
+    const km = e.fareKm ?? e.km;
+    addAdj(e.from, e.to, km, e.kind, e.operator);
+    addAdj(e.to, e.from, km, e.kind, e.operator);
   }
 
   const nameOf = (id: string): string | undefined => graph.nodes[id]?.name;

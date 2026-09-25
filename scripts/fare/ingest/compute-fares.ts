@@ -21,7 +21,6 @@
 // 側の誤りなので、精度の問題では済まない。
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createFareCalculator } from "@/lib/fare/calculator";
-import { fareCalcKm, type FareLeg } from "@/lib/fare/fare-distance";
 import {
   surchargeAmount,
   surchargePairAmount,
@@ -29,7 +28,6 @@ import {
   type Surcharge,
 } from "@/lib/fare/surcharge";
 import { fareRuleSchema } from "@/lib/fare/types";
-import { buildOperatorKmTable } from "@/lib/graph/operator-distance";
 import type { RailGraph, StationNode } from "@/lib/graph/types";
 
 const FETCHED_AT = new Date().toISOString().slice(0, 10);
@@ -58,7 +56,6 @@ interface Leg {
 interface State {
   /** 運賃計算キロ（擬制率をかけた値）。経路の選択もこれで行う */
   weighted: number;
-  legs: FareLeg[];
   ridden: Map<string, Ridden>;
 }
 
@@ -102,11 +99,13 @@ function main(write: boolean, onlyOperator: string | undefined): void {
       ),
   );
 
+  // 擬制キロだけの事業者は graph.json の fareKm で実行時に解決されるので、
+  // 特定運賃を作る必要が無い（JR各社はこれに該当し、全ペア走ると数百万組になる）。
+  // ここで扱うのは加算運賃のある事業者だけ。
   const operators = [
-    ...new Set([
-      ...classes.map((c) => c.operator),
-      ...surcharges.filter((s) => s.pending !== true).map((s) => s.operator),
-    ]),
+    ...new Set(
+      surcharges.filter((s) => s.pending !== true).map((s) => s.operator),
+    ),
   ].filter((op) => onlyOperator === undefined || op === onlyOperator);
 
   for (const operator of operators) {
@@ -119,7 +118,6 @@ function main(write: boolean, onlyOperator: string | undefined): void {
     );
     const inOperator = new Set(nodes.map((n) => n.id));
     const nameOf = new Map(nodes.map((n) => [n.id, n.name]));
-    const rawKm = buildOperatorKmTable(graph, operator);
 
     const adjacency = new Map<string, Leg[]>();
     const link = (from: string, to: string, km: number) => {
@@ -160,7 +158,7 @@ function main(write: boolean, onlyOperator: string | undefined): void {
       const best = new Map<string, State>();
       const queue: { id: string; state: State }[] = [];
       for (const id of starts) {
-        const state: State = { weighted: 0, legs: [], ridden: new Map() };
+        const state: State = { weighted: 0, ridden: new Map() };
         best.set(id, state);
         queue.push({ id, state });
       }
@@ -193,11 +191,7 @@ function main(write: boolean, onlyOperator: string | undefined): void {
               exit: nameOf.get(leg.to) ?? "",
             });
           }
-          const state: State = {
-            weighted,
-            legs: [...cur.state.legs, { km: leg.km, rate: leg.rate }],
-            ridden,
-          };
+          const state: State = { weighted, ridden };
           best.set(leg.to, state);
           queue.push({ id: leg.to, state });
         }
@@ -214,24 +208,21 @@ function main(write: boolean, onlyOperator: string | undefined): void {
       }
 
       for (const [destination, state] of byName) {
-        let fare = tableOnly.estimate(operator, fareCalcKm(state.legs));
+        // 擬制キロは graph.json の fareKm に焼いてあり実行時が扱うので、
+        // ここで足すのは加算運賃だけ。両方で足すと二重になる。
+        let extra = 0;
         for (const s of applied) {
           const r = state.ridden.get(s.id);
-          fare +=
+          extra +=
             s.pairs !== undefined
               ? surchargePairAmount(s, r?.entry, r?.exit)
               : surchargeAmount(s, r?.km ?? 0);
         }
-        // 実行時は営業キロの最短経路で距離帯を引く。同じ額になるなら
-        // 特定運賃を持つ意味が無いので落とす
-        const naive = tableOnly.estimate(
-          operator,
-          rawKm(origin, destination) ?? 0,
-        );
-        if (fare === naive) {
+        if (extra === 0) {
           sameAsTable++;
           continue;
         }
+        const fare = tableOnly.estimate(operator, state.weighted) + extra;
         const key = [origin, destination].sort().join("\u0000");
         if (!pairs.has(key))
           pairs.set(key, { from: origin, to: destination, fare });
@@ -240,7 +231,7 @@ function main(write: boolean, onlyOperator: string | undefined): void {
 
     const hasRates = Object.keys(rates).length > 0;
     process.stdout.write(
-      `${operator}: 距離帯と違うペア ${pairs.size}（同じで落としたもの ${sameAsTable}）` +
+      `${operator}: 加算のかかるペア ${pairs.size}（加算なしで落としたもの ${sameAsTable}）` +
         ` 擬制キロ${hasRates ? "あり" : "なし"} 加算${applied.length}件\n`,
     );
     if (!write || pairs.size === 0) continue;
@@ -270,7 +261,7 @@ function main(write: boolean, onlyOperator: string | undefined): void {
             note:
               `公式の運賃規則から計算した実額。距離帯表そのままでは引けないペアだけを持つ。` +
               (hasRates
-                ? `運賃計算キロは線区ごとの擬制率をかけて合計し1km単位に切り上げたもの（定義と出典は data/fare-distance-classes.json）。`
+                ? `擬制キロは graph.json の fareKm に焼いてあるので、ここには含まれない（定義と出典は data/fare-distance-classes.json）。`
                 : "") +
               (applied.length > 0
                 ? `加算運賃は ${applied.map((s) => s.lines.join("・")).join(" / ")}（定義と出典は data/fare-surcharges.json）。`

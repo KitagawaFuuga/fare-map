@@ -172,9 +172,12 @@ const overrides = [
 // graph.json の駅間距離（座標から求めて実営業キロで補正した値）で帯を切ってある。
 // 探索が calculator に渡すのもこの距離なので、検証も同じ距離でなければ意味がない
 // （公表営業キロで検証していたときは、実際には5ペアで下界が破れているのに緑だった）。
+// 探索が運賃を引くのに使うのは営業キロではなく運賃計算キロ（GraphEdge.fareKm）。
+// 擬制キロのある事業者はこちらで検証しなければ意味がない
 const graphKmCache = new Map<string, Map<string, number>>();
-function graphKmOf(operator: string): Map<string, number> {
-  const hit = graphKmCache.get(operator);
+function graphKmOf(operator: string, useFareKm = false): Map<string, number> {
+  const cacheKey = useFareKm ? `${operator}:fare` : operator;
+  const hit = graphKmCache.get(cacheKey);
   if (hit) return hit;
   const graph = JSON.parse(
     readFileSync("data/graph.json", "utf8"),
@@ -193,8 +196,9 @@ function graphKmOf(operator: string): Map<string, number> {
     if (!inSet.has(e.from) || !inSet.has(e.to)) continue;
     // transfer は区間を確定しないので、同一事業者内のものは距離0の辺として含める
     if (e.kind === "rail" && e.operator !== operator) continue;
-    link(e.from, e.to, e.km);
-    link(e.to, e.from, e.km);
+    const km = useFareKm ? (e.fareKm ?? e.km) : e.km;
+    link(e.from, e.to, km);
+    link(e.to, e.from, km);
   }
   const byName = new Map<string, string[]>();
   for (const id of ids) {
@@ -230,8 +234,12 @@ function graphKmOf(operator: string): Map<string, number> {
       if (Number.isFinite(km)) out.set([from, to].sort().join("\u0000"), km);
     }
   }
+  graphKmCache.set(cacheKey, out);
   return out;
 }
+
+/** 探索が運賃を引くのに使う距離（運賃計算キロ） */
+const graphFareKmOf = (operator: string) => graphKmOf(operator, true);
 
 const calc = createFareCalculator(rules, overrides);
 
@@ -480,11 +488,15 @@ describe("FareCalculator", () => {
     // この4点は実運賃そのもの。距離はグラフの営業キロを渡して、
     // 生成の過程が変わったら落ちるようにしてある。
     it("名鉄名古屋→犬山 は 630円（営業キロ27.9のままだと570円）", () => {
-      const km = graphKmOf("名古屋鉄道");
-      const d = km.get(["名鉄名古屋", "犬山"].sort().join("\u0000"));
-      expect(d).toBeDefined();
-      expect(calc.estimate("名古屋鉄道", d!, "名鉄名古屋", "犬山")).toBe(630);
-      expect(calc.estimate("名古屋鉄道", d!)).toBe(570);
+      const key = ["名鉄名古屋", "犬山"].sort().join("\u0000");
+      // 探索は運賃計算キロで引く。擬制キロが効いて 630円 になる
+      expect(
+        calc.estimate("名古屋鉄道", graphFareKmOf("名古屋鉄道").get(key)!),
+      ).toBe(630);
+      // 営業キロのままだと1帯安い。直っていることを同時に固定する
+      expect(
+        calc.estimate("名古屋鉄道", graphKmOf("名古屋鉄道").get(key)!),
+      ).toBe(570);
     });
 
     it.each([
@@ -492,8 +504,9 @@ describe("FareCalculator", () => {
       ["太田川", "中部国際空港", 650],
       ["名鉄名古屋", "中部国際空港", 980],
     ])("%s→%s は %i円（擬制キロ＋空港線の加算運賃）", (from, to, fare) => {
-      const km = graphKmOf("名古屋鉄道");
-      const d = km.get([from, to].sort().join("\u0000"));
+      const d = graphFareKmOf("名古屋鉄道").get(
+        [from, to].sort().join("\u0000"),
+      );
       expect(d).toBeDefined();
       expect(
         calc.estimate("名古屋鉄道", d!, from as string, to as string),

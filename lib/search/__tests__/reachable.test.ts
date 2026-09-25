@@ -1575,3 +1575,54 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
     });
   });
 });
+
+// 名鉄の擬制キロ・JRの地方交通線の換算キロは、営業キロと違う距離で運賃を引く。
+// 探索は GraphEdge.fareKm があればそれを使わなければならない。使わないと運賃が
+// 実額より安く出て、到達できない駅を到達できると言うことになる。
+describe("運賃計算キロ (GraphEdge.fareKm)", () => {
+  const node = (id: string) => ({
+    id,
+    groupId: id,
+    name: id,
+    lat: 0,
+    lng: 0,
+    lineId: "L",
+    lineName: "線",
+    operator: "OpA",
+  });
+  const build = (fareKm?: number): RailGraph => ({
+    nodes: Object.fromEntries(["A", "B"].map((id) => [id, node(id)])),
+    edges: [
+      {
+        from: "A",
+        to: "B",
+        km: 10,
+        ...(fareKm === undefined ? {} : { fareKm }),
+        kind: "rail" as const,
+        operator: "OpA",
+      },
+    ],
+  });
+
+  it("fareKm があればそちらで運賃を引く", () => {
+    // 営業キロ10kmなら100円の帯だが、運賃計算キロ11.5kmでは150円の帯になる
+    const found = findReachable(build(11.5), calc, "A", 150);
+    expect(found.find((s) => s.id === "B")?.fare).toBe(150);
+  });
+
+  it("fareKm が無ければ営業キロで引く", () => {
+    expect(
+      findReachable(build(), calc, "A", 150).find((s) => s.id === "B")?.fare,
+    ).toBe(100);
+  });
+
+  it("運賃計算キロで予算を超える駅は到達不可になる", () => {
+    // 営業キロのままなら100円で予算内だが、運賃計算キロでは150円で超える
+    expect(
+      findReachable(build(11.5), calc, "A", 120).map((s) => s.id),
+    ).not.toContain("B");
+    expect(findReachable(build(), calc, "A", 120).map((s) => s.id)).toContain(
+      "B",
+    );
+  });
+});

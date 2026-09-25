@@ -92,6 +92,41 @@ describe("extractStationKm", () => {
     expect(r.edgeKm.get(edgeKey("乙", "丙"))).toBeCloseTo(4.5);
   });
 
+  // 首都圏・関西圏の駅一覧は駅名のうしろに特定都区市内の記号を置く
+  // （根岸線は「横浜駅 浜」、大阪環状線は「大阪駅 阪」）。記号は漢字なので
+  // 末尾の記号だけを落とす規則では外れず、根岸線は全行が漏れていた
+  it("駅名のうしろの特定都区市内の記号を落とす（「横浜駅 浜」）", () => {
+    const marked = [
+      ["駅名", "累計"],
+      ["甲駅 浜", "0.0"],
+      ["乙駅　区", "3.0"],
+      ["丙駅 名", "7.5"],
+      ["丁駅 阪", "10.0"],
+    ];
+    const r = extractStationKm([marked], { stationNames: names, sections });
+    expect(r.edgeKm.get(edgeKey("甲", "乙"))).toBeCloseTo(3.0);
+    expect(r.edgeKm.get(edgeKey("丙", "丁"))).toBeCloseTo(2.5);
+  });
+
+  it("文章のセルを駅名と読み違えない", () => {
+    // 接続路線の欄には「甲駅 - 乙駅間」のような文が入る
+    expect(
+      extractStationKm(
+        [
+          [
+            ["駅名", "累計", "接続路線"],
+            ["甲駅", "0.0", "甲駅 - 乙駅間は複線"],
+            ["乙駅", "3.0", ""],
+          ],
+        ],
+        {
+          stationNames: names,
+          sections: [{ from: "甲", to: "乙", officialKm: 3.0 }],
+        },
+      ).edgeKm.get(edgeKey("甲", "乙")),
+    ).toBeCloseTo(3.0);
+  });
+
   it("複数の表に分かれた路線を繋げる", () => {
     const first = [
       ["駅名", "累計"],

@@ -140,12 +140,15 @@ export function articleTitles(
   operator: string,
   prefix: string,
 ): string[] {
-  const base = lineName
-    .replace(/^JR/, "")
-    .replace(/[（(].*/, "")
-    .trim();
+  const base = lineName.replace(/[（(].*/, "").trim();
   const titles = [base];
-  if (prefix !== "" && prefix !== operator && base.startsWith(prefix)) {
+  // JR は落とす前を先に試す。「JR京都線」「JR神戸線」「JR東西線」は記事名その
+  // もので、落とした「京都線」「東西線」は駅一覧の無い曖昧さ回避ページに当たる。
+  // 「JR山手線」「JR宝塚線」のように正式名へのリダイレクトなら、どちらでも同じ
+  // 記事に着く。JR が付かない路線（函館本線など）はここを通らない
+  const stripped = base.replace(/^JR/, "");
+  if (stripped !== base && stripped !== "") titles.push(stripped);
+  else if (prefix !== "" && prefix !== operator && base.startsWith(prefix)) {
     titles.push(operator + base.slice(prefix.length));
   }
   const alias = LINE_ALIASES[base];
@@ -169,6 +172,11 @@ async function fetchArticleHtml(
   const cache = `${cacheDir}/${encodeURIComponent(title)}.html`;
   if (existsSync(cache))
     return { kind: "ok", html: readFileSync(cache, "utf8") };
+  // 「記事が無い」も残す。候補を複数試すようになったので、存在しない候補
+  // （JRおおさか東線・JR関西本線など）を毎回引き直すと1件2.5秒が積み上がる。
+  // 記事が後から作られたら消せばよい（cacheDir は node_modules/.cache の下）
+  const absent = `${cacheDir}/${encodeURIComponent(title)}.missing`;
+  if (existsSync(absent)) return { kind: "missing" };
   const url =
     `${API}?action=parse&page=${encodeURIComponent(title)}` +
     "&prop=text&format=json&formatversion=2&redirects=1&maxlag=5";
@@ -205,7 +213,10 @@ async function fetchArticleHtml(
       parse?: { text?: string };
       error?: { code?: string };
     };
-    if (body.error?.code === "missingtitle") return { kind: "missing" };
+    if (body.error?.code === "missingtitle") {
+      writeFileSync(absent, "");
+      return { kind: "missing" };
+    }
     if (body.error?.code === "maxlag") {
       await sleep(wait);
       wait *= 3;

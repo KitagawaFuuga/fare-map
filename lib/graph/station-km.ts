@@ -59,8 +59,15 @@ export const edgeKey = (a: string, b: string): string =>
 export function normalizeStationName(raw: string): string {
   const trailingJunk =
     /[^\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9ー]+$/u;
+  // 首都圏・関西圏の駅一覧は駅名のうしろに特定都区市内の記号を置く
+  // （根岸線は「横浜駅 浜」、大阪環状線は「大阪駅 阪」）。記号は漢字なので
+  // 下の trailingJunk では外れず、末尾の「駅」も外せないまま行ごと漏れる。
+  // 「〜駅」＋空白＋3文字以内、でセルが終わる形だけを落とす。接続路線の欄に入る
+  // 「甲駅 - 乙駅間は複線」のような文はこの形にならないので巻き込まない
+  const cityMarker = /^(.+?駅)[\s　]+[^\s　]{1,3}$/u;
   return raw
     .replace(/\[[^\]]*\]/g, "")
+    .replace(cityMarker, "$1")
     .replace(/（[^）]*）/g, "")
     .replace(/\([^)]*\)/g, "")
     .trim()

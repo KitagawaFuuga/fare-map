@@ -860,6 +860,6 @@
   "source": {
     "url": "https://api3.ottop.org/download/gtfs/ooXuXei4op7y/4360001000447 （一覧: https://github.com/tshimada291/gtfs-jp-list）",
     "fetchedAt": "2026-09-24",
-    "note": "data/fare-rules/ の距離帯では引けないペア（171/171）。沖縄都市モノレール が公開する GTFS の fare_rules.txt / fare_attributes.txt から起こした実額。ゆいレール全19駅の全ペア。 ライセンスは CC BY 4.0。GTFS は origin_id/destination_id で駅を明示するため、運賃表PDFのような行ズレは起こりえない（距離単調性が無力という警告が出ても、それは検査が効かないという意味であって誤りの兆候ではない）。営業キロは data/graph.json の自社線最短経路（実測ではなく補正済みの推定値）。再生成は npx tsx scripts/fare/ingest/gtfs-fares.ts --only=yui-rail --write data/fare-sources/yui-rail.json と合わせて lib/fare/__tests__/fare-sources.test.ts が全ペア一致を検証する。"
+    "note": "data/fare-sources/yui-rail.json の実額を全ペア持つ。距離帯表で引ける額と一致するペアも落とさない: 落とすと生成時のグラフ距離に依存し、距離データを入れ替えたときに覆いが外れて運賃が変わる。再生成は npx tsx scripts/fare/derive-overrides.ts --write。元データの出典: 沖縄都市モノレール が公開する GTFS の fare_rules.txt / fare_attributes.txt から起こした実額。ゆいレール全19駅の全ペア。 ライセンスは CC BY 4.0。GTFS は origin_id/destination_id で駅を明示するため、運賃表PDFのような行ズレは起こりえない（距離単調性が無力という警告が出ても、それは検査が効かないという意味であって誤りの兆候ではない）。営業キロは data/graph.json の自社線最短経路（実測ではなく補正済みの推定値）。再生成は npx tsx scripts/fare/ingest/gtfs-fares.ts --only=yui-rail --write"
   }
 }

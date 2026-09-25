@@ -81,6 +81,7 @@ import echizenOverride from "@/data/fare-overrides/echizen.json";
 import tokitetsuOverride from "@/data/fare-overrides/tokitetsu.json";
 import shinanoOverride from "@/data/fare-overrides/shinano.json";
 import toeiSubwayOverride from "@/data/fare-overrides/toei-subway.json";
+import toeiTodenOverride from "@/data/fare-overrides/toei-toden.json";
 import toeiToneriOverride from "@/data/fare-overrides/toei-toneri.json";
 import kotodenOverride from "@/data/fare-overrides/kotoden.json";
 import yuiRailOverride from "@/data/fare-overrides/yui-rail.json";
@@ -165,6 +166,7 @@ const overrides = [
   tokitetsuOverride,
   shinanoOverride,
   toeiSubwayOverride,
+  toeiTodenOverride,
   toeiToneriOverride,
   kotodenOverride,
   yuiRailOverride,

@@ -1,6 +1,8 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createFareCalculator } from "@/lib/fare/calculator";
+import { buildOperatorKmTable } from "@/lib/graph/operator-distance";
+import type { RailGraph } from "@/lib/graph/types";
 import {
   fareOverrideSchema,
   fareRuleSchema,
@@ -39,6 +41,16 @@ const overrides = readAll<unknown>("data/fare-overrides").map((o) =>
 ) as FareOverride[];
 const calc = createFareCalculator(rules, overrides);
 const sources = readAll<FareSource>("data/fare-sources");
+const graph = JSON.parse(readFileSync("data/graph.json", "utf8")) as RailGraph;
+const kmTables = new Map<string, (a: string, b: string) => number | null>();
+const graphKmOf = (operator: string) => {
+  const hit = kmTables.get(operator);
+  if (hit !== undefined) return hit;
+  // 運賃を引く距離は運賃計算キロ（擬制キロを含む）
+  const t = buildOperatorKmTable(graph, operator, { useFareKm: true });
+  kmTables.set(operator, t);
+  return t;
+};
 
 // 全線均一運賃の事業者。運賃額が1種類しかないのが正しい状態
 const FLAT_FARE_IDS = new Set(["toei-toden"]);
@@ -65,6 +77,26 @@ describe("公式運賃表の再現", () => {
           if (got !== p.fare)
             wrong.push(
               `${p.from}→${p.to} ${p.km ?? "km不明"} 公式${p.fare} 実装${got}`,
+            );
+        }
+        expect(wrong.slice(0, 10)).toEqual([]);
+        expect(wrong).toHaveLength(0);
+      });
+
+      // 上のテストは取り込み時に記録した km で引いている。実行時に使われるのは
+      // graph.json から求めた距離なので、そちらでも公式どおりにならないと意味がない。
+      // 特定運賃が「距離表と食い違うペアだけ」を持っていると、距離データを入れ替えた
+      // ときに覆いが外れてここが落ちる（実際に2026-09-25に29ペアで落ちた）。
+      it("graph.json の距離で引いても公式表どおりになる", () => {
+        const km = graphKmOf(s.operator);
+        const wrong: string[] = [];
+        for (const p of s.pairs) {
+          const d = km(p.from, p.to);
+          if (d === null || d <= 0) continue;
+          const got = calc.estimate(s.operator, d, p.from, p.to);
+          if (got !== p.fare)
+            wrong.push(
+              `${p.from}→${p.to} ${d.toFixed(2)}km 公式${p.fare} 実装${got}`,
             );
         }
         expect(wrong.slice(0, 10)).toEqual([]);

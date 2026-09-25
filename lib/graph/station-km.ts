@@ -105,16 +105,9 @@ function readChain(
     points.push({ station, km });
   }
   if (points.length < MIN_STATIONS) return null;
-  // 累計なら単調非減少になる。駅間の列はここで落ちる
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const cur = points[i];
-    if (prev === undefined || cur === undefined) return null;
-    if (cur.km < prev.km) return null;
-  }
-  // 全部同じ値なら距離の情報が無い
-  if (points[0]?.km === points[points.length - 1]?.km) return null;
-  return { table: tableIndex, column, points };
+  const run = longestMonotoneRun(points);
+  if (run === null) return null;
+  return { table: tableIndex, column, points: run };
 }
 
 // 正しい列でも数個だけ正解と食い違うことがある。累計の差は「その路線に沿った
@@ -125,6 +118,50 @@ function readChain(
 // 一方、列の取り違えは必ず「一致0」になる。全国の表を調べると、矛盾を含む340列は
 // すべて一致0で、一致がありつつ矛盾もある列は57列しかなかった。したがって
 // 「矛盾0」ではなく「一致が矛盾より十分多い」を条件にする。
+/**
+ * 累計として読める最長の連続部分を返す。読めなければ null。
+ *
+ * 累計は単調になるので、上下する列（駅間）はここで落ちる。ただし列全体に単調性を
+ * 要求してはいけない。路線記事の駅一覧は先頭や末尾に接続路線の区間を混ぜることが
+ * あり、石北本線の累計列は「旭川3.7 → 新旭川0.0」（宗谷本線の降順）のあと
+ * 「新旭川0.0 → 網走234.0」と続くV字になっている。
+ *
+ * 向きも問わない。終点側からの累計が降順に並ぶ記事がある（湖西線・釧網本線）ので、
+ * 降順なら昇順に並べ替えて返す。
+ */
+function longestMonotoneRun(
+  points: { station: string; km: number }[],
+): { station: string; km: number }[] | null {
+  let best: { station: string; km: number }[] | null = null;
+  for (const direction of [1, -1]) {
+    let start = 0;
+    for (let i = 1; i <= points.length; i++) {
+      const prev = points[i - 1];
+      const cur = points[i];
+      const broken =
+        cur === undefined ||
+        prev === undefined ||
+        (cur.km - prev.km) * direction < 0;
+      if (!broken) continue;
+      const run = points.slice(start, i);
+      const first = run[0];
+      const last = run[run.length - 1];
+      // 端が同じ値なら距離の情報が無い
+      if (
+        run.length >= MIN_STATIONS &&
+        first !== undefined &&
+        last !== undefined &&
+        first.km !== last.km &&
+        (best === null || run.length > best.length)
+      ) {
+        best = direction === 1 ? run : [...run].reverse();
+      }
+      start = i;
+    }
+  }
+  return best;
+}
+
 const MATCH_RATIO = 3;
 // 経路が違えばキロは大きく変わる。これ未満の差は別経路では説明がつかないので、
 // 資料の食い違い（または列の取り違え）として棄却する。実データでは別経路による

@@ -278,3 +278,63 @@ describe("extractStationKm: 小さい矛盾は別経路では説明できない"
     expect(r.rejected).toBeGreaterThan(0);
   });
 });
+
+// 記事によっては累計が終点側からの並びで降順に載る（石北本線・湖西線・釧網本線）。
+// 累計として使えるかは単調かどうかで、向きは関係ない。降順を捨てていたため
+// 石北本線は33駅・一致12の列を「単調×」で落としていた。
+describe("extractStationKm: 降順の累計も読む", () => {
+  const descending = [
+    ["駅名", "累計"],
+    ["丁駅", "10.0"],
+    ["丙駅", "7.5"],
+    ["乙駅", "3.0"],
+    ["甲駅", "0.0"],
+  ];
+
+  it("降順の累計から隣接駅間の距離を出す", () => {
+    const r = extractStationKm([descending], {
+      stationNames: names,
+      sections,
+    });
+    expect(r.edgeKm.get(edgeKey("甲", "乙"))).toBeCloseTo(3.0);
+    expect(r.edgeKm.get(edgeKey("乙", "丙"))).toBeCloseTo(4.5);
+    expect(r.edgeKm.get(edgeKey("丙", "丁"))).toBeCloseTo(2.5);
+  });
+
+  it("上下する列（駅間）は降順としても読まない", () => {
+    const gaps = [
+      ["駅名", "駅間"],
+      ["甲駅", "0.0"],
+      ["乙駅", "3.0"],
+      ["丙駅", "4.5"],
+      ["丁駅", "2.5"],
+    ];
+    const r = extractStationKm([gaps], { stationNames: names, sections });
+    expect(r.edgeKm.size).toBe(0);
+  });
+});
+
+// 路線記事の駅一覧は、先頭や末尾に接続路線の区間を混ぜることがある。石北本線の
+// 累計列は「旭川3.7 → 旭川四条1.9 → 新旭川0.0」（宗谷本線区間の降順）のあと
+// 「新旭川0.0 → … → 網走234.0」と続くV字で、列ごと捨てて33駅を落としていた。
+describe("extractStationKm: 列の中の最長の単調部分を使う", () => {
+  it("先頭に別路線の区間が混じった累計列でも読む", () => {
+    const vShaped = [
+      ["駅名", "累計"],
+      ["庚駅", "3.7"], // 接続路線の区間（降順）
+      ["己駅", "1.9"],
+      ["甲駅", "0.0"], // ここから本題の路線（昇順）
+      ["乙駅", "3.0"],
+      ["丙駅", "7.5"],
+      ["丁駅", "10.0"],
+    ];
+    const r = extractStationKm([vShaped], {
+      stationNames: new Set([...names, "己", "庚"]),
+      sections,
+    });
+    expect(r.edgeKm.get(edgeKey("甲", "乙"))).toBeCloseTo(3.0);
+    expect(r.edgeKm.get(edgeKey("丙", "丁"))).toBeCloseTo(2.5);
+    // 別路線ぶんは最長の単調部分に入らないので出さない
+    expect(r.edgeKm.get(edgeKey("己", "庚"))).toBeUndefined();
+  });
+});

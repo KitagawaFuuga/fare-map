@@ -79,3 +79,24 @@ describe("buildOperatorKmTable", () => {
     expect(buildOperatorKmTable(g, "甲鉄道")("A駅", "C駅")).toBeCloseTo(0.5);
   });
 });
+
+describe("buildOperatorKmTable（運賃計算キロ）", () => {
+  // B'-C に擬制キロ（営業キロ2.0 → 運賃計算キロ2.5）を持たせたグラフ
+  const withFareKm: RailGraph = {
+    nodes: graph.nodes,
+    edges: graph.edges.map((e) =>
+      e.from === "b2" && e.to === "c" ? { ...e, fareKm: 2.5 } : e,
+    ),
+  };
+
+  it("useFareKm を指定すると運賃計算キロで合算する", () => {
+    const km = buildOperatorKmTable(withFareKm, "甲鉄道", {
+      useFareKm: true,
+    });
+    expect(km("A駅", "C駅")).toBe(3.5);
+  });
+
+  it("既定は営業キロ（fareKm があっても使わない）", () => {
+    expect(buildOperatorKmTable(withFareKm, "甲鉄道")("A駅", "C駅")).toBe(3.0);
+  });
+});

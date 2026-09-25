@@ -9,9 +9,16 @@ import type { RailGraph } from "@/lib/graph/types";
 //
 // グラフには同じ駅名のノードが路線ぶんだけあるので、始点は同名ノード全部を
 // 距離0で初期化し、終点も同名ノードのうち最小値を採る。
+export interface OperatorKmOptions {
+  // 運賃計算キロ（GraphEdge.fareKm）で合算する。運賃を引く距離で検証・生成したい
+  // ときに使う。既定は営業キロで、距離そのものの検証はこちらでなければならない
+  useFareKm?: boolean;
+}
+
 export function buildOperatorKmTable(
   graph: RailGraph,
   operator: string,
+  options: OperatorKmOptions = {},
 ): (a: string, b: string) => number | null {
   const nodes = Object.values(graph.nodes).filter(
     (n) => n.operator === operator,
@@ -28,7 +35,12 @@ export function buildOperatorKmTable(
     if (!inOperator.has(e.from) || !inOperator.has(e.to)) continue;
     // 自社の駅同士でも、他社線の区間を通る経路は営業キロに含めない
     if (e.kind === "rail" && e.operator !== operator) continue;
-    const km = e.kind === "rail" ? e.km : 0;
+    const km =
+      e.kind === "rail"
+        ? options.useFareKm === true
+          ? (e.fareKm ?? e.km)
+          : e.km
+        : 0;
     link(e.from, e.to, km);
     link(e.to, e.from, km);
   }

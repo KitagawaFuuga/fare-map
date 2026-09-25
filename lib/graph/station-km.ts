@@ -9,6 +9,8 @@
 // 出すのは累計値ではなく隣接駅間の距離。累計は起点の取り方で値が変わるが、
 // 差はどの列を採っても同じで、運賃計算に要るのも差のほうである。
 
+import { buildNameLookup, matchKey } from "@/lib/graph/station-name";
+
 export interface KmSection {
   from: string;
   to: string;
@@ -65,8 +67,14 @@ export function normalizeStationName(raw: string): string {
   // 「〜駅」＋空白＋3文字以内、でセルが終わる形だけを落とす。接続路線の欄に入る
   // 「甲駅 - 乙駅間は複線」のような文はこの形にならないので巻き込まない
   const cityMarker = /^(.+?駅)[\s　]+[^\s　]{1,3}$/u;
+  // 路線図テンプレートの表は駅名セルの頭に駅ナンバリングを置く
+  // （東京メトロ有楽町線は「Y-01 和光市駅」）。英字1〜3＋任意のハイフン＋数字が
+  // 空白で区切られて先頭にある形だけを落とす。駅名そのものがこの形になることは
+  // 無い（「Ｂ６」のような駅名は全角で、空白でも区切られない）
+  const stationNumber = /^[A-Za-z]{1,3}[-‐–]?[0-9]{1,3}[\s　]+(?=.)/u;
   return raw
     .replace(/\[[^\]]*\]/g, "")
+    .replace(stationNumber, "")
     .replace(cityMarker, "$1")
     .replace(/（[^）]*）/g, "")
     .replace(/\([^)]*\)/g, "")
@@ -94,16 +102,18 @@ interface Chain {
 function readChain(
   table: string[][],
   column: number,
-  stationNames: Set<string>,
+  lookup: Map<string, string>,
   tableIndex: number,
 ): Chain | null {
   const points: { station: string; km: number }[] = [];
   for (const row of table) {
     // 行の中で最初にグラフの駅名と一致したセルを駅名とみなす。
     // 信号場・貨物駅の行はどのセルも一致しないので自然に落ちる。
+    // 記事とグラフで表記が揺れる（箱根ヶ崎/箱根ケ崎など）ので、
+    // 突き合わせは lib/graph/station-name.ts の鍵で行い、採るのはグラフ側の表記
     const station = row
-      .map(normalizeStationName)
-      .find((n) => n !== "" && stationNames.has(n));
+      .map((cell) => lookup.get(matchKey(normalizeStationName(cell))))
+      .find((n) => n !== undefined && n !== "");
     if (station === undefined) continue;
     const km = numberIn(row[column] ?? "");
     if (km === null) continue;
@@ -229,6 +239,7 @@ export function extractStationKm(
   options: StationKmOptions,
 ): StationKmResult {
   const tolerance = options.toleranceKm ?? DEFAULT_TOLERANCE_KM;
+  const lookup = buildNameLookup(options.stationNames);
   const result: StationKmResult = {
     edgeKm: new Map(),
     accepted: [],
@@ -264,12 +275,7 @@ export function extractStationKm(
         contradicted: Set<string>;
       } | null = null;
       for (let column = 0; column < width; column++) {
-        const chain = readChain(
-          table,
-          column,
-          options.stationNames,
-          tableIndex,
-        );
+        const chain = readChain(table, column, lookup, tableIndex);
         if (chain === null) continue;
         const { matched, large, small } = scoreChain(chain, known, tolerance);
         if (matched === 0 || small > 0) continue;

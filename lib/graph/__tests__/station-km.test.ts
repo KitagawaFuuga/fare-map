@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   edgeKey,
   extractStationKm,
+  normalizeStationName,
   type KmSection,
 } from "@/lib/graph/station-km";
 
@@ -106,6 +107,27 @@ describe("extractStationKm", () => {
     const r = extractStationKm([marked], { stationNames: names, sections });
     expect(r.edgeKm.get(edgeKey("甲", "乙"))).toBeCloseTo(3.0);
     expect(r.edgeKm.get(edgeKey("丙", "丁"))).toBeCloseTo(2.5);
+  });
+
+  // 路線図テンプレートの表は駅名セルに駅ナンバリングを付ける
+  // （東京メトロ有楽町線は「Y-01 和光市駅」）。落とさないと1駅も一致しない
+  it("駅名の前の駅ナンバリングを落とす（「Y-01 和光市駅」）", () => {
+    const numbered = [
+      ["", "0.0", "A-01 甲駅"],
+      ["", "3.0", "A-02 乙駅"],
+      ["", "7.5", "A-03 丙駅"],
+      ["", "10.0", "A-04 丁駅"],
+    ];
+    const r = extractStationKm([numbered], { stationNames: names, sections });
+    expect(r.edgeKm.get(edgeKey("甲", "乙"))).toBeCloseTo(3.0);
+    expect(r.edgeKm.get(edgeKey("丙", "丁"))).toBeCloseTo(2.5);
+  });
+
+  it("空白で区切られていなければ駅ナンバリングとみなさない", () => {
+    // 落とすのは「英数字＋空白」で始まる形だけ。駅名の一部を削ってはいけない
+    expect(normalizeStationName("A-01 甲駅")).toBe("甲");
+    expect(normalizeStationName("A-01甲駅")).toBe("A-01甲");
+    expect(normalizeStationName("JR難波駅")).toBe("JR難波");
   });
 
   it("文章のセルを駅名と読み違えない", () => {

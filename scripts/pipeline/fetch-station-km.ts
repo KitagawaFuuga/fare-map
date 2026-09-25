@@ -23,6 +23,7 @@ import {
   operatorAliasesSchema,
 } from "@/lib/graph/operator-alias";
 import { extractStationKm, type KmSection } from "@/lib/graph/station-km";
+import { buildNameLookup, matchKey } from "@/lib/graph/station-name";
 import { extractTables } from "@/scripts/fare/ingest/html-table";
 import type { RailGraph } from "@/lib/graph/types";
 
@@ -101,12 +102,16 @@ export function buildSections(
   operator: string,
   names: Set<string>,
 ): KmSection[] {
+  // 駅名の表記が資料とグラフで食い違う（箱根ヶ崎/箱根ケ崎、ＪＲ松山駅前、
+  // 明治神宮前〈原宿〉、松山市駅）。寄せないと2,139区間のうち79区間を捨てる
+  const lookup = buildNameLookup(names);
   const byPair = new Map<string, KmSection[]>();
   for (const r of rows) {
     if ((r["事業者名"] ?? "") !== operator) continue;
-    const from = r["起点駅"] ?? "";
-    const to = r["終点駅"] ?? "";
-    if (!names.has(from) || !names.has(to)) continue;
+    // 出力はグラフ側の表記に直す。資料側の表記を残すと駅名で引けなくなる
+    const from = lookup.get(matchKey(r["起点駅"] ?? "")) ?? "";
+    const to = lookup.get(matchKey(r["終点駅"] ?? "")) ?? "";
+    if (from === "" || to === "" || from === to) continue;
     const officialKm = Number(r["営業キロ"]);
     if (!Number.isFinite(officialKm) || officialKm <= 0) continue;
     const key = [from, to].sort().join("\u0000");

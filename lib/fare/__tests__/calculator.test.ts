@@ -286,9 +286,11 @@ describe("FareCalculator", () => {
     expect(calc.estimate("JR東日本", 0)).toBe(0);
   });
 
+  // JR東日本の表は基準額表と同じ3400kmまで帯を持つので、外挿が効くのはその先だけ
+  // （実在の経路はここまで届かない）。以前は100km超をすべて外挿で近似していた
   it("表を超える距離は賃率で外挿し 10 円単位に丸める", () => {
-    const fare = calc.estimate("JR東日本", 150);
-    expect(fare).toBe(Math.ceil((1790 + 50 * 16.96) / 10) * 10);
+    const fare = calc.estimate("JR東日本", 3500);
+    expect(fare).toBe(Math.ceil((31570 + 100 * 16.2) / 10) * 10);
   });
 
   it("未知の事業者はフォールバック表を使う", () => {

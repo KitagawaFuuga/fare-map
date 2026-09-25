@@ -16,6 +16,7 @@
 // lib/graph/station-km.ts が実営業キロの区間を正解にして行う。検証できない表は
 // 採用しない。
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 import { parseCsv } from "@/lib/graph/csv";
 import { extractStationKm, type KmSection } from "@/lib/graph/station-km";
 import { extractTables } from "@/scripts/fare/ingest/html-table";
@@ -78,6 +79,43 @@ export function csvLineKeys(name: string): string[] {
     .split(/[・／/]/)
     .map((part) => normalizeLineKey(part))
     .filter((part) => part !== "");
+}
+
+// 検証に使う実営業キロの区間を、路線ではなく事業者単位で集める。
+//
+// 路線名で絞ってはいけない。グラフの lineName の多くは愛称や運転系統名
+// （花咲線＝根室本線、宇都宮線＝東北本線、琵琶湖線・京都線・神戸線＝東海道本線）で、
+// 実営業キロ側の正式路線名と一致しない。路線で絞ると231路線が「正解に使える区間が
+// 無い」として丸ごと棄却されていた。
+//
+// 絞らなくても取り違えは起きない。正解は駅ペアで引くので、別路線の区間は
+// その2駅が表に並んでいなければ参照されないし、並んでいれば同じ2駅の距離として
+// 正しい。ただし同じ2駅を別経路で結ぶ区間（池袋〜赤羽は東北線経由11.3km・
+// 埼京線経由5.5km）は正解を一意に決められないので捨てる。
+export function buildSections(
+  rows: Record<string, string>[],
+  operator: string,
+  names: Set<string>,
+): KmSection[] {
+  const byPair = new Map<string, KmSection[]>();
+  for (const r of rows) {
+    if ((r["事業者名"] ?? "") !== operator) continue;
+    const from = r["起点駅"] ?? "";
+    const to = r["終点駅"] ?? "";
+    if (!names.has(from) || !names.has(to)) continue;
+    const officialKm = Number(r["営業キロ"]);
+    if (!Number.isFinite(officialKm) || officialKm <= 0) continue;
+    const key = [from, to].sort().join("\u0000");
+    byPair.set(key, [...(byPair.get(key) ?? []), { from, to, officialKm }]);
+  }
+  const sections: KmSection[] = [];
+  for (const found of byPair.values()) {
+    const first = found[0];
+    if (first === undefined) continue;
+    if (found.some((s) => s.officialKm !== first.officialKm)) continue;
+    sections.push(first);
+  }
+  return sections;
 }
 
 // 通称と正式名が別物で、事業者名の置き換えでは辿りつけない路線。
@@ -257,7 +295,13 @@ async function main(): Promise<void> {
     namesByOperator.set(n.operator, set);
   }
 
-  // 路線ごとに、正解に使う実営業キロの区間を集める
+  // 正解に使う実営業キロの区間は事業者単位で作る（路線名では絞らない）
+  const sectionsByOperator = new Map<string, KmSection[]>();
+  for (const [operator, names] of namesByOperator) {
+    sectionsByOperator.set(operator, buildSections(kmRows, operator, names));
+  }
+
+  // 路線ごとに記事を引く単位を作る
   const lines = new Map<
     string,
     { operator: string; lineName: string; names: Set<string> }
@@ -297,22 +341,8 @@ async function main(): Promise<void> {
   let noSections = 0;
 
   for (const target of targets) {
-    const sections: KmSection[] = kmRows
-      .filter(
-        (r) =>
-          (r["事業者名"] ?? "") === target.operator &&
-          csvLineKeys(r["路線名"] ?? "").includes(
-            graphLineKey(target.operator, target.lineName),
-          ) &&
-          target.names.has(r["起点駅"] ?? "") &&
-          target.names.has(r["終点駅"] ?? ""),
-      )
-      .map((r) => ({
-        from: r["起点駅"] as string,
-        to: r["終点駅"] as string,
-        officialKm: Number(r["営業キロ"]),
-      }))
-      .filter((s) => Number.isFinite(s.officialKm) && s.officialKm > 0);
+    const sections =
+      sectionsByOperator.get(target.operator) ?? ([] as KmSection[]);
 
     if (sections.length === 0) {
       noSections++;
@@ -411,4 +441,11 @@ async function main(): Promise<void> {
   process.stdout.write("data/station-km.json に書き出した\n");
 }
 
-void main();
+// テストや他のスクリプトから関数を import しただけで全件取得が始まらないよう、
+// 直接実行されたときだけ走らせる
+if (
+  process.argv[1] !== undefined &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  void main();
+}

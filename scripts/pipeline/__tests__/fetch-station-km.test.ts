@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   articleTitles,
+  buildSections,
   csvLineKeys,
   normalizeLineKey,
   operatorLinePrefix,
@@ -87,5 +88,100 @@ describe("articleTitles", () => {
 
   it("略称が無い事業者は候補1つ", () => {
     expect(articleTitles("万葉線", "万葉線", "")).toEqual(["万葉線"]);
+  });
+});
+
+describe("buildSections", () => {
+  const rows = [
+    {
+      事業者名: "甲鉄道",
+      路線名: "本線",
+      起点駅: "A",
+      終点駅: "B",
+      営業キロ: "10",
+    },
+    {
+      事業者名: "甲鉄道",
+      路線名: "支線",
+      起点駅: "B",
+      終点駅: "C",
+      営業キロ: "4.5",
+    },
+    {
+      事業者名: "乙鉄道",
+      路線名: "本線",
+      起点駅: "A",
+      終点駅: "B",
+      営業キロ: "99",
+    },
+  ];
+  const names = new Set(["A", "B", "C"]);
+
+  it("路線を問わず事業者の全区間を正解に使う（愛称の路線でも検証できるようにする）", () => {
+    expect(buildSections(rows, "甲鉄道", names)).toEqual([
+      { from: "A", to: "B", officialKm: 10 },
+      { from: "B", to: "C", officialKm: 4.5 },
+    ]);
+  });
+
+  it("グラフに無い駅の区間は使わない", () => {
+    expect(buildSections(rows, "甲鉄道", new Set(["A", "B"]))).toEqual([
+      { from: "A", to: "B", officialKm: 10 },
+    ]);
+  });
+
+  it("同じ駅ペアで距離が食い違う区間は捨てる（別経路があるため正解にできない）", () => {
+    const conflicting = [
+      ...rows,
+      {
+        事業者名: "甲鉄道",
+        路線名: "短絡線",
+        起点駅: "B",
+        終点駅: "A",
+        営業キロ: "5.5",
+      },
+    ];
+    expect(buildSections(conflicting, "甲鉄道", names)).toEqual([
+      { from: "B", to: "C", officialKm: 4.5 },
+    ]);
+  });
+
+  it("同じ距離が複数行にあるだけなら1つ残す", () => {
+    const duplicated = [
+      ...rows,
+      {
+        事業者名: "甲鉄道",
+        路線名: "別名",
+        起点駅: "B",
+        終点駅: "A",
+        営業キロ: "10",
+      },
+    ];
+    expect(buildSections(duplicated, "甲鉄道", names)).toHaveLength(2);
+  });
+
+  it("営業キロが数値でない行・0の行は捨てる", () => {
+    expect(
+      buildSections(
+        [
+          {
+            事業者名: "甲鉄道",
+            路線名: "本線",
+            起点駅: "A",
+            終点駅: "B",
+            営業キロ: "",
+          },
+          {
+            事業者名: "甲鉄道",
+            路線名: "本線",
+            起点駅: "B",
+            終点駅: "C",
+            営業キロ: "0",
+          },
+        ],
+        "甲鉄道",
+        names,
+      ),
+    ).toEqual([]);
   });
 });

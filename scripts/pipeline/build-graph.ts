@@ -14,6 +14,7 @@ import {
   applyStationKm,
   type StationKmEdge,
 } from "@/lib/graph/apply-station-km";
+import { operatorAliasesSchema } from "@/lib/graph/operator-alias";
 
 // データ更新時にだけ走る生成スクリプト。ekidata の CSV からグラフを組み、
 // 実営業キロで距離補正をかけて data/graph.json に焼き付ける。
@@ -67,9 +68,18 @@ const sections: CalibrationSection[] = kmRows
       s.officialKm > 0,
   );
 
-// operator-splits で分けた事業者名は実営業キロのデータ側には存在しないので、
-// 分割前の名前で分割後のノードを引けるよう別名として渡す
-const calibration = buildCalibration(graph, sections, splits);
+// 実営業キロのデータ側に無いグラフ側の事業者名を、別名として渡す。2種類ある。
+// operator-splits は運賃体系で分けた名前（分割前の名前で分割後のノードを引く）、
+// operator-aliases は通称と登記上の社名の違い（東京メトロ＝東京地下鉄）。
+// どちらも無いと区間を解決できず、補正係数が路線・事業者のどちらにも載らないまま
+// 全国中央値に落ちる。
+const operatorAliases = operatorAliasesSchema.parse(
+  JSON.parse(readFileSync("data/operator-aliases.json", "utf8")),
+).aliases;
+const calibration = buildCalibration(graph, sections, [
+  ...splits,
+  ...operatorAliases.map((a) => ({ from: a.csv, to: a.graph })),
+]);
 for (const edge of graph.edges) {
   // 補正するのは rail のみ。transfer エッジは距離0の乗換なので係数を掛けない
   if (edge.kind !== "rail") continue;

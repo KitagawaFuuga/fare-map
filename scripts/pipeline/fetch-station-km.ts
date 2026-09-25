@@ -18,6 +18,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { parseCsv } from "@/lib/graph/csv";
+import {
+  csvOperatorOf,
+  operatorAliasesSchema,
+} from "@/lib/graph/operator-alias";
 import { extractStationKm, type KmSection } from "@/lib/graph/station-km";
 import { extractTables } from "@/scripts/fare/ingest/html-table";
 import type { RailGraph } from "@/lib/graph/types";
@@ -296,9 +300,16 @@ async function main(): Promise<void> {
   }
 
   // 正解に使う実営業キロの区間は事業者単位で作る（路線名では絞らない）
+  // グラフ側は通称、実営業キロ側は登記上の社名なので、事業者名も直してから引く
+  const aliases = operatorAliasesSchema.parse(
+    JSON.parse(readFileSync("data/operator-aliases.json", "utf8")),
+  ).aliases;
   const sectionsByOperator = new Map<string, KmSection[]>();
   for (const [operator, names] of namesByOperator) {
-    sectionsByOperator.set(operator, buildSections(kmRows, operator, names));
+    sectionsByOperator.set(
+      operator,
+      buildSections(kmRows, csvOperatorOf(aliases, operator), names),
+    );
   }
 
   // 路線ごとに記事を引く単位を作る

@@ -9,6 +9,10 @@ const fareRuleShape = z.object({
   id: z.string(),
   operators: z.array(z.string()), // 空配列 = フォールバック
   table: z.array(z.tuple([z.number(), z.number()])), // [kmまで, 運賃円] 昇順
+  // JRの地方交通線の表。乗車区間がすべて地方交通線のとき、table（幹線）を換算キロで
+  // 引く代わりに、これを営業キロで引く。公式の表は途中の距離までしか無いので
+  // （本州の基準額は200kmまで）、範囲を超えたら table を運賃計算キロで引く
+  localTable: z.array(z.tuple([z.number(), z.number()])).optional(),
   beyond: z.object({
     fromKm: z.number(),
     baseFare: z.number(),
@@ -24,18 +28,21 @@ const fareRuleShape = z.object({
 });
 
 export const fareRuleSchema = fareRuleShape.superRefine((rule, ctx) => {
-  for (let i = 1; i < rule.table.length; i++) {
-    const prev = rule.table[i - 1];
-    const cur = rule.table[i];
-    if (prev === undefined || cur === undefined) continue;
-    if (prev[0] >= cur[0]) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["table", i, 0],
-        message:
-          `fareRuleSchema: table は maxKm の厳密な昇順である必要があります ` +
-          `(id="${rule.id}"): table[${i - 1}].maxKm=${prev[0]} >= table[${i}].maxKm=${cur[0]}`,
-      });
+  for (const key of ["table", "localTable"] as const) {
+    const table = rule[key] ?? [];
+    for (let i = 1; i < table.length; i++) {
+      const prev = table[i - 1];
+      const cur = table[i];
+      if (prev === undefined || cur === undefined) continue;
+      if (prev[0] >= cur[0]) {
+        ctx.addIssue({
+          code: "custom",
+          path: [key, i, 0],
+          message:
+            `fareRuleSchema: ${key} は maxKm の厳密な昇順である必要があります ` +
+            `(id="${rule.id}"): ${key}[${i - 1}].maxKm=${prev[0]} >= ${key}[${i}].maxKm=${cur[0]}`,
+        });
+      }
     }
   }
 });

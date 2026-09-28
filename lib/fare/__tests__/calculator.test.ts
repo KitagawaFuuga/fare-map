@@ -2090,3 +2090,57 @@ describe("FareCalculator", () => {
     });
   });
 });
+
+describe("地方交通線の表 (localTable)", () => {
+  const calcL = createFareCalculator([
+    {
+      id: "fallback",
+      operators: [],
+      table: [[100, 999]],
+      beyond: { fromKm: 100, baseFare: 999, ratePerKm: 0 },
+    },
+    {
+      id: "opj",
+      operators: ["OpJ"],
+      table: [
+        [10, 100],
+        [20, 200],
+      ],
+      localTable: [
+        [10, 110],
+        [15, 150],
+      ],
+      beyond: { fromKm: 20, baseFare: 200, ratePerKm: 10 },
+    },
+  ]);
+
+  it("営業キロ（localKm）を渡すと地方交通線の表で引く", () => {
+    expect(calcL.estimate("OpJ", 16.5, "A", "B", 15)).toBe(150);
+  });
+
+  it("地方交通線の表の範囲を超えたら運賃計算キロで幹線の表を引く", () => {
+    // 公式の地方交通線の表は途中の距離までしか無い（本州の基準額は200kmまで）
+    expect(calcL.estimate("OpJ", 17.6, "A", "B", 16)).toBe(200);
+  });
+
+  it("localKm を渡さなければ幹線の表", () => {
+    expect(calcL.estimate("OpJ", 16.5, "A", "B")).toBe(200);
+  });
+
+  it("地方交通線の表を持たない事業者は localKm を無視する", () => {
+    expect(calcL.estimate("Other", 50, "A", "B", 10)).toBe(999);
+    expect(calcL.hasLocalTable("Other")).toBe(false);
+    expect(calcL.hasLocalTable("OpJ")).toBe(true);
+  });
+
+  it("下界は地方交通線の表を下回らない", () => {
+    // 地方交通線だけのまま進めば150円、幹線に入れば200円以上。下界は安いほう
+    expect(calcL.lowerBound("OpJ", 16.5, undefined, 15)).toBe(150);
+    expect(calcL.lowerBound("OpJ", 16.5)).toBe(200);
+  });
+
+  it("地方交通線の表のほうが高い距離では、下界は幹線の表", () => {
+    // 7〜9kmのように地方交通線の表が高い帯がある。幹線に入れば安くなりうる
+    expect(calcL.lowerBound("OpJ", 9.9, undefined, 9)).toBe(100);
+  });
+});

@@ -9,15 +9,25 @@ const HONSHU_BASE_OPERATOR = "JR東海";
 const HONSHU_KASAN_OPERATOR = "__jr-honshu-kasan";
 
 export interface FareCalculator {
+  // localKm は区間がすべて地方交通線のときの営業キロ。渡すと地方交通線の表を引く
+  // （FareRule.localTable。表を持たない事業者・表の範囲外では無視する）
   estimate(
     operator: string,
     km: number,
     fromName?: string,
     toName?: string,
+    localKm?: number,
   ): number;
   // 探索の枝刈り用。「この先どう乗り継いでも これより安くならない」額を返す。
   // fromName を渡すと下界を締められる（根拠と限界: docs/search-design.md）
-  lowerBound(operator: string, km: number, fromName?: string): number;
+  lowerBound(
+    operator: string,
+    km: number,
+    fromName?: string,
+    localKm?: number,
+  ): number;
+  // 地方交通線の表を持つ事業者か。探索はこれで地方交通線だけの区間を区別する
+  hasLocalTable(operator: string): boolean;
   // stationName がその事業者の override 駅ペアに登場するか。
   // 探索はこれで状態をマージしてよいか判定する（docs/search-design.md）
   isOverrideAnchor(operator: string, stationName: string | undefined): boolean;
@@ -100,6 +110,13 @@ export function createFareCalculator(
     return fareFromTable(byOperator.get(operator) ?? fb, km);
   }
 
+  // 地方交通線の表で引いた運賃。表を持たない事業者、表の範囲外なら undefined
+  function localFare(operator: string, localKm: number): number | undefined {
+    const table = byOperator.get(operator)?.localTable;
+    if (table === undefined || localKm <= 0) return undefined;
+    return table.find((row) => localKm <= row[0])?.[1];
+  }
+
   function fareFromTable(
     rule: Pick<FareRule, "table" | "beyond">,
     km: number,
@@ -127,7 +144,7 @@ export function createFareCalculator(
   }
 
   return {
-    estimate(operator, km, fromName, toName) {
+    estimate(operator, km, fromName, toName, localKm) {
       if (km <= 0) return 0;
       if (fromName !== undefined && toName !== undefined) {
         const overridden = overrideByOperator
@@ -142,15 +159,26 @@ export function createFareCalculator(
         inZone(operator, toName)
       )
         return fareFromTable(z.zone, km);
+      if (localKm !== undefined) {
+        const local = localFare(operator, localKm);
+        if (local !== undefined) return local;
+      }
       return tableFare(operator, km);
     },
-    lowerBound(operator, km, fromName) {
+    lowerBound(operator, km, fromName, localKm) {
       // 発駅が区間内なら、着駅しだいで区間の表（事業者の表以下）になりうる
       const z = zoneByOperator.get(operator);
-      const table =
+      let table =
         z !== undefined && inZone(operator, fromName)
           ? Math.min(fareFromTable(z.zone, km), tableFare(operator, km))
           : tableFare(operator, km);
+      // 地方交通線だけの区間は、そのまま進めば地方交通線の表、幹線に入れば
+      // 幹線の表（距離が伸びるので今の額以上）になる。安いほうが下界。
+      // 地方交通線の表のほうが高い帯（本州の7〜10km）もあるので min を取る
+      if (localKm !== undefined) {
+        const local = localFare(operator, localKm);
+        if (local !== undefined) table = Math.min(table, local);
+      }
       if (fromName !== undefined) {
         const stationMin = minOverrideByOperatorStation
           .get(operator)
@@ -164,6 +192,9 @@ export function createFareCalculator(
       }
       const minOverride = minOverrideByOperator.get(operator) ?? Infinity;
       return Math.min(table, minOverride);
+    },
+    hasLocalTable(operator) {
+      return byOperator.get(operator)?.localTable !== undefined;
     },
     zoneOf(operator, stationName) {
       return inZone(operator, stationName)

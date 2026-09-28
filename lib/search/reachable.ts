@@ -26,6 +26,11 @@ interface SearchState {
   isHonshuThrough: boolean;
   honshuThroughKm: number; // 通算中の距離。segmentKm は含まない。非通算中は 0
   honshuThroughEastKm: number; // うち加算額の対象になる距離
+  // 進行中区間がすべて地方交通線か（true→falseのみ）。true なら地方交通線の表を
+  // 営業キロ（segmentLocalKm）で引く。通し運賃（isHonshuThrough）の間は常に false
+  // （通し運賃の地方交通線の扱いは未対応。換算キロで幹線の表を引く近似のまま）
+  segmentAllLocal: boolean;
+  segmentLocalKm: number; // 進行中区間の営業キロ。segmentAllLocal の間だけ意味を持つ
   fare: number; // confirmedFare + 進行中区間の運賃。状態生成時に確定する
   entry: ParetoEntry; // pop 時の生死判定を O(1) にするための挿入先への参照
 }
@@ -166,6 +171,7 @@ function evaluateSegmentFare(
   honshuThroughEastKm: number,
   fromName: string | undefined,
   toName: string | undefined,
+  localKm: number | undefined,
 ): number {
   if (isHonshuThrough) {
     const totalKm = honshuThroughKm + segmentKm;
@@ -181,8 +187,15 @@ function evaluateSegmentFare(
       );
     return calc.estimateHonshuThrough(totalKm, eastKm);
   }
-  return calc.estimate(segmentOperator, segmentKm, fromName, toName);
+  return calc.estimate(segmentOperator, segmentKm, fromName, toName, localKm);
 }
+
+// 区間が地方交通線だけのときの営業キロ。そうでなければ undefined（幹線の表で引く）
+const localKmOf = (state: {
+  segmentAllLocal: boolean;
+  segmentLocalKm: number;
+}): number | undefined =>
+  state.segmentAllLocal ? state.segmentLocalKm : undefined;
 
 // bucket の非支配集合へ挿入する。既存に支配されていれば false を返す。呼び出し側が
 // 完全な ParetoEntry を渡すのは、dominates に渡るオブジェクトの形を揃えるため。
@@ -205,7 +218,7 @@ export function tryInsertPareto(
 }
 
 // 4階層のネスト Map でキーを表現する（文字列結合による区切り文字衝突を避けるため）。
-// 4階層目のフラグ3種はエッジ緩和のたびに文字列を確保しないよう、8本（2^3）の
+// 4階層目のフラグ4種はエッジ緩和のたびに文字列を確保しないよう、16本（2^4）の
 // 固定リテラルから選ぶ。
 export type __internalParetoStore = Map<
   string,
@@ -213,29 +226,47 @@ export type __internalParetoStore = Map<
 >;
 type ParetoStore = __internalParetoStore;
 
-// インデックス = (isHonshuThrough<<2) | (segmentOnlyExcludedLines<<1) | segmentOriginInTokyoArea
+// インデックス = (segmentAllLocal<<3) | (isHonshuThrough<<2) |
+//   (segmentOnlyExcludedLines<<1) | segmentOriginInTokyoArea
+//
+// segmentAllLocal を bucket に入れるのは、地方交通線だけの状態と幹線を含む状態を
+// 距離で比べてはいけないため。前者は営業キロで地方交通線の表、後者は換算キロで
+// 幹線の表を引くので、換算キロが長くても前者のほうが安いことがある
+// （同じ bucket だと、換算キロの短い幹線経由の状態が安い地方交通線の状態を消す）。
+// 地方交通線だけの bucket の中では換算キロ＝営業キロ×1.1（辺ごとに小数3桁で丸め）
+// なので、totalKm で比べても営業キロで比べたのと同じ順になる。
 const FLAG_KEYS = [
-  "000",
-  "001",
-  "010",
-  "011",
-  "100",
-  "101",
-  "110",
-  "111",
+  "0000",
+  "0001",
+  "0010",
+  "0011",
+  "0100",
+  "0101",
+  "0110",
+  "0111",
+  "1000",
+  "1001",
+  "1010",
+  "1011",
+  "1100",
+  "1101",
+  "1110",
+  "1111",
 ] as const;
 
 function flagsKey(
   isHonshuThrough: boolean,
   segmentOnlyExcludedLines: boolean,
   segmentOriginInTokyoArea: boolean,
+  segmentAllLocal: boolean,
 ): string {
   const index =
+    (segmentAllLocal ? 8 : 0) |
     (isHonshuThrough ? 4 : 0) |
     (segmentOnlyExcludedLines ? 2 : 0) |
     (segmentOriginInTokyoArea ? 1 : 0);
   const key = FLAG_KEYS[index];
-  // FLAG_KEYS は長さ8の固定配列で index は 0-7 の範囲に収まるため必ず存在する。
+  // FLAG_KEYS は長さ16の固定配列で index は 0-15 の範囲に収まるため必ず存在する。
   if (key === undefined)
     throw new Error(`unreachable: flagsKey index ${index}`);
   return key;
@@ -280,7 +311,14 @@ function runSearch(
 ): ParetoStore {
   const adjacency = new Map<
     string,
-    { to: string; km: number; kind: "rail" | "transfer"; operator: string }[]
+    {
+      to: string;
+      km: number;
+      kind: "rail" | "transfer";
+      operator: string;
+      // 地方交通線の辺なら営業キロ、そうでなければ undefined
+      localKm: number | undefined;
+    }[]
   >();
   const addAdj = (
     from: string,
@@ -288,19 +326,31 @@ function runSearch(
     km: number,
     kind: "rail" | "transfer",
     operator: string,
+    localKm: number | undefined,
   ) => {
     const arr = adjacency.get(from) ?? [];
-    arr.push({ to, km, kind, operator });
+    arr.push({ to, km, kind, operator, localKm });
     adjacency.set(from, arr);
   };
   // 探索が扱う距離は運賃計算キロ（fareKm）。運賃を引くのも枝刈りの次元も距離は
   // ここだけで、外に出すのは運賃だけ（ReachableStation は距離を持たない）なので、
   // 隣接表を作る時点で入れ替えれば足りる。営業キロと違う事業者の根拠は
   // lib/graph/types.ts の GraphEdge.fareKm 参照。
+  //
+  // 地方交通線の辺は「換算キロ（fareKm）が営業キロより長い、地方交通線の表を持つ
+  // 事業者の辺」で見分ける（換算キロは data/fare-distance-classes.json の地方交通線
+  // だけに入る）。名鉄の擬制キロなど、表を持たない事業者の fareKm は対象外。
   for (const e of graph.edges) {
     const km = e.fareKm ?? e.km;
-    addAdj(e.from, e.to, km, e.kind, e.operator);
-    addAdj(e.to, e.from, km, e.kind, e.operator);
+    const localKm =
+      e.kind === "rail" &&
+      e.fareKm !== undefined &&
+      e.fareKm > e.km &&
+      calc.hasLocalTable(e.operator)
+        ? e.km
+        : undefined;
+    addAdj(e.from, e.to, km, e.kind, e.operator, localKm);
+    addAdj(e.to, e.from, km, e.kind, e.operator, localKm);
   }
 
   const nameOf = (id: string): string | undefined => graph.nodes[id]?.name;
@@ -340,7 +390,7 @@ function runSearch(
       fromId,
       "",
       originBucketKey("", fromId),
-      flagsKey(false, false, false),
+      flagsKey(false, false, false, false),
     ),
     initialEntry,
   );
@@ -355,6 +405,8 @@ function runSearch(
     isHonshuThrough: false,
     honshuThroughKm: 0,
     honshuThroughEastKm: 0,
+    segmentAllLocal: false,
+    segmentLocalKm: 0,
     fare: 0,
     entry: initialEntry,
   };
@@ -384,6 +436,8 @@ function runSearch(
           isHonshuThrough: state.isHonshuThrough,
           honshuThroughKm: state.honshuThroughKm,
           honshuThroughEastKm: state.honshuThroughEastKm,
+          segmentAllLocal: state.segmentAllLocal,
+          segmentLocalKm: state.segmentLocalKm,
           fare:
             state.confirmedFare +
             evaluateSegmentFare(
@@ -397,6 +451,7 @@ function runSearch(
               state.honshuThroughEastKm,
               nameOf(state.segmentFromId),
               nameOf(edge.to),
+              localKmOf(state),
             ),
           entry: PENDING_ENTRY,
         };
@@ -407,6 +462,9 @@ function runSearch(
           state.segmentOnlyExcludedLines,
           { ...edge, from: state.stationId },
         );
+        const segmentAllLocal =
+          state.segmentAllLocal && edge.localKm !== undefined;
+        const segmentLocalKm = state.segmentLocalKm + (edge.localKm ?? 0);
         next = {
           stationId: edge.to,
           confirmedFare: state.confirmedFare,
@@ -418,6 +476,8 @@ function runSearch(
           isHonshuThrough: state.isHonshuThrough,
           honshuThroughKm: state.honshuThroughKm,
           honshuThroughEastKm: state.honshuThroughEastKm,
+          segmentAllLocal,
+          segmentLocalKm,
           fare:
             state.confirmedFare +
             evaluateSegmentFare(
@@ -431,6 +491,7 @@ function runSearch(
               state.honshuThroughEastKm,
               nameOf(state.segmentFromId),
               nameOf(edge.to),
+              segmentAllLocal ? segmentLocalKm : undefined,
             ),
           entry: PENDING_ENTRY,
         };
@@ -481,6 +542,8 @@ function runSearch(
           isHonshuThrough: true,
           honshuThroughKm,
           honshuThroughEastKm,
+          segmentAllLocal: false,
+          segmentLocalKm: 0,
           fare:
             state.confirmedFare +
             calc.estimateHonshuThrough(honshuThroughKm + segmentKm, eastKm),
@@ -501,6 +564,7 @@ function runSearch(
             state.honshuThroughEastKm,
             nameOf(state.segmentFromId),
             nameOf(state.stationId),
+            localKmOf(state),
           );
         next = {
           stationId: edge.to,
@@ -519,6 +583,8 @@ function runSearch(
           isHonshuThrough: false,
           honshuThroughKm: 0,
           honshuThroughEastKm: 0,
+          segmentAllLocal: edge.localKm !== undefined,
+          segmentLocalKm: edge.localKm ?? 0,
           fare:
             confirmedFare +
             calc.estimate(
@@ -526,6 +592,7 @@ function runSearch(
               edge.km,
               nameOf(state.stationId),
               nameOf(edge.to),
+              edge.localKm,
             ),
           entry: PENDING_ENTRY,
         };
@@ -540,6 +607,7 @@ function runSearch(
             next.segmentOperator,
             next.segmentKm,
             nameOf(next.segmentFromId),
+            localKmOf(next),
           );
       if (next.confirmedFare + segmentLowerBound > budget) continue;
 
@@ -552,6 +620,7 @@ function runSearch(
           next.isHonshuThrough,
           next.segmentOnlyExcludedLines,
           next.segmentOriginInTokyoArea,
+          next.segmentAllLocal,
         ),
       );
       // 今ラチェットが false に落ちたら totalEastKm がいくらになるか。除外中で

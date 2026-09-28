@@ -1690,3 +1690,79 @@ describe("区間運賃", () => {
     expect([...byFrom!.keys()]).not.toContain("");
   });
 });
+
+// JRの地方交通線。乗車区間がすべて地方交通線なら、換算キロで幹線の表を引くのでは
+// なく、地方交通線の表（localTable）を営業キロで引く。幹線を1駅でも含めば従来どおり
+// 運賃計算キロ（換算キロ）で幹線の表を引く。
+describe("地方交通線の表 (FareRule.localTable)", () => {
+  const localCalc = createFareCalculator([
+    {
+      id: "fallback",
+      operators: [],
+      table: [[100, 999]],
+      beyond: { fromKm: 100, baseFare: 999, ratePerKm: 0 },
+    },
+    {
+      id: "opj",
+      operators: ["OpJ"],
+      table: [
+        [10, 100],
+        [20, 200],
+        [30, 300],
+      ],
+      localTable: [
+        [10, 110],
+        [20, 150],
+      ],
+      beyond: { fromKm: 30, baseFare: 300, ratePerKm: 10 },
+    },
+  ]);
+  const jNode = (id: string) => ({
+    id,
+    groupId: id,
+    name: id,
+    lat: 0,
+    lng: 0,
+    lineId: "L",
+    lineName: "線",
+    operator: "OpJ",
+  });
+  // A→B→C は地方交通線（営業キロ9km＋9km、換算キロ9.9km＋9.9km）。
+  // A→C の直通は幹線19km。A→C はどちらも20kmの帯に入る。
+  const graph: RailGraph = {
+    nodes: Object.fromEntries(
+      ["A", "B", "C", "D"].map((id) => [id, jNode(id)]),
+    ),
+    edges: [
+      { from: "A", to: "B", km: 9, fareKm: 9.9, kind: "rail", operator: "OpJ" },
+      { from: "B", to: "C", km: 9, fareKm: 9.9, kind: "rail", operator: "OpJ" },
+      { from: "A", to: "C", km: 19, kind: "rail", operator: "OpJ" },
+      { from: "C", to: "D", km: 5, kind: "rail", operator: "OpJ" },
+    ],
+  };
+
+  it("地方交通線だけの区間は地方交通線の表を営業キロで引く", () => {
+    // A→B は営業キロ9km → 地方交通線の表で110円（幹線の表なら換算キロ9.9kmで100円）
+    const result = findReachable(graph, localCalc, "A", 10000);
+    expect(result.find((r) => r.id === "B")?.fare).toBe(110);
+  });
+
+  it("運賃計算キロが長くても安い地方交通線だけの経路を捨てない", () => {
+    // A→B→C は換算キロ19.8km・営業キロ18kmで150円、幹線直通は19kmで200円。
+    // 距離だけで比べると幹線の状態が地方交通線の状態を支配して消し、200円になる
+    const result = findReachable(graph, localCalc, "A", 10000);
+    expect(result.find((r) => r.id === "C")?.fare).toBe(150);
+  });
+
+  it("幹線を含む区間は運賃計算キロで幹線の表を引く", () => {
+    // A→B→C→D は換算キロ19.8km＋幹線5km＝24.8km → 幹線の表で300円
+    // （A→C 幹線19km＋5km＝24kmも300円）
+    const result = findReachable(graph, localCalc, "A", 10000);
+    expect(result.find((r) => r.id === "D")?.fare).toBe(300);
+  });
+
+  it("地方交通線の表で予算内になる駅は到達できる", () => {
+    const found = findReachable(graph, localCalc, "A", 150).map((s) => s.id);
+    expect(found).toContain("C");
+  });
+});

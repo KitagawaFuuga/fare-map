@@ -1,4 +1,4 @@
-import type { FareOverride, FareRule } from "@/lib/fare/types";
+import type { FareOverride, FareRule, FareZone } from "@/lib/fare/types";
 
 // この3社をまたぐ乗車だけ、会社境界で分割せず通し運賃で計算する（docs/search-design.md）
 export const HONSHU_OPERATORS = new Set(["JR東日本", "JR東海", "JR西日本"]);
@@ -21,6 +21,10 @@ export interface FareCalculator {
   // stationName がその事業者の override 駅ペアに登場するか。
   // 探索はこれで状態をマージしてよいか判定する（docs/search-design.md）
   isOverrideAnchor(operator: string, stationName: string | undefined): boolean;
+  // stationName が属する区間運賃（data/fare-zones.json）の id。無ければ undefined。
+  // 区間内の起点からの運賃は着駅しだいで区間の表になるので、探索は区間外の起点と
+  // 状態をまとめてはいけない（lib/search/reachable.ts の originBucketKey）
+  zoneOf(operator: string, stationName: string | undefined): string | undefined;
   // 通し運賃 = 基準額(総営業キロ) + 加算額(eastKm)。eastKm は呼び出し側が
   // 東京〜熱海の特例を適用した後の値を渡す（docs/search-design.md）
   estimateHonshuThrough(totalKm: number, eastKm: number): number;
@@ -36,6 +40,7 @@ function pairKey(a: string, b: string): string {
 export function createFareCalculator(
   rules: FareRule[],
   overrides?: FareOverride[],
+  zones?: FareZone[],
 ): FareCalculator {
   const byOperator = new Map<string, FareRule>();
   let fallback: FareRule | undefined;
@@ -77,9 +82,29 @@ export function createFareCalculator(
     minOverrideByOperatorStation.set(o.operator, byStation);
   }
 
+  // 事業者ごとの区間運賃。発着の両駅が区間内なら、事業者の表の代わりに引く
+  const zoneByOperator = new Map<
+    string,
+    { zone: FareZone; stations: Set<string> }
+  >();
+  for (const z of zones ?? []) {
+    if (zoneByOperator.has(z.operator))
+      throw new Error(`${z.operator} に区間運賃が2つある（1事業者1区間まで）`);
+    zoneByOperator.set(z.operator, { zone: z, stations: new Set(z.stations) });
+  }
+  const inZone = (operator: string, name: string | undefined) =>
+    name !== undefined &&
+    (zoneByOperator.get(operator)?.stations.has(name) ?? false);
+
   function tableFare(operator: string, km: number): number {
+    return fareFromTable(byOperator.get(operator) ?? fb, km);
+  }
+
+  function fareFromTable(
+    rule: Pick<FareRule, "table" | "beyond">,
+    km: number,
+  ): number {
     if (km <= 0) return 0;
-    const rule = byOperator.get(operator) ?? fb;
     // maxKm 昇順なので「km <= maxKm の最初の行」を二分探索で探せる（昇順は zod が強制）
     const table = rule.table;
     let lo = 0;
@@ -110,10 +135,22 @@ export function createFareCalculator(
           ?.get(pairKey(fromName, toName));
         if (overridden !== undefined) return overridden;
       }
+      const z = zoneByOperator.get(operator);
+      if (
+        z !== undefined &&
+        inZone(operator, fromName) &&
+        inZone(operator, toName)
+      )
+        return fareFromTable(z.zone, km);
       return tableFare(operator, km);
     },
     lowerBound(operator, km, fromName) {
-      const table = tableFare(operator, km);
+      // 発駅が区間内なら、着駅しだいで区間の表（事業者の表以下）になりうる
+      const z = zoneByOperator.get(operator);
+      const table =
+        z !== undefined && inZone(operator, fromName)
+          ? Math.min(fareFromTable(z.zone, km), tableFare(operator, km))
+          : tableFare(operator, km);
       if (fromName !== undefined) {
         const stationMin = minOverrideByOperatorStation
           .get(operator)
@@ -127,6 +164,11 @@ export function createFareCalculator(
       }
       const minOverride = minOverrideByOperator.get(operator) ?? Infinity;
       return Math.min(table, minOverride);
+    },
+    zoneOf(operator, stationName) {
+      return inZone(operator, stationName)
+        ? zoneByOperator.get(operator)?.zone.id
+        : undefined;
     },
     isOverrideAnchor(operator, stationName) {
       if (stationName === undefined) return false;

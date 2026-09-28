@@ -1,7 +1,11 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
 import { createFareCalculator } from "@/lib/fare/calculator";
-import { fareOverrideSchema, fareRuleSchema } from "@/lib/fare/types";
+import {
+  fareOverrideSchema,
+  fareRuleSchema,
+  fareZoneSchema,
+} from "@/lib/fare/types";
 import { buildOperatorKmTable } from "@/lib/graph/operator-distance";
 import type { RailGraph } from "@/lib/graph/types";
 
@@ -31,7 +35,13 @@ const overrides = readdirSync("data/fare-overrides")
       JSON.parse(readFileSync(`data/fare-overrides/${f}`, "utf8")),
     ),
   );
-const calc = createFareCalculator(rules, overrides);
+const zones = (
+  JSON.parse(readFileSync("data/fare-zones.json", "utf8")) as {
+    zones: unknown[];
+  }
+).zones.map((z) => fareZoneSchema.parse(z));
+// 本番（lib/server/graph-store.ts）と同じく、運賃表・特定運賃・区間運賃をすべて渡す
+const calc = createFareCalculator(rules, overrides, zones);
 const graph = JSON.parse(readFileSync("data/graph.json", "utf8")) as RailGraph;
 
 const cache = new Map<string, (a: string, b: string) => number | null>();
@@ -316,18 +326,28 @@ describe("渋谷→浅草（東京メトロ）", () => {
   });
 });
 
-// 照合で見つかったが、まだ直していない誤り。直ったらこのテストが落ちる
-// （it.fails は中の期待が外れているあいだだけ通る）ので、そのとき通常のテストに移す。
-describe("既知の未対応", () => {
-  it.fails(
-    "大阪→和歌山は電車特定区間の運賃表が無いため実額1,300円にならない",
-    () => {
-      // JR西日本は京阪神の「電車特定区間」を2025年4月に拡大し、専用の運賃表を持つ
-      // （71〜80kmは幹線1,340円に対し1,300円）。当方は幹線表だけを引くので40円高く出る。
-      // 出典: JR西日本「京阪神都市圏における運賃体系の見直しについて」(2024-05-15) 別紙1
-      const km = kmOf("JR西日本", true)("大阪", "和歌山");
-      expect(km).not.toBeNull();
-      expect(calc.estimate("JR西日本", km!, "大阪", "和歌山")).toBe(1300);
-    },
-  );
+// JR西日本は京阪神の「電車特定区間」を2025年4月に拡大し、区間内相互の移動には
+// 幹線より安い専用の表を使う（71〜80kmは幹線1,340円に対し1,300円）。照合で
+// 大阪→和歌山が40円高く出ていたのをきっかけに data/fare-zones.json で入れた。
+// 出典: JR西日本「京阪神都市圏における運賃体系の見直しについて」(2024-05-15) 別紙1
+describe("電車特定区間（JR西日本）", () => {
+  it("大阪→和歌山は区間内なので電車特定区間の表で1,300円（幹線なら1,340円）", () => {
+    const km = kmOf("JR西日本", true)("大阪", "和歌山");
+    expect(km).not.toBeNull();
+    expect(calc.estimate("JR西日本", km!, "大阪", "和歌山")).toBe(1300);
+    expect(calc.estimate("JR西日本", km!)).toBe(1340);
+  });
+
+  it("区間外の駅（野洲の隣の篠原）へは幹線の表になる", () => {
+    const km = kmOf("JR西日本", true)("京都", "篠原");
+    expect(km).not.toBeNull();
+    expect(calc.estimate("JR西日本", km!, "京都", "篠原")).toBe(
+      calc.estimate("JR西日本", km!),
+    );
+  });
+
+  it("区間の端の駅（野洲）は区間内、その隣（篠原）は区間外", () => {
+    expect(calc.zoneOf("JR西日本", "野洲")).toBe("jr-west-osaka");
+    expect(calc.zoneOf("JR西日本", "篠原")).toBeUndefined();
+  });
 });

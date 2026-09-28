@@ -310,14 +310,19 @@ function runSearch(
   // （docs/search-design.md「isOverrideAnchor が探索を軽くする理屈」）。
   // 駅名をキーにするのは、同じ物理駅が路線ごとに別ノードIDを持つため。
   // 運賃計算は駅名しか見ないので情報は失われず、bucket 数だけが減る。
+  //
+  // ただし区間運賃（JR西日本の電車特定区間）の区間内の起点は "" に潰せない。
+  // 着駅も区間内なら安い表になるので、同じ距離でも区間外の起点とは将来の運賃が
+  // 違う。区間の表は距離だけで決まるので、区間内の起点どうしは区間 id でまとめてよい。
   const originBucketKey = (
     segmentOperator: string,
     segmentFromId: string,
   ): string => {
     const name = nameOf(segmentFromId);
-    return name !== undefined && calc.isOverrideAnchor(segmentOperator, name)
-      ? name
-      : "";
+    if (name === undefined) return "";
+    if (calc.isOverrideAnchor(segmentOperator, name)) return name;
+    const zone = calc.zoneOf(segmentOperator, name);
+    return zone === undefined ? "" : `zone:${zone}`;
   };
 
   const store: ParetoStore = new Map();

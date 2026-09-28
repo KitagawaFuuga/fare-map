@@ -1626,3 +1626,67 @@ describe("運賃計算キロ (GraphEdge.fareKm)", () => {
     );
   });
 });
+
+// 区間運賃（data/fare-zones.json）。事業者 OpZ の A・B は区間内、C は区間外。
+// 区間内の相互は安い表、区間外が絡むと事業者の表。
+describe("区間運賃", () => {
+  const zoneCalc = createFareCalculator(
+    [
+      {
+        id: "fallback",
+        operators: [],
+        table: [[100, 999]],
+        beyond: { fromKm: 100, baseFare: 999, ratePerKm: 0 },
+      },
+      {
+        id: "opz",
+        operators: ["OpZ"],
+        table: [
+          [10, 200],
+          [20, 400],
+        ],
+        beyond: { fromKm: 20, baseFare: 400, ratePerKm: 20 },
+      },
+    ],
+    [],
+    [
+      {
+        id: "z",
+        operator: "OpZ",
+        stations: ["A", "B"],
+        table: [
+          [10, 150],
+          [20, 300],
+        ],
+        beyond: { fromKm: 20, baseFare: 300, ratePerKm: 15 },
+        source: { url: "", fetchedAt: "", note: "" },
+      },
+    ],
+  );
+  const zNode = (id: string) => ({ ...node(id), operator: "OpZ" });
+  const zoneGraph: RailGraph = {
+    nodes: { A: zNode("A"), B: zNode("B"), C: zNode("C") },
+    edges: [
+      { from: "A", to: "B", km: 10, kind: "rail", operator: "OpZ" },
+      { from: "B", to: "C", km: 5, kind: "rail", operator: "OpZ" },
+    ],
+  };
+
+  it("発着とも区間内なら区間の表、区間外が着駅なら事業者の表で運賃を出す", () => {
+    const result = findReachable(zoneGraph, zoneCalc, "A", 10000);
+    expect(result.find((r) => r.id === "B")?.fare).toBe(150);
+    // A→C は15km。区間外の C が着駅なので事業者の表（20kmまで400円）
+    expect(result.find((r) => r.id === "C")?.fare).toBe(400);
+  });
+
+  it("区間内の起点は、区間外の起点とまとめずに区間 id のキーで分ける", () => {
+    // 起点が特定運賃の駅でなければ、将来の運賃は距離だけで決まるとして "" にまとめる。
+    // 区間内の起点は着駅しだいで安い表になるので、まとめると区間外の起点に支配されて
+    // 消え、安い運賃を取りこぼす。
+    const store = __internalRunSearchForTest(zoneGraph, zoneCalc, "A", 10000);
+    const byFrom = store.get("B")?.get("OpZ");
+    expect(byFrom).toBeDefined();
+    expect([...byFrom!.keys()]).toContain("zone:z");
+    expect([...byFrom!.keys()]).not.toContain("");
+  });
+});

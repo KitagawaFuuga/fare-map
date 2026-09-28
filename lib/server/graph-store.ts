@@ -8,8 +8,10 @@ import {
 import {
   fareOverrideSchema,
   fareRuleSchema,
+  fareZoneSchema,
   type FareOverride,
   type FareRule,
+  type FareZone,
 } from "@/lib/fare/types";
 
 export interface GraphStore {
@@ -21,8 +23,9 @@ export function createGraphStore(
   graph: RailGraph,
   rules: FareRule[],
   overrides?: FareOverride[],
+  zones?: FareZone[],
 ): GraphStore {
-  return { graph, calc: createFareCalculator(rules, overrides) };
+  return { graph, calc: createFareCalculator(rules, overrides, zones) };
 }
 
 // data/graph.json は約3MBあり、読み込みと JSON.parse だけで数百ミリ秒かかる。
@@ -55,7 +58,13 @@ export function getGraphStore(): GraphStore {
           JSON.parse(readFileSync(path.join(overridesDir, f), "utf8")),
         ),
       );
-    cached = createGraphStore(graph, rules, overrides);
+    // 区間運賃（JR西日本の電車特定区間）。発着の両駅が区間内なら事業者の表の代わりに引く
+    const zones = (
+      JSON.parse(
+        readFileSync(path.join(process.cwd(), "data/fare-zones.json"), "utf8"),
+      ) as { zones: unknown[] }
+    ).zones.map((z) => fareZoneSchema.parse(z));
+    cached = createGraphStore(graph, rules, overrides, zones);
   }
   return cached;
 }

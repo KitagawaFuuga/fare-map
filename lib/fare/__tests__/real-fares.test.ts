@@ -8,6 +8,7 @@ import {
 } from "@/lib/fare/types";
 import { buildOperatorKmTable } from "@/lib/graph/operator-distance";
 import type { RailGraph } from "@/lib/graph/types";
+import { findReachable } from "@/lib/search/reachable";
 
 // 実額との層別スポット照合。事業者 × 距離帯 × 線区分（幹線 / 地方交通線）で選んだ
 // 区間を、運賃と営業キロの両方で固定する。
@@ -350,4 +351,56 @@ describe("電車特定区間（JR西日本）", () => {
     expect(calc.zoneOf("JR西日本", "野洲")).toBe("jr-west-osaka");
     expect(calc.zoneOf("JR西日本", "篠原")).toBeUndefined();
   });
+});
+
+// 乗車区間がすべて地方交通線なら、換算キロで幹線の表を引くのではなく、地方交通線の
+// 表（FareRule.localTable）を営業キロで引く。区間が地方交通線だけかは探索が経路に
+// 沿って判定するので、ここは findReachable を丸ごと通して確かめる。
+// どちらも以前の近似（換算キロで幹線の表）では1帯高く出ていた区間。
+// 出典: ekitan.com（2026-09-28取得、乗車券のみ）
+describe("地方交通線だけの区間（探索を通した照合）", () => {
+  const LOCAL_CASES = [
+    {
+      operator: "JR北海道",
+      from: "旭川",
+      to: "富良野",
+      fare: 1380,
+      note: "富良野線54.8km。近似なら換算キロ60.3kmで1,590円",
+    },
+    {
+      // 実際は猪谷〜富山はJR西日本の区間だが、graph.json（駅データ.jp）は高山本線を
+      // 全線JR東海の1路線として持つ。地方交通線の表はJR東海・西日本で同一なので
+      // 運賃は変わらない
+      operator: "JR東海",
+      from: "富山",
+      to: "猪谷",
+      fare: 680,
+      note: "高山本線36.6km。近似なら換算キロ40.3kmで770円",
+    },
+  ];
+
+  it.each(LOCAL_CASES)(
+    "$operator $from→$to は $fare 円（$note）",
+    ({ operator, from, to, fare }) => {
+      const idOf = (name: string) =>
+        Object.values(graph.nodes).find(
+          (n) => n.name === name && n.operator === operator,
+        )?.id;
+      const fromId = idOf(from);
+      const toId = idOf(to);
+      expect(fromId).toBeDefined();
+      expect(toId).toBeDefined();
+      const reached = findReachable(graph, calc, fromId!, fare);
+      const toNames = new Set(
+        Object.values(graph.nodes)
+          .filter((n) => n.name === to && n.operator === operator)
+          .map((n) => n.id),
+      );
+      const best = Math.min(
+        ...reached.filter((r) => toNames.has(r.id)).map((r) => r.fare),
+      );
+      expect(best).toBe(fare);
+    },
+    60000,
+  );
 });

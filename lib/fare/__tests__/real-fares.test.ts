@@ -54,7 +54,7 @@ interface Case {
   note: string;
 }
 
-// 出典はすべて ekitan.com（2026-09-26取得、乗車券のみ・特急料金を含まない）。
+// 出典はすべて ekitan.com（2026-09-26〜28取得、乗車券のみ・特急料金を含まない）。
 // 営業キロも同ページの表示。
 const CASES: Case[] = [
   {
@@ -145,6 +145,118 @@ const CASES: Case[] = [
     fare: 1140,
     note: "大手私鉄の長距離",
   },
+  {
+    operator: "JR東日本",
+    from: "東京",
+    to: "横浜",
+    officialKm: 28.8,
+    fare: 530,
+    note: "幹線の短距離",
+  },
+  {
+    operator: "JR東日本",
+    from: "東京",
+    to: "高崎",
+    officialKm: 105.0,
+    fare: 2090,
+    note: "幹線の100km超。基準額＋加算額で作った表が効く",
+  },
+  {
+    operator: "JR東日本",
+    from: "仙台",
+    to: "石巻",
+    officialKm: 48.5,
+    fare: 910,
+    note: "仙石線",
+  },
+  {
+    operator: "JR東海",
+    from: "名古屋",
+    to: "豊橋",
+    officialKm: 72.4,
+    fare: 1340,
+    note: "東海道本線の幹線",
+  },
+  {
+    operator: "JR北海道",
+    from: "札幌",
+    to: "旭川",
+    officialKm: 136.8,
+    fare: 3080,
+    note: "函館本線の100km超",
+  },
+  {
+    operator: "JR四国",
+    from: "高松",
+    to: "徳島",
+    officialKm: 74.5,
+    fare: 1640,
+    note: "高徳線",
+  },
+  {
+    operator: "JR九州",
+    from: "博多",
+    to: "熊本",
+    officialKm: 118.4,
+    fare: 2420,
+    note: "鹿児島本線の100km超",
+  },
+  {
+    operator: "西武鉄道",
+    from: "西武新宿",
+    to: "本川越",
+    officialKm: 47.5,
+    fare: 600,
+    note: "大手私鉄の中距離",
+  },
+  {
+    operator: "京王電鉄",
+    from: "新宿",
+    to: "京王八王子",
+    officialKm: 37.9,
+    fare: 410,
+    note: "大手私鉄の中距離",
+  },
+  {
+    operator: "東急電鉄",
+    from: "渋谷",
+    to: "横浜",
+    officialKm: 24.2,
+    fare: 310,
+    note: "大手私鉄の短距離",
+  },
+  {
+    operator: "京急電鉄",
+    from: "品川",
+    to: "横浜",
+    officialKm: 22.2,
+    fare: 320,
+    note: "大手私鉄の短距離",
+  },
+  {
+    operator: "京阪電鉄",
+    from: "淀屋橋",
+    to: "三条",
+    officialKm: 49.3,
+    fare: 490,
+    note: "大手私鉄の中距離",
+  },
+  {
+    operator: "阪神電鉄",
+    from: "大阪梅田",
+    to: "神戸三宮",
+    officialKm: 31.2,
+    fare: 330,
+    note: "大手私鉄の短距離",
+  },
+  {
+    operator: "相模鉄道",
+    from: "横浜",
+    to: "海老名",
+    officialKm: 24.6,
+    fare: 330,
+    note: "大手私鉄の短距離",
+  },
 ];
 
 // 距離表は事業者の全駅ぶんをダイクストラで作るので、JR東日本（1,619駅）では数秒かかる。
@@ -192,4 +304,30 @@ describe("岡山→出雲市（JR西日本）", () => {
   it("伯備線経由の距離なら実額どおり4,070円になる（表は正しい）", () => {
     expect(calc.estimate("JR西日本", 220.7)).toBe(4070);
   });
+});
+
+describe("渋谷→浅草（東京メトロ）", () => {
+  it("最短経路の営業キロで計算するので、銀座線直通より短い距離でも実額どおり260円", () => {
+    // ekitan は銀座線直通の14.2kmを表示する。東京メトロの運賃は最も短い経路の
+    // 営業キロで計算し、当方は乗換を使った12.2kmの経路を採る。どちらも12〜19km帯
+    const km = kmOf("東京メトロ", true)("渋谷", "浅草");
+    expect(km).not.toBeNull();
+    expect(calc.estimate("東京メトロ", km!, "渋谷", "浅草")).toBe(260);
+  });
+});
+
+// 照合で見つかったが、まだ直していない誤り。直ったらこのテストが落ちる
+// （it.fails は中の期待が外れているあいだだけ通る）ので、そのとき通常のテストに移す。
+describe("既知の未対応", () => {
+  it.fails(
+    "大阪→和歌山は電車特定区間の運賃表が無いため実額1,300円にならない",
+    () => {
+      // JR西日本は京阪神の「電車特定区間」を2025年4月に拡大し、専用の運賃表を持つ
+      // （71〜80kmは幹線1,340円に対し1,300円）。当方は幹線表だけを引くので40円高く出る。
+      // 出典: JR西日本「京阪神都市圏における運賃体系の見直しについて」(2024-05-15) 別紙1
+      const km = kmOf("JR西日本", true)("大阪", "和歌山");
+      expect(km).not.toBeNull();
+      expect(calc.estimate("JR西日本", km!, "大阪", "和歌山")).toBe(1300);
+    },
+  );
 });

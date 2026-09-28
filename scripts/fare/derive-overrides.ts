@@ -13,15 +13,8 @@
 // 別に検証しているため、特定運賃で覆っても距離表の誤りは隠れない。
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { fareOverrideSchema } from "@/lib/fare/types";
+import { graphNameResolver } from "@/lib/graph/station-name";
 import type { RailGraph } from "@/lib/graph/types";
-
-// 公式の運賃表と graph.json（駅データ.jp）で駅名が食い違うもの。
-// 万葉線の西新湊は2023年9月1日に「第一イン新湊 クロスベイ前」へ改称されたが、
-// グラフ側は旧名のまま（出典: https://www.manyosen.co.jp/season/2023/95103/）。
-// 特定運賃は駅名で引くので、ここを合わせないとそのペアが引けなくなる。
-const STATION_ALIASES: Record<string, string> = {
-  クロスベイ前: "西新湊",
-};
 
 interface FareSource {
   id: string;
@@ -47,21 +40,25 @@ function main(write: boolean, onlyId: string | undefined): void {
       ? fareOverrideSchema.parse(JSON.parse(readFileSync(path, "utf8")))
       : undefined;
 
-    const names = new Set(
+    // 資料側の駅名をグラフ側の表記に直す（改称・全角半角・かっこ書き）。
+    // 特定運賃は駅名で引くので、ここを合わせないとそのペアが引けなくなる
+    const resolve = graphNameResolver(
       Object.values(graph.nodes)
         .filter((n) => n.operator === source.operator)
         .map((n) => n.name),
     );
-    const alias = (n: string) => STATION_ALIASES[n] ?? n;
     const dropped: string[] = [];
-    const pairs = [...source.pairs]
-      .map((p) => ({ from: alias(p.from), to: alias(p.to), fare: p.fare }))
-      .filter((p) => {
+    const pairs = source.pairs
+      .flatMap((p) => {
+        const from = resolve(p.from);
+        const to = resolve(p.to);
         // グラフに無い駅のペアは持てない（引く手段が無く、整合テストも落ちる）。
         // 落とした数は必ず表示する。黙って捨てると改称や新駅に気づけない
-        const ok = names.has(p.from) && names.has(p.to);
-        if (!ok) dropped.push(`${p.from}-${p.to}`);
-        return ok;
+        if (from === undefined || to === undefined) {
+          dropped.push(`${p.from}-${p.to}`);
+          return [];
+        }
+        return [{ from, to, fare: p.fare }];
       })
       .sort((a, b) =>
         a.from === b.from

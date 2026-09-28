@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildNameLookup, matchKey } from "@/lib/graph/station-name";
+import {
+  buildNameLookup,
+  graphNameResolver,
+  matchKey,
+} from "@/lib/graph/station-name";
 
 describe("matchKey", () => {
   it("ヶ と ケ を同じに扱う（箱根ヶ崎 と 箱根ケ崎）", () => {
@@ -45,9 +49,35 @@ describe("buildNameLookup", () => {
     expect(lookup.get(matchKey("押上"))).toBe("押上（スカイツリー前）");
   });
 
+  it("同じ駅名が何度出ても衝突とみなさない（路線ごとに同名のノードがある）", () => {
+    // グラフは同じ駅を路線ぶんのノードで持つので、駅名を配列で渡すと重複する。
+    // 重複を衝突と取り違えると、大阪や京都のような乗換駅ほど引けなくなる
+    const lookup = buildNameLookup(["大阪", "大阪", "京都", "大阪"]);
+    expect(lookup.get(matchKey("大阪"))).toBe("大阪");
+    expect(lookup.get(matchKey("京都"))).toBe("京都");
+  });
+
   it("同じ鍵に2駅以上が当たる場合はその鍵を捨てる", () => {
     // 万一潰れたときに、どちらか一方を黙って選ばない
     const lookup = buildNameLookup(["甲ヶ丘", "甲ケ丘"]);
     expect(lookup.has(matchKey("甲ヶ丘"))).toBe(false);
+  });
+});
+
+describe("graphNameResolver", () => {
+  const resolve = graphNameResolver(["西新湊", "JR総持寺", "ＪＲ難波", "大阪"]);
+
+  it("改称を当てる（クロスベイ前 → 西新湊）", () => {
+    expect(resolve("クロスベイ前")).toBe("西新湊");
+  });
+
+  it("全角・半角の違いを吸収し、グラフ側の表記を返す", () => {
+    // グラフは JR総持寺（半角）と ＪＲ難波（全角）が混在している
+    expect(resolve("ＪＲ総持寺")).toBe("JR総持寺");
+    expect(resolve("JR難波")).toBe("ＪＲ難波");
+  });
+
+  it("グラフに無い駅は undefined", () => {
+    expect(resolve("存在しない駅")).toBeUndefined();
   });
 });

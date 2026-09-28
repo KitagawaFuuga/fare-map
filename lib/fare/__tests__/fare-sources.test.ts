@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createFareCalculator } from "@/lib/fare/calculator";
 import { buildOperatorKmTable } from "@/lib/graph/operator-distance";
+import { graphNameResolver } from "@/lib/graph/station-name";
 import type { RailGraph } from "@/lib/graph/types";
 import {
   fareOverrideSchema,
@@ -42,6 +43,12 @@ const overrides = readAll<unknown>("data/fare-overrides").map((o) =>
 const calc = createFareCalculator(rules, overrides);
 const sources = readAll<FareSource>("data/fare-sources");
 const graph = JSON.parse(readFileSync("data/graph.json", "utf8")) as RailGraph;
+const resolverOf = (operator: string) =>
+  graphNameResolver(
+    Object.values(graph.nodes)
+      .filter((n) => n.operator === operator)
+      .map((n) => n.name),
+  );
 const kmTables = new Map<string, (a: string, b: string) => number | null>();
 const graphKmOf = (operator: string) => {
   const hit = kmTables.get(operator);
@@ -68,8 +75,15 @@ describe("公式運賃表の再現", () => {
   for (const s of sources) {
     describe(`${s.operator} (${s.pairs.length}ペア)`, () => {
       it("全ペアが公式表どおりの運賃になる", () => {
+        const resolve = resolverOf(s.operator);
         const wrong: string[] = [];
-        for (const p of s.pairs) {
+        for (const raw of s.pairs) {
+          // 生成側（scripts/fare/derive-overrides.ts）と同じ規則でグラフの表記に直す
+          const p = {
+            ...raw,
+            from: resolve(raw.from) ?? raw.from,
+            to: resolve(raw.to) ?? raw.to,
+          };
           // km が null のペアは特定運賃でしか引けない。estimate は km<=0 で
           // 即 0 を返すので、正の微小値を渡して override が効くかどうかを見る
           // （override が無ければ距離表の初乗りが返り、公式値と違うので落ちる）
@@ -89,8 +103,14 @@ describe("公式運賃表の再現", () => {
       // ときに覆いが外れてここが落ちる（実際に2026-09-25に29ペアで落ちた）。
       it("graph.json の距離で引いても公式表どおりになる", () => {
         const km = graphKmOf(s.operator);
+        const resolve = resolverOf(s.operator);
         const wrong: string[] = [];
-        for (const p of s.pairs) {
+        for (const raw of s.pairs) {
+          const p = {
+            ...raw,
+            from: resolve(raw.from) ?? raw.from,
+            to: resolve(raw.to) ?? raw.to,
+          };
           const d = km(p.from, p.to);
           if (d === null || d <= 0) continue;
           const got = calc.estimate(s.operator, d, p.from, p.to);

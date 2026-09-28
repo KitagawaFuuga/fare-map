@@ -31,7 +31,8 @@ export function matchKey(name: string): string {
  */
 export function buildNameLookup(names: Iterable<string>): Map<string, string> {
   const byKey = new Map<string, string[]>();
-  for (const name of names) {
+  // 同じ駅名の重複は衝突ではない（グラフは同じ駅を路線ぶんのノードで持つ）ので、先に畳む
+  for (const name of new Set(names)) {
     const key = matchKey(name);
     byKey.set(key, [...(byKey.get(key) ?? []), name]);
   }
@@ -41,4 +42,27 @@ export function buildNameLookup(names: Iterable<string>): Map<string, string> {
     if (found.length === 1 && only !== undefined) lookup.set(key, only);
   }
   return lookup;
+}
+
+// 公式資料とグラフ（駅データ.jp）で駅名そのものが違うもの（改称など）。
+// 表記揺れは matchKey で吸収できるが、別の名前になっているものはここで対応づける。
+// 万葉線の西新湊は2023年9月1日に「第一イン新湊 クロスベイ前」へ改称されたが、
+// グラフ側は旧名のまま（出典: https://www.manyosen.co.jp/season/2023/95103/）。
+export const STATION_RENAMES: Record<string, string> = {
+  クロスベイ前: "西新湊",
+};
+
+/**
+ * 資料側の駅名をグラフ側の表記に直す関数を作る。改称を先に当て、表記揺れは
+ * matchKey で吸収する。グラフに無ければ undefined。
+ *
+ * 特定運賃の生成（scripts/fare/derive-overrides.ts）と、その検証
+ * （lib/fare/__tests__/fare-sources.test.ts）で同じ規則を使うこと。
+ * 片方だけ寄せると、生成された特定運賃をテストが引けなくなる。
+ */
+export function graphNameResolver(
+  names: Iterable<string>,
+): (name: string) => string | undefined {
+  const lookup = buildNameLookup(names);
+  return (name) => lookup.get(matchKey(STATION_RENAMES[name] ?? name));
 }

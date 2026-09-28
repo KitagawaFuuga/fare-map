@@ -10269,7 +10269,7 @@
   ],
   "source": {
     "url": "https://www.mlit.go.jp/common/001625145.pdf, https://www.meitetsu.co.jp/train/ticket_fare/fare/ の各路線の普通旅客運賃加算額表PDF (kasan_chita.pdf / kasan_toyota.pdf / kasan_hashima.pdf / kasan_kuukou.pdf)",
-    "fetchedAt": "2026-09-25",
+    "fetchedAt": "2026-09-28",
     "note": "公式の運賃規則から計算した実額。距離帯表そのままでは引けないペアだけを持つ。擬制キロは graph.json の fareKm に焼いてあるので、ここには含まれない（定義と出典は data/fare-distance-classes.json）。加算運賃は 名鉄知多新線 / 名鉄豊田線 / 名鉄羽島線 / 名鉄空港線（定義と出典は data/fare-surcharges.json）。営業キロは data/graph.json。再生成は npx tsx scripts/fare/ingest/compute-fares.ts --write"
   }
 }

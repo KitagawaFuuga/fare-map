@@ -264,7 +264,7 @@
     {
       "from": "宇治",
       "to": "宇多津",
-      "fare": 4950
+      "fare": 5280
     },
     {
       "from": "宇多津",
@@ -959,7 +959,7 @@
     {
       "from": "宇多津",
       "to": "内名",
-      "fare": 2750
+      "fare": 3190
     },
     {
       "from": "宇多津",
@@ -1699,7 +1699,7 @@
     {
       "from": "紀伊由良",
       "to": "宇多津",
-      "fare": 5830
+      "fare": 6160
     },
     {
       "from": "紀三井寺",
@@ -2549,7 +2549,7 @@
     {
       "from": "山城多賀",
       "to": "宇多津",
-      "fare": 4950
+      "fare": 5280
     },
     {
       "from": "山中渓",
@@ -3734,7 +3734,7 @@
     {
       "from": "大和小泉",
       "to": "宇多津",
-      "fare": 4620
+      "fare": 4950
     },
     {
       "from": "大和新庄",
@@ -4339,7 +4339,7 @@
     {
       "from": "同志社前",
       "to": "宇多津",
-      "fare": 4620
+      "fare": 4950
     },
     {
       "from": "道場",
@@ -4459,7 +4459,7 @@
     {
       "from": "南部",
       "to": "宇多津",
-      "fare": 6490
+      "fare": 6710
     },
     {
       "from": "南矢代",
@@ -4514,7 +4514,7 @@
     {
       "from": "日登",
       "to": "宇多津",
-      "fare": 4180
+      "fare": 4620
     },
     {
       "from": "日本へそ公園",
@@ -5319,7 +5319,7 @@
     {
       "from": "揖屋",
       "to": "宇多津",
-      "fare": 3850
+      "fare": 4180
     },
     {
       "from": "有年",
@@ -5534,7 +5534,7 @@
   ],
   "source": {
     "url": "https://ja.wikipedia.org/wiki/%E5%9C%B0%E6%96%B9%E4%BA%A4%E9%80%9A%E7%B7%9A, https://jr-group.jp/shikoku-fare/",
-    "fetchedAt": "2026-09-25",
+    "fetchedAt": "2026-09-28",
     "note": "公式の運賃規則から計算した実額。距離帯表そのままでは引けないペアだけを持つ。擬制キロは graph.json の fareKm に焼いてあるので、ここには含まれない（定義と出典は data/fare-distance-classes.json）。加算運賃は 瀬戸大橋線（定義と出典は data/fare-surcharges.json）。営業キロは data/graph.json。再生成は npx tsx scripts/fare/ingest/compute-fares.ts --write"
   }
 }

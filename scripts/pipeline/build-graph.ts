@@ -14,6 +14,7 @@ import {
   applyStationKm,
   type StationKmEdge,
 } from "@/lib/graph/apply-station-km";
+import { fillFromRealChains } from "@/lib/graph/fill-from-chains";
 import {
   buildKilometrageFix,
   kilometrageCorrectionsSchema,
@@ -123,6 +124,28 @@ if (existsSync("data/station-km.json")) {
     process.stdout.write(
       `  差が大きい: ${w.from}–${w.to} ${w.before.toFixed(2)} → ${w.after.toFixed(2)}km
 `,
+    );
+  }
+
+  // 駅を飛ばす運転系統の辺（JR宝塚線の大阪-尼崎など）は station-km が当たらず、
+  // 直線距離ベースの短い推定が残る。実営業キロの辺だけで両端を結べるなら、
+  // その長さで置き換える（lib/graph/fill-from-chains.ts）。1.3倍は、同じ線路を
+  // 飛ばしているだけなら長さがほぼ変わらないことからの上限
+  const filled = fillFromRealChains(graph, stationKm.edges, { maxRatio: 1.3 });
+  process.stdout.write(
+    `飛ばし辺: ${filled.replaced} エッジを実営業キロの経路長で置き換え` +
+      `（長くなった合計 ${filled.totalDelta.toFixed(1)}km）、` +
+      `遠回りで使わなかった ${filled.skippedDetour}\n`,
+  );
+  for (const d of filled.detours.slice(0, 5)) {
+    process.stdout.write(
+      `  遠回り: ${d.from}–${d.to} 推定${d.km.toFixed(2)} / つなぐと${d.chain.toFixed(2)}km
+`,
+    );
+  }
+  for (const w of filled.worst.slice(0, 5)) {
+    process.stdout.write(
+      `  差が大きい: ${w.from}–${w.to} ${w.before.toFixed(2)} → ${w.after.toFixed(2)}km\n`,
     );
   }
 }

@@ -123,6 +123,14 @@ describe("extractStationKm", () => {
     expect(r.edgeKm.get(edgeKey("丙", "丁"))).toBeCloseTo(2.5);
   });
 
+  it("英字と数字の間が空白の駅ナンバリングも落とす（「JO 19 東京駅」）", () => {
+    // JR東日本の路線図は「JO 19」の形。落とせないと番号付きの駅だけが漏れ、
+    // 番号の無い支線の駅と遠くの駅が隣り合った並びになる（総武本線で
+    // 「御茶ノ水 4.3」と「南酒々井 59.3」がつながり、55kmの駅間が出ていた）
+    expect(normalizeStationName("JO 19 東京駅")).toBe("東京");
+    expect(normalizeStationName("JO 28 千葉駅 (II)")).toBe("千葉");
+  });
+
   it("空白で区切られていなければ駅ナンバリングとみなさない", () => {
     // 落とすのは「英数字＋空白」で始まる形だけ。駅名の一部を削ってはいけない
     expect(normalizeStationName("A-01 甲駅")).toBe("甲");
@@ -210,6 +218,43 @@ describe("extractStationKm", () => {
       sections,
     });
     expect(r.edgeKm.get(edgeKey("丁", "戊"))).toBeCloseTo(5.5);
+  });
+
+  // 環状線の記事は、路線図（品川起点で1周）と駅一覧（東京起点で1周）で起点が違う。
+  // 先に採った表の値で、1周のつなぎ目をまたぐ駅ペアが「遠回り側」の距離で正解に
+  // 入るため、後の表はその全ペアで食い違って棄却される。記事の並び順で先に来た
+  // 表を採ると、区間キロとの一致が多い駅一覧のほうを落とす（山手線で起きた）
+  it("区間キロとの一致が多い表を、並び順より先に採用する", () => {
+    const loopFrom丙 = [
+      ["駅名", "累計"],
+      ["丙駅", "0.0"],
+      ["丁駅", "2.5"],
+      ["戊駅", "4.5"],
+      ["甲駅", "9.5"],
+      ["乙駅", "12.5"],
+    ];
+    const loopFrom甲 = [
+      ["駅名", "累計"],
+      ["甲駅", "0.0"],
+      ["乙駅", "3.0"],
+      ["丙駅", "7.5"],
+      ["丁駅", "10.0"],
+      ["戊駅", "12.0"],
+      ["己駅", "14.0"],
+    ];
+    const r = extractStationKm([loopFrom丙, loopFrom甲], {
+      stationNames: new Set([...names, "戊", "己"]),
+      sections: [
+        { from: "甲", to: "乙", officialKm: 3.0 },
+        { from: "乙", to: "丙", officialKm: 4.5 },
+        { from: "丙", to: "丁", officialKm: 2.5 },
+        { from: "丁", to: "戊", officialKm: 2.0 },
+        { from: "戊", to: "甲", officialKm: 5.0 },
+        { from: "丙", to: "戊", officialKm: 4.5 },
+        { from: "戊", to: "己", officialKm: 2.0 },
+      ],
+    });
+    expect(r.edgeKm.get(edgeKey("戊", "己"))).toBeCloseTo(2.0);
   });
 
   it("採用済みの表と重なるが値が食い違う表は採らない", () => {
@@ -373,6 +418,46 @@ describe("extractStationKm: 降順の累計も読む", () => {
     expect(r.edgeKm.get(edgeKey("甲", "乙"))).toBeCloseTo(3.0);
     expect(r.edgeKm.get(edgeKey("乙", "丙"))).toBeCloseTo(4.5);
     expect(r.edgeKm.get(edgeKey("丙", "丁"))).toBeCloseTo(2.5);
+  });
+
+  it("2つの累計がくっついたセルは先頭の累計を読む（「49.535.3*」は49.5）", () => {
+    // 路線図の表は分岐駅で本線と支線の累計を1セルに並べ、先頭が本線側になる
+    // （函館本線の森駅は本線49.5・砂原支線35.3、桑園駅は1.6と札沼線の0.0）。
+    // 数字として先頭から読むと49.535になり、東森–森が16.03kmに化けた。
+    // 読まずに捨てると、分岐駅（桑園）が並びから抜けて前後が直結する
+    const glued = [
+      ["駅名", "累計"],
+      ["甲駅", "0.0"],
+      ["乙駅", "3.0"],
+      ["丙駅", "7.52.0*"],
+      ["丁駅", "10.0"],
+    ];
+    const r = extractStationKm([glued], {
+      stationNames: names,
+      sections: [{ from: "甲", to: "丁", officialKm: 10.0 }],
+    });
+    expect(r.edgeKm.get(edgeKey("乙", "丙"))).toBeCloseTo(4.5);
+    expect(r.edgeKm.get(edgeKey("丙", "丁"))).toBeCloseTo(2.5);
+  });
+
+  it("「*」の付いた累計（支線の起点から）は本線の並びに混ぜない", () => {
+    // 路線図の表は支線の駅に支線の起点からの累計を「33.5*」の形で書く。
+    // 本線の累計と一緒に読むと、支線の駅と本線の駅が隣り合って見える
+    // （函館本線の東森33.5*と森49.5で、東森–森が16.0kmになった。実際は1.8km）
+    const branch = [
+      ["駅名", "累計"],
+      ["甲駅", "0.0"],
+      ["乙駅", "3.0"],
+      ["戊駅", "1.5*"],
+      ["丙駅", "7.5"],
+      ["丁駅", "10.0"],
+    ];
+    const r = extractStationKm([branch], {
+      stationNames: new Set([...names, "戊"]),
+      sections: [{ from: "甲", to: "丁", officialKm: 10.0 }],
+    });
+    expect(r.edgeKm.get(edgeKey("乙", "丙"))).toBeCloseTo(4.5);
+    expect(r.edgeKm.has(edgeKey("戊", "丙"))).toBe(false);
   });
 
   it("上下する列（駅間）は降順としても読まない", () => {

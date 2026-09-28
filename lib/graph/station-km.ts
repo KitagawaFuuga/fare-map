@@ -70,8 +70,9 @@ export function normalizeStationName(raw: string): string {
   // 路線図テンプレートの表は駅名セルの頭に駅ナンバリングを置く
   // （東京メトロ有楽町線は「Y-01 和光市駅」）。英字1〜3＋任意のハイフン＋数字が
   // 空白で区切られて先頭にある形だけを落とす。駅名そのものがこの形になることは
-  // 無い（「Ｂ６」のような駅名は全角で、空白でも区切られない）
-  const stationNumber = /^[A-Za-z]{1,3}[-‐–]?[0-9]{1,3}[\s　]+(?=.)/u;
+  // 無い（「Ｂ６」のような駅名は全角で、空白でも区切られない）。
+  // JR東日本は英字と数字の間も空白（「JO 19 東京駅」）
+  const stationNumber = /^[A-Za-z]{1,3}[-‐–\s　]?[0-9]{1,3}[\s　]+(?=.)/u;
   return raw
     .replace(/\[[^\]]*\]/g, "")
     .replace(stationNumber, "")
@@ -86,7 +87,16 @@ export function normalizeStationName(raw: string): string {
 }
 
 function numberIn(cell: string): number | null {
-  const m = /-?\d+(?:\.\d+)?/.exec(cell.replace(/,/g, ""));
+  const text = cell.replace(/,/g, "");
+  // 路線図の表は分岐駅で本線と支線の累計を1セルに並べ、先頭が本線側になる
+  // （函館本線の森駅は「49.535.3*」＝49.5と35.3、桑園駅は「1.60.0」）。
+  // 区切りが無いので、営業キロが小数1桁であることを使って先頭を切り出す。
+  // 読まずに捨てると分岐駅が並びから抜け、前後の駅が直結してしまう
+  const glued = /(-?\d+\.\d)\d+\.\d/.exec(text);
+  if (glued !== null) return Number(glued[1]);
+  // 「33.5*」は支線の起点からの累計。本線の累計と同じ並びに入れると、支線の駅と
+  // 本線の駅が隣り合って見える（函館本線の東森–森が16.0kmになった。実際は1.8km）
+  const m = /-?\d+(?:\.\d+)?(?!\d|\.\d|\s*\*)/.exec(text);
   if (m === null) return null;
   const n = Number(m[0]);
   return Number.isFinite(n) ? n : null;
@@ -257,57 +267,55 @@ export function extractStationKm(
   }
 
   const pending = new Set(tables.keys());
-  // 伝播するので、1周では決まらない。何も採用できなくなるまで回す
-  for (let round = 0; round < tables.length + 1 && pending.size > 0; round++) {
-    let acceptedThisRound = 0;
-    for (const tableIndex of [...pending]) {
+  // 1つ採るたびに正解が増えるので、残りの表を全部測り直し、区間キロとの一致が
+  // 最多の表から採る。記事の並び順で採ると、環状線では起点の違う路線図が駅一覧より
+  // 先に入り、1周のつなぎ目をまたぐ駅ペアが遠回り側の距離で正解に載って、駅一覧の
+  // ほうが食い違いだらけで棄却される（山手線の渋谷・原宿・大崎まわりが漏れた）
+  while (pending.size > 0) {
+    let pick: {
+      tableIndex: number;
+      chain: Chain;
+      matched: number;
+      contradicted: Set<string>;
+    } | null = null;
+    for (const tableIndex of pending) {
       const table = tables[tableIndex];
-      if (table === undefined) {
-        pending.delete(tableIndex);
-        continue;
-      }
+      if (table === undefined) continue;
       const width = Math.max(0, ...table.map((r) => r.length));
       // 1つの表の中で複数の列が通ることがある（累計が2本ある表）。
       // 差はどちらも同じなので、説明できた組が最多の列を1本だけ採る。
-      let best: {
-        chain: Chain;
-        matched: number;
-        contradicted: Set<string>;
-      } | null = null;
       for (let column = 0; column < width; column++) {
         const chain = readChain(table, column, lookup, tableIndex);
         if (chain === null) continue;
         const { matched, contradicted } = scoreChain(chain, known, tolerance);
         if (matched === 0) continue;
         if (matched < contradicted.size * MATCH_RATIO) continue;
-        if (best === null || matched > best.matched)
-          best = { chain, matched, contradicted };
-      }
-      if (best === null) continue;
-
-      pending.delete(tableIndex);
-      acceptedThisRound++;
-      result.accepted.push({
-        table: tableIndex,
-        column: best.chain.column,
-        matched: best.matched,
-        contradicted: best.contradicted.size,
-      });
-      addKnownPairs(best.chain, known);
-      const points = best.chain.points;
-      for (let i = 1; i < points.length; i++) {
-        const prev = points[i - 1];
-        const cur = points[i];
-        if (prev === undefined || cur === undefined) continue;
-        const key = edgeKey(prev.station, cur.station);
-        const km = Number((cur.km - prev.km).toFixed(2));
-        // 食い違ったペアは出さない（環状線の遠回りなど、路線に沿った距離が
-        // 公表営業キロと違う区間）。先に入ったほうを残す
-        if (best.contradicted.has(key)) continue;
-        if (!result.edgeKm.has(key)) result.edgeKm.set(key, km);
+        if (pick === null || matched > pick.matched)
+          pick = { tableIndex, chain, matched, contradicted };
       }
     }
-    if (acceptedThisRound === 0) break;
+    if (pick === null) break;
+
+    pending.delete(pick.tableIndex);
+    result.accepted.push({
+      table: pick.tableIndex,
+      column: pick.chain.column,
+      matched: pick.matched,
+      contradicted: pick.contradicted.size,
+    });
+    addKnownPairs(pick.chain, known);
+    const points = pick.chain.points;
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1];
+      const cur = points[i];
+      if (prev === undefined || cur === undefined) continue;
+      const key = edgeKey(prev.station, cur.station);
+      const km = Number((cur.km - prev.km).toFixed(2));
+      // 食い違ったペアは出さない（環状線の遠回りなど、路線に沿った距離が
+      // 公表営業キロと違う区間）。先に入ったほうを残す
+      if (pick.contradicted.has(key)) continue;
+      if (!result.edgeKm.has(key)) result.edgeKm.set(key, km);
+    }
   }
   result.rejected = pending.size;
   return result;

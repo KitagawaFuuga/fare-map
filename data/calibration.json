@@ -726,10 +726,10 @@
     "熊本市交通局": 1.0270629315105246,
     "鹿児島市交通局": 1.013133795473842
   },
-  "fallback": 1.0489172369842856,
+  "fallback": 1.0488844897639715,
   "meta": {
     "source": "https://gtfs-gis.jp/railway_honsu/data/unkohonsu2026_kukan_sjis.csv",
-    "fetchedAt": "2026-09-28T11:02:28.351Z",
+    "fetchedAt": "2026-09-28T12:08:33.668Z",
     "sections": 2148
   }
 }

@@ -160,6 +160,15 @@ const LINE_ALIASES: Record<string, string> = {
   "富山地方鉄道不二越・上滝線": "富山地方鉄道上滝線",
 };
 
+// 駅一覧が複数の記事に分かれている路線。本来の記事に加えて、ここの記事も読む。
+//
+// 総武本線の記事の駅一覧は千葉以東だけで、東京〜千葉は「総武快速線」の記事にある。
+// 東京〜錦糸町（新日本橋・馬喰町）は快速線にしか駅が無いので、読まないと推定値の
+// まま残る。
+const EXTRA_ARTICLES: Record<string, string[]> = {
+  JR総武本線: ["総武快速線"],
+};
+
 // 記事名の候補を、試す順に返す。
 //
 // 1つに決められない。記事名は正式路線名（富山地方鉄道本線）だが graph の
@@ -392,6 +401,13 @@ async function main(): Promise<void> {
           (x) => x.titles[0] === l.titles[0] && x.operator === l.operator,
         ) === i,
     );
+
+  // 本来の記事と別に読む記事を、同じ路線の対象として足す
+  for (const target of [...targets]) {
+    for (const extra of EXTRA_ARTICLES[target.lineName] ?? []) {
+      targets.push({ ...target, titles: [extra] });
+    }
+  }
 
   const edges: OutputEdge[] = [];
   const report: string[] = [];

@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { createFareCalculator } from "@/lib/fare/calculator";
 import { fareOverrideSchema, fareRuleSchema } from "@/lib/fare/types";
 import { buildOperatorKmTable } from "@/lib/graph/operator-distance";
@@ -105,7 +105,58 @@ const CASES: Case[] = [
     fare: 1270,
     note: "名古屋本線は擬制率1.00。擬制キロを掛けすぎていないことの確認",
   },
+  {
+    operator: "東武鉄道",
+    from: "浅草",
+    to: "東武日光",
+    officialKm: 135.5,
+    fare: 1400,
+    note: "大手私鉄の長距離",
+  },
+  {
+    operator: "小田急電鉄",
+    from: "新宿",
+    to: "小田原",
+    officialKm: 82.5,
+    fare: 910,
+    note: "記事名の別名（小田急線→小田急小田原線）を入れて80.5km→82.5kmになった区間",
+  },
+  {
+    operator: "南海電鉄",
+    from: "難波",
+    to: "和歌山市",
+    officialKm: 64.2,
+    fare: 970,
+    note: "大手私鉄の中距離",
+  },
+  {
+    operator: "阪急電鉄",
+    from: "大阪梅田",
+    to: "京都河原町",
+    officialKm: 47.7,
+    fare: 410,
+    note: "大手私鉄の中距離",
+  },
+  {
+    operator: "西日本鉄道",
+    from: "西鉄福岡（天神）",
+    to: "大牟田",
+    officialKm: 74.8,
+    fare: 1140,
+    note: "大手私鉄の長距離",
+  },
 ];
+
+// 距離表は事業者の全駅ぶんをダイクストラで作るので、JR東日本（1,619駅）では数秒かかる。
+// 最初のテストで作ると、全体を並列実行したときに既定の5秒を超えて落ちる。
+// 先にまとめて作っておき、個々のテストは引くだけにする。
+beforeAll(() => {
+  for (const c of CASES) {
+    kmOf(c.operator, false);
+    kmOf(c.operator, true);
+  }
+  kmOf("JR西日本", true);
+}, 120_000);
 
 describe.each(CASES)("$from→$to（$operator）", (c) => {
   it(`営業キロが公表の ${c.officialKm}km と合う`, () => {

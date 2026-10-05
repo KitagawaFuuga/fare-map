@@ -165,8 +165,19 @@ const LINE_ALIASES: Record<string, string> = {
 // 総武本線の記事の駅一覧は千葉以東だけで、東京〜千葉は「総武快速線」の記事にある。
 // 東京〜錦糸町（新日本橋・馬喰町）は快速線にしか駅が無いので、読まないと推定値の
 // まま残る。
+// 東海道本線・関西本線（名古屋〜亀山）も同じで、本線の記事には駅一覧が無く、
+// 地区ごとの記事に分かれている。読まないとJR東海の区間の33%が推定値のまま残り、
+// 距離由来の運賃の誤り率がJR東海だけ11%になっていた（scripts/analysis/fare-uncertainty.ts）。
+//
+// キーはかっこ書きを外した路線名（lineName は「JR東海道本線(熱海～浜松)」のように区間付き）。
 const EXTRA_ARTICLES: Record<string, string[]> = {
   JR総武本線: ["総武快速線"],
+  JR東海道本線: [
+    "東海道線 (JR東日本)",
+    "東海道線 (静岡地区)",
+    "東海道線 (名古屋地区)",
+  ],
+  JR関西本線: ["関西線 (名古屋地区)"],
 };
 
 // 記事名の候補を、試す順に返す。
@@ -404,7 +415,8 @@ async function main(): Promise<void> {
 
   // 本来の記事と別に読む記事を、同じ路線の対象として足す
   for (const target of [...targets]) {
-    for (const extra of EXTRA_ARTICLES[target.lineName] ?? []) {
+    const base = target.lineName.replace(/[（(].*/, "").trim();
+    for (const extra of EXTRA_ARTICLES[base] ?? []) {
       targets.push({ ...target, titles: [extra] });
     }
   }

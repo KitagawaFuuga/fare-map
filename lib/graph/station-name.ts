@@ -2,6 +2,7 @@
 //
 // 実例（実営業キロのCSVとグラフで食い違っていたもの）:
 //   ヶ / ケ          箱根ヶ崎・霞ヶ関・姉ヶ崎・櫛ヶ浜・柳ヶ浦・関ヶ原・駒ヶ根
+//   異体字           飛驒 / 飛騨（Wikipedia の記事と駅データ）
 //   全角 / 半角      ＪＲ松山駅前、羽田空港第１・第２ターミナル
 //   かっこ書き       明治神宮前〈原宿〉、押上（スカイツリー前）
 //   末尾の駅         松山市駅
@@ -15,6 +16,10 @@
 export function matchKey(name: string): string {
   const key = name
     .replace(/ヶ/g, "ケ")
+    // 異体字。記事は「飛驒」、駅データは「飛騨」（高山本線の飛騨金山など7駅が漏れていた）
+    .replace(/驒/g, "騨")
+    .replace(/髙/g, "高")
+    .replace(/﨑/g, "崎")
     .replace(/[Ａ-Ｚａ-ｚ０-９]/g, (c) =>
       String.fromCharCode(c.charCodeAt(0) - 0xfee0),
     )

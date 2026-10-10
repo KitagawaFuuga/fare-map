@@ -11,6 +11,12 @@ describe("matchKey", () => {
     expect(matchKey("霞ヶ関")).toBe(matchKey("霞ケ関"));
   });
 
+  it("異体字を寄せる（飛驒金山 と 飛騨金山）", () => {
+    // 記事は「驒」、駅データは「騨」。寄せないと高山本線の7区間が推定値のまま残り、
+    // 岐阜〜久々野が公式123.2kmに対し124.2kmになっていた
+    expect(matchKey("飛驒金山")).toBe(matchKey("飛騨金山"));
+  });
+
   it("全角の英数字を半角に寄せる（ＪＲ松山駅前）", () => {
     expect(matchKey("ＪＲ松山駅前")).toBe(matchKey("JR松山駅前"));
     expect(matchKey("羽田空港第１・第２ターミナル")).toBe(

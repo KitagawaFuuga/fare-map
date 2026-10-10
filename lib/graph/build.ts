@@ -15,6 +15,10 @@ export interface OperatorSplit {
   lineId: string;
   from: string; // 分割前の事業者名。実データと食い違えば例外にするための検証用
   to: string;
+  // 駅名を指定すると、その路線のうちこの駅だけを分ける。他社の線路を含めて1路線に
+  // 登録されている直通線用（相鉄・JR直通線は新宿〜武蔵小杉〜羽沢横浜国大がJRの線路）。
+  // 事業者がまたがる駅間には線路を張らない（どちらの運賃で計算するか決まらないため）
+  stations?: string[];
 }
 
 // 元データ(join.csv)に無い駅間接続を補う定義。ekidata は「他社の線路に乗り入れる区間」を
@@ -26,6 +30,27 @@ export interface ExtraJoin {
   lineId: string; // 接続を足す路線。両駅がこの路線に属していることを検証する
   from: string; // station_cd
   to: string;
+}
+
+// 元データ(station.csv)から消えた駅を補う。駅データ.jp の2026年版では、しなの鉄道線
+// （99403）からJR線に乗り入れる篠ノ井〜長野の4駅が消えた。消えたままだと、しなの鉄道の
+// 通し運賃（上田→長野など）が引けず、しなの鉄道とJRの運賃を足した額になる。
+// 同じ駅コードが元データにあれば例外にする。元データが直ったら定義を消すため
+// （extra-joins の「join.csv に既に存在します」と同じ方針）。
+export function mergeExtraStations(
+  stations: Record<string, string>[],
+  extra: Record<string, string>[],
+): Record<string, string>[] {
+  const existing = new Set(stations.map((s) => s.station_cd ?? ""));
+  for (const s of extra) {
+    if (existing.has(s.station_cd ?? "")) {
+      throw new Error(
+        `extra-stations: ${s.station_cd}(${s.station_name}) は station.csv に既に存在します。` +
+          `元データが更新された可能性があるため data/extra-stations.json から削除してください`,
+      );
+    }
+  }
+  return [...stations, ...extra];
 }
 
 // 別駅扱いでも徒歩で乗り換えられるとみなす距離。大きくすると無関係な駅どうしが
@@ -57,6 +82,7 @@ export function buildGraph(
   );
 
   const nodes: Record<string, StationNode> = {};
+  const splitStationsSeen = new Set<string>();
   for (const s of input.stations) {
     const line = lineInfo.get(s.line_cd ?? "");
     if (!line || !s.station_cd) continue;
@@ -77,8 +103,14 @@ export function buildGraph(
             `lineId が振り直された可能性があるため data/operator-splits.json を確認してください`,
         );
       }
-      operator = split.to;
       matched.add(lineId);
+      if (
+        split.stations === undefined ||
+        split.stations.includes(s.station_name ?? "")
+      ) {
+        operator = split.to;
+        splitStationsSeen.add(`${lineId}\u0000${s.station_name ?? ""}`);
+      }
     }
     nodes[s.station_cd] = {
       id: s.station_cd,
@@ -101,6 +133,18 @@ export function buildGraph(
     );
   }
 
+  for (const split of splits) {
+    const missing = (split.stations ?? []).filter(
+      (name) => !splitStationsSeen.has(`${split.lineId}\u0000${name}`),
+    );
+    if (missing.length > 0) {
+      throw new Error(
+        `operator-splits: lineId=${split.lineId} の路線に無い駅が指定されています ` +
+          `(${missing.join(", ")})。data/operator-splits.json を確認してください`,
+      );
+    }
+  }
+
   const edges: GraphEdge[] = [];
   const joined = new Set<string>();
   const joinKey = (a: string, b: string) => (a < b ? `${a}:${b}` : `${b}:${a}`);
@@ -108,6 +152,8 @@ export function buildGraph(
     const a = nodes[j.station_cd1 ?? ""];
     const b = nodes[j.station_cd2 ?? ""];
     if (!a || !b) continue;
+    // 駅を指定した分割で事業者がまたがった駅間。どちらの運賃で計算するか決まらない
+    if (a.operator !== b.operator) continue;
     joined.add(joinKey(a.id, b.id));
     edges.push({
       from: a.id,

@@ -2,6 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { parseCsv } from "@/lib/graph/csv";
 import {
   buildGraph,
+  mergeExtraStations,
   type ExtraJoin,
   type OperatorSplit,
 } from "@/lib/graph/build";
@@ -39,11 +40,18 @@ const extraJoins = (
   }
 ).joins;
 
+// 元データから消えた駅を補う（lib/graph/build.ts の mergeExtraStations）
+const extraStations = (
+  JSON.parse(readFileSync("data/extra-stations.json", "utf8")) as {
+    stations: Record<string, string>[];
+  }
+).stations;
+
 const graph = buildGraph(
   {
     companies: raw("company.csv"),
     lines: raw("line.csv"),
-    stations: raw("station.csv"),
+    stations: mergeExtraStations(raw("station.csv"), extraStations),
     joins: raw("join.csv"),
   },
   splits,

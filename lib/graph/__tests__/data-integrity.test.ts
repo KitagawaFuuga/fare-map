@@ -38,7 +38,12 @@ describe("data/operator-splits.json と graph.json の整合", () => {
   it("定義された路線のノードは分割後の事業者名になっている", () => {
     const wrong: string[] = [];
     for (const s of splits) {
-      const ns = nodes.filter((n) => n.lineId === s.lineId);
+      // 駅を指定した分割（相鉄・JR直通線のJR区間）は、その駅だけが対象
+      const ns = nodes.filter(
+        (n) =>
+          n.lineId === s.lineId &&
+          (s.stations === undefined || s.stations.includes(n.name)),
+      );
       for (const n of ns) {
         if (n.operator !== s.to)
           wrong.push(`${s.lineId} ${n.name}: ${n.operator} (期待 ${s.to})`);

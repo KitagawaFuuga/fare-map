@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildGraph } from "@/lib/graph/build";
+import { buildGraph, mergeExtraStations } from "@/lib/graph/build";
 
 const input = {
   companies: [{ company_cd: "1", company_name: "テスト鉄道" }],
@@ -182,6 +182,54 @@ describe("buildGraph の事業者分割 (operator-splits)", () => {
     ).toThrow(/事業者が想定と違います/);
   });
 
+  // 駅データ.jp の2026年版は相鉄・JR直通線を、JRの区間（新宿〜武蔵小杉〜羽沢横浜国大）まで
+  // 含めて全部相鉄の駅として持つ。JRの区間の駅だけをJRに分ける
+  describe("駅を指定した分割（stations）", () => {
+    const through = {
+      companies: [{ company_cd: "1", company_name: "甲鉄道" }],
+      lines: [{ line_cd: "L1", company_cd: "1", line_name: "直通線" }],
+      stations: ["あ", "い", "う"].map((name, i) => ({
+        station_cd: `S${i + 1}`,
+        station_g_cd: `G${i + 1}`,
+        station_name: name,
+        line_cd: "L1",
+        lon: String(139.7 + i * 0.05),
+        lat: "35.69",
+      })),
+      joins: [
+        { line_cd: "L1", station_cd1: "S1", station_cd2: "S2" },
+        { line_cd: "L1", station_cd1: "S2", station_cd2: "S3" },
+      ],
+    };
+    const split = {
+      lineId: "L1",
+      from: "甲鉄道",
+      to: "乙鉄道",
+      stations: ["あ", "い"],
+    };
+
+    it("指定した駅だけ事業者が置き換わる", () => {
+      const g = buildGraph(through, [split]);
+      expect(g.nodes["S1"]?.operator).toBe("乙鉄道");
+      expect(g.nodes["S2"]?.operator).toBe("乙鉄道");
+      expect(g.nodes["S3"]?.operator).toBe("甲鉄道");
+    });
+
+    it("事業者がまたがる駅間には線路を張らない（どちらの運賃か決まらない）", () => {
+      const rail = buildGraph(through, [split]).edges.filter(
+        (e) => e.kind === "rail",
+      );
+      expect(rail).toHaveLength(1);
+      expect(rail[0]?.operator).toBe("乙鉄道");
+    });
+
+    it("指定した駅がその路線に無ければ例外", () => {
+      expect(() =>
+        buildGraph(through, [{ ...split, stations: ["あ", "ん"] }]),
+      ).toThrow(/路線に無い駅/);
+    });
+  });
+
   it("分割定義が空なら従来どおり（既存の挙動を変えない）", () => {
     const g = buildGraph(twoLines);
     expect(g.nodes["S1"]?.operator).toBe("テスト市交通局");
@@ -246,5 +294,44 @@ describe("buildGraph の駅間接続の補完 (extra-joins)", () => {
     expect(() =>
       buildGraph(input, [], [{ lineId: "L1", from: "S1", to: "S2" }]),
     ).toThrow(/join.csv に既に存在します/);
+  });
+});
+
+// 元データから消えた駅を補う定義。駅データ.jp の2026年版では、しなの鉄道線から
+// JR線に乗り入れる篠ノ井〜長野の4駅が消えた。消えたままだと、しなの鉄道の通し運賃
+// （上田→長野など、data/fare-overrides/shinano.json）が引けなくなる。
+describe("mergeExtraStations (extra-stations)", () => {
+  const extra = {
+    station_cd: "S9",
+    station_g_cd: "G9",
+    station_name: "え駅",
+    line_cd: "L1",
+    lon: "139.80",
+    lat: "35.69",
+  };
+
+  it("元データに無い駅を足す", () => {
+    const merged = mergeExtraStations(input.stations, [extra]);
+    expect(merged.map((s) => s.station_cd)).toEqual(["S1", "S2", "S3", "S9"]);
+  });
+
+  it("足した駅は extra-joins でつなげる", () => {
+    const g = buildGraph(
+      { ...input, stations: mergeExtraStations(input.stations, [extra]) },
+      [],
+      [{ lineId: "L1", from: "S2", to: "S9" }],
+    );
+    expect(g.nodes["S9"]?.name).toBe("え駅");
+    expect(
+      g.edges.some(
+        (e) => e.kind === "rail" && e.from === "S2" && e.to === "S9",
+      ),
+    ).toBe(true);
+  });
+
+  it("元データに同じ駅コードがあれば例外（元データが直ったら定義を消すため）", () => {
+    expect(() =>
+      mergeExtraStations(input.stations, [{ ...extra, station_cd: "S1" }]),
+    ).toThrow(/station.csv に既に存在します/);
   });
 });

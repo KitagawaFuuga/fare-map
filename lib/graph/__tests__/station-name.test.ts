@@ -65,10 +65,15 @@ describe("buildNameLookup", () => {
 });
 
 describe("graphNameResolver", () => {
-  const resolve = graphNameResolver(["西新湊", "JR総持寺", "ＪＲ難波", "大阪"]);
+  const resolve = graphNameResolver([
+    "第一イン新湊 クロスベイ前",
+    "JR総持寺",
+    "ＪＲ難波",
+    "大阪",
+  ]);
 
-  it("改称を当てる（クロスベイ前 → 西新湊）", () => {
-    expect(resolve("クロスベイ前")).toBe("西新湊");
+  it("改称を当てる（クロスベイ前 → 第一イン新湊 クロスベイ前）", () => {
+    expect(resolve("クロスベイ前")).toBe("第一イン新湊 クロスベイ前");
   });
 
   it("全角・半角の違いを吸収し、グラフ側の表記を返す", () => {

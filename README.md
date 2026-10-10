@@ -116,8 +116,10 @@ CI（`.github/workflows/ci.yml`）は push / PR ごとに lint / format:check / 
   タイル配信 [OpenFreeMap](https://openfreemap.org/)
 - 駅・路線データ（`data/graph.json` の駅・路線・接続）:
   [駅データ.jp](https://ekidata.jp/)（[利用規約](https://ekidata.jp/agreement.php)）。
-  第5条により加工可、第6条により加工済みデータの第三者提供可。取得は再配布ミラー
-  [ny-a/ekidata](https://github.com/ny-a/ekidata) 経由。
+  第5条により加工可、第6条により加工済みデータの第三者提供可。本家の会員ダウンロード
+  （無料・要ログイン）で取得した CSV を `data/raw/` に置き、`npm run pipeline:fetch` で
+  正式な名前にそろえる（現在は2026年版。以前使っていたミラー ny-a/ekidata は2021年で更新停止）。
+  しなの鉄道の篠ノ井〜長野の4駅は2026年版に無いため、2021年版の行を `data/extra-stations.json` で補っている。
 - 実営業キロ（`data/calibration.json`、および `graph.json` の `km` への距離補正）:
   [全国鉄道運行本数データ](https://gtfs-gis.jp/railway_honsu/) / CC BY 4.0。
 - 運賃表・特定運賃（`data/fare-rules`、`data/fare-overrides`）: 各鉄道事業者が公表する

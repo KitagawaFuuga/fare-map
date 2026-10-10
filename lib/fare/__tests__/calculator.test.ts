@@ -31,6 +31,7 @@ import hiroshimaDentetsu from "@/data/fare-rules/hiroshima-dentetsu.json";
 import keio from "@/data/fare-rules/keio.json";
 import keikyu from "@/data/fare-rules/keikyu.json";
 import keisei from "@/data/fare-rules/keisei.json";
+import keiseiMatsudo from "@/data/fare-rules/keisei-matsudo.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -90,6 +91,7 @@ import jrKyushuComputedOverride from "@/data/fare-overrides/jr-kyushu-computed.j
 import jrWestSetoComputedOverride from "@/data/fare-overrides/jr-west-seto-computed.json";
 import kintetsuComputedOverride from "@/data/fare-overrides/kintetsu-computed.json";
 import meitetsuComputedOverride from "@/data/fare-overrides/meitetsu-computed.json";
+import nankaiComputedOverride from "@/data/fare-overrides/nankai-computed.json";
 
 const rules = [
   jrEast,
@@ -118,6 +120,7 @@ const rules = [
   keio,
   keikyu,
   keisei,
+  keiseiMatsudo,
   keihan,
   tokyu,
   odakyu,
@@ -176,6 +179,7 @@ const overrides = [
   jrKyushuComputedOverride,
   jrWestSetoComputedOverride,
   kintetsuComputedOverride,
+  nankaiComputedOverride,
   meitetsuComputedOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地方鉄道・しなの鉄道の距離表は枝刈りの下界専用で、公表営業キロではなく

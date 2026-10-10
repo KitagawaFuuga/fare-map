@@ -46,10 +46,11 @@ export function buildNameLookup(names: Iterable<string>): Map<string, string> {
 
 // 公式資料とグラフ（駅データ.jp）で駅名そのものが違うもの（改称など）。
 // 表記揺れは matchKey で吸収できるが、別の名前になっているものはここで対応づける。
-// 万葉線の西新湊は2023年9月1日に「第一イン新湊 クロスベイ前」へ改称されたが、
-// グラフ側は旧名のまま（出典: https://www.manyosen.co.jp/season/2023/95103/）。
+// 万葉線の西新湊は2023年9月1日に「第一イン新湊 クロスベイ前」へ改称された
+// （出典: https://www.manyosen.co.jp/season/2023/95103/）。運賃表は略して「クロスベイ前」と書く。
+// 駅データ.jp の2026年版でグラフ側も新しい名前になった。
 export const STATION_RENAMES: Record<string, string> = {
-  クロスベイ前: "西新湊",
+  クロスベイ前: "第一イン新湊 クロスベイ前",
 };
 
 /**

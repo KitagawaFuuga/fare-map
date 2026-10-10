@@ -83,6 +83,11 @@
     },
     {
       "from": "りんくう常滑",
+      "to": "加木屋中ノ池",
+      "fare": 600
+    },
+    {
+      "from": "りんくう常滑",
       "to": "可児川",
       "fare": 1530
     },
@@ -374,7 +379,7 @@
     {
       "from": "りんくう常滑",
       "to": "須賀",
-      "fare": 1460
+      "fare": 1410
     },
     {
       "from": "りんくう常滑",
@@ -494,7 +499,7 @@
     {
       "from": "りんくう常滑",
       "to": "中部国際空港",
-      "fare": 230
+      "fare": 260
     },
     {
       "from": "りんくう常滑",
@@ -709,7 +714,7 @@
     {
       "from": "りんくう常滑",
       "to": "柳津",
-      "fare": 1410
+      "fare": 1350
     },
     {
       "from": "りんくう常滑",
@@ -719,7 +724,7 @@
     {
       "from": "りんくう常滑",
       "to": "六輪",
-      "fare": 1300
+      "fare": 1220
     },
     {
       "from": "りんくう常滑",
@@ -1254,7 +1259,7 @@
     {
       "from": "加納",
       "to": "りんくう常滑",
-      "fare": 1410
+      "fare": 1350
     },
     {
       "from": "加納",
@@ -1290,6 +1295,36 @@
       "from": "加納",
       "to": "野間",
       "fare": 1610
+    },
+    {
+      "from": "加木屋中ノ池",
+      "to": "上野間",
+      "fare": 670
+    },
+    {
+      "from": "加木屋中ノ池",
+      "to": "新羽島",
+      "fare": 1300
+    },
+    {
+      "from": "加木屋中ノ池",
+      "to": "知多奥田",
+      "fare": 740
+    },
+    {
+      "from": "加木屋中ノ池",
+      "to": "内海",
+      "fare": 820
+    },
+    {
+      "from": "加木屋中ノ池",
+      "to": "美浜緑苑",
+      "fare": 670
+    },
+    {
+      "from": "加木屋中ノ池",
+      "to": "野間",
+      "fare": 750
     },
     {
       "from": "可児川",
@@ -2609,7 +2644,7 @@
     {
       "from": "三河鹿島",
       "to": "りんくう常滑",
-      "fare": 1740
+      "fare": 1730
     },
     {
       "from": "三河鹿島",
@@ -3244,7 +3279,7 @@
     {
       "from": "上挙母",
       "to": "りんくう常滑",
-      "fare": 1410
+      "fare": 1350
     },
     {
       "from": "上挙母",
@@ -5858,6 +5893,11 @@
     },
     {
       "from": "中部国際空港",
+      "to": "加木屋中ノ池",
+      "fare": 650
+    },
+    {
+      "from": "中部国際空港",
       "to": "可児川",
       "fare": 1630
     },
@@ -6749,7 +6789,7 @@
     {
       "from": "東枇杷島",
       "to": "りんくう常滑",
-      "fare": 930
+      "fare": 860
     },
     {
       "from": "東枇杷島",
@@ -7339,7 +7379,7 @@
     {
       "from": "南安城",
       "to": "りんくう常滑",
-      "fare": 1300
+      "fare": 1220
     },
     {
       "from": "南安城",
@@ -10269,7 +10309,7 @@
   ],
   "source": {
     "url": "https://www.mlit.go.jp/common/001625145.pdf, https://www.meitetsu.co.jp/train/ticket_fare/fare/ の各路線の普通旅客運賃加算額表PDF (kasan_chita.pdf / kasan_toyota.pdf / kasan_hashima.pdf / kasan_kuukou.pdf)",
-    "fetchedAt": "2026-10-05",
-    "note": "公式の運賃規則から計算した実額。距離帯表そのままでは引けないペアだけを持つ。擬制キロは graph.json の fareKm に焼いてあるので、ここには含まれない（定義と出典は data/fare-distance-classes.json）。加算運賃は 名鉄知多新線 / 名鉄豊田線 / 名鉄羽島線 / 名鉄空港線（定義と出典は data/fare-surcharges.json）。営業キロは data/graph.json。再生成は npx tsx scripts/fare/ingest/compute-fares.ts --write"
+    "fetchedAt": "2026-10-10",
+    "note": "公式の運賃規則から計算した実額。距離帯表そのままでは引けないペアだけを持つ。擬制キロは graph.json の fareKm に焼いてあるので、ここには含まれない（定義と出典は data/fare-distance-classes.json）。加算運賃は 名鉄知多新線 / 名鉄豊田線 / 名鉄羽島線 / 名鉄常滑・空港線（定義と出典は data/fare-surcharges.json）。営業キロは data/graph.json。再生成は npx tsx scripts/fare/ingest/compute-fares.ts --write"
   }
 }

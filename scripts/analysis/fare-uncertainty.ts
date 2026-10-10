@@ -14,6 +14,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { parseCsv } from "@/lib/graph/csv";
 import {
   buildGraph,
+  mergeExtraStations,
   type ExtraJoin,
   type OperatorSplit,
 } from "@/lib/graph/build";
@@ -73,7 +74,15 @@ const base = buildGraph(
   {
     companies: raw("company.csv"),
     lines: raw("line.csv"),
-    stations: raw("station.csv"),
+    // グラフ生成（build-graph.ts）と同じく、元データから消えた駅を補う
+    stations: mergeExtraStations(
+      raw("station.csv"),
+      (
+        JSON.parse(readFileSync("data/extra-stations.json", "utf8")) as {
+          stations: Record<string, string>[];
+        }
+      ).stations,
+    ),
     joins: raw("join.csv"),
   },
   splits,

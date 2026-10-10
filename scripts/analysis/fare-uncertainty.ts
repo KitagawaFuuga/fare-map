@@ -27,6 +27,7 @@ import {
   fareZoneSchema,
 } from "@/lib/fare/types";
 import type { RailGraph } from "@/lib/graph/types";
+import { stationGroupsOf } from "./station-groups";
 
 const arg = (name: string, fallback: number) => {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
@@ -151,14 +152,17 @@ interface Edge {
 // 事業者の中だけで完結する経路の運賃。最短経路は運賃計算キロで取り、地方交通線だけで
 // 行ける経路は別に営業キロで取って、安いほうを採る（探索と同じ扱い）
 function buildOperator(op: string) {
+  // 同名の別駅をつなげないよう、乗換でつながったノードだけを1駅にまとめる
+  const groupOf = stationGroupsOf(graph, op);
   const names: string[] = [];
   const index = new Map<string, number>();
-  const idOf = (name: string) => {
-    let i = index.get(name);
+  const idOf = (nodeId: string) => {
+    const key = groupOf(nodeId);
+    let i = index.get(key);
     if (i === undefined) {
       i = names.length;
-      names.push(name);
-      index.set(name, i);
+      names.push(graph.nodes[nodeId]!.name);
+      index.set(key, i);
     }
     return i;
   };
@@ -167,8 +171,8 @@ function buildOperator(op: string) {
   let estimatedCount = 0;
   for (const e of graph.edges) {
     if (e.kind !== "rail" || e.operator !== op) continue;
-    const a = idOf(graph.nodes[e.from]!.name);
-    const b = idOf(graph.nodes[e.to]!.name);
+    const a = idOf(e.from);
+    const b = idOf(e.to);
     if (a === b) continue;
     const est = estimate.get(pairKey(op, names[a]!, names[b]!));
     const estimated = est !== undefined && Math.abs(est - e.km) < 1e-6;

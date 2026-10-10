@@ -48,3 +48,29 @@ export function buildKilometrageFix(
     return Math.abs(hit.csvKm - km) < 1e-9 ? hit.officialKm : km;
   };
 }
+
+// 駅一覧の表から読んだ駅間キロ（data/station-km.json）の訂正。表の構造のせいで誤った値を
+// 読み、一致の検査でも弾けなかったものだけを、一次資料の値に差し替える。
+// 実例: 予讃線の表は累計の列の途中から「伊予長浜経由」の値に切り替わり、新谷（内子経由の
+// 237.3）と伊予大洲（伊予長浜経由の249.5）の差12.2kmを駅間として読んでいた（正しくは5.9km）。
+// 抽出した値（extractedKm）を一致条件に入れて、記事や読み取りが変われば効かなくする。
+export const stationKmCorrectionsSchema = z.object({
+  corrections: z.array(
+    z.object({
+      operator: z.string(),
+      from: z.string(),
+      to: z.string(),
+      extractedKm: z.number().positive(),
+      officialKm: z.number().positive(),
+      note: z.string(),
+    }),
+  ),
+});
+
+export function buildStationKmFix(
+  corrections: z.infer<typeof stationKmCorrectionsSchema>["corrections"],
+): (operator: string, from: string, to: string, km: number) => number {
+  return buildKilometrageFix(
+    corrections.map((c) => ({ ...c, csvKm: c.extractedKm })),
+  );
+}

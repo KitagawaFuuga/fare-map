@@ -25,6 +25,8 @@ import {
 import { extractStationKm, type KmSection } from "@/lib/graph/station-km";
 import {
   buildKilometrageFix,
+  buildStationKmFix,
+  stationKmCorrectionsSchema,
   kilometrageCorrectionsSchema,
 } from "@/lib/graph/kilometrage";
 import { buildNameLookup, matchKey } from "@/lib/graph/station-name";
@@ -421,6 +423,13 @@ async function main(): Promise<void> {
     }
   }
 
+  // 表の構造のせいで誤って読んだ駅間を一次資料の値に差し替える（data/station-km-corrections.json）
+  const fixStationKm = buildStationKmFix(
+    stationKmCorrectionsSchema.parse(
+      JSON.parse(readFileSync("data/station-km-corrections.json", "utf8")),
+    ).corrections,
+  );
+
   const edges: OutputEdge[] = [];
   const report: string[] = [];
   let missingArticle = 0;
@@ -462,7 +471,7 @@ async function main(): Promise<void> {
         line: target.lineName,
         from,
         to,
-        km,
+        km: fixStationKm(target.operator, from, to, km),
       });
     }
     report.push(

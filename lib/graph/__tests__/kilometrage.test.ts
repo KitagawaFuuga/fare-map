@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseCsv } from "@/lib/graph/csv";
 import {
+  buildStationKmFix,
+  stationKmCorrectionsSchema,
   buildKilometrageFix,
   kilometrageCorrectionsSchema,
 } from "@/lib/graph/kilometrage";
@@ -53,5 +55,47 @@ describe("data/kilometrage-corrections.json", () => {
 
   it("差し替え後の値がCSVの値と同じものは入れない（無意味なので）", () => {
     for (const c of corrections) expect(c.officialKm).not.toBe(c.csvKm);
+  });
+});
+
+describe("data/station-km-corrections.json", () => {
+  const stationKmCorrections = stationKmCorrectionsSchema.parse(
+    JSON.parse(readFileSync("data/station-km-corrections.json", "utf8")),
+  ).corrections;
+  const edges = (
+    JSON.parse(readFileSync("data/station-km.json", "utf8")) as {
+      edges: { operator: string; from: string; to: string; km: number }[];
+    }
+  ).edges;
+
+  // 抽出した値が変わると差し替えが効かなくなる。そのとき気づけるよう、
+  // 差し替え後の値が実際に station-km.json に入っていることを確かめる
+  it.each(
+    stationKmCorrections.map(
+      (c) => [c.operator, c.from, c.to, c.officialKm] as const,
+    ),
+  )("%s %s–%s は %f km になっている", (operator, from, to, officialKm) => {
+    const hit = edges.filter(
+      (e) =>
+        e.operator === operator &&
+        ((e.from === from && e.to === to) || (e.from === to && e.to === from)),
+    );
+    expect(hit.length).toBeGreaterThan(0);
+    for (const e of hit) expect(e.km).toBe(officialKm);
+  });
+
+  it("抽出した値を指定どおりに差し替える", () => {
+    const fix = buildStationKmFix([
+      {
+        operator: "甲",
+        from: "あ",
+        to: "い",
+        extractedKm: 12.2,
+        officialKm: 5.9,
+        note: "",
+      },
+    ]);
+    expect(fix("甲", "い", "あ", 12.2)).toBe(5.9);
+    expect(fix("甲", "あ", "い", 12.3)).toBe(12.3);
   });
 });

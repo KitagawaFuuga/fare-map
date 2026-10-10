@@ -404,3 +404,61 @@ describe("地方交通線だけの区間（探索を通した照合）", () => {
     60000,
   );
 });
+
+// JR各社から無作為に選んだ18組を ekitan と照合して見つかった誤り（2026-10-10）。
+// 照合先の運賃は最速経路のものなので、同じ経路で営業キロをそろえてから比べた。
+describe("無作為照合で見つかった区間（探索を通した照合）", () => {
+  const CASES = [
+    {
+      operator: "JR四国",
+      from: "三加茂",
+      to: "今治",
+      fare: 3630,
+      note: "徳島線（よしの川ブルーライン）を幹線で数えて3,190円になっていた",
+    },
+    {
+      operator: "JR九州",
+      from: "彼杵",
+      to: "下関",
+      fare: 4510,
+      note: "原田線（筑豊本線）を幹線で数えて近道になり4,180円になっていた",
+    },
+    {
+      operator: "JR四国",
+      from: "打井川",
+      to: "松山",
+      fare: 3630,
+      note: "予土線（しまんとグリーンライン）と伊予大洲–新谷の読み誤り",
+    },
+  ];
+
+  it.each(CASES)(
+    "$operator $from→$to は $fare 円（$note）",
+    ({ operator, from, to, fare }) => {
+      const nodes = Object.fromEntries(
+        Object.entries(graph.nodes).filter(([, n]) => n.operator === operator),
+      );
+      // 事業者の中だけで計算する（照合先もJRだけの経路）
+      const sub: RailGraph = {
+        nodes,
+        edges: graph.edges.filter(
+          (e) => nodes[e.from] !== undefined && nodes[e.to] !== undefined,
+        ),
+      };
+      const fromId = Object.values(nodes).find((n) => n.name === from)?.id;
+      expect(fromId).toBeDefined();
+      const toIds = new Set(
+        Object.values(nodes)
+          .filter((n) => n.name === to)
+          .map((n) => n.id),
+      );
+      const best = Math.min(
+        ...findReachable(sub, calc, fromId!, fare + 500)
+          .filter((r) => toIds.has(r.id))
+          .map((r) => r.fare),
+      );
+      expect(best).toBe(fare);
+    },
+    60000,
+  );
+});

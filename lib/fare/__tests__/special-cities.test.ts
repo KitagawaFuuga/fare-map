@@ -209,6 +209,51 @@ describe("特定都区市内とJR本州3社の通し運賃", () => {
     expect(calc.honshuThroughBaseFare(255, "A")).toBeLessThanOrEqual(2500);
     expect(calc.honshuThroughBaseFare(258, "Far1")).toBeLessThanOrEqual(2500);
   });
+
+  // 加算額: 100kmまで100円、200kmまで200円（区域内の5kmが効くと帯が変わる）
+  const kasanSteps: FareRule = {
+    id: "kasan",
+    operators: ["__jr-honshu-kasan"],
+    table: [
+      [100, 100],
+      [200, 200],
+    ],
+    beyond: { fromKm: 200, baseFare: 200, ratePerKm: 0 },
+  };
+
+  it("JR東日本の区域で縮んだ距離は、加算額の距離からも引く", () => {
+    // 名古屋→赤羽で、東京→赤羽の13.2kmを加算額に入れていた（ekitan より80円高い）
+    const c = createFareCalculator(
+      [base, kasanSteps, fallback],
+      [],
+      [],
+      [eastCity],
+    );
+    // A→C の5kmは中心駅までの区域内。JR東日本の区間 105km → 100km
+    expect(c.estimateHonshuThrough(255, 105, "A", "Far1")).toBe(2500 + 100);
+  });
+
+  it("読み替えで距離が伸びても、加算額の距離は増やさない", () => {
+    const c = createFareCalculator(
+      [base, kasanSteps, fallback],
+      [],
+      [],
+      [eastCity],
+    );
+    // 発駅が中心駅より着駅寄り（実際 245km、中心駅から 250km）
+    expect(c.estimateHonshuThrough(245, 100, "A", "Far1")).toBe(2500 + 100);
+  });
+
+  it("JR東日本以外の区域で縮んだ距離は、加算額の距離から引かない", () => {
+    const westCity: SpecialCity = { ...cityX, operator: "JR西日本" };
+    const c = createFareCalculator(
+      [base, kasanSteps, fallback],
+      [],
+      [],
+      [westCity],
+    );
+    expect(c.estimateHonshuThrough(255, 105, "A", "Far1")).toBe(2500 + 200);
+  });
 });
 
 describe("buildSpecialCities", () => {

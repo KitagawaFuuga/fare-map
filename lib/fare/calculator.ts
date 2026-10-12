@@ -10,6 +10,8 @@ const HONSHU_BASE_OPERATOR = "JR東海";
 const HONSHU_KASAN_OPERATOR = "__jr-honshu-kasan";
 // 特定都区市内の区域を事業者ごとにまとめるとき、通し運賃に効く区域のまとまりの名前
 const HONSHU_CITY_GROUP = "__jr-honshu";
+// 加算額の対象になる会社（区域で縮んだ距離を加算額の距離からも引く）
+const EAST_OPERATOR = "JR東日本";
 
 export interface FareCalculator {
   // localKm は区間がすべて地方交通線のときの営業キロ。渡すと地方交通線の表を引く
@@ -202,7 +204,8 @@ export function createFareCalculator(
       ),
     );
 
-  // 特定都区市内の規則で読み替えた距離。適用されなければ undefined。
+  // 特定都区市内の規則で読み替えた距離（km）と、そのうち JR東日本の区域で縮んだ
+  // 距離（eastShrink、通し運賃の加算額の距離から引く）。適用されなければ undefined。
   // 乗車経路は分からないので、中心駅からの距離を「実際の距離から発駅〜中心駅を
   // 引いた値」と「中心駅から着駅までの最短距離」の大きいほうで近似する。
   // 前者は発駅から区域の外へ向かう経路、後者は発駅が中心駅より着駅寄りの場合に合う
@@ -211,7 +214,7 @@ export function createFareCalculator(
     km: number,
     fromName: string | undefined,
     toName: string | undefined,
-  ): number | undefined {
+  ): { km: number; eastShrink: number } | undefined {
     if (km <= (cityReachByGroup.get(group) ?? Infinity)) return undefined;
     const byName = citiesByStation.get(group);
     if (byName === undefined || fromName === undefined || toName === undefined)
@@ -256,9 +259,25 @@ export function createFareCalculator(
         return undefined;
       const fromRadius = origin.city.centerKm.get(fromName) ?? 0;
       const toRadius = dest.city.centerKm.get(toName) ?? 0;
-      return Math.max(km - fromRadius - toRadius, between);
+      const kmBetween = Math.max(km - fromRadius - toRadius, between);
+      // 縮んだ距離のうち、JR東日本の区域の側の分（その側の半径まで）
+      const shrink = Math.max(km - kmBetween, 0);
+      const eastSide =
+        (origin.city.operator === EAST_OPERATOR ? fromRadius : 0) +
+        (dest.city.operator === EAST_OPERATOR ? toRadius : 0);
+      return { km: kmBetween, eastShrink: Math.min(eastSide, shrink) };
     }
-    return origin?.km ?? dest?.km;
+    const applied = origin ?? dest;
+    if (applied === undefined) return undefined;
+    // 読み替えで距離が伸びた分（発駅が中心駅より着駅寄り）は加算額の距離に足さない。
+    // 伸びるのは東京〜品川のような区域内の区間で、加算額の対象とは限らないため
+    return {
+      km: applied.km,
+      eastShrink:
+        applied.city.operator === EAST_OPERATOR
+          ? Math.max(km - applied.km, 0)
+          : 0,
+    };
   }
 
   // 下界用。読み替えで距離が縮んでも、この距離より短くはならない。区域が無ければ
@@ -403,8 +422,8 @@ export function createFareCalculator(
         inZone(operator, toName)
       )
         return fareFromTable(z.zone, km);
-      const cityKm = specialCityKm(operator, km, fromName, toName);
-      if (cityKm !== undefined) return tableFare(operator, cityKm);
+      const city = specialCityKm(operator, km, fromName, toName);
+      if (city !== undefined) return tableFare(operator, city.km);
       if (localKm !== undefined) {
         const local = localFare(operator, localKm);
         if (local !== undefined) return local;
@@ -478,10 +497,10 @@ export function createFareCalculator(
           `JR本州3社通し運賃の基準額表(${HONSHU_BASE_OPERATOR})が見つかりません`,
         );
       }
-      const base = tableFare(
-        HONSHU_BASE_OPERATOR,
-        specialCityKm(HONSHU_CITY_GROUP, totalKm, fromName, toName) ?? totalKm,
-      );
+      // 中心駅から計算するので、JR東日本の区域内の区間は加算額の距離にも入れない
+      const city = specialCityKm(HONSHU_CITY_GROUP, totalKm, fromName, toName);
+      const base = tableFare(HONSHU_BASE_OPERATOR, city?.km ?? totalKm);
+      eastKm = Math.max(eastKm - (city?.eastShrink ?? 0), 0);
       if (!byOperator.has(HONSHU_KASAN_OPERATOR)) {
         throw new Error(
           `JR本州3社通し運賃の加算額表(${HONSHU_KASAN_OPERATOR})が見つかりません`,

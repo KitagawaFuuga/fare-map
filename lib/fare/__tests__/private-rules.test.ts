@@ -42,6 +42,7 @@ const calc = createFareCalculator([
     "kashima-rinkai",
     "ueda-dentetsu",
     "alpico",
+    "fukushima-kotsu",
   ].map(rule),
 ]);
 
@@ -134,6 +135,10 @@ describe("公式の駅間表との照合", () => {
     // アルピコ交通上高地線: 2019年10月改定
     ["アルピコ交通", "3.0km", 3.0, 180],
     ["アルピコ交通", "松本→新島々", 14.4, 710],
+    // 福島交通飯坂線: 2025年5月改定（9km超は430円均一）
+    ["福島交通", "2.0km", 2.0, 180],
+    ["福島交通", "2.1km", 2.1, 210],
+    ["福島交通", "福島→飯坂温泉", 9.2, 430],
   ] as const)("%s %s（%fkm）は %i 円", (operator, _pair, km, fare) => {
     expect(calc.estimate(operator, km)).toBe(fare);
   });

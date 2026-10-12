@@ -73,6 +73,7 @@ import fujikyu from "@/data/fare-rules/fujikyu.json";
 import kashimaRinkai from "@/data/fare-rules/kashima-rinkai.json";
 import uedaDentetsu from "@/data/fare-rules/ueda-dentetsu.json";
 import alpico from "@/data/fare-rules/alpico.json";
+import fukushimaKotsu from "@/data/fare-rules/fukushima-kotsu.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -215,6 +216,7 @@ const rules = [
   kashimaRinkai,
   uedaDentetsu,
   alpico,
+  fukushimaKotsu,
   keihan,
   tokyu,
   odakyu,

@@ -37,6 +37,8 @@ python scripts/fare/extract/<id>.py <PDFを置いたディレクトリ>
 | `jr-west-special.py`  | JR西日本 大阪附近の特定区間 341区間 | `jrw.pdf`（2024-05-15 京阪神運賃体系見直しプレス、別紙4） |
 | `chiba-monorail.py`   | 千葉都市モノレール 18駅・153ペア    | `chiba.pdf`（普通旅客運賃表、2019-10-01）                 |
 | `kobe-new-transit.ts` | 神戸新交通 18駅・81ペア             | `knt.html`（公式サイトの運賃表ページ。`npx tsx` で実行）  |
+| `sanriku.py`          | 三陸鉄道 41駅・820ペア              | `sanriku.pdf`（普通運賃表、2026-03-14 改正）              |
+| `orange.py`           | 肥薩おれんじ鉄道 28駅・378ペア      | `orange.pdf`（普通運賃三角表、2024-10-01）                |
 
 万葉線と北陸鉄道は運賃表が画像（PDFではない）なので、画像を読んで手で書き起こした。
 北九州モノレール・ニューシャトル・リニモは公式サイトや Wikipedia の HTML の表を書き起こした

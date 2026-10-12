@@ -50,6 +50,11 @@ import igr from "@/data/fare-rules/igr.json";
 import astram from "@/data/fare-rules/astram.json";
 import seasideLine from "@/data/fare-rules/seaside-line.json";
 import aonami from "@/data/fare-rules/aonami.json";
+import tosakuroNakamura from "@/data/fare-rules/tosakuro-nakamura.json";
+import tosakuroGomen from "@/data/fare-rules/tosakuro-gomen.json";
+import heichiku from "@/data/fare-rules/heichiku.json";
+import heichikuRetro from "@/data/fare-rules/heichiku-retro.json";
+import tango from "@/data/fare-rules/tango.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -115,6 +120,9 @@ import kobeNewTransitOverride from "@/data/fare-overrides/kobe-new-transit.json"
 import kitakyushuMonorailOverride from "@/data/fare-overrides/kitakyushu-monorail.json";
 import newShuttleOverride from "@/data/fare-overrides/new-shuttle.json";
 import linimoOverride from "@/data/fare-overrides/linimo.json";
+import sanrikuOverride from "@/data/fare-overrides/sanriku.json";
+import orangeOverride from "@/data/fare-overrides/orange.json";
+import tosakuroGomenAdjacentOverride from "@/data/fare-overrides/tosakuro-gomen-adjacent.json";
 
 const rules = [
   jrEast,
@@ -162,6 +170,11 @@ const rules = [
   astram,
   seasideLine,
   aonami,
+  tosakuroNakamura,
+  tosakuroGomen,
+  heichiku,
+  heichikuRetro,
+  tango,
   keihan,
   tokyu,
   odakyu,
@@ -226,6 +239,9 @@ const overrides = [
   kitakyushuMonorailOverride,
   newShuttleOverride,
   linimoOverride,
+  sanrikuOverride,
+  orangeOverride,
+  tosakuroGomenAdjacentOverride,
   meitetsuComputedOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地方鉄道・しなの鉄道の距離表は枝刈りの下界専用で、公表営業キロではなく

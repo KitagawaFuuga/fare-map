@@ -1,0 +1,4931 @@
+{
+  "id": "sanriku",
+  "operator": "三陸鉄道",
+  "source": {
+    "url": "https://www.sanrikutetsudou.com/wp-content/uploads/2026/03/20260314futuunchinhyou.pdf",
+    "fetchedAt": "2026-10-12",
+    "note": "三陸鉄道（リアス線）の公式の普通運賃表（三角表、2026年3月14日改正）から scripts/fare/extract/sanriku.py で取り出した全820ペアの大人運賃（きっぷ）。行ごとの値の数と、線路に沿って運賃が下がらないことを抽出時に検算した。2km未満の一部区間の190円の特定運賃（宮古〜山口団地など）も表に含まれる。改定後の運賃として報じられた陸中山田〜宮古860円・陸中山田〜釜石940円と一致する。営業キロは表に無いので null。"
+  },
+  "pairs": [
+    {
+      "from": "盛",
+      "to": "陸前赤崎",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "盛",
+      "to": "綾里",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "盛",
+      "to": "恋し浜",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "盛",
+      "to": "甫嶺",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "盛",
+      "to": "三陸",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "盛",
+      "to": "吉浜",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "盛",
+      "to": "唐丹",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "盛",
+      "to": "平田",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "盛",
+      "to": "釜石",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "盛",
+      "to": "両石",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "盛",
+      "to": "鵜住居",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "盛",
+      "to": "大槌",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "盛",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "盛",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "盛",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "盛",
+      "to": "織笠",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "盛",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "盛",
+      "to": "豊間根",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "盛",
+      "to": "払川",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "盛",
+      "to": "津軽石",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "盛",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "盛",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "盛",
+      "to": "宮古",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "盛",
+      "to": "山口団地",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "盛",
+      "to": "一の渡",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "盛",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "盛",
+      "to": "田老",
+      "km": null,
+      "fare": 2820
+    },
+    {
+      "from": "盛",
+      "to": "新田老",
+      "km": null,
+      "fare": 2890
+    },
+    {
+      "from": "盛",
+      "to": "摂待",
+      "km": null,
+      "fare": 3020
+    },
+    {
+      "from": "盛",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 3150
+    },
+    {
+      "from": "盛",
+      "to": "島越",
+      "km": null,
+      "fare": 3280
+    },
+    {
+      "from": "盛",
+      "to": "田野畑",
+      "km": null,
+      "fare": 3360
+    },
+    {
+      "from": "盛",
+      "to": "普代",
+      "km": null,
+      "fare": 3560
+    },
+    {
+      "from": "盛",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 3620
+    },
+    {
+      "from": "盛",
+      "to": "堀内",
+      "km": null,
+      "fare": 3690
+    },
+    {
+      "from": "盛",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 3820
+    },
+    {
+      "from": "盛",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 3820
+    },
+    {
+      "from": "盛",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 3890
+    },
+    {
+      "from": "盛",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 3960
+    },
+    {
+      "from": "盛",
+      "to": "久慈",
+      "km": null,
+      "fare": 4160
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "綾里",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "恋し浜",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "甫嶺",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "三陸",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "吉浜",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "唐丹",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "平田",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "釜石",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "両石",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "鵜住居",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "大槌",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "織笠",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "豊間根",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "払川",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "津軽石",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "宮古",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "山口団地",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "一の渡",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "田老",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "新田老",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "摂待",
+      "km": null,
+      "fare": 2950
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 3020
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "島越",
+      "km": null,
+      "fare": 3220
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "田野畑",
+      "km": null,
+      "fare": 3280
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "普代",
+      "km": null,
+      "fare": 3490
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 3560
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "堀内",
+      "km": null,
+      "fare": 3620
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 3760
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 3760
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 3820
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 3890
+    },
+    {
+      "from": "陸前赤崎",
+      "to": "久慈",
+      "km": null,
+      "fare": 4100
+    },
+    {
+      "from": "綾里",
+      "to": "恋し浜",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "綾里",
+      "to": "甫嶺",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "綾里",
+      "to": "三陸",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "綾里",
+      "to": "吉浜",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "綾里",
+      "to": "唐丹",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "綾里",
+      "to": "平田",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "綾里",
+      "to": "釜石",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "綾里",
+      "to": "両石",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "綾里",
+      "to": "鵜住居",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "綾里",
+      "to": "大槌",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "綾里",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "綾里",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "綾里",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "綾里",
+      "to": "織笠",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "綾里",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "綾里",
+      "to": "豊間根",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "綾里",
+      "to": "払川",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "綾里",
+      "to": "津軽石",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "綾里",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "綾里",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "綾里",
+      "to": "宮古",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "綾里",
+      "to": "山口団地",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "綾里",
+      "to": "一の渡",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "綾里",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "綾里",
+      "to": "田老",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "綾里",
+      "to": "新田老",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "綾里",
+      "to": "摂待",
+      "km": null,
+      "fare": 2820
+    },
+    {
+      "from": "綾里",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 2890
+    },
+    {
+      "from": "綾里",
+      "to": "島越",
+      "km": null,
+      "fare": 3080
+    },
+    {
+      "from": "綾里",
+      "to": "田野畑",
+      "km": null,
+      "fare": 3150
+    },
+    {
+      "from": "綾里",
+      "to": "普代",
+      "km": null,
+      "fare": 3360
+    },
+    {
+      "from": "綾里",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 3430
+    },
+    {
+      "from": "綾里",
+      "to": "堀内",
+      "km": null,
+      "fare": 3490
+    },
+    {
+      "from": "綾里",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 3620
+    },
+    {
+      "from": "綾里",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 3620
+    },
+    {
+      "from": "綾里",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 3690
+    },
+    {
+      "from": "綾里",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 3760
+    },
+    {
+      "from": "綾里",
+      "to": "久慈",
+      "km": null,
+      "fare": 3960
+    },
+    {
+      "from": "恋し浜",
+      "to": "甫嶺",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "恋し浜",
+      "to": "三陸",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "恋し浜",
+      "to": "吉浜",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "恋し浜",
+      "to": "唐丹",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "恋し浜",
+      "to": "平田",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "恋し浜",
+      "to": "釜石",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "恋し浜",
+      "to": "両石",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "恋し浜",
+      "to": "鵜住居",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "恋し浜",
+      "to": "大槌",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "恋し浜",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "恋し浜",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "恋し浜",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "恋し浜",
+      "to": "織笠",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "恋し浜",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "恋し浜",
+      "to": "豊間根",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "恋し浜",
+      "to": "払川",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "恋し浜",
+      "to": "津軽石",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "恋し浜",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "恋し浜",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "恋し浜",
+      "to": "宮古",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "恋し浜",
+      "to": "山口団地",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "恋し浜",
+      "to": "一の渡",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "恋し浜",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "恋し浜",
+      "to": "田老",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "恋し浜",
+      "to": "新田老",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "恋し浜",
+      "to": "摂待",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "恋し浜",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 2890
+    },
+    {
+      "from": "恋し浜",
+      "to": "島越",
+      "km": null,
+      "fare": 3020
+    },
+    {
+      "from": "恋し浜",
+      "to": "田野畑",
+      "km": null,
+      "fare": 3080
+    },
+    {
+      "from": "恋し浜",
+      "to": "普代",
+      "km": null,
+      "fare": 3280
+    },
+    {
+      "from": "恋し浜",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 3360
+    },
+    {
+      "from": "恋し浜",
+      "to": "堀内",
+      "km": null,
+      "fare": 3430
+    },
+    {
+      "from": "恋し浜",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 3560
+    },
+    {
+      "from": "恋し浜",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 3560
+    },
+    {
+      "from": "恋し浜",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 3620
+    },
+    {
+      "from": "恋し浜",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 3690
+    },
+    {
+      "from": "恋し浜",
+      "to": "久慈",
+      "km": null,
+      "fare": 3890
+    },
+    {
+      "from": "甫嶺",
+      "to": "三陸",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "甫嶺",
+      "to": "吉浜",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "甫嶺",
+      "to": "唐丹",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "甫嶺",
+      "to": "平田",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "甫嶺",
+      "to": "釜石",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "甫嶺",
+      "to": "両石",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "甫嶺",
+      "to": "鵜住居",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "甫嶺",
+      "to": "大槌",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "甫嶺",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "甫嶺",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "甫嶺",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "甫嶺",
+      "to": "織笠",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "甫嶺",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "甫嶺",
+      "to": "豊間根",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "甫嶺",
+      "to": "払川",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "甫嶺",
+      "to": "津軽石",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "甫嶺",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "甫嶺",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "甫嶺",
+      "to": "宮古",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "甫嶺",
+      "to": "山口団地",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "甫嶺",
+      "to": "一の渡",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "甫嶺",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "甫嶺",
+      "to": "田老",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "甫嶺",
+      "to": "新田老",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "甫嶺",
+      "to": "摂待",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "甫嶺",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 2820
+    },
+    {
+      "from": "甫嶺",
+      "to": "島越",
+      "km": null,
+      "fare": 3020
+    },
+    {
+      "from": "甫嶺",
+      "to": "田野畑",
+      "km": null,
+      "fare": 3020
+    },
+    {
+      "from": "甫嶺",
+      "to": "普代",
+      "km": null,
+      "fare": 3220
+    },
+    {
+      "from": "甫嶺",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 3280
+    },
+    {
+      "from": "甫嶺",
+      "to": "堀内",
+      "km": null,
+      "fare": 3430
+    },
+    {
+      "from": "甫嶺",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 3490
+    },
+    {
+      "from": "甫嶺",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 3560
+    },
+    {
+      "from": "甫嶺",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 3560
+    },
+    {
+      "from": "甫嶺",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 3620
+    },
+    {
+      "from": "甫嶺",
+      "to": "久慈",
+      "km": null,
+      "fare": 3820
+    },
+    {
+      "from": "三陸",
+      "to": "吉浜",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "三陸",
+      "to": "唐丹",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "三陸",
+      "to": "平田",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "三陸",
+      "to": "釜石",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "三陸",
+      "to": "両石",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "三陸",
+      "to": "鵜住居",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "三陸",
+      "to": "大槌",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "三陸",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "三陸",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "三陸",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "三陸",
+      "to": "織笠",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "三陸",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "三陸",
+      "to": "豊間根",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "三陸",
+      "to": "払川",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "三陸",
+      "to": "津軽石",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "三陸",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "三陸",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "三陸",
+      "to": "宮古",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "三陸",
+      "to": "山口団地",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "三陸",
+      "to": "一の渡",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "三陸",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "三陸",
+      "to": "田老",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "三陸",
+      "to": "新田老",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "三陸",
+      "to": "摂待",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "三陸",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "三陸",
+      "to": "島越",
+      "km": null,
+      "fare": 2950
+    },
+    {
+      "from": "三陸",
+      "to": "田野畑",
+      "km": null,
+      "fare": 2950
+    },
+    {
+      "from": "三陸",
+      "to": "普代",
+      "km": null,
+      "fare": 3150
+    },
+    {
+      "from": "三陸",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 3280
+    },
+    {
+      "from": "三陸",
+      "to": "堀内",
+      "km": null,
+      "fare": 3360
+    },
+    {
+      "from": "三陸",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 3430
+    },
+    {
+      "from": "三陸",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 3490
+    },
+    {
+      "from": "三陸",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 3490
+    },
+    {
+      "from": "三陸",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 3620
+    },
+    {
+      "from": "三陸",
+      "to": "久慈",
+      "km": null,
+      "fare": 3760
+    },
+    {
+      "from": "吉浜",
+      "to": "唐丹",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "吉浜",
+      "to": "平田",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "吉浜",
+      "to": "釜石",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "吉浜",
+      "to": "両石",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "吉浜",
+      "to": "鵜住居",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "吉浜",
+      "to": "大槌",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "吉浜",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "吉浜",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "吉浜",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "吉浜",
+      "to": "織笠",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "吉浜",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "吉浜",
+      "to": "豊間根",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "吉浜",
+      "to": "払川",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "吉浜",
+      "to": "津軽石",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "吉浜",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "吉浜",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "吉浜",
+      "to": "宮古",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "吉浜",
+      "to": "山口団地",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "吉浜",
+      "to": "一の渡",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "吉浜",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "吉浜",
+      "to": "田老",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "吉浜",
+      "to": "新田老",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "吉浜",
+      "to": "摂待",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "吉浜",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "吉浜",
+      "to": "島越",
+      "km": null,
+      "fare": 2820
+    },
+    {
+      "from": "吉浜",
+      "to": "田野畑",
+      "km": null,
+      "fare": 2890
+    },
+    {
+      "from": "吉浜",
+      "to": "普代",
+      "km": null,
+      "fare": 3080
+    },
+    {
+      "from": "吉浜",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 3150
+    },
+    {
+      "from": "吉浜",
+      "to": "堀内",
+      "km": null,
+      "fare": 3220
+    },
+    {
+      "from": "吉浜",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 3360
+    },
+    {
+      "from": "吉浜",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 3360
+    },
+    {
+      "from": "吉浜",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 3430
+    },
+    {
+      "from": "吉浜",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 3490
+    },
+    {
+      "from": "吉浜",
+      "to": "久慈",
+      "km": null,
+      "fare": 3690
+    },
+    {
+      "from": "唐丹",
+      "to": "平田",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "唐丹",
+      "to": "釜石",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "唐丹",
+      "to": "両石",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "唐丹",
+      "to": "鵜住居",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "唐丹",
+      "to": "大槌",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "唐丹",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "唐丹",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "唐丹",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "唐丹",
+      "to": "織笠",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "唐丹",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "唐丹",
+      "to": "豊間根",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "唐丹",
+      "to": "払川",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "唐丹",
+      "to": "津軽石",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "唐丹",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "唐丹",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "唐丹",
+      "to": "宮古",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "唐丹",
+      "to": "山口団地",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "唐丹",
+      "to": "一の渡",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "唐丹",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "唐丹",
+      "to": "田老",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "唐丹",
+      "to": "新田老",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "唐丹",
+      "to": "摂待",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "唐丹",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "唐丹",
+      "to": "島越",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "唐丹",
+      "to": "田野畑",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "唐丹",
+      "to": "普代",
+      "km": null,
+      "fare": 2950
+    },
+    {
+      "from": "唐丹",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 3020
+    },
+    {
+      "from": "唐丹",
+      "to": "堀内",
+      "km": null,
+      "fare": 3080
+    },
+    {
+      "from": "唐丹",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 3220
+    },
+    {
+      "from": "唐丹",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 3220
+    },
+    {
+      "from": "唐丹",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 3280
+    },
+    {
+      "from": "唐丹",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 3360
+    },
+    {
+      "from": "唐丹",
+      "to": "久慈",
+      "km": null,
+      "fare": 3560
+    },
+    {
+      "from": "平田",
+      "to": "釜石",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "平田",
+      "to": "両石",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "平田",
+      "to": "鵜住居",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "平田",
+      "to": "大槌",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "平田",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "平田",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "平田",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "平田",
+      "to": "織笠",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "平田",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "平田",
+      "to": "豊間根",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "平田",
+      "to": "払川",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "平田",
+      "to": "津軽石",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "平田",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "平田",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "平田",
+      "to": "宮古",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "平田",
+      "to": "山口団地",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "平田",
+      "to": "一の渡",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "平田",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "平田",
+      "to": "田老",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "平田",
+      "to": "新田老",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "平田",
+      "to": "摂待",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "平田",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "平田",
+      "to": "島越",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "平田",
+      "to": "田野畑",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "平田",
+      "to": "普代",
+      "km": null,
+      "fare": 2820
+    },
+    {
+      "from": "平田",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 2890
+    },
+    {
+      "from": "平田",
+      "to": "堀内",
+      "km": null,
+      "fare": 2950
+    },
+    {
+      "from": "平田",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 3080
+    },
+    {
+      "from": "平田",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 3080
+    },
+    {
+      "from": "平田",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 3150
+    },
+    {
+      "from": "平田",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 3220
+    },
+    {
+      "from": "平田",
+      "to": "久慈",
+      "km": null,
+      "fare": 3430
+    },
+    {
+      "from": "釜石",
+      "to": "両石",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "釜石",
+      "to": "鵜住居",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "釜石",
+      "to": "大槌",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "釜石",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "釜石",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "釜石",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "釜石",
+      "to": "織笠",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "釜石",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "釜石",
+      "to": "豊間根",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "釜石",
+      "to": "払川",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "釜石",
+      "to": "津軽石",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "釜石",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "釜石",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "釜石",
+      "to": "宮古",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "釜石",
+      "to": "山口団地",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "釜石",
+      "to": "一の渡",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "釜石",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "釜石",
+      "to": "田老",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "釜石",
+      "to": "新田老",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "釜石",
+      "to": "摂待",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "釜石",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "釜石",
+      "to": "島越",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "釜石",
+      "to": "田野畑",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "釜石",
+      "to": "普代",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "釜石",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 2820
+    },
+    {
+      "from": "釜石",
+      "to": "堀内",
+      "km": null,
+      "fare": 2890
+    },
+    {
+      "from": "釜石",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 3020
+    },
+    {
+      "from": "釜石",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 3020
+    },
+    {
+      "from": "釜石",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 3080
+    },
+    {
+      "from": "釜石",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 3150
+    },
+    {
+      "from": "釜石",
+      "to": "久慈",
+      "km": null,
+      "fare": 3360
+    },
+    {
+      "from": "両石",
+      "to": "鵜住居",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "両石",
+      "to": "大槌",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "両石",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "両石",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "両石",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "両石",
+      "to": "織笠",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "両石",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "両石",
+      "to": "豊間根",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "両石",
+      "to": "払川",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "両石",
+      "to": "津軽石",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "両石",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "両石",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "両石",
+      "to": "宮古",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "両石",
+      "to": "山口団地",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "両石",
+      "to": "一の渡",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "両石",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "両石",
+      "to": "田老",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "両石",
+      "to": "新田老",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "両石",
+      "to": "摂待",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "両石",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "両石",
+      "to": "島越",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "両石",
+      "to": "田野畑",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "両石",
+      "to": "普代",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "両石",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "両石",
+      "to": "堀内",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "両石",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 2890
+    },
+    {
+      "from": "両石",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 2890
+    },
+    {
+      "from": "両石",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 2950
+    },
+    {
+      "from": "両石",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 3020
+    },
+    {
+      "from": "両石",
+      "to": "久慈",
+      "km": null,
+      "fare": 3220
+    },
+    {
+      "from": "鵜住居",
+      "to": "大槌",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "鵜住居",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "鵜住居",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "鵜住居",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "鵜住居",
+      "to": "織笠",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "鵜住居",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "鵜住居",
+      "to": "豊間根",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "鵜住居",
+      "to": "払川",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "鵜住居",
+      "to": "津軽石",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "鵜住居",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "鵜住居",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "鵜住居",
+      "to": "宮古",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "鵜住居",
+      "to": "山口団地",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "鵜住居",
+      "to": "一の渡",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "鵜住居",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "鵜住居",
+      "to": "田老",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "鵜住居",
+      "to": "新田老",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "鵜住居",
+      "to": "摂待",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "鵜住居",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "鵜住居",
+      "to": "島越",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "鵜住居",
+      "to": "田野畑",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "鵜住居",
+      "to": "普代",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "鵜住居",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "鵜住居",
+      "to": "堀内",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "鵜住居",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 2820
+    },
+    {
+      "from": "鵜住居",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 2820
+    },
+    {
+      "from": "鵜住居",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 2890
+    },
+    {
+      "from": "鵜住居",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 2950
+    },
+    {
+      "from": "鵜住居",
+      "to": "久慈",
+      "km": null,
+      "fare": 3150
+    },
+    {
+      "from": "大槌",
+      "to": "吉里吉里",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "大槌",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "大槌",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "大槌",
+      "to": "織笠",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "大槌",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "大槌",
+      "to": "豊間根",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "大槌",
+      "to": "払川",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "大槌",
+      "to": "津軽石",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "大槌",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "大槌",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "大槌",
+      "to": "宮古",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "大槌",
+      "to": "山口団地",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "大槌",
+      "to": "一の渡",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "大槌",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "大槌",
+      "to": "田老",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "大槌",
+      "to": "新田老",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "大槌",
+      "to": "摂待",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "大槌",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "大槌",
+      "to": "島越",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "大槌",
+      "to": "田野畑",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "大槌",
+      "to": "普代",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "大槌",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "大槌",
+      "to": "堀内",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "大槌",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "大槌",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "大槌",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 2820
+    },
+    {
+      "from": "大槌",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 2890
+    },
+    {
+      "from": "大槌",
+      "to": "久慈",
+      "km": null,
+      "fare": 3080
+    },
+    {
+      "from": "吉里吉里",
+      "to": "浪板海岸",
+      "km": null,
+      "fare": 190
+    },
+    {
+      "from": "吉里吉里",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "吉里吉里",
+      "to": "織笠",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "吉里吉里",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "吉里吉里",
+      "to": "豊間根",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "吉里吉里",
+      "to": "払川",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "吉里吉里",
+      "to": "津軽石",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "吉里吉里",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "吉里吉里",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "吉里吉里",
+      "to": "宮古",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "吉里吉里",
+      "to": "山口団地",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "吉里吉里",
+      "to": "一の渡",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "吉里吉里",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "吉里吉里",
+      "to": "田老",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "吉里吉里",
+      "to": "新田老",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "吉里吉里",
+      "to": "摂待",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "吉里吉里",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "吉里吉里",
+      "to": "島越",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "吉里吉里",
+      "to": "田野畑",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "吉里吉里",
+      "to": "普代",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "吉里吉里",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "吉里吉里",
+      "to": "堀内",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "吉里吉里",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "吉里吉里",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "吉里吉里",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "吉里吉里",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 2820
+    },
+    {
+      "from": "吉里吉里",
+      "to": "久慈",
+      "km": null,
+      "fare": 2950
+    },
+    {
+      "from": "浪板海岸",
+      "to": "岩手船越",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "浪板海岸",
+      "to": "織笠",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "浪板海岸",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "浪板海岸",
+      "to": "豊間根",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "浪板海岸",
+      "to": "払川",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "浪板海岸",
+      "to": "津軽石",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "浪板海岸",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "浪板海岸",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "浪板海岸",
+      "to": "宮古",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "浪板海岸",
+      "to": "山口団地",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "浪板海岸",
+      "to": "一の渡",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "浪板海岸",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "浪板海岸",
+      "to": "田老",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "浪板海岸",
+      "to": "新田老",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "浪板海岸",
+      "to": "摂待",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "浪板海岸",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "浪板海岸",
+      "to": "島越",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "浪板海岸",
+      "to": "田野畑",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "浪板海岸",
+      "to": "普代",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "浪板海岸",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "浪板海岸",
+      "to": "堀内",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "浪板海岸",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "浪板海岸",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "浪板海岸",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "浪板海岸",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 2750
+    },
+    {
+      "from": "浪板海岸",
+      "to": "久慈",
+      "km": null,
+      "fare": 2950
+    },
+    {
+      "from": "岩手船越",
+      "to": "織笠",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "岩手船越",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "岩手船越",
+      "to": "豊間根",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "岩手船越",
+      "to": "払川",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "岩手船越",
+      "to": "津軽石",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "岩手船越",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "岩手船越",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "岩手船越",
+      "to": "宮古",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "岩手船越",
+      "to": "山口団地",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "岩手船越",
+      "to": "一の渡",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "岩手船越",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "岩手船越",
+      "to": "田老",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "岩手船越",
+      "to": "新田老",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "岩手船越",
+      "to": "摂待",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "岩手船越",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "岩手船越",
+      "to": "島越",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "岩手船越",
+      "to": "田野畑",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "岩手船越",
+      "to": "普代",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "岩手船越",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "岩手船越",
+      "to": "堀内",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "岩手船越",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "岩手船越",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "岩手船越",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "岩手船越",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "岩手船越",
+      "to": "久慈",
+      "km": null,
+      "fare": 2820
+    },
+    {
+      "from": "織笠",
+      "to": "陸中山田",
+      "km": null,
+      "fare": 190
+    },
+    {
+      "from": "織笠",
+      "to": "豊間根",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "織笠",
+      "to": "払川",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "織笠",
+      "to": "津軽石",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "織笠",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "織笠",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "織笠",
+      "to": "宮古",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "織笠",
+      "to": "山口団地",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "織笠",
+      "to": "一の渡",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "織笠",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "織笠",
+      "to": "田老",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "織笠",
+      "to": "新田老",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "織笠",
+      "to": "摂待",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "織笠",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "織笠",
+      "to": "島越",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "織笠",
+      "to": "田野畑",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "織笠",
+      "to": "普代",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "織笠",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "織笠",
+      "to": "堀内",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "織笠",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "織笠",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "織笠",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "織笠",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 2550
+    },
+    {
+      "from": "織笠",
+      "to": "久慈",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "陸中山田",
+      "to": "豊間根",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "陸中山田",
+      "to": "払川",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "陸中山田",
+      "to": "津軽石",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "陸中山田",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "陸中山田",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "陸中山田",
+      "to": "宮古",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "陸中山田",
+      "to": "山口団地",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "陸中山田",
+      "to": "一の渡",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "陸中山田",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "陸中山田",
+      "to": "田老",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "陸中山田",
+      "to": "新田老",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "陸中山田",
+      "to": "摂待",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "陸中山田",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "陸中山田",
+      "to": "島越",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "陸中山田",
+      "to": "田野畑",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "陸中山田",
+      "to": "普代",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "陸中山田",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "陸中山田",
+      "to": "堀内",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "陸中山田",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "陸中山田",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "陸中山田",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "陸中山田",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "陸中山田",
+      "to": "久慈",
+      "km": null,
+      "fare": 2680
+    },
+    {
+      "from": "豊間根",
+      "to": "払川",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "豊間根",
+      "to": "津軽石",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "豊間根",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "豊間根",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "豊間根",
+      "to": "宮古",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "豊間根",
+      "to": "山口団地",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "豊間根",
+      "to": "一の渡",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "豊間根",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "豊間根",
+      "to": "田老",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "豊間根",
+      "to": "新田老",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "豊間根",
+      "to": "摂待",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "豊間根",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "豊間根",
+      "to": "島越",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "豊間根",
+      "to": "田野畑",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "豊間根",
+      "to": "普代",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "豊間根",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "豊間根",
+      "to": "堀内",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "豊間根",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "豊間根",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "豊間根",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 2220
+    },
+    {
+      "from": "豊間根",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "豊間根",
+      "to": "久慈",
+      "km": null,
+      "fare": 2410
+    },
+    {
+      "from": "払川",
+      "to": "津軽石",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "払川",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "払川",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "払川",
+      "to": "宮古",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "払川",
+      "to": "山口団地",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "払川",
+      "to": "一の渡",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "払川",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "払川",
+      "to": "田老",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "払川",
+      "to": "新田老",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "払川",
+      "to": "摂待",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "払川",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "払川",
+      "to": "島越",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "払川",
+      "to": "田野畑",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "払川",
+      "to": "普代",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "払川",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "払川",
+      "to": "堀内",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "払川",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "払川",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "払川",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "払川",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "払川",
+      "to": "久慈",
+      "km": null,
+      "fare": 2350
+    },
+    {
+      "from": "津軽石",
+      "to": "八木沢・宮古短大",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "津軽石",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "津軽石",
+      "to": "宮古",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "津軽石",
+      "to": "山口団地",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "津軽石",
+      "to": "一の渡",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "津軽石",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "津軽石",
+      "to": "田老",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "津軽石",
+      "to": "新田老",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "津軽石",
+      "to": "摂待",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "津軽石",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "津軽石",
+      "to": "島越",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "津軽石",
+      "to": "田野畑",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "津軽石",
+      "to": "普代",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "津軽石",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "津軽石",
+      "to": "堀内",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "津軽石",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "津軽石",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "津軽石",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "津軽石",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "津軽石",
+      "to": "久慈",
+      "km": null,
+      "fare": 2280
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "磯鶏",
+      "km": null,
+      "fare": 190
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "宮古",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "山口団地",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "一の渡",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "田老",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "新田老",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "摂待",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "島越",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "田野畑",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "普代",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "堀内",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 2010
+    },
+    {
+      "from": "八木沢・宮古短大",
+      "to": "久慈",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "磯鶏",
+      "to": "宮古",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "磯鶏",
+      "to": "山口団地",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "磯鶏",
+      "to": "一の渡",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "磯鶏",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "磯鶏",
+      "to": "田老",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "磯鶏",
+      "to": "新田老",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "磯鶏",
+      "to": "摂待",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "磯鶏",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "磯鶏",
+      "to": "島越",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "磯鶏",
+      "to": "田野畑",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "磯鶏",
+      "to": "普代",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "磯鶏",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "磯鶏",
+      "to": "堀内",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "磯鶏",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "磯鶏",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "磯鶏",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "磯鶏",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "磯鶏",
+      "to": "久慈",
+      "km": null,
+      "fare": 2150
+    },
+    {
+      "from": "宮古",
+      "to": "山口団地",
+      "km": null,
+      "fare": 190
+    },
+    {
+      "from": "宮古",
+      "to": "一の渡",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "宮古",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "宮古",
+      "to": "田老",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "宮古",
+      "to": "新田老",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "宮古",
+      "to": "摂待",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "宮古",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "宮古",
+      "to": "島越",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "宮古",
+      "to": "田野畑",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "宮古",
+      "to": "普代",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "宮古",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "宮古",
+      "to": "堀内",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "宮古",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "宮古",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "宮古",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "宮古",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "宮古",
+      "to": "久慈",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "山口団地",
+      "to": "一の渡",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "山口団地",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "山口団地",
+      "to": "田老",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "山口団地",
+      "to": "新田老",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "山口団地",
+      "to": "摂待",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "山口団地",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "山口団地",
+      "to": "島越",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "山口団地",
+      "to": "田野畑",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "山口団地",
+      "to": "普代",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "山口団地",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "山口団地",
+      "to": "堀内",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "山口団地",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "山口団地",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "山口団地",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "山口団地",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "山口団地",
+      "to": "久慈",
+      "km": null,
+      "fare": 2080
+    },
+    {
+      "from": "一の渡",
+      "to": "佐羽根",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "一の渡",
+      "to": "田老",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "一の渡",
+      "to": "新田老",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "一の渡",
+      "to": "摂待",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "一の渡",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "一の渡",
+      "to": "島越",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "一の渡",
+      "to": "田野畑",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "一の渡",
+      "to": "普代",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "一の渡",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "一の渡",
+      "to": "堀内",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "一の渡",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "一の渡",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "一の渡",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 1600
+    },
+    {
+      "from": "一の渡",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "一の渡",
+      "to": "久慈",
+      "km": null,
+      "fare": 1940
+    },
+    {
+      "from": "佐羽根",
+      "to": "田老",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "佐羽根",
+      "to": "新田老",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "佐羽根",
+      "to": "摂待",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "佐羽根",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "佐羽根",
+      "to": "島越",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "佐羽根",
+      "to": "田野畑",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "佐羽根",
+      "to": "普代",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "佐羽根",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "佐羽根",
+      "to": "堀内",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "佐羽根",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "佐羽根",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "佐羽根",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "佐羽根",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 1700
+    },
+    {
+      "from": "佐羽根",
+      "to": "久慈",
+      "km": null,
+      "fare": 1860
+    },
+    {
+      "from": "田老",
+      "to": "新田老",
+      "km": null,
+      "fare": 190
+    },
+    {
+      "from": "田老",
+      "to": "摂待",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "田老",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "田老",
+      "to": "島越",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "田老",
+      "to": "田野畑",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "田老",
+      "to": "普代",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "田老",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "田老",
+      "to": "堀内",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "田老",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "田老",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "田老",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "田老",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "田老",
+      "to": "久慈",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "新田老",
+      "to": "摂待",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "新田老",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "新田老",
+      "to": "島越",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "新田老",
+      "to": "田野畑",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "新田老",
+      "to": "普代",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "新田老",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "新田老",
+      "to": "堀内",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "新田老",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "新田老",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 1370
+    },
+    {
+      "from": "新田老",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "新田老",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "新田老",
+      "to": "久慈",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "摂待",
+      "to": "岩泉小本",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "摂待",
+      "to": "島越",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "摂待",
+      "to": "田野畑",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "摂待",
+      "to": "普代",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "摂待",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "摂待",
+      "to": "堀内",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "摂待",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "摂待",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "摂待",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "摂待",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 1280
+    },
+    {
+      "from": "摂待",
+      "to": "久慈",
+      "km": null,
+      "fare": 1510
+    },
+    {
+      "from": "岩泉小本",
+      "to": "島越",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "岩泉小本",
+      "to": "田野畑",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "岩泉小本",
+      "to": "普代",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "岩泉小本",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "岩泉小本",
+      "to": "堀内",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "岩泉小本",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "岩泉小本",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 1030
+    },
+    {
+      "from": "岩泉小本",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "岩泉小本",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "岩泉小本",
+      "to": "久慈",
+      "km": null,
+      "fare": 1450
+    },
+    {
+      "from": "島越",
+      "to": "田野畑",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "島越",
+      "to": "普代",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "島越",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "島越",
+      "to": "堀内",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "島越",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "島越",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "島越",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "島越",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "島越",
+      "to": "久慈",
+      "km": null,
+      "fare": 1210
+    },
+    {
+      "from": "田野畑",
+      "to": "普代",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "田野畑",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "田野畑",
+      "to": "堀内",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "田野畑",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "田野畑",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "田野畑",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "田野畑",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 940
+    },
+    {
+      "from": "田野畑",
+      "to": "久慈",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "普代",
+      "to": "白井海岸",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "普代",
+      "to": "堀内",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "普代",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "普代",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "普代",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "普代",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "普代",
+      "to": "久慈",
+      "km": null,
+      "fare": 860
+    },
+    {
+      "from": "白井海岸",
+      "to": "堀内",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "白井海岸",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "白井海岸",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "白井海岸",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "白井海岸",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "白井海岸",
+      "to": "久慈",
+      "km": null,
+      "fare": 790
+    },
+    {
+      "from": "堀内",
+      "to": "野田玉川",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "堀内",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "堀内",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "堀内",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "堀内",
+      "to": "久慈",
+      "km": null,
+      "fare": 690
+    },
+    {
+      "from": "野田玉川",
+      "to": "十府ヶ浦海岸",
+      "km": null,
+      "fare": 190
+    },
+    {
+      "from": "野田玉川",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "野田玉川",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 350
+    },
+    {
+      "from": "野田玉川",
+      "to": "久慈",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "十府ヶ浦海岸",
+      "to": "陸中野田",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "十府ヶ浦海岸",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "十府ヶ浦海岸",
+      "to": "久慈",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "陸中野田",
+      "to": "陸中宇部",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "陸中野田",
+      "to": "久慈",
+      "km": null,
+      "fare": 440
+    },
+    {
+      "from": "陸中宇部",
+      "to": "久慈",
+      "km": null,
+      "fare": 350
+    }
+  ]
+}

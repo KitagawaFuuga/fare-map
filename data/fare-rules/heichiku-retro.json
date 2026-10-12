@@ -1,0 +1,15 @@
+{
+  "id": "heichiku-retro",
+  "operators": ["平成筑豊鉄道(門司港レトロ観光線)"],
+  "table": [[100, 500]],
+  "beyond": {
+    "fromKm": 100,
+    "baseFare": 500,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://www.heichiku.net/2025/09/30/25432/",
+    "fetchedAt": "2026-10-12",
+    "note": "門司港レトロ観光線の大人運賃。2025年10月18日改定で全線一律500円。"
+  }
+}

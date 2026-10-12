@@ -55,8 +55,10 @@ export function buildNameLookup(names: Iterable<string>): Map<string, string> {
 // 万葉線の西新湊は2023年9月1日に「第一イン新湊 クロスベイ前」へ改称された
 // （出典: https://www.manyosen.co.jp/season/2023/95103/）。運賃表は略して「クロスベイ前」と書く。
 // 駅データ.jp の2026年版でグラフ側も新しい名前になった。
+// 肥薩おれんじ鉄道の運賃表は旧名の「御立岬公園」のまま（駅データは改称後の「たのうら御立岬公園」）。
 export const STATION_RENAMES: Record<string, string> = {
   クロスベイ前: "第一イン新湊 クロスベイ前",
+  御立岬公園: "たのうら御立岬公園",
 };
 
 /**

@@ -1,0 +1,48 @@
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+import { createFareCalculator } from "@/lib/fare/calculator";
+import { fareRuleSchema, type FareRule } from "@/lib/fare/types";
+
+// 汎用の運賃表から各社の運賃表に切り替えた事業者のうち、公式に駅間の営業キロと運賃の
+// 表が出ているものを、その表の値で照合する（キロの帯と金額の対応を取り違えていないか）。
+const rule = (id: string): FareRule =>
+  fareRuleSchema.parse(
+    JSON.parse(readFileSync(`data/fare-rules/${id}.json`, "utf8")),
+  );
+const calc = createFareCalculator([
+  {
+    id: "fallback",
+    operators: [],
+    table: [[100, 9999]],
+    beyond: { fromKm: 100, baseFare: 9999, ratePerKm: 0 },
+  },
+  ...[
+    "tsukuba-express",
+    "tokyo-monorail",
+    "tama-monorail",
+    "osaka-monorail",
+  ].map(rule),
+]);
+
+describe("公式の駅間表との照合", () => {
+  it.each([
+    // つくばエクスプレス: 2026年3月改定のキロ別運賃表と営業キロ程表（同じPDF）
+    ["首都圏新都市鉄道", "秋葉原→つくば", 58.3, 1280],
+    ["首都圏新都市鉄道", "北千住→守谷", 30.2, 800],
+    ["首都圏新都市鉄道", "秋葉原→新御徒町", 1.6, 180],
+    // 東京モノレール: 2024年3月改定の駅間運賃表
+    ["東京モノレール", "浜松町→羽田空港第2ターミナル", 17.8, 520],
+    // 多摩モノレール: 多摩センター駅・高松駅の運賃表
+    ["多摩都市モノレール", "多摩センター→上北台", 16.0, 410],
+    ["多摩都市モノレール", "多摩センター→程久保", 4.7, 270],
+    ["多摩都市モノレール", "高松→万願寺", 5.1, 320],
+    ["多摩都市モノレール", "高松→大塚・帝京大学", 10.1, 410],
+    ["多摩都市モノレール", "高松→中央大学・明星大学", 9.2, 370],
+    // 大阪モノレール: 普通運賃・キロ程表（運賃計算キロは1km未満切り上げ）
+    ["大阪モノレール株式会社", "大阪空港→蛍池", 1.4, 200],
+    ["大阪モノレール株式会社", "大阪空港→門真市", 21.2, 500],
+    ["大阪モノレール株式会社", "12.1kmの組", 12.1, 440],
+  ] as const)("%s %s（%fkm）は %i 円", (operator, _pair, km, fare) => {
+    expect(calc.estimate(operator, km)).toBe(fare);
+  });
+});

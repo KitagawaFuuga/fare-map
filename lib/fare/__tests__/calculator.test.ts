@@ -32,6 +32,16 @@ import keio from "@/data/fare-rules/keio.json";
 import keikyu from "@/data/fare-rules/keikyu.json";
 import keisei from "@/data/fare-rules/keisei.json";
 import keiseiMatsudo from "@/data/fare-rules/keisei-matsudo.json";
+import kyotoSubway from "@/data/fare-rules/kyoto-subway.json";
+import kobeSubway from "@/data/fare-rules/kobe-subway.json";
+import tsukubaExpress from "@/data/fare-rules/tsukuba-express.json";
+import rinkai from "@/data/fare-rules/rinkai.json";
+import minatomirai from "@/data/fare-rules/minatomirai.json";
+import hokuso from "@/data/fare-rules/hokuso.json";
+import tokyoMonorail from "@/data/fare-rules/tokyo-monorail.json";
+import yurikamome from "@/data/fare-rules/yurikamome.json";
+import tamaMonorail from "@/data/fare-rules/tama-monorail.json";
+import osakaMonorail from "@/data/fare-rules/osaka-monorail.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -121,6 +131,16 @@ const rules = [
   keikyu,
   keisei,
   keiseiMatsudo,
+  kyotoSubway,
+  kobeSubway,
+  tsukubaExpress,
+  rinkai,
+  minatomirai,
+  hokuso,
+  tokyoMonorail,
+  yurikamome,
+  tamaMonorail,
+  osakaMonorail,
   keihan,
   tokyu,
   odakyu,

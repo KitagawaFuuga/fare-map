@@ -1,0 +1,20 @@
+{
+  "id": "tama-monorail",
+  "operators": ["多摩都市モノレール"],
+  "table": [
+    [3, 220],
+    [5, 270],
+    [7, 320],
+    [10, 370]
+  ],
+  "beyond": {
+    "fromKm": 10,
+    "baseFare": 410,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://www.tama-monorail.co.jp/monorail/station/tama-center/fare.html, https://www.tama-monorail.co.jp/monorail/station/takamatsu/fare.html",
+    "fetchedAt": "2026-10-11",
+    "note": "多摩モノレールの大人普通運賃（きっぷ）: 1〜3km 220円、4〜5km 270円、6〜7km 320円、8〜10km 370円、11km以上 410円（キロは1km未満切り上げ）。公式の駅別運賃表（多摩センター・高松の2駅、全36組）が営業キロとすべて一致することを確かめた。立川付近などに110円の特定の組（多摩センター〜松が谷、高松〜立川南など）があるが、組の一覧が無いので未対応（高く出る側）。"
+  }
+}

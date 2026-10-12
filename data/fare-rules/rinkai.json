@@ -1,0 +1,20 @@
+{
+  "id": "rinkai",
+  "operators": ["東京臨海高速鉄道"],
+  "table": [
+    [3, 210],
+    [6, 280],
+    [9, 340],
+    [13, 400]
+  ],
+  "beyond": {
+    "fromKm": 13,
+    "baseFare": 400,
+    "ratePerKm": 20
+  },
+  "source": {
+    "url": "https://www.twr.co.jp/route/tabid/123/Default.aspx, https://jikokuhyo.train-times.net/data/rinkai_fare",
+    "fetchedAt": "2026-10-11",
+    "note": "りんかい線の大人普通運賃（きっぷ）。2019年10月1日改定: 1〜3km 210円、4〜6km 280円、7〜9km 340円、10〜13km 400円。公式ページは駅間の運賃を示す表で、金額4段階が二次資料のキロ帯と一致する。全線12.2kmなので beyond は使われない。JR埼京線との直通は会社ごとに別々に計算する（合算）。"
+  }
+}

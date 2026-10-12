@@ -1,0 +1,20 @@
+{
+  "id": "kyoto-subway",
+  "operators": ["京都市交通局"],
+  "table": [
+    [3, 220],
+    [7, 260],
+    [11, 290],
+    [15, 330]
+  ],
+  "beyond": {
+    "fromKm": 15,
+    "baseFare": 360,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://www2.city.kyoto.lg.jp/kotsu/webguide/ja/fare/fare_tika.html, https://www.city.kyoto.lg.jp/kotsu/page/0000240757.html",
+    "fetchedAt": "2026-10-11",
+    "note": "京都市営地下鉄（烏丸線・東西線）の大人普通運賃（きっぷ）。2025年10月1日改定の区制運賃: 1区（3kmまで）220円、2区（7km以下）260円、3区（11km以下）290円、4区（15km以下）330円、5区（15km超）360円。烏丸線と東西線は烏丸御池で乗り継いでも通しで計算する（同じ事業者なので探索が1区間として扱う）。beyond は5区の均一額。"
+  }
+}

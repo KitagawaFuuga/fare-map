@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import sharp from "sharp";
 
 // 地図タイルは外部サービス(tiles.openfreemap.org)から取る。CI を外部の障害や
 // レート制限に晒さないため、スタイル定義とタイル本体は差し替える。検証したいのは
@@ -116,4 +117,53 @@ test("徒歩連絡を前提とする運賃には印が付く", async ({ page }) 
   const rowCount = await rows.count();
   expect(badgeCount).toBeGreaterThan(0);
   expect(badgeCount).toBeLessThan(rowCount);
+});
+
+test("地図の読み込みより先に検索結果が届いても、駅の円が描かれる", async ({
+  page,
+}) => {
+  // 地図の load より先に結果が届くと、まだ GeoJSON ソースが無いので setData が
+  // 空振りし、load で空のソースが作られて二度と描かれなかった（回線が遅い初回に発生）。
+  // スタイルの応答を遅らせて、その間に検索を終える。
+  test.setTimeout(60_000);
+  await page.route("https://tiles.openfreemap.org/**", async (route) => {
+    if (route.request().url().includes("/styles/")) {
+      await new Promise((r) => setTimeout(r, 8_000));
+      await route.fulfill({ json: EMPTY_STYLE });
+      return;
+    }
+    await route.fulfill({ status: 204, body: "" });
+  });
+  await page.goto("/");
+
+  const panel = sidebar(page);
+  await panel.getByPlaceholder("駅名を入力").fill("新宿");
+  await panel.getByRole("button", { name: /^新宿/ }).first().click();
+  await panel.locator('input[type="number"]').fill("500");
+  await panel.getByRole("button", { name: "検索" }).click();
+  await expect(panel.getByText(/\d+ 駅に到達可能/)).toBeVisible({
+    timeout: 30_000,
+  });
+
+  // 円の色（500円以下の緑 #16a34a）の画素が地図に現れるまで待つ
+  const canvas = page.locator("canvas.maplibregl-canvas");
+  await expect
+    .poll(
+      async () => {
+        const { data, info } = await sharp(await canvas.screenshot())
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+        let n = 0;
+        for (let k = 0; k < data.length; k += info.channels)
+          if (
+            Math.abs(data[k]! - 0x16) < 10 &&
+            Math.abs(data[k + 1]! - 0xa3) < 10 &&
+            Math.abs(data[k + 2]! - 0x4a) < 10
+          )
+            n++;
+        return n;
+      },
+      { timeout: 30_000, intervals: [1_000] },
+    )
+    .toBeGreaterThan(100);
 });

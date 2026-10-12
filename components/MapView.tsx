@@ -85,6 +85,10 @@ export default function MapView({
   const fromNameRef = useRef(fromName);
   onMapClickRef.current = onMapClick;
   fromNameRef.current = fromName;
+  // 地図の load より先に検索結果が届くと、下の setData はソースが無くて空振りする。
+  // load でソースを作るときに最新の結果を入れられるよう、ref にも持っておく
+  const stationsRef = useRef(stations);
+  stationsRef.current = stations;
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -98,7 +102,10 @@ export default function MapView({
     mapRef.current = map;
 
     map.on("load", () => {
-      map.addSource(SOURCE_ID, { type: "geojson", data: toGeoJson([]) });
+      map.addSource(SOURCE_ID, {
+        type: "geojson",
+        data: toGeoJson(stationsRef.current),
+      });
       map.addLayer({
         id: LAYER_ID,
         type: "circle",

@@ -198,3 +198,46 @@ test.describe("駅名入力の境界値", () => {
     await expect(item).toContainText("<img src=x onerror=1>テスト駅");
   });
 });
+
+test.describe("エラーとキーボード操作", () => {
+  test("検索 API が HTML のエラーページを返しても、分かる文言でエラー表示する", async ({
+    page,
+  }) => {
+    // 前段のゲートウェイが 502 の HTML を返すと、JSON の解析エラー
+    // 「Unexpected token '<' …」がそのまま表示されていた
+    await stubTiles(page);
+    await page.route("**/api/reachable?*", (route) =>
+      route.fulfill({
+        status: 502,
+        contentType: "text/html",
+        body: "<html><body>Bad Gateway</body></html>",
+      }),
+    );
+    await page.goto("/");
+    await selectShinjuku(page);
+
+    const panel = sidebar(page);
+    await panel.getByRole("button", { name: "検索" }).click();
+    const error = panel.locator("p.text-red-600");
+    await expect(error).toContainText("502");
+    await expect(error).not.toContainText("JSON");
+    await expect(panel.getByRole("button", { name: "検索" })).toBeEnabled();
+  });
+
+  test("駅名の候補を矢印キーと Enter で選べる", async ({ page }) => {
+    await stubTiles(page);
+    await page.goto("/");
+    const panel = sidebar(page);
+    const input = panel.getByPlaceholder("駅名を入力");
+    await input.fill("新宿");
+    await expect(panel.locator("ul li").first()).toContainText("新宿");
+
+    await input.press("ArrowDown"); // 1件目（新宿）
+    await page.keyboard.press("ArrowDown"); // 2件目
+    await page.keyboard.press("ArrowUp"); // 1件目に戻る
+    await page.keyboard.press("Enter");
+    await expect(
+      panel.getByText("選択中: 新宿", { exact: true }),
+    ).toBeVisible();
+  });
+});

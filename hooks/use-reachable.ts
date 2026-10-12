@@ -12,6 +12,18 @@ export interface UseReachable {
   search(fromId: string, budget: number): Promise<boolean>;
 }
 
+// 前段のゲートウェイやプロキシは HTML のエラーページを返すことがある。
+// JSON として読めなければ、解析エラーの文ではなく状態コードで伝える
+async function errorMessageOf(res: Response): Promise<string> {
+  try {
+    const body = (await res.json()) as { error?: unknown };
+    if (typeof body.error === "string") return body.error;
+  } catch {
+    // JSON でない応答。下の汎用の文言にする
+  }
+  return `サーバーに接続できませんでした（HTTP ${res.status}）`;
+}
+
 export function useReachable(): UseReachable {
   const [data, setData] = useState<ReachableResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -29,10 +41,7 @@ export function useReachable(): UseReachable {
       const res = await fetch(
         `/api/reachable?from=${encodeURIComponent(fromId)}&budget=${budget}`,
       );
-      if (!res.ok) {
-        const body = (await res.json()) as { error?: string };
-        throw new Error(body.error ?? `HTTP ${res.status}`);
-      }
+      if (!res.ok) throw new Error(await errorMessageOf(res));
       const result = (await res.json()) as ReachableResult;
       if (isStale()) return false;
       setData(result);

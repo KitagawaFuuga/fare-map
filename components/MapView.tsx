@@ -13,10 +13,10 @@ import {
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { BRACKET_COLORS } from "@/lib/brackets";
-import type { ReachableResult } from "@/lib/server/api-service";
+import type { ReachableStation } from "@/hooks/use-reachable";
 
 export interface MapViewProps {
-  stations: ReachableResult["stations"];
+  stations: ReachableStation[];
   fromName: string | null;
   focus: { lat: number; lng: number } | null;
   onMapClick(lat: number, lng: number): void;

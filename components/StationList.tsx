@@ -1,10 +1,10 @@
 "use client";
 
 import { BRACKET_COLORS } from "@/lib/brackets";
-import type { ReachableResult } from "@/lib/server/api-service";
+import type { ReachableStation } from "@/hooks/use-reachable";
 
 export interface StationListProps {
-  stations: ReachableResult["stations"];
+  stations: ReachableStation[];
   onPick(s: { lat: number; lng: number }): void;
 }
 

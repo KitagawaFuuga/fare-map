@@ -4,6 +4,7 @@ import {
   nearestStation,
   reachable,
   suggestStations,
+  walkStationIds,
 } from "@/lib/server/api-service";
 import type { RailGraph } from "@/lib/graph/types";
 
@@ -120,31 +121,27 @@ const walkGraph: RailGraph = {
 };
 const walkStore = createGraphStore(walkGraph, rules);
 
-describe("reachable の viaWalk 判定", () => {
+describe("walkStationIds（徒歩ありの判定）", () => {
   const res = reachable(walkStore, "W0", 2000);
-  const byName = new Map(res.stations.map((s) => [s.name, s]));
+  const walk = new Set(walkStationIds(walkStore, res));
+  const idOf = (name: string) => res.stations.find((s) => s.name === name)?.id;
 
-  it("徒歩連絡を通らないと同じ運賃で行けない駅に viaWalk が立つ", () => {
-    const dest = byName.get("目的地");
-    expect(dest).toBeDefined();
-    expect(dest?.viaWalk).toBe(true);
+  it("運賃の結果には徒歩の判定を含めない（探索を1回で済ませるため）", () => {
+    expect(res.stations.every((s) => !("viaWalk" in s))).toBe(true);
   });
 
-  it("徒歩を使わずに着ける駅には viaWalk が立たない", () => {
-    expect(byName.get("乗換元")?.viaWalk).toBe(false);
-    expect(byName.get("迂回")?.viaWalk).toBe(false);
+  it("徒歩連絡を通らないと同じ運賃で行けない駅を返す", () => {
+    expect(idOf("目的地")).toBeDefined();
+    expect(walk.has(idOf("目的地")!)).toBe(true);
   });
 
-  it("meta.viaWalkCount が viaWalk の件数と一致する", () => {
-    expect(res.meta.viaWalkCount).toBe(
-      res.stations.filter((s) => s.viaWalk).length,
-    );
-    expect(res.meta.viaWalkCount).toBeGreaterThan(0);
+  it("徒歩を使わずに着ける駅は返さない", () => {
+    expect(walk.has(idOf("乗換元")!)).toBe(false);
+    expect(walk.has(idOf("迂回")!)).toBe(false);
   });
 
-  it("徒歩連絡が無いグラフでは誰にも viaWalk が立たない", () => {
+  it("徒歩連絡が無いグラフでは何も返さない", () => {
     const r = reachable(store, "S1", 2000);
-    expect(r.stations.every((s) => !s.viaWalk)).toBe(true);
-    expect(r.meta.viaWalkCount).toBe(0);
+    expect(walkStationIds(store, r)).toEqual([]);
   });
 });

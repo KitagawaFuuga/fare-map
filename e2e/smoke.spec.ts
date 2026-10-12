@@ -167,3 +167,36 @@ test("地図の読み込みより先に検索結果が届いても、駅の円�
     )
     .toBeGreaterThan(100);
 });
+
+test("先の入力の候補が遅れて届いても、最新の入力の候補が表示される", async ({
+  page,
+}) => {
+  // 「新」の応答が「新宿」の応答より後に届くと、候補が「新」の結果（新函館北斗など）
+  // に戻っていた。古い応答を捨てずに setSuggestions していたため。
+  await stubTiles(page);
+  await page.route("**/api/stations?*", async (route) => {
+    const q = new URL(route.request().url()).searchParams.get("q");
+    if (q === "新") await new Promise((r) => setTimeout(r, 1_500));
+    await route.continue();
+  });
+  await page.goto("/");
+
+  const panel = sidebar(page);
+  const input = panel.getByPlaceholder("駅名を入力");
+  const first = page.waitForRequest(
+    (r) => new URL(r.url()).searchParams.get("q") === "新",
+  );
+  await input.fill("新");
+  await first; // デバウンスを越えて「新」の問い合わせが出たことを確かめる
+  const lateResponse = page.waitForResponse(
+    (r) => new URL(r.url()).searchParams.get("q") === "新",
+  );
+  await input.fill("新宿");
+  await expect(panel.locator("ul li").first()).toContainText("新宿");
+  await lateResponse; // 遅れた「新」の応答が届いたあとも
+
+  const items = panel.locator("ul li");
+  await expect(items.first()).toBeVisible();
+  for (const text of await items.allInnerTexts())
+    expect(text).toContain("新宿");
+});

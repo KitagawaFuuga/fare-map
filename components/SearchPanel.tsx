@@ -13,9 +13,14 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
   const [suggestions, setSuggestions] = useState<StationSuggestion[]>([]);
   const [open, setOpen] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // デバウンスだけでは、先の入力の応答が後から届いたときに古い候補で上書きされる
+  // （「新宿」と入力しても「新」の候補が出た）。hooks/use-reachable.ts と同じく
+  // 世代カウンタで最新の問い合わせの応答だけを反映する
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
     if (timer.current) clearTimeout(timer.current);
+    const requestId = ++requestIdRef.current;
     if (query.trim() === "") {
       setSuggestions([]);
       return;
@@ -25,6 +30,7 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
       const res = await fetch(`/api/stations?q=${encodeURIComponent(query)}`);
       if (res.ok) {
         const body = (await res.json()) as { stations: StationSuggestion[] };
+        if (requestId !== requestIdRef.current) return;
         setSuggestions(body.stations);
         setOpen(true);
       }

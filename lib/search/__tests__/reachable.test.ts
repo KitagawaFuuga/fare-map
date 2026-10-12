@@ -442,8 +442,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
         confirmedFare: 100,
         totalKm: 10,
         totalEastKm: 0,
-        pendingEastKm: 0,
-        noZoneEastKm: 0,
         fare: 150,
         alive: true,
       }),
@@ -454,8 +452,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
         confirmedFare: 200,
         totalKm: 20,
         totalEastKm: 0,
-        pendingEastKm: 0,
-        noZoneEastKm: 0,
         fare: 250,
         alive: true,
       }),
@@ -465,8 +461,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
         confirmedFare: 100,
         totalKm: 10,
         totalEastKm: 0,
-        pendingEastKm: 0,
-        noZoneEastKm: 0,
         fare: 150,
         alive: true,
       },
@@ -479,8 +473,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
         confirmedFare: 200,
         totalKm: 20,
         totalEastKm: 0,
-        pendingEastKm: 0,
-        noZoneEastKm: 0,
         fare: 250,
         alive: true,
       },
@@ -490,8 +482,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
         confirmedFare: 100,
         totalKm: 10,
         totalEastKm: 0,
-        pendingEastKm: 0,
-        noZoneEastKm: 0,
         fare: 150,
         alive: true,
       }),
@@ -501,8 +491,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
         confirmedFare: 100,
         totalKm: 10,
         totalEastKm: 0,
-        pendingEastKm: 0,
-        noZoneEastKm: 0,
         fare: 150,
         alive: true,
       },
@@ -516,8 +504,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
         confirmedFare: 100,
         totalKm: 20,
         totalEastKm: 0,
-        pendingEastKm: 0,
-        noZoneEastKm: 0,
         fare: 150,
         alive: true,
       }),
@@ -527,8 +513,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
         confirmedFare: 50,
         totalKm: 30,
         totalEastKm: 0,
-        pendingEastKm: 0,
-        noZoneEastKm: 0,
         fare: 200,
         alive: true,
       }),
@@ -542,8 +526,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
       confirmedFare: 100,
       totalKm: 10,
       totalEastKm: 0,
-      pendingEastKm: 0,
-      noZoneEastKm: 0,
       fare: 150,
       alive: true,
     });
@@ -553,8 +535,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
         confirmedFare: 100,
         totalKm: 10,
         totalEastKm: 0,
-        pendingEastKm: 0,
-        noZoneEastKm: 0,
         fare: 150,
         alive: true,
       }),
@@ -568,8 +548,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
       confirmedFare: 200,
       totalKm: 20,
       totalEastKm: 0,
-      pendingEastKm: 0,
-      noZoneEastKm: 0,
       fare: 250,
       alive: true,
     });
@@ -578,8 +556,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
       confirmedFare: 100,
       totalKm: 10,
       totalEastKm: 0,
-      pendingEastKm: 0,
-      noZoneEastKm: 0,
       fare: 150,
       alive: true,
     });
@@ -601,8 +577,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
       confirmedFare: 0,
       totalKm: 50,
       totalEastKm: 40,
-      pendingEastKm: 40,
-      noZoneEastKm: 40,
       fare: 999,
       alive: true,
     };
@@ -613,50 +587,7 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
       confirmedFare: 0,
       totalKm: 10,
       totalEastKm: 0,
-      pendingEastKm: 0,
-      noZoneEastKm: 0,
       fare: 500,
-      alive: true,
-    };
-    expect(tryInsertPareto(bucket, better)).toBe(true);
-    expect(bucket).toEqual([better]);
-    expect(worse.alive).toBe(false);
-  });
-
-  // レビュー指摘2（Important）: isHonshuThrough=true かつ eastKm除外が現在
-  // 適用中（加算額対象キロへの寄与が0）のバケットでは、totalEastKm が常に
-  // honshuThroughEastKm（segmentKmに依存しない）になるため、segmentKm/honshuThroughKmの内訳が
-  // totalKm/totalEastKmから復元できない。この状態で、除外が後から解除される
-  // （ラチェットが落ちる）同一事業者エッジに当たると、内訳だけが違う2状態が
-  // (confirmedFare, totalKm, totalEastKm) で完全に一致し相互支配になり、
-  // 先着ちでsegmentKmの大きい（将来、除外解除時に加算額が多く乗る、不利な）方が
-  // 残りうる。pendingEastKm（= totalEastKm + 除外中に隠れているsegmentKm）を
-  // 追加の非strict次元として比較することで、segmentKmが小さい（有利な）方を
-  // 正しく残す。
-  it("pendingEastKm を無視すると、eastKm除外中に隠れた segmentKm の大小を区別できず、不利な状態が残りうる（反映漏れの再現）", () => {
-    const bucket: ParetoEntry[] = [];
-    // 除外中(totalEastKmはhonshuThroughEastKm=0のまま)だが、隠れているsegmentKmが45と
-    // 大きい（不利な）状態が先に入る
-    const worse: ParetoEntry = {
-      confirmedFare: 0,
-      totalKm: 50,
-      totalEastKm: 0,
-      pendingEastKm: 45,
-      noZoneEastKm: 0,
-      fare: 900,
-      alive: true,
-    };
-    expect(tryInsertPareto(bucket, worse)).toBe(true);
-    // confirmedFare・totalKm・totalEastKmは完全に同じだが、隠れているsegmentKmが5と
-    // 小さい（有利な）状態。pendingEastKmを見ていれば worse を支配して
-    // 追い出し、挿入されるはず。見ていなければ相互支配で拒否されてしまう。
-    const better: ParetoEntry = {
-      confirmedFare: 0,
-      totalKm: 50,
-      totalEastKm: 0,
-      pendingEastKm: 5,
-      noZoneEastKm: 0,
-      fare: 900,
       alive: true,
     };
     expect(tryInsertPareto(bucket, better)).toBe(true);
@@ -673,8 +604,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
       confirmedFare: 100,
       totalKm: 10,
       totalEastKm: 0,
-      pendingEastKm: 0,
-      noZoneEastKm: 0,
       fare: 150,
       alive: true,
     });
@@ -682,8 +611,6 @@ describe("tryInsertPareto（同一キー内の非支配集合の管理）", () =
       confirmedFare: 200,
       totalKm: 20,
       totalEastKm: 0,
-      pendingEastKm: 0,
-      noZoneEastKm: 0,
       fare: 250,
       alive: true,
     };
@@ -1296,263 +1223,6 @@ describe("findReachable: JR本州3社をまたぐ通し運賃（基準額＋加�
     };
     const result = findReachable(graph, honshuCalc, "A", 10000);
     expect(result.find((r) => r.id === "D")?.fare).toBe(210);
-  });
-
-  // レビュー指摘1: 「東京都区内・山手線内〜東京(品川)～熱海間は新幹線(JR東海)経由と
-  // して計算するためJR東日本分の加算はない」という規則(出典:
-  // https://ameblo.jp/yyrapid/entry-12937999551.html)を、実データの構造
-  // （lineId "11301"=JR東海道本線 東京～熱海、"11302"=JR山手線）で再現する。
-  describe("eastKm除外規則（東京都区内・山手線内〜東京～熱海間は加算額の対象外）", () => {
-    // name を id と独立に指定できるようにしている（実データでは同じ物理駅が
-    // 路線ごとに別ノードIDを持つため、id !== name のケースを正しく表現するため）。
-    const tokaidoNode = (
-      id: string,
-      name: string,
-      operator: string,
-      lineId: string,
-    ) => ({
-      id,
-      groupId: id,
-      name,
-      lat: 35,
-      lng: 139,
-      lineId,
-      lineName: "L",
-      operator,
-    });
-
-    it("東京～熱海間相当のJR東日本区間はeastKmから除外され、加算額に反映されない", () => {
-      // Tokyo(11301)--JR東日本60km-->Atami(11301)--JR東海50km-->C。
-      // 総距離110km・eastKm=0（東京～熱海間の在来線=lineId 11301のため除外）。
-      // 通し: 基準額(110km)=900円のみ（加算額表[0]=対象外のため0円）。
-      // 除外がなければ前のテストと同じく970円になってしまう。
-      //
-      // 実データでは同じ物理駅（東京）が lineId 11301（東海道本線）と
-      // 11302（山手線）の両方に別ノードとして存在する。ここでも
-      // TokyoYamanote（lineId 11302・同名"Tokyo"）を無関係ノードとして
-      // 追加し、「起点の駅名が山手線内駅集合に属するか」の判定が
-      // 実データの構造どおりに機能することを確認する。
-      const graph: RailGraph = {
-        nodes: {
-          Tokyo: tokaidoNode("Tokyo", "Tokyo", "JR東日本", "11301"),
-          TokyoYamanote: tokaidoNode(
-            "TokyoYamanote",
-            "Tokyo",
-            "JR東日本",
-            "11302",
-          ),
-          Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
-          C: jrNode("C", "JR東海"),
-        },
-        edges: [
-          {
-            from: "Tokyo",
-            to: "Atami",
-            km: 60,
-            kind: "rail",
-            operator: "JR東日本",
-          },
-          { from: "Atami", to: "C", km: 50, kind: "rail", operator: "JR東海" },
-        ],
-      };
-      const result = findReachable(graph, honshuCalc, "Tokyo", 10000);
-      expect(result.find((r) => r.id === "C")?.fare).toBe(900);
-    });
-
-    it("山手線内(lineId 11302)からの区間もeastKmから除外される", () => {
-      const graph: RailGraph = {
-        nodes: {
-          Shinjuku: tokaidoNode("Shinjuku", "Shinjuku", "JR東日本", "11302"),
-          Tokyo: tokaidoNode("Tokyo", "Tokyo", "JR東日本", "11302"),
-          C: jrNode("C", "JR東海"),
-        },
-        edges: [
-          {
-            from: "Shinjuku",
-            to: "Tokyo",
-            km: 10,
-            kind: "rail",
-            operator: "JR東日本",
-          },
-          { from: "Tokyo", to: "C", km: 20, kind: "rail", operator: "JR東海" },
-        ],
-      };
-      const result = findReachable(graph, honshuCalc, "Shinjuku", 10000);
-      // 総距離30km・eastKm=0（山手線内のため除外） => 基準額(30km)=300円のみ
-      expect(result.find((r) => r.id === "C")?.fare).toBe(300);
-    });
-
-    it("lineIdが対象外（通常のJR東日本区間）ならeastKmは通常どおり積まれる（回帰確認）", () => {
-      // "L"という無関係のlineIdのJR東日本区間は除外対象ではないので、
-      // 通常どおり加算額の対象になるはず（前段の「100kmを超えても加算額は0円に
-      // ならない」テストと同じ構図をlineId付きノードで再確認する）。
-      const graph: RailGraph = {
-        nodes: {
-          A: jrNode("A", "JR東日本"),
-          B: jrNode("B", "JR東日本"),
-          C: jrNode("C", "JR東海"),
-        },
-        edges: [
-          { from: "A", to: "B", km: 60, kind: "rail", operator: "JR東日本" },
-          { from: "B", to: "C", km: 50, kind: "rail", operator: "JR東海" },
-        ],
-      };
-      const result = findReachable(graph, honshuCalc, "A", 10000);
-      expect(result.find((r) => r.id === "C")?.fare).toBe(970);
-    });
-
-    it("除外区間の後に通常区間が混在すると、除外区間分の距離も加算額に含めてしまう（安全側の近似の限界）", () => {
-      // Tokyo(11301)--JR東日本60km-->Atami(11301)--JR東日本10km-->X(lineId "L")
-      // --JR東海40km--> C。
-      //
-      // 本来の趣旨に忠実に計算するなら、除外されるのはTokyo→Atami分(60km)のみで
-      // eastKmはAtami→X分の10kmだけになるはずだが、本実装のsegEastExcludedは
-      // 「除外区間でないエッジに一度でも当たったら区間の残り全体で恒久的にfalseに
-      // なる」一方向ラチェットのため、Atami→X（除外対象外のlineId）で除外フラグが
-      // 落ちた時点で、それ以前の60km分も含めた区間全体(70km)がeastKmに算入されて
-      // しまう。これは「絶対に安全側（過大評価はしても過小評価はしない）」設計上の
-      // トレードオフであり、意図的な近似である（コメント参照）。
-      const graph: RailGraph = {
-        nodes: {
-          Tokyo: tokaidoNode("Tokyo", "Tokyo", "JR東日本", "11301"),
-          TokyoYamanote: tokaidoNode(
-            "TokyoYamanote",
-            "Tokyo",
-            "JR東日本",
-            "11302",
-          ),
-          Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
-          X: jrNode("X", "JR東日本"), // lineId "L"（対象外）
-          C: jrNode("C", "JR東海"),
-        },
-        edges: [
-          {
-            from: "Tokyo",
-            to: "Atami",
-            km: 60,
-            kind: "rail",
-            operator: "JR東日本",
-          },
-          {
-            from: "Atami",
-            to: "X",
-            km: 10,
-            kind: "rail",
-            operator: "JR東日本",
-          },
-          { from: "X", to: "C", km: 40, kind: "rail", operator: "JR東海" },
-        ],
-      };
-      const result = findReachable(graph, honshuCalc, "Tokyo", 10000);
-      // 総距離110km(60+10+40)・eastKm=70km(Tokyo→X全体。除外区間60km分も
-      // 算入されてしまう安全側の近似)。基準額(110km)=900 + 加算額(70km、
-      // 61〜100km帯)=110 = 1010円。
-      expect(result.find((r) => r.id === "C")?.fare).toBe(1010);
-    });
-
-    // レビュー指摘（過小評価バグ）: isEastKmExcludedEdge は両端ノードの lineId
-    // だけを見ており、「乗車が東京都区内・山手線内発か」を一切見ていなかった。
-    // lineId "11301"（JR東海道本線 東京〜熱海）には小田原・大船・藤沢・平塚・
-    // 湯河原・横浜など、東京都区内でも山手線内でもない駅が含まれるため、
-    // これらの駅を起点にしても除外が発動し、加算額が丸ごと0円になってしまう
-    // （過小評価）。まず修正前に失敗することを確認する。
-    it("小田原（東京都区内・山手線内ではない）を起点にすると、eastKm除外は発動しない", () => {
-      // Odawara(11301)--JR東日本20km-->Atami(11301)--JR東海50km-->C。
-      // グラフ内に別途 Shinjuku(11302) を無関係ノードとして置き、山手線名集合が
-      // 空にならないようにする（「常に false を返す実装」でも通ってしまう、
-      // というレビュー指摘への対応。この集合が空だと isEligibleExclusionName は
-      // 何を渡しても false になり、実装の正しさを検証できていなかった）。
-      // 起点が東京都区内・山手線内の駅ではないので、除外は発動せず、
-      // eastKm=20kmとして加算額が乗るべき。
-      // 総距離70km => 基準額(70km、beyond帯: fromKm=110未満なので110km帯)=900円
-      // + 加算額(eastKm20km、11〜20km帯)=20円 = 920円。
-      // 除外が（誤って）発動するとeastKm=0円になり900円になってしまう。
-      const graph: RailGraph = {
-        nodes: {
-          Odawara: tokaidoNode("Odawara", "Odawara", "JR東日本", "11301"),
-          Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
-          Shinjuku: tokaidoNode("Shinjuku", "Shinjuku", "JR東日本", "11302"),
-          C: jrNode("C", "JR東海"),
-        },
-        edges: [
-          {
-            from: "Odawara",
-            to: "Atami",
-            km: 20,
-            kind: "rail",
-            operator: "JR東日本",
-          },
-          { from: "Atami", to: "C", km: 50, kind: "rail", operator: "JR東海" },
-        ],
-      };
-      const result = findReachable(graph, honshuCalc, "Odawara", 10000);
-      expect(result.find((r) => r.id === "C")?.fare).toBe(920);
-    });
-
-    it("横浜（東京都区内・山手線内ではない）を起点にすると、eastKm除外は発動しない", () => {
-      // Yokohama(11301)--JR東日本30km-->Atami(11301)--JR東海50km-->C。
-      // Shinjuku(11302) を無関係ノードとして置き、山手線名集合を非空にする。
-      // 総距離80km => 基準額(80km)=900円 + 加算額(eastKm30km、21〜30km帯)=30円
-      // = 930円。除外が（誤って）発動すると900円になってしまう。
-      const graph: RailGraph = {
-        nodes: {
-          Yokohama: tokaidoNode("Yokohama", "Yokohama", "JR東日本", "11301"),
-          Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
-          Shinjuku: tokaidoNode("Shinjuku", "Shinjuku", "JR東日本", "11302"),
-          C: jrNode("C", "JR東海"),
-        },
-        edges: [
-          {
-            from: "Yokohama",
-            to: "Atami",
-            km: 30,
-            kind: "rail",
-            operator: "JR東日本",
-          },
-          { from: "Atami", to: "C", km: 50, kind: "rail", operator: "JR東海" },
-        ],
-      };
-      const result = findReachable(graph, honshuCalc, "Yokohama", 10000);
-      expect(result.find((r) => r.id === "C")?.fare).toBe(930);
-    });
-
-    // レビュー指摘1（Important）: isEligibleExclusionOrigin は区間の「起点」しか
-    // 見ておらず、上り方向（東京着）で除外が発動しない非対称バグがあった。
-    // 実運賃は方向対称（東京→名古屋 = 名古屋→東京）のはずだが、修正前は
-    // 上り方向で加算額が誤って上乗せされる（過大評価）。
-    it("上り方向（終端が山手線内）でもeastKm除外が発動する（方向対称性の修正）", () => {
-      // C(JR東海)--50km-->Atami(11301)--60km(JR東日本)-->Tokyo(11301)。
-      // TokyoYamanote(11302,同名"Tokyo")を追加し、終端Tokyoが山手線内である
-      // ことを表現する。起点Atami（山手線内ではない）だけを見ていた修正前は
-      // 除外が発動せず、eastKm=60km分の加算額が乗ってしまう
-      // （基準額900+加算額70=970円）。終端も見るようにすると、下り方向の
-      // 「東京～熱海間相当」テストと対称に、eastKm=0円（基準額900円のみ）になる。
-      const graph: RailGraph = {
-        nodes: {
-          C: jrNode("C", "JR東海"),
-          Atami: tokaidoNode("Atami", "Atami", "JR東日本", "11301"),
-          Tokyo: tokaidoNode("Tokyo", "Tokyo", "JR東日本", "11301"),
-          TokyoYamanote: tokaidoNode(
-            "TokyoYamanote",
-            "Tokyo",
-            "JR東日本",
-            "11302",
-          ),
-        },
-        edges: [
-          { from: "C", to: "Atami", km: 50, kind: "rail", operator: "JR東海" },
-          {
-            from: "Atami",
-            to: "Tokyo",
-            km: 60,
-            kind: "rail",
-            operator: "JR東日本",
-          },
-        ],
-      };
-      const result = findReachable(graph, honshuCalc, "C", 10000);
-      expect(result.find((r) => r.id === "Tokyo")?.fare).toBe(900);
-    });
   });
 
   // レビュー指摘3: honshuThroughKm を「距離」と「通算中フラグ」の兼用にしていると、

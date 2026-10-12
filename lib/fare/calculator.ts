@@ -12,9 +12,6 @@ const HONSHU_KASAN_OPERATOR = "__jr-honshu-kasan";
 const HONSHU_CITY_GROUP = "__jr-honshu";
 // 加算額の対象になる会社（区域で縮んだ距離を加算額の距離からも引く）
 const EAST_OPERATOR = "JR東日本";
-// 東京〜熱海の加算額の除外は、この区域（data/special-cities.json の id）が
-// 適用される乗車だけが対象（docs/search-design.md「加算額の除外区間」）
-export const EAST_KM_EXCLUSION_CITIES = ["tokyo", "yamanote"] as const;
 
 export interface FareCalculator {
   // localKm は区間がすべて地方交通線のときの営業キロ。渡すと地方交通線の表を引く
@@ -55,20 +52,15 @@ export interface FareCalculator {
     honshuThrough: boolean,
     maxFare: number,
   ): string | undefined;
-  // 通し運賃 = 基準額(総営業キロ) + 加算額(eastKm)。eastKm は呼び出し側が
-  // 東京〜熱海の特例を適用した後の値を渡す（docs/search-design.md）。
-  // fromName/toName は通しの発着駅。noZoneEastKm は EAST_KM_EXCLUSION_CITIES の区域が
-  // 適用されなかった場合の eastKm（区域内の駅を条件付きで除外した分を戻した値）。
-  // 区域が適用されたかはここで判定する
+  // 通し運賃 = 基準額(総営業キロ) + 加算額(eastKm)。eastKm は JR東日本の区間の
+  // 距離（docs/search-design.md）。fromName/toName は通しの発着駅で、特定都区市内の
+  // 読み替えに使う
   estimateHonshuThrough(
     totalKm: number,
     eastKm: number,
     fromName?: string,
     toName?: string,
-    noZoneEastKm?: number,
   ): number;
-  // 特定都区市内の区域の駅（id は data/special-cities.json）。無ければ undefined
-  specialCityStations(id: string): ReadonlySet<string> | undefined;
   // 上記の下界。加算額は常に0以上なので基準額だけ返せば安全
   honshuThroughBaseFare(totalKm: number, fromName?: string): number;
 }
@@ -222,7 +214,7 @@ export function createFareCalculator(
     km: number,
     fromName: string | undefined,
     toName: string | undefined,
-  ): { km: number; eastShrink: number; cityIds: string[] } | undefined {
+  ): { km: number; eastShrink: number } | undefined {
     if (km <= (cityReachByGroup.get(group) ?? Infinity)) return undefined;
     const byName = citiesByStation.get(group);
     if (byName === undefined || fromName === undefined || toName === undefined)
@@ -276,7 +268,6 @@ export function createFareCalculator(
       return {
         km: kmBetween,
         eastShrink: Math.min(eastSide, shrink),
-        cityIds: [origin.city.id, dest.city.id],
       };
     }
     const applied = origin ?? dest;
@@ -289,7 +280,6 @@ export function createFareCalculator(
         applied.city.operator === EAST_OPERATOR
           ? Math.max(km - applied.km, 0)
           : 0,
-      cityIds: [applied.city.id],
     };
   }
 
@@ -489,12 +479,6 @@ export function createFareCalculator(
       if (usable.length === 0) return undefined;
       return usable.map(({ city }) => city.id).join("+");
     },
-    specialCityStations(id) {
-      for (const list of citiesByGroup.values())
-        for (const { city, stations } of list)
-          if (city.id === id) return stations;
-      return undefined;
-    },
     hasLocalTable(operator) {
       return byOperator.get(operator)?.localTable !== undefined;
     },
@@ -509,7 +493,7 @@ export function createFareCalculator(
         overrideStationsByOperator.get(operator)?.has(stationName) ?? false
       );
     },
-    estimateHonshuThrough(totalKm, eastKm, fromName, toName, noZoneEastKm) {
+    estimateHonshuThrough(totalKm, eastKm, fromName, toName) {
       if (totalKm <= 0) return 0;
       if (!byOperator.has(HONSHU_BASE_OPERATOR)) {
         throw new Error(
@@ -519,11 +503,6 @@ export function createFareCalculator(
       // 中心駅から計算するので、JR東日本の区域内の区間は加算額の距離にも入れない
       const city = specialCityKm(HONSHU_CITY_GROUP, totalKm, fromName, toName);
       const base = tableFare(HONSHU_BASE_OPERATOR, city?.km ?? totalKm);
-      const zoneApplied =
-        city?.cityIds.some((id) =>
-          (EAST_KM_EXCLUSION_CITIES as readonly string[]).includes(id),
-        ) ?? false;
-      if (!zoneApplied && noZoneEastKm !== undefined) eastKm = noZoneEastKm;
       eastKm = Math.max(eastKm - (city?.eastShrink ?? 0), 0);
       if (!byOperator.has(HONSHU_KASAN_OPERATOR)) {
         throw new Error(

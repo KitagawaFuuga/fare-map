@@ -149,11 +149,10 @@ describe("探索での特定都区市内とJR本州3社の通し運賃", () => {
   });
 });
 
-describe("東京都区内・山手線内の加算額の除外（東京〜熱海）", () => {
+describe("東京都区内から東海道方面の通し運賃（在来線経由）", () => {
   // 東京都区内: A（赤羽にあたる、除外区間の路線ではない）・C（東京、中心駅）
   // 山手線内: C のみ
   //   A —東日本13km— C —東日本105km（東海道本線 11301）— H | H' —東海50km— S —東海210km— N —東海10km— M
-  //   A —東日本60km— B | B' —東海58km— H'（JR東日本の距離が短い別経路。S まで同じ168km）
   const graph: RailGraph = {
     nodes: {
       A: { ...node("A", "JR東日本"), lineId: "L1" },
@@ -163,13 +162,8 @@ describe("東京都区内・山手線内の加算額の除外（東京〜熱海�
       S: node("S", "JR東海"),
       N: node("N", "JR東海"),
       M: node("M", "JR東海"),
-      B: { ...node("B", "JR東日本"), lineId: "L2" },
-      B2: { ...node("B2", "JR東海"), name: "B" },
     },
     edges: [
-      rail("A", "B", 60, "JR東日本"),
-      { from: "B", to: "B2", km: 0, kind: "transfer", operator: "" },
-      rail("B2", "H2", 58, "JR東海"),
       rail("A", "C", 13, "JR東日本"),
       rail("C", "H", 105, "JR東日本"),
       { from: "H", to: "H2", km: 0, kind: "transfer", operator: "" },
@@ -221,32 +215,12 @@ describe("東京都区内・山手線内の加算額の除外（東京〜熱海�
     cities,
   );
 
-  it("区域内の駅から東海道方面へ200km超なら、東京〜熱海も区域内の区間も加算額に入れない", () => {
-    // 中心駅から 365km。基準額 3,650円 ＋ 加算額 0円
+  it("区域内の駅から東海道方面へ200km超でも、東京〜熱海の加算額がかかる", () => {
+    // 2026年3月の改定で東京〜熱海の新幹線と在来線は別線になり、在来線経由は
+    // JR東日本の加算額がかかる（このアプリは普通列車で行ける範囲を出す）。
+    // 中心駅から 365km で基準額 3,650円。加算額は区域内の A→C（13km）を除いた
+    // C→H の 105km 分で200円
     const result = findReachable(graph, calc, "A", 5000);
-    expect(fareAt(result, "N")).toBe(3650);
-    expect(fareAt(result, "M")).toBe(3750);
-  });
-
-  it("逆方向（東海道方面から区域内の駅へ）も同じ額", () => {
-    expect(fareAt(findReachable(graph, calc, "N", 5000), "A")).toBe(3650);
-  });
-
-  it("東京都区内が適用されない200km以下では、区域内の駅でも加算額がかかる", () => {
-    // 実際の 168km（中心駅から 155km で200km以下）。東京経由は加算額 118km 分の200円、
-    // B 経由は JR東日本が 60km で100円。B 経由が安い
-    expect(fareAt(findReachable(graph, calc, "A", 5000), "S")).toBe(1680 + 100);
-  });
-
-  it("区域が適用されたときの加算額が小さい状態でも、適用されないときに高い状態は別の状態を消さない", () => {
-    // 熱海で東京経由（加算額の距離 0km、適用されなければ118km）と B 経由（60km）が
-    // 同じ距離で並ぶ。前者が後者を消すと、200km以下の S で B 経由の安い額を取りこぼす
-    const result = findReachable(graph, calc, "A", 5000);
-    expect(fareAt(result, "S")).toBe(1780);
-    expect(fareAt(result, "N")).toBe(3650);
-  });
-
-  it("山手線内の駅からは100km超200km以下でも除外する", () => {
-    expect(fareAt(findReachable(graph, calc, "C", 5000), "S")).toBe(1550);
+    expect(fareAt(result, "N")).toBe(3650 + 200);
   });
 });

@@ -43,6 +43,7 @@ const calc = createFareCalculator([
     "ueda-dentetsu",
     "alpico",
     "fukushima-kotsu",
+    "choshi",
   ].map(rule),
 ]);
 
@@ -139,6 +140,10 @@ describe("公式の駅間表との照合", () => {
     ["福島交通", "2.0km", 2.0, 180],
     ["福島交通", "2.1km", 2.1, 210],
     ["福島交通", "福島→飯坂温泉", 9.2, 430],
+    // 銚子電気鉄道: 2019年10月改定（1km未満切り上げ）
+    ["銚子電気鉄道", "1.0km", 1.0, 180],
+    ["銚子電気鉄道", "1.1km", 1.1, 210],
+    ["銚子電気鉄道", "銚子→外川", 6.4, 350],
   ] as const)("%s %s（%fkm）は %i 円", (operator, _pair, km, fare) => {
     expect(calc.estimate(operator, km)).toBe(fare);
   });

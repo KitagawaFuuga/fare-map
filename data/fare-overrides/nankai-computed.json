@@ -524,7 +524,7 @@
   ],
   "source": {
     "url": "https://www.nankai.co.jp/lib/traffic/guide/pdf/kasan_semboku_20250627.pdf, https://www.nankai.co.jp/lib/company/news/pdf/241204.pdf",
-    "fetchedAt": "2026-10-10",
+    "fetchedAt": "2026-10-12",
     "note": "公式の運賃規則から計算した実額。距離帯表そのままでは引けないペアだけを持つ。加算運賃は 泉北線（定義と出典は data/fare-surcharges.json）。営業キロは data/graph.json。再生成は npx tsx scripts/fare/ingest/compute-fares.ts --write"
   }
 }

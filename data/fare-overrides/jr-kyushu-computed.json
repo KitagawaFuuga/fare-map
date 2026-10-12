@@ -2799,7 +2799,7 @@
   ],
   "source": {
     "url": "https://ja.wikipedia.org/wiki/%E5%9C%B0%E6%96%B9%E4%BA%A4%E9%80%9A%E7%B7%9A, https://www.jrkyushu.co.jp/railway/kaitei/pdf/241217_unchinkaitei_guidebook.pdf",
-    "fetchedAt": "2026-10-10",
+    "fetchedAt": "2026-10-12",
     "note": "公式の運賃規則から計算した実額。距離帯表そのままでは引けないペアだけを持つ。擬制キロは graph.json の fareKm に焼いてあるので、ここには含まれない（定義と出典は data/fare-distance-classes.json）。加算運賃は JR宮崎空港線（定義と出典は data/fare-surcharges.json）。営業キロは data/graph.json。再生成は npx tsx scripts/fare/ingest/compute-fares.ts --write"
   }
 }

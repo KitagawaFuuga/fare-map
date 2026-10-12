@@ -1,7 +1,7 @@
 {
   "source": {
     "url": "https://ja.wikipedia.org/ (各路線の記事の駅一覧)",
-    "fetchedAt": "2026-10-10",
+    "fetchedAt": "2026-10-12",
     "note": "路線記事の駅一覧から取った隣接駅間の営業キロ。取得したのは駅名と数値のみで、文章は複製していない。どの列が累計営業キロかは記事だけでは決まらないため、全国鉄道運行本数データ(CC BY 4.0)の区間営業キロを正解として突き合わせ、一致した列だけを採用している（lib/graph/station-km.ts）。検証できない表は捨てる。再生成は npx tsx scripts/pipeline/fetch-station-km.ts --write"
   },
   "edges": [
@@ -44,8 +44,8 @@
       "operator": "IGRいわて銀河鉄道",
       "line": "いわて銀河鉄道線",
       "from": "奥中山高原",
-      "to": "小鳥谷",
-      "km": 15.4
+      "to": "小繋",
+      "km": 7.8
     },
     {
       "operator": "IGRいわて銀河鉄道",
@@ -67,6 +67,13 @@
       "from": "渋民",
       "to": "滝沢",
       "km": 4.4
+    },
+    {
+      "operator": "IGRいわて銀河鉄道",
+      "line": "いわて銀河鉄道線",
+      "from": "小繋",
+      "to": "小鳥谷",
+      "km": 7.6
     },
     {
       "operator": "IGRいわて銀河鉄道",

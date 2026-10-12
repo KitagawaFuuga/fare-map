@@ -61809,7 +61809,7 @@
   ],
   "source": {
     "url": "https://www.kintetsu.co.jp/gyoumu/kippu/kasan/kasan.html, https://www.kintetsu.co.jp/gyoumu/kippu/pdf/kirotei_20260314.pdf, https://www.kintetsu.co.jp/gyoumu/kippu/pdf/kirotei_20260314.pdf, https://ekitan.com/transit/fare/sf-5007/st-9072",
-    "fetchedAt": "2026-10-10",
+    "fetchedAt": "2026-10-12",
     "note": "公式の運賃規則から計算した実額。距離帯表そのままでは引けないペアだけを持つ。加算運賃は 近鉄鳥羽線 / 近鉄けいはんな線 / 近鉄吉野線・近鉄湯の山線・近鉄志摩線（定義と出典は data/fare-surcharges.json）。営業キロは data/graph.json。再生成は npx tsx scripts/fare/ingest/compute-fares.ts --write"
   }
 }

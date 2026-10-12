@@ -73,7 +73,7 @@ test("駅名を入力すると候補が出て、選ぶと出発駅になる", as
   await expect(suggestion).toBeVisible({ timeout: 15_000 });
   await suggestion.click();
 
-  await expect(panel.getByText("選択中: 新宿")).toBeVisible();
+  await expect(panel.getByText("選択中: 新宿", { exact: true })).toBeVisible();
 });
 
 test("予算を入れて検索すると到達可能駅が出る", async ({ page }) => {

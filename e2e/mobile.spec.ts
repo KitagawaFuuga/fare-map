@@ -75,7 +75,7 @@ async function selectShinjuku(page: Page): Promise<void> {
   const panel = sheet(page);
   await panel.getByPlaceholder("駅名を入力").fill("新宿");
   await panel.getByRole("button", { name: /^新宿/ }).first().click();
-  await expect(panel.getByText("選択中: 新宿")).toBeVisible();
+  await expect(panel.getByText("選択中: 新宿", { exact: true })).toBeVisible();
 }
 
 test.describe("ボトムシート", () => {
@@ -129,6 +129,12 @@ test.describe("ボトムシート", () => {
     await swipe(target, -20);
     await page.waitForTimeout(500);
     expect(await heightOf(target)).toBe(before);
+    // 対照: 閾値を超えるスワイプなら変わる。これが無いと、タッチの処理が
+    // 効いていなくても「変わらない」で通ってしまう
+    await swipe(target, -100);
+    await expect
+      .poll(() => heightOf(target), { timeout: 5_000 })
+      .toBeGreaterThan(before);
   });
 
   test("シートから駅を選んで検索すると結果が出て、シートが畳まれる", async ({

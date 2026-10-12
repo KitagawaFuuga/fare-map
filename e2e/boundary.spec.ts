@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page, type Response } from "@playwright/test";
 
 const EMPTY_STYLE = {
   version: 8,
@@ -20,11 +20,27 @@ async function stubTiles(page: Page): Promise<void> {
 
 const sidebar = (page: Page) => page.locator("aside");
 
+// 応答を受け取ってから画面に反映されるまでには時間差がある。0件を確かめる前に
+// 本文の受信と React の描画（2フレーム）を待つ。待たないと反映前の0件で素通りする
+async function afterResponseRendered(
+  page: Page,
+  response: Response,
+): Promise<void> {
+  await response.finished();
+  await page.evaluate(
+    () =>
+      new Promise<void>((r) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => r())),
+      ),
+  );
+}
+
 async function selectShinjuku(page: Page): Promise<void> {
   const panel = sidebar(page);
   await panel.getByPlaceholder("駅名を入力").fill("新宿");
   await panel.getByRole("button", { name: /^新宿/ }).first().click();
-  await expect(panel.getByText("選択中: 新宿")).toBeVisible();
+  // 部分一致だと新宿三丁目などを選んでも通るので、完全一致で確かめる
+  await expect(panel.getByText("選択中: 新宿", { exact: true })).toBeVisible();
 }
 
 test.describe("予算の境界値", () => {
@@ -32,6 +48,9 @@ test.describe("予算の境界値", () => {
   // 画面から実際にその値を入れて、結果が出るか・エラーが出るかを確かめる。
   for (const budget of ["100", "10000"]) {
     test(`予算 ${budget} 円で結果が出る`, async ({ page }) => {
+      // 結果を最大60秒待つので、テストの制限時間（既定30秒）も合わせる。
+      // 並列で予算1万円の検索が重なると30秒を超え、確認の途中で打ち切られていた
+      test.setTimeout(90_000);
       await stubTiles(page);
       await page.goto("/");
       await selectShinjuku(page);
@@ -114,19 +133,32 @@ test.describe("駅名入力の境界値", () => {
   // API の上限は 50 文字。超えても画面が壊れないこと（候補なしで済む）。
   test("51 文字入れても候補欄が出ずエラーにならない", async ({ page }) => {
     await stubTiles(page);
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(String(e)));
     await page.goto("/");
     const panel = sidebar(page);
+    // 固定の待ち時間のあとに0件を見るだけだと、応答が遅いときに素通りする。
+    // 応答を待ってから確かめる
+    const response = page.waitForResponse((r) =>
+      r.url().includes("/api/stations?"),
+    );
     await panel.getByPlaceholder("駅名を入力").fill("新".repeat(51));
-    await page.waitForTimeout(1000);
+    expect((await response).status()).toBe(400);
+    await afterResponseRendered(page, await response);
     await expect(panel.locator("ul li")).toHaveCount(0);
+    expect(errors).toEqual([]);
   });
 
   test("存在しない駅名では候補が出ない", async ({ page }) => {
     await stubTiles(page);
     await page.goto("/");
     const panel = sidebar(page);
+    const response = page.waitForResponse((r) =>
+      r.url().includes("/api/stations?"),
+    );
     await panel.getByPlaceholder("駅名を入力").fill("ZZZZ存在しない駅ZZZZ");
-    await page.waitForTimeout(1000);
+    expect((await response).status()).toBe(200);
+    await afterResponseRendered(page, await response);
     await expect(panel.locator("ul li")).toHaveCount(0);
   });
 

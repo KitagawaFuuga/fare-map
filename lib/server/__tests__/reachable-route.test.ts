@@ -27,7 +27,8 @@ describe("GET /api/reachable のレート制限", () => {
     const blocked = await call(query, ip);
     expect(blocked.status).toBe(429);
     expect(blocked.headers.get("retry-after")).toBeTruthy();
-  });
+    // 最初の呼び出しがグラフの読み込みと探索を抱えるので、並列実行中は5秒を超えることがある
+  }, 30000);
 
   it("別の IP は前の IP の消費に影響されない", async () => {
     const query = `from=${SHINJUKU}&budget=200`;

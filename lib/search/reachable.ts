@@ -13,6 +13,9 @@ interface SearchState {
   segmentOperator: string; // 進行中区間の事業者（"" = 未乗車）
   segmentFromId: string; // 進行中区間の開始駅（特定運賃は区間全体の駅ペアに適用するため必要）
   segmentKm: number; // 進行中区間の距離
+  // 運賃計算の発駅。通し運賃の間は JR本州3社に乗り始めた駅、それ以外は segmentFromId。
+  // 特定都区市内の規則は通しの発駅で判定するので、会社境界を越えても持ち回る
+  fareFromId: string;
   // 進行中区間が加算額除外区間だけで構成されているかの一方向ラチェット
   // （true→falseのみ）。lineId の連続性だけを見て、起点・終端の適格性は
   // segmentEastKmContribution が別に見る。過大評価はしても過小評価はしない近似。
@@ -172,6 +175,7 @@ function evaluateSegmentFare(
   fromName: string | undefined,
   toName: string | undefined,
   localKm: number | undefined,
+  fareFromName: string | undefined,
 ): number {
   if (isHonshuThrough) {
     const totalKm = honshuThroughKm + segmentKm;
@@ -185,7 +189,7 @@ function evaluateSegmentFare(
         fromName,
         toName,
       );
-    return calc.estimateHonshuThrough(totalKm, eastKm);
+    return calc.estimateHonshuThrough(totalKm, eastKm, fareFromName, toName);
   }
   return calc.estimate(segmentOperator, segmentKm, fromName, toName, localKm);
 }
@@ -364,16 +368,41 @@ function runSearch(
   // ただし区間運賃（JR西日本の電車特定区間）の区間内の起点は "" に潰せない。
   // 着駅も区間内なら安い表になるので、同じ距離でも区間外の起点とは将来の運賃が
   // 違う。区間の表は距離だけで決まるので、区間内の起点どうしは区間 id でまとめてよい。
+  //
+  // 特定都区市内の区域内の発駅（通し運賃ならその発駅）も潰せない。中心駅からの距離に
+  // 読み替えるので、同じ距離でも区域外の起点とは将来の運賃が違う。区域内の起点どうしは
+  // 区域でまとめる（発駅〜中心駅の違いが効くのは遠回りの経路だけ。近似の範囲は
+  // docs/search-design.md「特定都区市内」）。区切りの "|" は駅名・区間 id に現れない。
   const originBucketKey = (
     segmentOperator: string,
     segmentFromId: string,
+    fareFromId: string,
+    isHonshuThrough: boolean,
+    confirmedFare: number,
   ): string => {
     const name = nameOf(segmentFromId);
-    if (name === undefined) return "";
-    if (calc.isOverrideAnchor(segmentOperator, name)) return name;
-    const zone = calc.zoneOf(segmentOperator, name);
-    return zone === undefined ? "" : `zone:${zone}`;
+    let key = "";
+    if (name !== undefined) {
+      const zone = calc.zoneOf(segmentOperator, name);
+      if (calc.isOverrideAnchor(segmentOperator, name)) key = name;
+      else if (zone !== undefined) key = `zone:${zone}`;
+    }
+    const city = calc.specialCityKeyOf(
+      segmentOperator,
+      nameOf(fareFromId),
+      isHonshuThrough,
+      budget - confirmedFare,
+    );
+    if (city === undefined) return key;
+    // 辺を緩めるたびに文字列を作らないよう、区域ごとの接尾辞を使い回す
+    let suffix = citySuffixes.get(city);
+    if (suffix === undefined) {
+      suffix = `|city:${city}`;
+      citySuffixes.set(city, suffix);
+    }
+    return key === "" ? suffix : key + suffix;
   };
+  const citySuffixes = new Map<string, string>();
 
   const store: ParetoStore = new Map();
   const initialEntry: ParetoEntry = {
@@ -389,7 +418,7 @@ function runSearch(
       store,
       fromId,
       "",
-      originBucketKey("", fromId),
+      originBucketKey("", fromId, fromId, false, 0),
       flagsKey(false, false, false, false),
     ),
     initialEntry,
@@ -400,6 +429,7 @@ function runSearch(
     segmentOperator: "",
     segmentFromId: fromId,
     segmentKm: 0,
+    fareFromId: fromId,
     segmentOnlyExcludedLines: false,
     segmentOriginInTokyoArea: false,
     isHonshuThrough: false,
@@ -431,6 +461,7 @@ function runSearch(
           segmentOperator: state.segmentOperator,
           segmentFromId: state.segmentFromId,
           segmentKm: state.segmentKm,
+          fareFromId: state.fareFromId,
           segmentOnlyExcludedLines: state.segmentOnlyExcludedLines,
           segmentOriginInTokyoArea: state.segmentOriginInTokyoArea,
           isHonshuThrough: state.isHonshuThrough,
@@ -452,6 +483,7 @@ function runSearch(
               nameOf(state.segmentFromId),
               nameOf(edge.to),
               localKmOf(state),
+              nameOf(state.fareFromId),
             ),
           entry: PENDING_ENTRY,
         };
@@ -471,6 +503,7 @@ function runSearch(
           segmentOperator: state.segmentOperator,
           segmentFromId: state.segmentFromId,
           segmentKm,
+          fareFromId: state.fareFromId,
           segmentOnlyExcludedLines,
           segmentOriginInTokyoArea: state.segmentOriginInTokyoArea,
           isHonshuThrough: state.isHonshuThrough,
@@ -492,6 +525,7 @@ function runSearch(
               nameOf(state.segmentFromId),
               nameOf(edge.to),
               segmentAllLocal ? segmentLocalKm : undefined,
+              nameOf(state.fareFromId),
             ),
           entry: PENDING_ENTRY,
         };
@@ -537,6 +571,8 @@ function runSearch(
           segmentOperator: edge.operator,
           segmentFromId: state.stationId,
           segmentKm,
+          // 非通算中の fareFromId は区間の起点なので、そのまま通しの発駅になる
+          fareFromId: state.fareFromId,
           segmentOnlyExcludedLines,
           segmentOriginInTokyoArea,
           isHonshuThrough: true,
@@ -546,7 +582,12 @@ function runSearch(
           segmentLocalKm: 0,
           fare:
             state.confirmedFare +
-            calc.estimateHonshuThrough(honshuThroughKm + segmentKm, eastKm),
+            calc.estimateHonshuThrough(
+              honshuThroughKm + segmentKm,
+              eastKm,
+              nameOf(state.fareFromId),
+              nameOf(edge.to),
+            ),
           entry: PENDING_ENTRY,
         };
       } else {
@@ -565,6 +606,7 @@ function runSearch(
             nameOf(state.segmentFromId),
             nameOf(state.stationId),
             localKmOf(state),
+            nameOf(state.fareFromId),
           );
         next = {
           stationId: edge.to,
@@ -572,6 +614,7 @@ function runSearch(
           segmentOperator: edge.operator,
           segmentFromId: state.stationId,
           segmentKm: edge.km,
+          fareFromId: state.stationId,
           segmentOnlyExcludedLines: isEastKmExcludedEdge(graph, {
             ...edge,
             from: state.stationId,
@@ -602,7 +645,10 @@ function runSearch(
       // 沿って非減少）に区間の下界を足した値で刈る。
       // 停止性の根拠は docs/search-design.md「3. 探索の停止性」。
       const segmentLowerBound = next.isHonshuThrough
-        ? calc.honshuThroughBaseFare(next.honshuThroughKm + next.segmentKm)
+        ? calc.honshuThroughBaseFare(
+            next.honshuThroughKm + next.segmentKm,
+            nameOf(next.fareFromId),
+          )
         : calc.lowerBound(
             next.segmentOperator,
             next.segmentKm,
@@ -615,7 +661,13 @@ function runSearch(
         store,
         next.stationId,
         next.segmentOperator,
-        originBucketKey(next.segmentOperator, next.segmentFromId),
+        originBucketKey(
+          next.segmentOperator,
+          next.segmentFromId,
+          next.fareFromId,
+          next.isHonshuThrough,
+          next.confirmedFare,
+        ),
         flagsKey(
           next.isHonshuThrough,
           next.segmentOnlyExcludedLines,

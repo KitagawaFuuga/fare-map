@@ -21,6 +21,7 @@ COPY --from=builder /app/data/graph.json ./data/graph.json
 COPY --from=builder /app/data/fare-rules ./data/fare-rules
 COPY --from=builder /app/data/fare-overrides ./data/fare-overrides
 COPY --from=builder /app/data/fare-zones.json ./data/fare-zones.json
+COPY --from=builder /app/data/special-cities.json ./data/special-cities.json
 
 EXPOSE 3000
 

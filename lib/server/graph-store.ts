@@ -6,6 +6,10 @@ import {
   type FareCalculator,
 } from "@/lib/fare/calculator";
 import {
+  buildSpecialCities,
+  specialCitiesFileSchema,
+} from "@/lib/fare/special-cities";
+import {
   fareOverrideSchema,
   fareRuleSchema,
   fareZoneSchema,
@@ -24,8 +28,17 @@ export function createGraphStore(
   rules: FareRule[],
   overrides?: FareOverride[],
   zones?: FareZone[],
+  specialCities?: unknown,
 ): GraphStore {
-  return { graph, calc: createFareCalculator(rules, overrides, zones) };
+  // 特定都区市内は中心駅からの距離をグラフで測るので、グラフと一緒に組み立てる
+  const cities =
+    specialCities === undefined
+      ? undefined
+      : buildSpecialCities(graph, specialCitiesFileSchema.parse(specialCities));
+  return {
+    graph,
+    calc: createFareCalculator(rules, overrides, zones, cities),
+  };
 }
 
 // data/graph.json は約3MBあり、読み込みと JSON.parse だけで数百ミリ秒かかる。
@@ -64,7 +77,14 @@ export function getGraphStore(): GraphStore {
         readFileSync(path.join(process.cwd(), "data/fare-zones.json"), "utf8"),
       ) as { zones: unknown[] }
     ).zones.map((z) => fareZoneSchema.parse(z));
-    cached = createGraphStore(graph, rules, overrides, zones);
+    // JRの特定都区市内・東京山手線内。区域内の駅からの長距離は中心駅から計算する
+    const specialCities: unknown = JSON.parse(
+      readFileSync(
+        path.join(process.cwd(), "data/special-cities.json"),
+        "utf8",
+      ),
+    );
+    cached = createGraphStore(graph, rules, overrides, zones, specialCities);
   }
   return cached;
 }

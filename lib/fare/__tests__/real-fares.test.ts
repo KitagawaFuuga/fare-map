@@ -2,6 +2,10 @@ import { readdirSync, readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
 import { createFareCalculator } from "@/lib/fare/calculator";
 import {
+  buildSpecialCities,
+  specialCitiesFileSchema,
+} from "@/lib/fare/special-cities";
+import {
   fareOverrideSchema,
   fareRuleSchema,
   fareZoneSchema,
@@ -41,9 +45,20 @@ const zones = (
     zones: unknown[];
   }
 ).zones.map((z) => fareZoneSchema.parse(z));
-// 本番（lib/server/graph-store.ts）と同じく、運賃表・特定運賃・区間運賃をすべて渡す
-const calc = createFareCalculator(rules, overrides, zones);
 const graph = JSON.parse(readFileSync("data/graph.json", "utf8")) as RailGraph;
+// 本番（lib/server/graph-store.ts）と同じく、運賃表・特定運賃・区間運賃・特定都区市内を
+// すべて渡す
+const calc = createFareCalculator(
+  rules,
+  overrides,
+  zones,
+  buildSpecialCities(
+    graph,
+    specialCitiesFileSchema.parse(
+      JSON.parse(readFileSync("data/special-cities.json", "utf8")),
+    ),
+  ),
+);
 
 const cache = new Map<string, (a: string, b: string) => number | null>();
 const kmOf = (operator: string, useFareKm: boolean) => {
@@ -458,6 +473,41 @@ describe("無作為照合で見つかった区間（探索を通した照合）"
           .map((r) => r.fare),
       );
       expect(best).toBe(fare);
+    },
+    60000,
+  );
+});
+
+describe("特定都区市内（JR東日本の中だけの経路）", () => {
+  const nodes = Object.fromEntries(
+    Object.entries(graph.nodes).filter(([, n]) => n.operator === "JR東日本"),
+  );
+  const sub: RailGraph = {
+    nodes,
+    edges: graph.edges.filter(
+      (e) => nodes[e.from] !== undefined && nodes[e.to] !== undefined,
+    ),
+  };
+  const fareTo = (from: string, to: string) => {
+    const fromId = Object.values(nodes).find((n) => n.name === from)?.id;
+    expect(fromId).toBeDefined();
+    const toIds = new Set(
+      Object.values(nodes)
+        .filter((n) => n.name === to)
+        .map((n) => n.id),
+    );
+    return Math.min(
+      ...findReachable(sub, calc, fromId!, 8000)
+        .filter((r) => toIds.has(r.id))
+        .map((r) => r.fare),
+    );
+  };
+
+  // 東京都区内の駅から 200km を超える駅へは、区内のどの駅から乗っても東京から計算する
+  it.each(["西荻窪", "蒲田", "葛西臨海公園", "赤羽"])(
+    "%s→仙台 は東京→仙台と同じ額",
+    (from) => {
+      expect(fareTo(from, "仙台")).toBe(fareTo("東京", "仙台"));
     },
     60000,
   );

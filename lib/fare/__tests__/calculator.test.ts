@@ -68,6 +68,8 @@ import shizutetsu from "@/data/fare-rules/shizutetsu.json";
 import entetsu from "@/data/fare-rules/entetsu.json";
 import noseden from "@/data/fare-rules/noseden.json";
 import kitakyu from "@/data/fare-rules/kitakyu.json";
+import shimabara from "@/data/fare-rules/shimabara.json";
+import fujikyu from "@/data/fare-rules/fujikyu.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -205,6 +207,8 @@ const rules = [
   entetsu,
   noseden,
   kitakyu,
+  shimabara,
+  fujikyu,
   keihan,
   tokyu,
   odakyu,

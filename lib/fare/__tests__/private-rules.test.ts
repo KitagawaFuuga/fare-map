@@ -32,6 +32,8 @@ const calc = createFareCalculator([
     "tosakuro-gomen",
     "heichiku",
     "tango",
+    "akita-nairiku",
+    "hakodate-tram",
   ].map(rule),
 ]);
 
@@ -91,6 +93,13 @@ describe("公式の駅間表との照合", () => {
     ["平成筑豊鉄道", "直方→行橋", 42.4, 1190],
     // 京都丹後鉄道: 公式の三角表（西舞鶴→豊岡）
     ["京都丹後鉄道", "西舞鶴→豊岡", 83.6, 1500],
+    // 秋田内陸縦貫鉄道: 報道された現行運賃（鷹巣→角館）
+    ["秋田内陸縦貫鉄道", "鷹巣→角館", 94.2, 1700],
+    // 函館市電: 2025年12月改定の区間制（境界の両側）
+    ["函館市交通局", "2.0km", 2.0, 250],
+    ["函館市交通局", "2.1km", 2.1, 270],
+    ["函館市交通局", "7.0km", 7.0, 290],
+    ["函館市交通局", "7.1km", 7.1, 300],
   ] as const)("%s %s（%fkm）は %i 円", (operator, _pair, km, fare) => {
     expect(calc.estimate(operator, km)).toBe(fare);
   });

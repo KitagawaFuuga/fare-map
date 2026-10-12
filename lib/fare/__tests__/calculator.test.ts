@@ -55,6 +55,12 @@ import tosakuroGomen from "@/data/fare-rules/tosakuro-gomen.json";
 import heichiku from "@/data/fare-rules/heichiku.json";
 import heichikuRetro from "@/data/fare-rules/heichiku-retro.json";
 import tango from "@/data/fare-rules/tango.json";
+import akitaNairiku from "@/data/fare-rules/akita-nairiku.json";
+import kantoRailway from "@/data/fare-rules/kanto-railway.json";
+import sangi from "@/data/fare-rules/sangi.json";
+import konan from "@/data/fare-rules/konan.json";
+import yoro from "@/data/fare-rules/yoro.json";
+import hakodateTram from "@/data/fare-rules/hakodate-tram.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -125,6 +131,7 @@ import orangeOverride from "@/data/fare-overrides/orange.json";
 import tosakuroGomenAdjacentOverride from "@/data/fare-overrides/tosakuro-gomen-adjacent.json";
 import tenhamaOverride from "@/data/fare-overrides/tenhama.json";
 import matsuuraOverride from "@/data/fare-overrides/matsuura.json";
+import akitaNairikuSpecialOverride from "@/data/fare-overrides/akita-nairiku-special.json";
 
 const rules = [
   jrEast,
@@ -177,6 +184,12 @@ const rules = [
   heichiku,
   heichikuRetro,
   tango,
+  akitaNairiku,
+  kantoRailway,
+  sangi,
+  konan,
+  yoro,
+  hakodateTram,
   keihan,
   tokyu,
   odakyu,
@@ -246,6 +259,7 @@ const overrides = [
   tosakuroGomenAdjacentOverride,
   tenhamaOverride,
   matsuuraOverride,
+  akitaNairikuSpecialOverride,
   meitetsuComputedOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地方鉄道・しなの鉄道の距離表は枝刈りの下界専用で、公表営業キロではなく

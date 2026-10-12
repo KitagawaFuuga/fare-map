@@ -1,0 +1,21 @@
+{
+  "id": "wakayama-dentetsu",
+  "operators": ["和歌山電鐵"],
+  "table": [
+    [3, 220],
+    [6, 290],
+    [9, 370],
+    [12, 430],
+    [15, 480]
+  ],
+  "beyond": {
+    "fromKm": 15,
+    "baseFare": 480,
+    "ratePerKm": 20
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/和歌山電鐵",
+    "fetchedAt": "2026-10-12",
+    "note": "和歌山電鐵貴志川線の大人普通旅客運賃（2026年7月1日改定）。キロ程別の表（初乗り3km 220円、以降3kmごと、13〜15km 480円）。1km未満は切り上げ。全線14.3km。キロ帯の表は Wikipedia の会社の記事。"
+  }
+}

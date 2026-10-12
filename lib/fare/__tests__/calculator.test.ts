@@ -42,6 +42,11 @@ import tokyoMonorail from "@/data/fare-rules/tokyo-monorail.json";
 import yurikamome from "@/data/fare-rules/yurikamome.json";
 import tamaMonorail from "@/data/fare-rules/tama-monorail.json";
 import osakaMonorail from "@/data/fare-rules/osaka-monorail.json";
+import hapiLine from "@/data/fare-rules/hapi-line.json";
+import irIshikawa from "@/data/fare-rules/ir-ishikawa.json";
+import ainokazeToyama from "@/data/fare-rules/ainokaze-toyama.json";
+import aoimori from "@/data/fare-rules/aoimori.json";
+import igr from "@/data/fare-rules/igr.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -141,6 +146,11 @@ const rules = [
   yurikamome,
   tamaMonorail,
   osakaMonorail,
+  hapiLine,
+  irIshikawa,
+  ainokazeToyama,
+  aoimori,
+  igr,
   keihan,
   tokyu,
   odakyu,

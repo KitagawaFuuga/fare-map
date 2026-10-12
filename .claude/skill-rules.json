@@ -1,0 +1,43 @@
+[
+  {
+    "skill": "e2e-reviewer",
+    "on": "post",
+    "tool": "Edit|Write|MultiEdit",
+    "path": "/e2e/.*\\.spec\\.ts$"
+  },
+  {
+    "skill": "e2e-reviewer",
+    "on": "prompt",
+    "prompt": "E2E(テスト)?を?(レビュー|見直|監査)"
+  },
+  {
+    "skill": "maplibre-source-wiring",
+    "on": "prompt",
+    "prompt": "(地図|マップ|レイヤー|タイル|ソース).*(表示されない|出ない|描画されない|真っ白)|setFeatureState"
+  },
+  {
+    "skill": "maplibre-cartography",
+    "on": "prompt",
+    "prompt": "(地図|マップ)の?(見た目|配色|色|ラベル|スタイル|デザイン)|ラベルが?(読みにくい|見にくい|重なる)"
+  },
+  {
+    "skill": "maplibre-tile-sources",
+    "on": "prompt",
+    "prompt": "タイル(ソース|サーバ)|PMTiles|ベースマップ"
+  },
+  {
+    "skill": "accessibility",
+    "on": "prompt",
+    "prompt": "アクセシビリティ|\\ba11y\\b|WCAG|スクリーンリーダー|キーボード操作"
+  },
+  {
+    "skill": "core-web-vitals",
+    "on": "prompt",
+    "prompt": "Core Web Vitals|\\b(LCP|INP|CLS)\\b|レイアウトシフト"
+  },
+  {
+    "skill": "performance",
+    "on": "prompt",
+    "prompt": "(表示|読み込み|ページ|初回)が?(遅い|重い)|高速化|パフォーマンス"
+  }
+]

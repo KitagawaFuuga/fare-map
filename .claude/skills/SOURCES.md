@@ -3,17 +3,17 @@
 2026-10-12 に取り込んだ。中身は確認済みで、外部への送信・秘密情報の読み出し・指示の上書きは無かった。
 更新するときは、同じ確認をしてから差し替える。
 
-| スキル | 取得元 | コミット | ライセンス |
-|---|---|---|---|
-| qa-manual-istqb | https://github.com/fugazi/test-automation-skills-agents （skills/qa-manual-istqb） | 65a72d5（2026-10-03） | MIT |
-| grill-me-qa | https://github.com/fugazi/test-automation-skills-agents （skills/grill-me-qa） | 65a72d5（2026-10-03） | MIT |
-| e2e-reviewer | https://github.com/voidmatcha/e2e-skills （skills/e2e-reviewer。evals/ は除外） | 6ded5e9（2026-10-10） | Apache-2.0 |
-| maplibre-cartography | https://github.com/maplibre/maplibre-agent-skills （skills/maplibre-cartography） | e365652（2026-10-11） | MIT |
-| maplibre-source-wiring | https://github.com/maplibre/maplibre-agent-skills （skills/maplibre-source-wiring） | e365652（2026-10-11） | MIT |
-| maplibre-tile-sources | https://github.com/maplibre/maplibre-agent-skills （skills/maplibre-tile-sources） | e365652（2026-10-11） | MIT |
-| accessibility | https://github.com/addyosmani/web-quality-skills （skills/accessibility） | afa8da9（2026-08-24） | MIT |
-| core-web-vitals | https://github.com/addyosmani/web-quality-skills （skills/core-web-vitals） | afa8da9（2026-08-24） | MIT |
-| performance | https://github.com/addyosmani/web-quality-skills （skills/performance） | afa8da9（2026-08-24） | MIT |
+| スキル                 | 取得元                                                                              | コミット              | ライセンス |
+| ---------------------- | ----------------------------------------------------------------------------------- | --------------------- | ---------- |
+| qa-manual-istqb        | https://github.com/fugazi/test-automation-skills-agents （skills/qa-manual-istqb）  | 65a72d5（2026-10-03） | MIT        |
+| grill-me-qa            | https://github.com/fugazi/test-automation-skills-agents （skills/grill-me-qa）      | 65a72d5（2026-10-03） | MIT        |
+| e2e-reviewer           | https://github.com/voidmatcha/e2e-skills （skills/e2e-reviewer。evals/ は除外）     | 6ded5e9（2026-10-10） | Apache-2.0 |
+| maplibre-cartography   | https://github.com/maplibre/maplibre-agent-skills （skills/maplibre-cartography）   | e365652（2026-10-11） | MIT        |
+| maplibre-source-wiring | https://github.com/maplibre/maplibre-agent-skills （skills/maplibre-source-wiring） | e365652（2026-10-11） | MIT        |
+| maplibre-tile-sources  | https://github.com/maplibre/maplibre-agent-skills （skills/maplibre-tile-sources）  | e365652（2026-10-11） | MIT        |
+| accessibility          | https://github.com/addyosmani/web-quality-skills （skills/accessibility）           | afa8da9（2026-08-24） | MIT        |
+| core-web-vitals        | https://github.com/addyosmani/web-quality-skills （skills/core-web-vitals）         | afa8da9（2026-08-24） | MIT        |
+| performance            | https://github.com/addyosmani/web-quality-skills （skills/performance）             | afa8da9（2026-08-24） | MIT        |
 
 ## 使うときの注意
 

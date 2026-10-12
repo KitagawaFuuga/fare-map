@@ -75,6 +75,8 @@ import uedaDentetsu from "@/data/fare-rules/ueda-dentetsu.json";
 import alpico from "@/data/fare-rules/alpico.json";
 import fukushimaKotsu from "@/data/fare-rules/fukushima-kotsu.json";
 import choshi from "@/data/fare-rules/choshi.json";
+import shonanMonorail from "@/data/fare-rules/shonan-monorail.json";
+import ryutetsu from "@/data/fare-rules/ryutetsu.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -219,6 +221,8 @@ const rules = [
   alpico,
   fukushimaKotsu,
   choshi,
+  shonanMonorail,
+  ryutetsu,
   keihan,
   tokyu,
   odakyu,

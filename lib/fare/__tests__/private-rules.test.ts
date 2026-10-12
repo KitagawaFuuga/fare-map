@@ -44,6 +44,8 @@ const calc = createFareCalculator([
     "alpico",
     "fukushima-kotsu",
     "choshi",
+    "shonan-monorail",
+    "ryutetsu",
   ].map(rule),
 ]);
 
@@ -144,6 +146,13 @@ describe("公式の駅間表との照合", () => {
     ["銚子電気鉄道", "1.0km", 1.0, 180],
     ["銚子電気鉄道", "1.1km", 1.1, 210],
     ["銚子電気鉄道", "銚子→外川", 6.4, 350],
+    // 湘南モノレール: 2026年3月改定（1km未満切り上げ）
+    ["湘南モノレール", "2.0km", 2.0, 220],
+    ["湘南モノレール", "2.1km", 2.1, 240],
+    ["湘南モノレール", "大船→湘南江の島", 6.6, 340],
+    // 流鉄流山線: 2024年4月改定
+    ["流鉄", "2.0km", 2.0, 140],
+    ["流鉄", "馬橋→流山", 5.7, 220],
   ] as const)("%s %s（%fkm）は %i 円", (operator, _pair, km, fare) => {
     expect(calc.estimate(operator, km)).toBe(fare);
   });

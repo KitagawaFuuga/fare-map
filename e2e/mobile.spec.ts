@@ -57,6 +57,20 @@ const heightOf = async (target: Locator): Promise<number> => {
   return box.height;
 };
 
+// シートの高さは CSS の transition で変わるので、状態を変えた直後に測ると途中の
+// 高さになる。畳んだ高さを縮む途中の 280px で測り、開き直した高さ（288px）と
+// 比べて落ちていた（10回中2回）。続けて測った2回が同じになるまで待つ
+async function settledHeightOf(target: Locator): Promise<number> {
+  let prev = await heightOf(target);
+  for (let i = 0; i < 50; i++) {
+    await new Promise((r) => setTimeout(r, 100));
+    const cur = await heightOf(target);
+    if (cur === prev) return cur;
+    prev = cur;
+  }
+  throw new Error("シートの高さが落ち着かない");
+}
+
 async function selectShinjuku(page: Page): Promise<void> {
   const panel = sheet(page);
   await panel.getByPlaceholder("駅名を入力").fill("新宿");
@@ -99,7 +113,7 @@ test.describe("ボトムシート", () => {
       .poll(() => heightOf(target), { timeout: 5_000 })
       .toBeGreaterThan(initial);
 
-    const opened = await heightOf(target);
+    const opened = await settledHeightOf(target);
     await swipe(target, 100); // 指を下へ
     await expect
       .poll(() => heightOf(target), { timeout: 5_000 })
@@ -142,8 +156,13 @@ test.describe("ボトムシート", () => {
     await page.goto("/");
 
     const target = sheet(page);
+    const initial = await settledHeightOf(target);
     await swipe(target, 100); // half -> collapsed
-    const collapsed = await heightOf(target);
+    // 畳まれていないと、つまみで半分→全開になっても通ってしまうので先に確かめる
+    await expect
+      .poll(() => heightOf(target), { timeout: 5_000 })
+      .toBeLessThan(initial);
+    const collapsed = await settledHeightOf(target);
 
     await target.getByRole("button", { name: "シートを開閉" }).click();
     await expect

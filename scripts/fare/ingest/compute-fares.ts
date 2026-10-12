@@ -40,6 +40,7 @@ const OUTPUT_IDS: Record<string, string> = {
   JR九州: "jr-kyushu",
   JR西日本: "jr-west-seto",
   南海電鉄: "nankai",
+  北大阪急行電鉄: "kitakyu",
 };
 
 interface DistanceClass {

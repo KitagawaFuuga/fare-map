@@ -79,6 +79,9 @@ import shonanMonorail from "@/data/fare-rules/shonan-monorail.json";
 import ryutetsu from "@/data/fare-rules/ryutetsu.json";
 import maihamaResortLine from "@/data/fare-rules/maihama-resort-line.json";
 import sagano from "@/data/fare-rules/sagano.json";
+import aizu from "@/data/fare-rules/aizu.json";
+import kumamotoDentetsu from "@/data/fare-rules/kumamoto-dentetsu.json";
+import izukyu from "@/data/fare-rules/izukyu.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -228,6 +231,9 @@ const rules = [
   ryutetsu,
   maihamaResortLine,
   sagano,
+  aizu,
+  kumamotoDentetsu,
+  izukyu,
   keihan,
   tokyu,
   odakyu,

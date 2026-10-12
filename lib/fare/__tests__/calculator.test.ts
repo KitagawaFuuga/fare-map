@@ -77,6 +77,8 @@ import fukushimaKotsu from "@/data/fare-rules/fukushima-kotsu.json";
 import choshi from "@/data/fare-rules/choshi.json";
 import shonanMonorail from "@/data/fare-rules/shonan-monorail.json";
 import ryutetsu from "@/data/fare-rules/ryutetsu.json";
+import maihamaResortLine from "@/data/fare-rules/maihama-resort-line.json";
+import sagano from "@/data/fare-rules/sagano.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -148,6 +150,7 @@ import tosakuroGomenAdjacentOverride from "@/data/fare-overrides/tosakuro-gomen-
 import tenhamaOverride from "@/data/fare-overrides/tenhama.json";
 import matsuuraOverride from "@/data/fare-overrides/matsuura.json";
 import akitaNairikuSpecialOverride from "@/data/fare-overrides/akita-nairiku-special.json";
+import sendaiAirportOverride from "@/data/fare-overrides/sendai-airport.json";
 import kitakyuComputedOverride from "@/data/fare-overrides/kitakyu-computed.json";
 
 const rules = [
@@ -223,6 +226,8 @@ const rules = [
   choshi,
   shonanMonorail,
   ryutetsu,
+  maihamaResortLine,
+  sagano,
   keihan,
   tokyu,
   odakyu,
@@ -293,6 +298,7 @@ const overrides = [
   tenhamaOverride,
   matsuuraOverride,
   akitaNairikuSpecialOverride,
+  sendaiAirportOverride,
   kitakyuComputedOverride,
   meitetsuComputedOverride,
 ].map((o) => fareOverrideSchema.parse(o));

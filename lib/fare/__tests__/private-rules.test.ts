@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createFareCalculator } from "@/lib/fare/calculator";
-import { fareRuleSchema, type FareRule } from "@/lib/fare/types";
+import {
+  fareOverrideSchema,
+  fareRuleSchema,
+  type FareRule,
+} from "@/lib/fare/types";
 
 // 汎用の運賃表から各社の運賃表に切り替えた事業者のうち、公式に駅間の営業キロと運賃の
 // 表が出ているものを、その表の値で照合する（キロの帯と金額の対応を取り違えていないか）。
@@ -46,6 +50,8 @@ const calc = createFareCalculator([
     "choshi",
     "shonan-monorail",
     "ryutetsu",
+    "maihama-resort-line",
+    "sagano",
   ].map(rule),
 ]);
 
@@ -153,7 +159,39 @@ describe("公式の駅間表との照合", () => {
     // 流鉄流山線: 2024年4月改定
     ["流鉄", "2.0km", 2.0, 140],
     ["流鉄", "馬橋→流山", 5.7, 220],
+    // ディズニーリゾートライン: 2024年3月改定の均一運賃
+    ["舞浜リゾートライン", "1.0km", 1.0, 300],
+    ["舞浜リゾートライン", "1周", 5.0, 300],
+    // 嵯峨野観光鉄道（トロッコ列車）: 2022年4月改定の均一運賃
+    ["嵯峨野観光鉄道", "トロッコ嵯峨→トロッコ亀岡", 7.3, 880],
   ] as const)("%s %s（%fkm）は %i 円", (operator, _pair, km, fare) => {
     expect(calc.estimate(operator, km)).toBe(fare);
+  });
+});
+
+describe("駅ペアの運賃表（override）との照合", () => {
+  const override = (file: string) =>
+    fareOverrideSchema.parse(
+      JSON.parse(readFileSync(`data/fare-overrides/${file}.json`, "utf8")),
+    );
+  const withOverrides = createFareCalculator(
+    [
+      {
+        id: "fallback",
+        operators: [],
+        table: [[100, 9999]],
+        beyond: { fromKm: 100, baseFare: 9999, ratePerKm: 0 },
+      },
+    ],
+    [override("sendai-airport")],
+  );
+
+  it.each([
+    // 仙台空港鉄道: 2019年10月改定の駅間運賃表（きっぷ）
+    ["仙台空港鉄道", "名取", "仙台空港", 420],
+    ["仙台空港鉄道", "杜せきのした", "仙台空港", 310],
+    ["仙台空港鉄道", "美田園", "名取", 220],
+  ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
+    expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });
 });

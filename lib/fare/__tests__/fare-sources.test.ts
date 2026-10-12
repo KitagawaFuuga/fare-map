@@ -95,7 +95,8 @@ describe("公式運賃表の再現", () => {
         }
         expect(wrong.slice(0, 10)).toEqual([]);
         expect(wrong).toHaveLength(0);
-      });
+        // JR西日本は事業者内の全駅の最短距離表を作るので、並列実行中は5秒を超えることがある
+      }, 60000);
 
       // 上のテストは取り込み時に記録した km で引いている。実行時に使われるのは
       // graph.json から求めた距離なので、そちらでも公式どおりにならないと意味がない。
@@ -151,8 +152,16 @@ describe("公式運賃表の再現", () => {
     for (const s of sources) {
       if (withTable.has(s.operator)) continue;
       const covered = overridden.get(s.operator) ?? new Set<string>();
+      // 特定運賃はグラフ側の駅名で作られる（scripts/fare/derive-overrides.ts）ので、
+      // 資料側の駅名も同じ規則で読み替えてから突き合わせる（計算科学センター → 計算科学センター（…前））
+      const resolve = resolverOf(s.operator);
       const naked = s.pairs.filter(
-        (p) => !covered.has([p.from, p.to].sort().join("\u0000")),
+        (p) =>
+          !covered.has(
+            [resolve(p.from) ?? p.from, resolve(p.to) ?? p.to]
+              .sort()
+              .join("\u0000"),
+          ),
       );
       expect(
         naked.slice(0, 5),

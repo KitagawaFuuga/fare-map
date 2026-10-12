@@ -1,0 +1,23 @@
+{
+  "id": "astram",
+  "operators": ["広島高速交通"],
+  "table": [
+    [2, 220],
+    [4, 260],
+    [6, 300],
+    [9, 350],
+    [12, 400],
+    [15, 430],
+    [18, 460]
+  ],
+  "beyond": {
+    "fromKm": 18,
+    "baseFare": 490,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://www.astramline.co.jp/Portals/0/pdf/ride-guidance/%E2%97%8E20251001_sikakuhyo.pdf, https://jikokuhyo.train-times.net/news/astramline20251001",
+    "fetchedAt": "2026-10-12",
+    "note": "アストラムラインの大人普通運賃（きっぷ）。2025年10月1日改定: 1〜2km 220円、3〜4km 260円、5〜6km 300円、7〜9km 350円、10〜12km 400円、13〜15km 430円、16〜18km 460円、19km 490円（据え置き）。公式の運賃表PDFは表の抽出が崩れるため、改定内容を整理した記事の表を使い、公式の改定発表（12km以内は30円、15km以内は20円、18km以内は10円の値上げ、19kmは据え置き）と整合することを確かめた。キロは1km未満切り上げ。"
+  }
+}

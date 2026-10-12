@@ -1,0 +1,21 @@
+{
+  "id": "aonami",
+  "operators": ["名古屋臨海高速鉄道"],
+  "table": [
+    [3, 210],
+    [7, 240],
+    [11, 270],
+    [13, 310],
+    [15, 340]
+  ],
+  "beyond": {
+    "fromKm": 15,
+    "baseFare": 360,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://www.aonamiline.co.jp/train/an01-nagoya/an01-fare, https://www.aonamiline.co.jp/train/an11-kinjo-futo/an11-fare, https://www.aonamiline.co.jp/train/an08-arakogawa-koen/an08-fare",
+    "fetchedAt": "2026-10-12",
+    "note": "あおなみ線の大人普通運賃（きっぷ）の区制: 1区 210円、2区 240円、3区 270円、4区 310円、5区 340円、6区 360円。公式の駅別運賃表（名古屋・金城ふ頭・荒子川公園の3駅、営業キロと区数付き）から境界を読んだ: 3.0kmが1区で3.1kmが2区、7.0kmが2区で7.1kmが3区、10.9kmが3区で11.9kmが4区、14.4kmが5区で15.2kmが6区。4区と5区の境界は12.1km〜14.4kmの間で決めきれないが、その間に入る駅の組は無いので13.0kmとした。"
+  }
+}

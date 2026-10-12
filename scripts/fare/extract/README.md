@@ -39,6 +39,8 @@ python scripts/fare/extract/<id>.py <PDFを置いたディレクトリ>
 | `kobe-new-transit.ts` | 神戸新交通 18駅・81ペア             | `knt.html`（公式サイトの運賃表ページ。`npx tsx` で実行）  |
 | `sanriku.py`          | 三陸鉄道 41駅・820ペア              | `sanriku.pdf`（普通運賃表、2026-03-14 改正）              |
 | `orange.py`           | 肥薩おれんじ鉄道 28駅・378ペア      | `orange.pdf`（普通運賃三角表、2024-10-01）                |
+| `tenhama.py`          | 天竜浜名湖鉄道 39駅・741ペア        | `tenhama.pdf`（全体の運賃表、2024-10-01）                 |
+| `matsuura.py`         | 松浦鉄道 57駅・1596ペア             | `matsuura.pdf`（駅間普通旅客運賃表、2024-10-01、3ページ） |
 
 万葉線と北陸鉄道は運賃表が画像（PDFではない）なので、画像を読んで手で書き起こした。
 北九州モノレール・ニューシャトル・リニモは公式サイトや Wikipedia の HTML の表を書き起こした

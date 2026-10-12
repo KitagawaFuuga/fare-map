@@ -1,0 +1,4457 @@
+{
+  "id": "tenhama",
+  "operator": "天竜浜名湖鉄道",
+  "source": {
+    "url": "https://www.tenhama.co.jp/about/timetable-2/ (全体の運賃表 https://www.tenhama.co.jp/wp-content/uploads/078e045baf8688aca2ed7b1d2e5893ce.pdf)",
+    "fetchedAt": "2026-10-12",
+    "note": "天竜浜名湖鉄道（天浜線）の公式の普通旅客運賃表（三角表、2024年10月1日運賃改定）から scripts/fare/extract/tenhama.py で取り出した全741ペアの大人運賃（きっぷ）。行ごとの値の数と、線路に沿って運賃が下がらないことを抽出時に検算した。営業キロは表に無いので null。"
+  },
+  "pairs": [
+    {
+      "from": "掛川",
+      "to": "掛川市役所前",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "西掛川",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "西掛川",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "桜木",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "桜木",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "西掛川",
+      "to": "桜木",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "いこいの広場",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "いこいの広場",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "西掛川",
+      "to": "いこいの広場",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "桜木",
+      "to": "いこいの広場",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "細谷",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "細谷",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "西掛川",
+      "to": "細谷",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "桜木",
+      "to": "細谷",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "いこいの広場",
+      "to": "細谷",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "原谷",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "原谷",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "西掛川",
+      "to": "原谷",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "桜木",
+      "to": "原谷",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "いこいの広場",
+      "to": "原谷",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "細谷",
+      "to": "原谷",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "原田",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "原田",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "西掛川",
+      "to": "原田",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "桜木",
+      "to": "原田",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "いこいの広場",
+      "to": "原田",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "細谷",
+      "to": "原田",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "原谷",
+      "to": "原田",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "戸綿",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "戸綿",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "西掛川",
+      "to": "戸綿",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "桜木",
+      "to": "戸綿",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "いこいの広場",
+      "to": "戸綿",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "細谷",
+      "to": "戸綿",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "原谷",
+      "to": "戸綿",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "原田",
+      "to": "戸綿",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "遠州森",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "遠州森",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "西掛川",
+      "to": "遠州森",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "桜木",
+      "to": "遠州森",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "いこいの広場",
+      "to": "遠州森",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "細谷",
+      "to": "遠州森",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "原谷",
+      "to": "遠州森",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "原田",
+      "to": "遠州森",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "戸綿",
+      "to": "遠州森",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "森町病院前",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "森町病院前",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "西掛川",
+      "to": "森町病院前",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "桜木",
+      "to": "森町病院前",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "いこいの広場",
+      "to": "森町病院前",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "細谷",
+      "to": "森町病院前",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "原谷",
+      "to": "森町病院前",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "原田",
+      "to": "森町病院前",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "戸綿",
+      "to": "森町病院前",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "遠州森",
+      "to": "森町病院前",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "円田",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "円田",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "西掛川",
+      "to": "円田",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "桜木",
+      "to": "円田",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "いこいの広場",
+      "to": "円田",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "細谷",
+      "to": "円田",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "原谷",
+      "to": "円田",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "原田",
+      "to": "円田",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "戸綿",
+      "to": "円田",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "遠州森",
+      "to": "円田",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "森町病院前",
+      "to": "円田",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "西掛川",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "桜木",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "いこいの広場",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "細谷",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "原谷",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "原田",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "戸綿",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "遠州森",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "森町病院前",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "円田",
+      "to": "遠江一宮",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "敷地",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "敷地",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "西掛川",
+      "to": "敷地",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "桜木",
+      "to": "敷地",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "いこいの広場",
+      "to": "敷地",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "細谷",
+      "to": "敷地",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "原谷",
+      "to": "敷地",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "原田",
+      "to": "敷地",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "戸綿",
+      "to": "敷地",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "遠州森",
+      "to": "敷地",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "森町病院前",
+      "to": "敷地",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "円田",
+      "to": "敷地",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "遠江一宮",
+      "to": "敷地",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "掛川",
+      "to": "豊岡",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "豊岡",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "西掛川",
+      "to": "豊岡",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "桜木",
+      "to": "豊岡",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "いこいの広場",
+      "to": "豊岡",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "細谷",
+      "to": "豊岡",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "原谷",
+      "to": "豊岡",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "原田",
+      "to": "豊岡",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "戸綿",
+      "to": "豊岡",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "遠州森",
+      "to": "豊岡",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "森町病院前",
+      "to": "豊岡",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "円田",
+      "to": "豊岡",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "遠江一宮",
+      "to": "豊岡",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "敷地",
+      "to": "豊岡",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "掛川",
+      "to": "上野部",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "上野部",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "西掛川",
+      "to": "上野部",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "桜木",
+      "to": "上野部",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "いこいの広場",
+      "to": "上野部",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "細谷",
+      "to": "上野部",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "原谷",
+      "to": "上野部",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "原田",
+      "to": "上野部",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "戸綿",
+      "to": "上野部",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "遠州森",
+      "to": "上野部",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "森町病院前",
+      "to": "上野部",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "円田",
+      "to": "上野部",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "遠江一宮",
+      "to": "上野部",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "敷地",
+      "to": "上野部",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "豊岡",
+      "to": "上野部",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "西掛川",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "桜木",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "いこいの広場",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "細谷",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "原谷",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "原田",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "戸綿",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "遠州森",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "森町病院前",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "円田",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "遠江一宮",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "敷地",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "豊岡",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "上野部",
+      "to": "天竜二俣",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "西掛川",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "桜木",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "いこいの広場",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "細谷",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "原谷",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "原田",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "戸綿",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "遠州森",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "森町病院前",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "円田",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "遠江一宮",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "敷地",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "豊岡",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "上野部",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "天竜二俣",
+      "to": "二俣本町",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "西掛川",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "桜木",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "いこいの広場",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "細谷",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "原谷",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "原田",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "戸綿",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "遠州森",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "森町病院前",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "円田",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "遠江一宮",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "敷地",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "豊岡",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "上野部",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "天竜二俣",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "二俣本町",
+      "to": "西鹿島",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "西掛川",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "桜木",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "いこいの広場",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "細谷",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "原谷",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "原田",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "戸綿",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "遠州森",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "森町病院前",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "円田",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "遠江一宮",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "敷地",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "豊岡",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "上野部",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "天竜二俣",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "二俣本町",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "西鹿島",
+      "to": "岩水寺",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "宮口",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "宮口",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "西掛川",
+      "to": "宮口",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "桜木",
+      "to": "宮口",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "いこいの広場",
+      "to": "宮口",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "細谷",
+      "to": "宮口",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "原谷",
+      "to": "宮口",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "原田",
+      "to": "宮口",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "戸綿",
+      "to": "宮口",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "遠州森",
+      "to": "宮口",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "森町病院前",
+      "to": "宮口",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "円田",
+      "to": "宮口",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "遠江一宮",
+      "to": "宮口",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "敷地",
+      "to": "宮口",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "豊岡",
+      "to": "宮口",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "上野部",
+      "to": "宮口",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "天竜二俣",
+      "to": "宮口",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "二俣本町",
+      "to": "宮口",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "西鹿島",
+      "to": "宮口",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "岩水寺",
+      "to": "宮口",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "西掛川",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "桜木",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "いこいの広場",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "細谷",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "原谷",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "原田",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "戸綿",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "遠州森",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "森町病院前",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "円田",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "遠江一宮",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "敷地",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "豊岡",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "上野部",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "天竜二俣",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "二俣本町",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "西鹿島",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "岩水寺",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "宮口",
+      "to": "フルーツパーク",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "掛川",
+      "to": "都田",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "都田",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "西掛川",
+      "to": "都田",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "桜木",
+      "to": "都田",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "いこいの広場",
+      "to": "都田",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "細谷",
+      "to": "都田",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "原谷",
+      "to": "都田",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "原田",
+      "to": "都田",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "戸綿",
+      "to": "都田",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "遠州森",
+      "to": "都田",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "森町病院前",
+      "to": "都田",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "円田",
+      "to": "都田",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "遠江一宮",
+      "to": "都田",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "敷地",
+      "to": "都田",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "豊岡",
+      "to": "都田",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "上野部",
+      "to": "都田",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "天竜二俣",
+      "to": "都田",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "二俣本町",
+      "to": "都田",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "西鹿島",
+      "to": "都田",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "岩水寺",
+      "to": "都田",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "宮口",
+      "to": "都田",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "都田",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "西掛川",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "桜木",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "いこいの広場",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "細谷",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "原谷",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "原田",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "戸綿",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "遠州森",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "森町病院前",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "円田",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "遠江一宮",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "敷地",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "豊岡",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "上野部",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "天竜二俣",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "二俣本町",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "西鹿島",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "岩水寺",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "宮口",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "都田",
+      "to": "常葉大学前",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "金指",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "金指",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西掛川",
+      "to": "金指",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "桜木",
+      "to": "金指",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "いこいの広場",
+      "to": "金指",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "細谷",
+      "to": "金指",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "原谷",
+      "to": "金指",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "原田",
+      "to": "金指",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "戸綿",
+      "to": "金指",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "遠州森",
+      "to": "金指",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "森町病院前",
+      "to": "金指",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "円田",
+      "to": "金指",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "遠江一宮",
+      "to": "金指",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "敷地",
+      "to": "金指",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "豊岡",
+      "to": "金指",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "上野部",
+      "to": "金指",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "天竜二俣",
+      "to": "金指",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "二俣本町",
+      "to": "金指",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "西鹿島",
+      "to": "金指",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "岩水寺",
+      "to": "金指",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "宮口",
+      "to": "金指",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "金指",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "都田",
+      "to": "金指",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "常葉大学前",
+      "to": "金指",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "岡地",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "岡地",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "西掛川",
+      "to": "岡地",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "桜木",
+      "to": "岡地",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "いこいの広場",
+      "to": "岡地",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "細谷",
+      "to": "岡地",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "原谷",
+      "to": "岡地",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "原田",
+      "to": "岡地",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "戸綿",
+      "to": "岡地",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "遠州森",
+      "to": "岡地",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "森町病院前",
+      "to": "岡地",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "円田",
+      "to": "岡地",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "遠江一宮",
+      "to": "岡地",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "敷地",
+      "to": "岡地",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "豊岡",
+      "to": "岡地",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "上野部",
+      "to": "岡地",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "天竜二俣",
+      "to": "岡地",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "二俣本町",
+      "to": "岡地",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "西鹿島",
+      "to": "岡地",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "岩水寺",
+      "to": "岡地",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "宮口",
+      "to": "岡地",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "岡地",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "都田",
+      "to": "岡地",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "常葉大学前",
+      "to": "岡地",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "金指",
+      "to": "岡地",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "気賀",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "気賀",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "西掛川",
+      "to": "気賀",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "桜木",
+      "to": "気賀",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "いこいの広場",
+      "to": "気賀",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "細谷",
+      "to": "気賀",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "原谷",
+      "to": "気賀",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "原田",
+      "to": "気賀",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "戸綿",
+      "to": "気賀",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "遠州森",
+      "to": "気賀",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "森町病院前",
+      "to": "気賀",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "円田",
+      "to": "気賀",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "遠江一宮",
+      "to": "気賀",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "敷地",
+      "to": "気賀",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "豊岡",
+      "to": "気賀",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "上野部",
+      "to": "気賀",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "天竜二俣",
+      "to": "気賀",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "二俣本町",
+      "to": "気賀",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "西鹿島",
+      "to": "気賀",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "岩水寺",
+      "to": "気賀",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "宮口",
+      "to": "気賀",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "気賀",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "都田",
+      "to": "気賀",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "常葉大学前",
+      "to": "気賀",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "金指",
+      "to": "気賀",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "岡地",
+      "to": "気賀",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "西気賀",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "西気賀",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "西掛川",
+      "to": "西気賀",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "桜木",
+      "to": "西気賀",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "いこいの広場",
+      "to": "西気賀",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "細谷",
+      "to": "西気賀",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "原谷",
+      "to": "西気賀",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "原田",
+      "to": "西気賀",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "戸綿",
+      "to": "西気賀",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "遠州森",
+      "to": "西気賀",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "森町病院前",
+      "to": "西気賀",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "円田",
+      "to": "西気賀",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "遠江一宮",
+      "to": "西気賀",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "敷地",
+      "to": "西気賀",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "豊岡",
+      "to": "西気賀",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "上野部",
+      "to": "西気賀",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "天竜二俣",
+      "to": "西気賀",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "二俣本町",
+      "to": "西気賀",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "西鹿島",
+      "to": "西気賀",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "岩水寺",
+      "to": "西気賀",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "宮口",
+      "to": "西気賀",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "西気賀",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "都田",
+      "to": "西気賀",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "常葉大学前",
+      "to": "西気賀",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "金指",
+      "to": "西気賀",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "岡地",
+      "to": "西気賀",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "気賀",
+      "to": "西気賀",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "寸座",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "寸座",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "西掛川",
+      "to": "寸座",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "桜木",
+      "to": "寸座",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "いこいの広場",
+      "to": "寸座",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "細谷",
+      "to": "寸座",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "原谷",
+      "to": "寸座",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "原田",
+      "to": "寸座",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "戸綿",
+      "to": "寸座",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "遠州森",
+      "to": "寸座",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "森町病院前",
+      "to": "寸座",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "円田",
+      "to": "寸座",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "遠江一宮",
+      "to": "寸座",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "敷地",
+      "to": "寸座",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "豊岡",
+      "to": "寸座",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "上野部",
+      "to": "寸座",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "天竜二俣",
+      "to": "寸座",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "二俣本町",
+      "to": "寸座",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "西鹿島",
+      "to": "寸座",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "岩水寺",
+      "to": "寸座",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "宮口",
+      "to": "寸座",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "寸座",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "都田",
+      "to": "寸座",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "常葉大学前",
+      "to": "寸座",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "金指",
+      "to": "寸座",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "岡地",
+      "to": "寸座",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "気賀",
+      "to": "寸座",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "西気賀",
+      "to": "寸座",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "西掛川",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "桜木",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "いこいの広場",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "細谷",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "原谷",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "原田",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "戸綿",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "遠州森",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "森町病院前",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "円田",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "遠江一宮",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "敷地",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "豊岡",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "上野部",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "天竜二俣",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "二俣本町",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "西鹿島",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "岩水寺",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "宮口",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "都田",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "常葉大学前",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "金指",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "岡地",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "気賀",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "西気賀",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "寸座",
+      "to": "浜名湖佐久米",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "西掛川",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "桜木",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "いこいの広場",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "細谷",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "原谷",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "原田",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "戸綿",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "遠州森",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "森町病院前",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "円田",
+      "to": "東都筑",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "遠江一宮",
+      "to": "東都筑",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "敷地",
+      "to": "東都筑",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "豊岡",
+      "to": "東都筑",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "上野部",
+      "to": "東都筑",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "天竜二俣",
+      "to": "東都筑",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "二俣本町",
+      "to": "東都筑",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "西鹿島",
+      "to": "東都筑",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "岩水寺",
+      "to": "東都筑",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "宮口",
+      "to": "東都筑",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "東都筑",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "都田",
+      "to": "東都筑",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "常葉大学前",
+      "to": "東都筑",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "金指",
+      "to": "東都筑",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "岡地",
+      "to": "東都筑",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "気賀",
+      "to": "東都筑",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "西気賀",
+      "to": "東都筑",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "寸座",
+      "to": "東都筑",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "浜名湖佐久米",
+      "to": "東都筑",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "都筑",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "都筑",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "西掛川",
+      "to": "都筑",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "桜木",
+      "to": "都筑",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "いこいの広場",
+      "to": "都筑",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "細谷",
+      "to": "都筑",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "原谷",
+      "to": "都筑",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "原田",
+      "to": "都筑",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "戸綿",
+      "to": "都筑",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "遠州森",
+      "to": "都筑",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "森町病院前",
+      "to": "都筑",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "円田",
+      "to": "都筑",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "遠江一宮",
+      "to": "都筑",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "敷地",
+      "to": "都筑",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "豊岡",
+      "to": "都筑",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "上野部",
+      "to": "都筑",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "天竜二俣",
+      "to": "都筑",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "二俣本町",
+      "to": "都筑",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "西鹿島",
+      "to": "都筑",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "岩水寺",
+      "to": "都筑",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "宮口",
+      "to": "都筑",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "都筑",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "都田",
+      "to": "都筑",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "常葉大学前",
+      "to": "都筑",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "金指",
+      "to": "都筑",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "岡地",
+      "to": "都筑",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "気賀",
+      "to": "都筑",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "西気賀",
+      "to": "都筑",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "寸座",
+      "to": "都筑",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "浜名湖佐久米",
+      "to": "都筑",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "東都筑",
+      "to": "都筑",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "西掛川",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "桜木",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "いこいの広場",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "細谷",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "原谷",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "原田",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "戸綿",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "遠州森",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "森町病院前",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "円田",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "遠江一宮",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "敷地",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "豊岡",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "上野部",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "天竜二俣",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "二俣本町",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "西鹿島",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "岩水寺",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "宮口",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "都田",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "常葉大学前",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "金指",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "岡地",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "気賀",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "西気賀",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "寸座",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "浜名湖佐久米",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "東都筑",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "都筑",
+      "to": "三ヶ日",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "西掛川",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "桜木",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "いこいの広場",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "細谷",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "原谷",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "原田",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "戸綿",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "遠州森",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "森町病院前",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "円田",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "遠江一宮",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "敷地",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "豊岡",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "上野部",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "天竜二俣",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "二俣本町",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "西鹿島",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "岩水寺",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "宮口",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "都田",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "常葉大学前",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "金指",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "岡地",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "気賀",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "西気賀",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "寸座",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "浜名湖佐久米",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "東都筑",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "都筑",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "三ヶ日",
+      "to": "奥浜名湖",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1490
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "西掛川",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "桜木",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "いこいの広場",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "細谷",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "原谷",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "原田",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "戸綿",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "遠州森",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "森町病院前",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "円田",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "遠江一宮",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "敷地",
+      "to": "尾奈",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "豊岡",
+      "to": "尾奈",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "上野部",
+      "to": "尾奈",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "天竜二俣",
+      "to": "尾奈",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "二俣本町",
+      "to": "尾奈",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "西鹿島",
+      "to": "尾奈",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "岩水寺",
+      "to": "尾奈",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "宮口",
+      "to": "尾奈",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "尾奈",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "都田",
+      "to": "尾奈",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "常葉大学前",
+      "to": "尾奈",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "金指",
+      "to": "尾奈",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "岡地",
+      "to": "尾奈",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "気賀",
+      "to": "尾奈",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "西気賀",
+      "to": "尾奈",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "寸座",
+      "to": "尾奈",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "浜名湖佐久米",
+      "to": "尾奈",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "東都筑",
+      "to": "尾奈",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "都筑",
+      "to": "尾奈",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "三ヶ日",
+      "to": "尾奈",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "奥浜名湖",
+      "to": "尾奈",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "知波田",
+      "km": null,
+      "fare": 1530
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "知波田",
+      "km": null,
+      "fare": 1530
+    },
+    {
+      "from": "西掛川",
+      "to": "知波田",
+      "km": null,
+      "fare": 1530
+    },
+    {
+      "from": "桜木",
+      "to": "知波田",
+      "km": null,
+      "fare": 1490
+    },
+    {
+      "from": "いこいの広場",
+      "to": "知波田",
+      "km": null,
+      "fare": 1490
+    },
+    {
+      "from": "細谷",
+      "to": "知波田",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "原谷",
+      "to": "知波田",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "原田",
+      "to": "知波田",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "戸綿",
+      "to": "知波田",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "遠州森",
+      "to": "知波田",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "森町病院前",
+      "to": "知波田",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "円田",
+      "to": "知波田",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "遠江一宮",
+      "to": "知波田",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "敷地",
+      "to": "知波田",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "豊岡",
+      "to": "知波田",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "上野部",
+      "to": "知波田",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "天竜二俣",
+      "to": "知波田",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "二俣本町",
+      "to": "知波田",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "西鹿島",
+      "to": "知波田",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "岩水寺",
+      "to": "知波田",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "宮口",
+      "to": "知波田",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "知波田",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "都田",
+      "to": "知波田",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "常葉大学前",
+      "to": "知波田",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "金指",
+      "to": "知波田",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "岡地",
+      "to": "知波田",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "気賀",
+      "to": "知波田",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "西気賀",
+      "to": "知波田",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "寸座",
+      "to": "知波田",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "浜名湖佐久米",
+      "to": "知波田",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "東都筑",
+      "to": "知波田",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "都筑",
+      "to": "知波田",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "三ヶ日",
+      "to": "知波田",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "奥浜名湖",
+      "to": "知波田",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "尾奈",
+      "to": "知波田",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "掛川",
+      "to": "大森",
+      "km": null,
+      "fare": 1570
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "大森",
+      "km": null,
+      "fare": 1570
+    },
+    {
+      "from": "西掛川",
+      "to": "大森",
+      "km": null,
+      "fare": 1570
+    },
+    {
+      "from": "桜木",
+      "to": "大森",
+      "km": null,
+      "fare": 1530
+    },
+    {
+      "from": "いこいの広場",
+      "to": "大森",
+      "km": null,
+      "fare": 1490
+    },
+    {
+      "from": "細谷",
+      "to": "大森",
+      "km": null,
+      "fare": 1490
+    },
+    {
+      "from": "原谷",
+      "to": "大森",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "原田",
+      "to": "大森",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "戸綿",
+      "to": "大森",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "遠州森",
+      "to": "大森",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "森町病院前",
+      "to": "大森",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "円田",
+      "to": "大森",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "遠江一宮",
+      "to": "大森",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "敷地",
+      "to": "大森",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "豊岡",
+      "to": "大森",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "上野部",
+      "to": "大森",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "天竜二俣",
+      "to": "大森",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "二俣本町",
+      "to": "大森",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "西鹿島",
+      "to": "大森",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "岩水寺",
+      "to": "大森",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "宮口",
+      "to": "大森",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "大森",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "都田",
+      "to": "大森",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "常葉大学前",
+      "to": "大森",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "金指",
+      "to": "大森",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "岡地",
+      "to": "大森",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "気賀",
+      "to": "大森",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "西気賀",
+      "to": "大森",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "寸座",
+      "to": "大森",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "浜名湖佐久米",
+      "to": "大森",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "東都筑",
+      "to": "大森",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "都筑",
+      "to": "大森",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "三ヶ日",
+      "to": "大森",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "奥浜名湖",
+      "to": "大森",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "尾奈",
+      "to": "大森",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "知波田",
+      "to": "大森",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1620
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1570
+    },
+    {
+      "from": "西掛川",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1570
+    },
+    {
+      "from": "桜木",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1530
+    },
+    {
+      "from": "いこいの広場",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1530
+    },
+    {
+      "from": "細谷",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1530
+    },
+    {
+      "from": "原谷",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1490
+    },
+    {
+      "from": "原田",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1490
+    },
+    {
+      "from": "戸綿",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "遠州森",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "森町病院前",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "円田",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "遠江一宮",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1320
+    },
+    {
+      "from": "敷地",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "豊岡",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "上野部",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "天竜二俣",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "二俣本町",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西鹿島",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "岩水寺",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "宮口",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "都田",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "常葉大学前",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "金指",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "岡地",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "気賀",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "西気賀",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "寸座",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "浜名湖佐久米",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "東都筑",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "都筑",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "三ヶ日",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "奥浜名湖",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "尾奈",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "知波田",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "大森",
+      "to": "アスモ前",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "掛川",
+      "to": "新所原",
+      "km": null,
+      "fare": 1620
+    },
+    {
+      "from": "掛川市役所前",
+      "to": "新所原",
+      "km": null,
+      "fare": 1620
+    },
+    {
+      "from": "西掛川",
+      "to": "新所原",
+      "km": null,
+      "fare": 1570
+    },
+    {
+      "from": "桜木",
+      "to": "新所原",
+      "km": null,
+      "fare": 1570
+    },
+    {
+      "from": "いこいの広場",
+      "to": "新所原",
+      "km": null,
+      "fare": 1530
+    },
+    {
+      "from": "細谷",
+      "to": "新所原",
+      "km": null,
+      "fare": 1530
+    },
+    {
+      "from": "原谷",
+      "to": "新所原",
+      "km": null,
+      "fare": 1490
+    },
+    {
+      "from": "原田",
+      "to": "新所原",
+      "km": null,
+      "fare": 1490
+    },
+    {
+      "from": "戸綿",
+      "to": "新所原",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "遠州森",
+      "to": "新所原",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "森町病院前",
+      "to": "新所原",
+      "km": null,
+      "fare": 1430
+    },
+    {
+      "from": "円田",
+      "to": "新所原",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "遠江一宮",
+      "to": "新所原",
+      "km": null,
+      "fare": 1380
+    },
+    {
+      "from": "敷地",
+      "to": "新所原",
+      "km": null,
+      "fare": 1250
+    },
+    {
+      "from": "豊岡",
+      "to": "新所原",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "上野部",
+      "to": "新所原",
+      "km": null,
+      "fare": 1180
+    },
+    {
+      "from": "天竜二俣",
+      "to": "新所原",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "二俣本町",
+      "to": "新所原",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西鹿島",
+      "to": "新所原",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "岩水寺",
+      "to": "新所原",
+      "km": null,
+      "fare": 1050
+    },
+    {
+      "from": "宮口",
+      "to": "新所原",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "フルーツパーク",
+      "to": "新所原",
+      "km": null,
+      "fare": 910
+    },
+    {
+      "from": "都田",
+      "to": "新所原",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "常葉大学前",
+      "to": "新所原",
+      "km": null,
+      "fare": 850
+    },
+    {
+      "from": "金指",
+      "to": "新所原",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "岡地",
+      "to": "新所原",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "気賀",
+      "to": "新所原",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "西気賀",
+      "to": "新所原",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "寸座",
+      "to": "新所原",
+      "km": null,
+      "fare": 660
+    },
+    {
+      "from": "浜名湖佐久米",
+      "to": "新所原",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "東都筑",
+      "to": "新所原",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "都筑",
+      "to": "新所原",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "三ヶ日",
+      "to": "新所原",
+      "km": null,
+      "fare": 530
+    },
+    {
+      "from": "奥浜名湖",
+      "to": "新所原",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "尾奈",
+      "to": "新所原",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "知波田",
+      "to": "新所原",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "大森",
+      "to": "新所原",
+      "km": null,
+      "fare": 220
+    },
+    {
+      "from": "アスモ前",
+      "to": "新所原",
+      "km": null,
+      "fare": 220
+    }
+  ]
+}

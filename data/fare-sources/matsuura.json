@@ -1,0 +1,9587 @@
+{
+  "id": "matsuura",
+  "operator": "松浦鉄道",
+  "source": {
+    "url": "https://matutetu.com/pages/787/ (普通旅客運賃表【令和6年10月1日改定】 https://matutetu.com/files/libs/4890/202408251723586779.pdf)",
+    "fetchedAt": "2026-10-12",
+    "note": "松浦鉄道（西九州線）の公式の駅間普通旅客運賃表（2024年10月1日改定、3ページに分かれた三角表と長方形の表）から scripts/fare/extract/matsuura.py で取り出した全1,596ペアの大人運賃（きっぷ）。行ごとの値の数と、行・列の両方向で線路に沿って運賃が下がらないことを抽出時に検算した。改定の認可・届出資料（https://matutetu.com/files/libs/4880/202408081053018976.pdf）の主要区間の新運賃25組とすべて一致する。★印の特定区間（中佐世保〜佐世保など）の額も表どおり。営業キロは表に無いので null。"
+  },
+  "pairs": [
+    {
+      "from": "有田",
+      "to": "三代橋",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "黒川",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "三代橋",
+      "to": "黒川",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "蔵宿",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "三代橋",
+      "to": "蔵宿",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "黒川",
+      "to": "蔵宿",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "有田",
+      "to": "西有田",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "三代橋",
+      "to": "西有田",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "黒川",
+      "to": "西有田",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "蔵宿",
+      "to": "西有田",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "有田",
+      "to": "大木",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "三代橋",
+      "to": "大木",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "黒川",
+      "to": "大木",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "蔵宿",
+      "to": "大木",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "西有田",
+      "to": "大木",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "山谷",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "三代橋",
+      "to": "山谷",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "黒川",
+      "to": "山谷",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "蔵宿",
+      "to": "山谷",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "西有田",
+      "to": "山谷",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "大木",
+      "to": "山谷",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "有田",
+      "to": "夫婦石",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "三代橋",
+      "to": "夫婦石",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "黒川",
+      "to": "夫婦石",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "蔵宿",
+      "to": "夫婦石",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "西有田",
+      "to": "夫婦石",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "大木",
+      "to": "夫婦石",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "山谷",
+      "to": "夫婦石",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "有田",
+      "to": "金武",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "三代橋",
+      "to": "金武",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "黒川",
+      "to": "金武",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "蔵宿",
+      "to": "金武",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "西有田",
+      "to": "金武",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "大木",
+      "to": "金武",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "山谷",
+      "to": "金武",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "夫婦石",
+      "to": "金武",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "川東",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "三代橋",
+      "to": "川東",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "黒川",
+      "to": "川東",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "蔵宿",
+      "to": "川東",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "西有田",
+      "to": "川東",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "大木",
+      "to": "川東",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "山谷",
+      "to": "川東",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "夫婦石",
+      "to": "川東",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "金武",
+      "to": "川東",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "伊万里",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "三代橋",
+      "to": "伊万里",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "黒川",
+      "to": "伊万里",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "蔵宿",
+      "to": "伊万里",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "西有田",
+      "to": "伊万里",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "大木",
+      "to": "伊万里",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "山谷",
+      "to": "伊万里",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "夫婦石",
+      "to": "伊万里",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "金武",
+      "to": "伊万里",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "川東",
+      "to": "伊万里",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "東山代",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "三代橋",
+      "to": "東山代",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "黒川",
+      "to": "東山代",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "蔵宿",
+      "to": "東山代",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "西有田",
+      "to": "東山代",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "大木",
+      "to": "東山代",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "山谷",
+      "to": "東山代",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "夫婦石",
+      "to": "東山代",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "金武",
+      "to": "東山代",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "川東",
+      "to": "東山代",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "伊万里",
+      "to": "東山代",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "有田",
+      "to": "里",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "三代橋",
+      "to": "里",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "黒川",
+      "to": "里",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "蔵宿",
+      "to": "里",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "西有田",
+      "to": "里",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "大木",
+      "to": "里",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "山谷",
+      "to": "里",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "夫婦石",
+      "to": "里",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "金武",
+      "to": "里",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "川東",
+      "to": "里",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "伊万里",
+      "to": "里",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "東山代",
+      "to": "里",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "楠久",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "三代橋",
+      "to": "楠久",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "黒川",
+      "to": "楠久",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "蔵宿",
+      "to": "楠久",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "西有田",
+      "to": "楠久",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "大木",
+      "to": "楠久",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "山谷",
+      "to": "楠久",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "夫婦石",
+      "to": "楠久",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "金武",
+      "to": "楠久",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "川東",
+      "to": "楠久",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "伊万里",
+      "to": "楠久",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "東山代",
+      "to": "楠久",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "里",
+      "to": "楠久",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "鳴石",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "三代橋",
+      "to": "鳴石",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "黒川",
+      "to": "鳴石",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "蔵宿",
+      "to": "鳴石",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "西有田",
+      "to": "鳴石",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "大木",
+      "to": "鳴石",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "山谷",
+      "to": "鳴石",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "夫婦石",
+      "to": "鳴石",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "金武",
+      "to": "鳴石",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "川東",
+      "to": "鳴石",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "伊万里",
+      "to": "鳴石",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "東山代",
+      "to": "鳴石",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "里",
+      "to": "鳴石",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "楠久",
+      "to": "鳴石",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "久原",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "三代橋",
+      "to": "久原",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "黒川",
+      "to": "久原",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "蔵宿",
+      "to": "久原",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "西有田",
+      "to": "久原",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "大木",
+      "to": "久原",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "山谷",
+      "to": "久原",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "夫婦石",
+      "to": "久原",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "金武",
+      "to": "久原",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "川東",
+      "to": "久原",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "伊万里",
+      "to": "久原",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "東山代",
+      "to": "久原",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "里",
+      "to": "久原",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "楠久",
+      "to": "久原",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "鳴石",
+      "to": "久原",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "波瀬",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "三代橋",
+      "to": "波瀬",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "黒川",
+      "to": "波瀬",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "蔵宿",
+      "to": "波瀬",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "西有田",
+      "to": "波瀬",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "大木",
+      "to": "波瀬",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "山谷",
+      "to": "波瀬",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "夫婦石",
+      "to": "波瀬",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "金武",
+      "to": "波瀬",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "川東",
+      "to": "波瀬",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "伊万里",
+      "to": "波瀬",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "東山代",
+      "to": "波瀬",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "里",
+      "to": "波瀬",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "楠久",
+      "to": "波瀬",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "鳴石",
+      "to": "波瀬",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "久原",
+      "to": "波瀬",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "三代橋",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "黒川",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "蔵宿",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "西有田",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "大木",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "山谷",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "夫婦石",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "金武",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "川東",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "伊万里",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "東山代",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "里",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "楠久",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "鳴石",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "久原",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "波瀬",
+      "to": "浦ノ崎",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "福島口",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "三代橋",
+      "to": "福島口",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "黒川",
+      "to": "福島口",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "蔵宿",
+      "to": "福島口",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "西有田",
+      "to": "福島口",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "大木",
+      "to": "福島口",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "山谷",
+      "to": "福島口",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "夫婦石",
+      "to": "福島口",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "金武",
+      "to": "福島口",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "川東",
+      "to": "福島口",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "伊万里",
+      "to": "福島口",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "東山代",
+      "to": "福島口",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "里",
+      "to": "福島口",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "楠久",
+      "to": "福島口",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "鳴石",
+      "to": "福島口",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "久原",
+      "to": "福島口",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "波瀬",
+      "to": "福島口",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "福島口",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "有田",
+      "to": "今福",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "三代橋",
+      "to": "今福",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "黒川",
+      "to": "今福",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "蔵宿",
+      "to": "今福",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "西有田",
+      "to": "今福",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "大木",
+      "to": "今福",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "山谷",
+      "to": "今福",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "夫婦石",
+      "to": "今福",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "金武",
+      "to": "今福",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "川東",
+      "to": "今福",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "伊万里",
+      "to": "今福",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "東山代",
+      "to": "今福",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "里",
+      "to": "今福",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "楠久",
+      "to": "今福",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "鳴石",
+      "to": "今福",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "久原",
+      "to": "今福",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "波瀬",
+      "to": "今福",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "今福",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "福島口",
+      "to": "今福",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "有田",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "三代橋",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "黒川",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "蔵宿",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "西有田",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "大木",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "山谷",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "夫婦石",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "金武",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "川東",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "伊万里",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "東山代",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "里",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "楠久",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "鳴石",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "久原",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "波瀬",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "福島口",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "今福",
+      "to": "鷹島口",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "前浜",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "三代橋",
+      "to": "前浜",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "黒川",
+      "to": "前浜",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "蔵宿",
+      "to": "前浜",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "西有田",
+      "to": "前浜",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "大木",
+      "to": "前浜",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "山谷",
+      "to": "前浜",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "夫婦石",
+      "to": "前浜",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "金武",
+      "to": "前浜",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "川東",
+      "to": "前浜",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "伊万里",
+      "to": "前浜",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "東山代",
+      "to": "前浜",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "里",
+      "to": "前浜",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "楠久",
+      "to": "前浜",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "鳴石",
+      "to": "前浜",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "久原",
+      "to": "前浜",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "波瀬",
+      "to": "前浜",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "前浜",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "福島口",
+      "to": "前浜",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "今福",
+      "to": "前浜",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "鷹島口",
+      "to": "前浜",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "有田",
+      "to": "調川",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "三代橋",
+      "to": "調川",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "黒川",
+      "to": "調川",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "蔵宿",
+      "to": "調川",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "西有田",
+      "to": "調川",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "大木",
+      "to": "調川",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "山谷",
+      "to": "調川",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "夫婦石",
+      "to": "調川",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "金武",
+      "to": "調川",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "川東",
+      "to": "調川",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "伊万里",
+      "to": "調川",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "東山代",
+      "to": "調川",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "里",
+      "to": "調川",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "楠久",
+      "to": "調川",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "鳴石",
+      "to": "調川",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "久原",
+      "to": "調川",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "波瀬",
+      "to": "調川",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "調川",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "福島口",
+      "to": "調川",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "今福",
+      "to": "調川",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "鷹島口",
+      "to": "調川",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "前浜",
+      "to": "調川",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "松浦",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "三代橋",
+      "to": "松浦",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "黒川",
+      "to": "松浦",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "蔵宿",
+      "to": "松浦",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "西有田",
+      "to": "松浦",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "大木",
+      "to": "松浦",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "山谷",
+      "to": "松浦",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "夫婦石",
+      "to": "松浦",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "金武",
+      "to": "松浦",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "川東",
+      "to": "松浦",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "伊万里",
+      "to": "松浦",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "東山代",
+      "to": "松浦",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "里",
+      "to": "松浦",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "楠久",
+      "to": "松浦",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "鳴石",
+      "to": "松浦",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "久原",
+      "to": "松浦",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "波瀬",
+      "to": "松浦",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "松浦",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "福島口",
+      "to": "松浦",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "今福",
+      "to": "松浦",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "鷹島口",
+      "to": "松浦",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "前浜",
+      "to": "松浦",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "調川",
+      "to": "松浦",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "有田",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "三代橋",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "黒川",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "蔵宿",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "西有田",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "大木",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "山谷",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "夫婦石",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "金武",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "川東",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "伊万里",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "東山代",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "里",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "楠久",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "鳴石",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "久原",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "波瀬",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "福島口",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "今福",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "鷹島口",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "前浜",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "調川",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "松浦",
+      "to": "松浦発電所前",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "有田",
+      "to": "御厨",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "三代橋",
+      "to": "御厨",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "黒川",
+      "to": "御厨",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "蔵宿",
+      "to": "御厨",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "西有田",
+      "to": "御厨",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "大木",
+      "to": "御厨",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "山谷",
+      "to": "御厨",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "夫婦石",
+      "to": "御厨",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "金武",
+      "to": "御厨",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "川東",
+      "to": "御厨",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "伊万里",
+      "to": "御厨",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "東山代",
+      "to": "御厨",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "里",
+      "to": "御厨",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "楠久",
+      "to": "御厨",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "鳴石",
+      "to": "御厨",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "久原",
+      "to": "御厨",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "波瀬",
+      "to": "御厨",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "御厨",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "福島口",
+      "to": "御厨",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "今福",
+      "to": "御厨",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "鷹島口",
+      "to": "御厨",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "前浜",
+      "to": "御厨",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "調川",
+      "to": "御厨",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "松浦",
+      "to": "御厨",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "御厨",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "有田",
+      "to": "西木場",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "三代橋",
+      "to": "西木場",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "黒川",
+      "to": "西木場",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "蔵宿",
+      "to": "西木場",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "西有田",
+      "to": "西木場",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "大木",
+      "to": "西木場",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "山谷",
+      "to": "西木場",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "夫婦石",
+      "to": "西木場",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "金武",
+      "to": "西木場",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "川東",
+      "to": "西木場",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "伊万里",
+      "to": "西木場",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "東山代",
+      "to": "西木場",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "里",
+      "to": "西木場",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "楠久",
+      "to": "西木場",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "鳴石",
+      "to": "西木場",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "久原",
+      "to": "西木場",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "波瀬",
+      "to": "西木場",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "西木場",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "福島口",
+      "to": "西木場",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "今福",
+      "to": "西木場",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "鷹島口",
+      "to": "西木場",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "前浜",
+      "to": "西木場",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "調川",
+      "to": "西木場",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "松浦",
+      "to": "西木場",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "西木場",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "御厨",
+      "to": "西木場",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "有田",
+      "to": "東田平",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "三代橋",
+      "to": "東田平",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "黒川",
+      "to": "東田平",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "蔵宿",
+      "to": "東田平",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "西有田",
+      "to": "東田平",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "大木",
+      "to": "東田平",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "山谷",
+      "to": "東田平",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "夫婦石",
+      "to": "東田平",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "金武",
+      "to": "東田平",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "川東",
+      "to": "東田平",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "伊万里",
+      "to": "東田平",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "東山代",
+      "to": "東田平",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "里",
+      "to": "東田平",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "楠久",
+      "to": "東田平",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "鳴石",
+      "to": "東田平",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "久原",
+      "to": "東田平",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "波瀬",
+      "to": "東田平",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "東田平",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "福島口",
+      "to": "東田平",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "今福",
+      "to": "東田平",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "鷹島口",
+      "to": "東田平",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "前浜",
+      "to": "東田平",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "調川",
+      "to": "東田平",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "松浦",
+      "to": "東田平",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "東田平",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "御厨",
+      "to": "東田平",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "西木場",
+      "to": "東田平",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "中田平",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "三代橋",
+      "to": "中田平",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "黒川",
+      "to": "中田平",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "蔵宿",
+      "to": "中田平",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "西有田",
+      "to": "中田平",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "大木",
+      "to": "中田平",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "山谷",
+      "to": "中田平",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "夫婦石",
+      "to": "中田平",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "金武",
+      "to": "中田平",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "川東",
+      "to": "中田平",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "伊万里",
+      "to": "中田平",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "東山代",
+      "to": "中田平",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "里",
+      "to": "中田平",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "楠久",
+      "to": "中田平",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "鳴石",
+      "to": "中田平",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "久原",
+      "to": "中田平",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "波瀬",
+      "to": "中田平",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "中田平",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "福島口",
+      "to": "中田平",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "今福",
+      "to": "中田平",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "鷹島口",
+      "to": "中田平",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "前浜",
+      "to": "中田平",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "調川",
+      "to": "中田平",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "松浦",
+      "to": "中田平",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "中田平",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "御厨",
+      "to": "中田平",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "西木場",
+      "to": "中田平",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "東田平",
+      "to": "中田平",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "有田",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "三代橋",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "黒川",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "蔵宿",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "西有田",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "大木",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "山谷",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "夫婦石",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "金武",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "川東",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "伊万里",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "東山代",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "里",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "楠久",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "鳴石",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "久原",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "波瀬",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "福島口",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "今福",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "鷹島口",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "前浜",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "調川",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "松浦",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "御厨",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "西木場",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "東田平",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "中田平",
+      "to": "たびら平戸口",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "有田",
+      "to": "西田平",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "三代橋",
+      "to": "西田平",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "黒川",
+      "to": "西田平",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "蔵宿",
+      "to": "西田平",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "西有田",
+      "to": "西田平",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "大木",
+      "to": "西田平",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "山谷",
+      "to": "西田平",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "夫婦石",
+      "to": "西田平",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "金武",
+      "to": "西田平",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "川東",
+      "to": "西田平",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "伊万里",
+      "to": "西田平",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "東山代",
+      "to": "西田平",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "里",
+      "to": "西田平",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "楠久",
+      "to": "西田平",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "鳴石",
+      "to": "西田平",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "久原",
+      "to": "西田平",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "波瀬",
+      "to": "西田平",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "西田平",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "福島口",
+      "to": "西田平",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "今福",
+      "to": "西田平",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "鷹島口",
+      "to": "西田平",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "前浜",
+      "to": "西田平",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "調川",
+      "to": "西田平",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "松浦",
+      "to": "西田平",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "西田平",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "御厨",
+      "to": "西田平",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "西木場",
+      "to": "西田平",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "東田平",
+      "to": "西田平",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "中田平",
+      "to": "西田平",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "西田平",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "有田",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "三代橋",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "黒川",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "蔵宿",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "西有田",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "大木",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "山谷",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "夫婦石",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "金武",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "川東",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "伊万里",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "東山代",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "里",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "楠久",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "鳴石",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "久原",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "波瀬",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "福島口",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "今福",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "鷹島口",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "前浜",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "調川",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "松浦",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "御厨",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "西木場",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "東田平",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "中田平",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "有田",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "三代橋",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "黒川",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "蔵宿",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "西有田",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "大木",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "山谷",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "夫婦石",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "金武",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "川東",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "伊万里",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "東山代",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "里",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "楠久",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "鳴石",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "久原",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "波瀬",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "福島口",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "今福",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "鷹島口",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "前浜",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "調川",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "松浦",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "御厨",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "西木場",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "東田平",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "中田平",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "有田",
+      "to": "高岩",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "三代橋",
+      "to": "高岩",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "黒川",
+      "to": "高岩",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "蔵宿",
+      "to": "高岩",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "西有田",
+      "to": "高岩",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "大木",
+      "to": "高岩",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "山谷",
+      "to": "高岩",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "夫婦石",
+      "to": "高岩",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "金武",
+      "to": "高岩",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "川東",
+      "to": "高岩",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "伊万里",
+      "to": "高岩",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "東山代",
+      "to": "高岩",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "里",
+      "to": "高岩",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "楠久",
+      "to": "高岩",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "鳴石",
+      "to": "高岩",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "久原",
+      "to": "高岩",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "波瀬",
+      "to": "高岩",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "高岩",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "福島口",
+      "to": "高岩",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "今福",
+      "to": "高岩",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "鷹島口",
+      "to": "高岩",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "前浜",
+      "to": "高岩",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "調川",
+      "to": "高岩",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "松浦",
+      "to": "高岩",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "高岩",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "御厨",
+      "to": "高岩",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "西木場",
+      "to": "高岩",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "東田平",
+      "to": "高岩",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "中田平",
+      "to": "高岩",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "高岩",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "有田",
+      "to": "いのつき",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "三代橋",
+      "to": "いのつき",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "黒川",
+      "to": "いのつき",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "蔵宿",
+      "to": "いのつき",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "西有田",
+      "to": "いのつき",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "大木",
+      "to": "いのつき",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "山谷",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "夫婦石",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "金武",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "川東",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "伊万里",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "東山代",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "里",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "楠久",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "鳴石",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "久原",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "波瀬",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "福島口",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "今福",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "鷹島口",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "前浜",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "調川",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "松浦",
+      "to": "いのつき",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "いのつき",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "御厨",
+      "to": "いのつき",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "西木場",
+      "to": "いのつき",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "東田平",
+      "to": "いのつき",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "中田平",
+      "to": "いのつき",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "いのつき",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "有田",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "三代橋",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "黒川",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "蔵宿",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "西有田",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "大木",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "山谷",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "夫婦石",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "金武",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "川東",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "伊万里",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "東山代",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "里",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "楠久",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "鳴石",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "久原",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "波瀬",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "福島口",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "今福",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "鷹島口",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "前浜",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "調川",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "松浦",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "御厨",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "西木場",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "東田平",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "中田平",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "有田",
+      "to": "吉井",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "三代橋",
+      "to": "吉井",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "黒川",
+      "to": "吉井",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "蔵宿",
+      "to": "吉井",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "西有田",
+      "to": "吉井",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "大木",
+      "to": "吉井",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "山谷",
+      "to": "吉井",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "夫婦石",
+      "to": "吉井",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "金武",
+      "to": "吉井",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "川東",
+      "to": "吉井",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "伊万里",
+      "to": "吉井",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "東山代",
+      "to": "吉井",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "里",
+      "to": "吉井",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "楠久",
+      "to": "吉井",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "鳴石",
+      "to": "吉井",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "久原",
+      "to": "吉井",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "波瀬",
+      "to": "吉井",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "吉井",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "福島口",
+      "to": "吉井",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "今福",
+      "to": "吉井",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "鷹島口",
+      "to": "吉井",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "前浜",
+      "to": "吉井",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "調川",
+      "to": "吉井",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "松浦",
+      "to": "吉井",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "吉井",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "御厨",
+      "to": "吉井",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "西木場",
+      "to": "吉井",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "東田平",
+      "to": "吉井",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "中田平",
+      "to": "吉井",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "吉井",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "有田",
+      "to": "神田",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "三代橋",
+      "to": "神田",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "黒川",
+      "to": "神田",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "蔵宿",
+      "to": "神田",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "西有田",
+      "to": "神田",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "大木",
+      "to": "神田",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "山谷",
+      "to": "神田",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "夫婦石",
+      "to": "神田",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "金武",
+      "to": "神田",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "川東",
+      "to": "神田",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "伊万里",
+      "to": "神田",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "東山代",
+      "to": "神田",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "里",
+      "to": "神田",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "楠久",
+      "to": "神田",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "鳴石",
+      "to": "神田",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "久原",
+      "to": "神田",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "波瀬",
+      "to": "神田",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "神田",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "福島口",
+      "to": "神田",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "今福",
+      "to": "神田",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "鷹島口",
+      "to": "神田",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "前浜",
+      "to": "神田",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "調川",
+      "to": "神田",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "松浦",
+      "to": "神田",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "神田",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "御厨",
+      "to": "神田",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "西木場",
+      "to": "神田",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "東田平",
+      "to": "神田",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "中田平",
+      "to": "神田",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "神田",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "有田",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "三代橋",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "黒川",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "蔵宿",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "西有田",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "大木",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "山谷",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "夫婦石",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "金武",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "川東",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "伊万里",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "東山代",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "里",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "楠久",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "鳴石",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "久原",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "波瀬",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "福島口",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "今福",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "鷹島口",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "前浜",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "調川",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "松浦",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "御厨",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "西木場",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "東田平",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "中田平",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "有田",
+      "to": "佐々",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "三代橋",
+      "to": "佐々",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "黒川",
+      "to": "佐々",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "蔵宿",
+      "to": "佐々",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "西有田",
+      "to": "佐々",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "大木",
+      "to": "佐々",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "山谷",
+      "to": "佐々",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "夫婦石",
+      "to": "佐々",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "金武",
+      "to": "佐々",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "川東",
+      "to": "佐々",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "伊万里",
+      "to": "佐々",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "東山代",
+      "to": "佐々",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "里",
+      "to": "佐々",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "楠久",
+      "to": "佐々",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "鳴石",
+      "to": "佐々",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "久原",
+      "to": "佐々",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "波瀬",
+      "to": "佐々",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "佐々",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "福島口",
+      "to": "佐々",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "今福",
+      "to": "佐々",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "鷹島口",
+      "to": "佐々",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "前浜",
+      "to": "佐々",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "調川",
+      "to": "佐々",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "松浦",
+      "to": "佐々",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "佐々",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "御厨",
+      "to": "佐々",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "西木場",
+      "to": "佐々",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "東田平",
+      "to": "佐々",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "中田平",
+      "to": "佐々",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "佐々",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "有田",
+      "to": "小浦",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "三代橋",
+      "to": "小浦",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "黒川",
+      "to": "小浦",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "蔵宿",
+      "to": "小浦",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "西有田",
+      "to": "小浦",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "大木",
+      "to": "小浦",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "山谷",
+      "to": "小浦",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "夫婦石",
+      "to": "小浦",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "金武",
+      "to": "小浦",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "川東",
+      "to": "小浦",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "伊万里",
+      "to": "小浦",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "東山代",
+      "to": "小浦",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "里",
+      "to": "小浦",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "楠久",
+      "to": "小浦",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "鳴石",
+      "to": "小浦",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "久原",
+      "to": "小浦",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "波瀬",
+      "to": "小浦",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "小浦",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "福島口",
+      "to": "小浦",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "今福",
+      "to": "小浦",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "鷹島口",
+      "to": "小浦",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "前浜",
+      "to": "小浦",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "調川",
+      "to": "小浦",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "松浦",
+      "to": "小浦",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "小浦",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "御厨",
+      "to": "小浦",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "西木場",
+      "to": "小浦",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "東田平",
+      "to": "小浦",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "中田平",
+      "to": "小浦",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "小浦",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "有田",
+      "to": "真申",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "三代橋",
+      "to": "真申",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "黒川",
+      "to": "真申",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "蔵宿",
+      "to": "真申",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "西有田",
+      "to": "真申",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "大木",
+      "to": "真申",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "山谷",
+      "to": "真申",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "夫婦石",
+      "to": "真申",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "金武",
+      "to": "真申",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "川東",
+      "to": "真申",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "伊万里",
+      "to": "真申",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "東山代",
+      "to": "真申",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "里",
+      "to": "真申",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "楠久",
+      "to": "真申",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "鳴石",
+      "to": "真申",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "久原",
+      "to": "真申",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "波瀬",
+      "to": "真申",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "真申",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "福島口",
+      "to": "真申",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "今福",
+      "to": "真申",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "鷹島口",
+      "to": "真申",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "前浜",
+      "to": "真申",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "調川",
+      "to": "真申",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "松浦",
+      "to": "真申",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "真申",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "御厨",
+      "to": "真申",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "西木場",
+      "to": "真申",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "東田平",
+      "to": "真申",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "中田平",
+      "to": "真申",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "真申",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "有田",
+      "to": "棚方",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "三代橋",
+      "to": "棚方",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "黒川",
+      "to": "棚方",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "蔵宿",
+      "to": "棚方",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "西有田",
+      "to": "棚方",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "大木",
+      "to": "棚方",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "山谷",
+      "to": "棚方",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "夫婦石",
+      "to": "棚方",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "金武",
+      "to": "棚方",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "川東",
+      "to": "棚方",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "伊万里",
+      "to": "棚方",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "東山代",
+      "to": "棚方",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "里",
+      "to": "棚方",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "楠久",
+      "to": "棚方",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "鳴石",
+      "to": "棚方",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "久原",
+      "to": "棚方",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "波瀬",
+      "to": "棚方",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "棚方",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "福島口",
+      "to": "棚方",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "今福",
+      "to": "棚方",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "鷹島口",
+      "to": "棚方",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "前浜",
+      "to": "棚方",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "調川",
+      "to": "棚方",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "松浦",
+      "to": "棚方",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "棚方",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "御厨",
+      "to": "棚方",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "西木場",
+      "to": "棚方",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "東田平",
+      "to": "棚方",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "中田平",
+      "to": "棚方",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "棚方",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "有田",
+      "to": "相浦",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "三代橋",
+      "to": "相浦",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "黒川",
+      "to": "相浦",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "蔵宿",
+      "to": "相浦",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "西有田",
+      "to": "相浦",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "大木",
+      "to": "相浦",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "山谷",
+      "to": "相浦",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "夫婦石",
+      "to": "相浦",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "金武",
+      "to": "相浦",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "川東",
+      "to": "相浦",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "伊万里",
+      "to": "相浦",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "東山代",
+      "to": "相浦",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "里",
+      "to": "相浦",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "楠久",
+      "to": "相浦",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "鳴石",
+      "to": "相浦",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "久原",
+      "to": "相浦",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "波瀬",
+      "to": "相浦",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "相浦",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "福島口",
+      "to": "相浦",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "今福",
+      "to": "相浦",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "鷹島口",
+      "to": "相浦",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "前浜",
+      "to": "相浦",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "調川",
+      "to": "相浦",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "松浦",
+      "to": "相浦",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "相浦",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "御厨",
+      "to": "相浦",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "西木場",
+      "to": "相浦",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "東田平",
+      "to": "相浦",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "中田平",
+      "to": "相浦",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "相浦",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "有田",
+      "to": "大学",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "三代橋",
+      "to": "大学",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "黒川",
+      "to": "大学",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "蔵宿",
+      "to": "大学",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "西有田",
+      "to": "大学",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "大木",
+      "to": "大学",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "山谷",
+      "to": "大学",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "夫婦石",
+      "to": "大学",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "金武",
+      "to": "大学",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "川東",
+      "to": "大学",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "伊万里",
+      "to": "大学",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "東山代",
+      "to": "大学",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "里",
+      "to": "大学",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "楠久",
+      "to": "大学",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "鳴石",
+      "to": "大学",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "久原",
+      "to": "大学",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "波瀬",
+      "to": "大学",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "大学",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "福島口",
+      "to": "大学",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "今福",
+      "to": "大学",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "鷹島口",
+      "to": "大学",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "前浜",
+      "to": "大学",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "調川",
+      "to": "大学",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "松浦",
+      "to": "大学",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "大学",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "御厨",
+      "to": "大学",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "西木場",
+      "to": "大学",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "東田平",
+      "to": "大学",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "中田平",
+      "to": "大学",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "大学",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "有田",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "三代橋",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "黒川",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "蔵宿",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "西有田",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "大木",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "山谷",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "夫婦石",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "金武",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "川東",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "伊万里",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "東山代",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "里",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "楠久",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "鳴石",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "久原",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "波瀬",
+      "to": "上相浦",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "福島口",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "今福",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "鷹島口",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "前浜",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "調川",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "松浦",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "御厨",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "西木場",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "東田平",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "中田平",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "有田",
+      "to": "本山",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "三代橋",
+      "to": "本山",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "黒川",
+      "to": "本山",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "蔵宿",
+      "to": "本山",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "西有田",
+      "to": "本山",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "大木",
+      "to": "本山",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "山谷",
+      "to": "本山",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "夫婦石",
+      "to": "本山",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "金武",
+      "to": "本山",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "川東",
+      "to": "本山",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "伊万里",
+      "to": "本山",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "東山代",
+      "to": "本山",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "里",
+      "to": "本山",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "楠久",
+      "to": "本山",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "鳴石",
+      "to": "本山",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "久原",
+      "to": "本山",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "波瀬",
+      "to": "本山",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "本山",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "福島口",
+      "to": "本山",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "今福",
+      "to": "本山",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "鷹島口",
+      "to": "本山",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "前浜",
+      "to": "本山",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "調川",
+      "to": "本山",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "松浦",
+      "to": "本山",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "本山",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "御厨",
+      "to": "本山",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "西木場",
+      "to": "本山",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "東田平",
+      "to": "本山",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "中田平",
+      "to": "本山",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "本山",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "有田",
+      "to": "中里",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "三代橋",
+      "to": "中里",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "黒川",
+      "to": "中里",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "蔵宿",
+      "to": "中里",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "西有田",
+      "to": "中里",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "大木",
+      "to": "中里",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "山谷",
+      "to": "中里",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "夫婦石",
+      "to": "中里",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "金武",
+      "to": "中里",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "川東",
+      "to": "中里",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "伊万里",
+      "to": "中里",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "東山代",
+      "to": "中里",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "里",
+      "to": "中里",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "楠久",
+      "to": "中里",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "鳴石",
+      "to": "中里",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "久原",
+      "to": "中里",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "波瀬",
+      "to": "中里",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "中里",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "福島口",
+      "to": "中里",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "今福",
+      "to": "中里",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "鷹島口",
+      "to": "中里",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "前浜",
+      "to": "中里",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "調川",
+      "to": "中里",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "松浦",
+      "to": "中里",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "中里",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "御厨",
+      "to": "中里",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "西木場",
+      "to": "中里",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "東田平",
+      "to": "中里",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "中田平",
+      "to": "中里",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "中里",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "有田",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "三代橋",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "黒川",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "蔵宿",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "西有田",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "大木",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "山谷",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "夫婦石",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "金武",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "川東",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "伊万里",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "東山代",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "里",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "楠久",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "鳴石",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "久原",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "波瀬",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "福島口",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "今福",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "鷹島口",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "前浜",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "調川",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "松浦",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "御厨",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "西木場",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "東田平",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "中田平",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "有田",
+      "to": "野中",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "三代橋",
+      "to": "野中",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "黒川",
+      "to": "野中",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "蔵宿",
+      "to": "野中",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "西有田",
+      "to": "野中",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "大木",
+      "to": "野中",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "山谷",
+      "to": "野中",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "夫婦石",
+      "to": "野中",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "金武",
+      "to": "野中",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "川東",
+      "to": "野中",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "伊万里",
+      "to": "野中",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "東山代",
+      "to": "野中",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "里",
+      "to": "野中",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "楠久",
+      "to": "野中",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "鳴石",
+      "to": "野中",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "久原",
+      "to": "野中",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "波瀬",
+      "to": "野中",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "野中",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "福島口",
+      "to": "野中",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "今福",
+      "to": "野中",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "鷹島口",
+      "to": "野中",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "前浜",
+      "to": "野中",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "調川",
+      "to": "野中",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "松浦",
+      "to": "野中",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "野中",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "御厨",
+      "to": "野中",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "西木場",
+      "to": "野中",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "東田平",
+      "to": "野中",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "中田平",
+      "to": "野中",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "野中",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "有田",
+      "to": "左石",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "三代橋",
+      "to": "左石",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "黒川",
+      "to": "左石",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "蔵宿",
+      "to": "左石",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "西有田",
+      "to": "左石",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "大木",
+      "to": "左石",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "山谷",
+      "to": "左石",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "夫婦石",
+      "to": "左石",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "金武",
+      "to": "左石",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "川東",
+      "to": "左石",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "伊万里",
+      "to": "左石",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "東山代",
+      "to": "左石",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "里",
+      "to": "左石",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "楠久",
+      "to": "左石",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "鳴石",
+      "to": "左石",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "久原",
+      "to": "左石",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "波瀬",
+      "to": "左石",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "左石",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "福島口",
+      "to": "左石",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "今福",
+      "to": "左石",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "鷹島口",
+      "to": "左石",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "前浜",
+      "to": "左石",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "調川",
+      "to": "左石",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "松浦",
+      "to": "左石",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "左石",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "御厨",
+      "to": "左石",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "西木場",
+      "to": "左石",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "東田平",
+      "to": "左石",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "中田平",
+      "to": "左石",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "左石",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "有田",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "三代橋",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "黒川",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "蔵宿",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "西有田",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "大木",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "山谷",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "夫婦石",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "金武",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "川東",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "伊万里",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "東山代",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "里",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "楠久",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "鳴石",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "久原",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "波瀬",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "福島口",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "今福",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "鷹島口",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "前浜",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "調川",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "松浦",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "御厨",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "西木場",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "東田平",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "中田平",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "有田",
+      "to": "山の田",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "三代橋",
+      "to": "山の田",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "黒川",
+      "to": "山の田",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "蔵宿",
+      "to": "山の田",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "西有田",
+      "to": "山の田",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "大木",
+      "to": "山の田",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "山谷",
+      "to": "山の田",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "夫婦石",
+      "to": "山の田",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "金武",
+      "to": "山の田",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "川東",
+      "to": "山の田",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "伊万里",
+      "to": "山の田",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "東山代",
+      "to": "山の田",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "里",
+      "to": "山の田",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "楠久",
+      "to": "山の田",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "鳴石",
+      "to": "山の田",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "久原",
+      "to": "山の田",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "波瀬",
+      "to": "山の田",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "山の田",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "福島口",
+      "to": "山の田",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "今福",
+      "to": "山の田",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "鷹島口",
+      "to": "山の田",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "前浜",
+      "to": "山の田",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "調川",
+      "to": "山の田",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "松浦",
+      "to": "山の田",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "山の田",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "御厨",
+      "to": "山の田",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "西木場",
+      "to": "山の田",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "東田平",
+      "to": "山の田",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "中田平",
+      "to": "山の田",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "山の田",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "有田",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 3090
+    },
+    {
+      "from": "三代橋",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "黒川",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "蔵宿",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "西有田",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "大木",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "山谷",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "夫婦石",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "金武",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "川東",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "伊万里",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "東山代",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "里",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "楠久",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "鳴石",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "久原",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "波瀬",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "福島口",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "今福",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "鷹島口",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "前浜",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "調川",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "松浦",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "御厨",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "西木場",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "東田平",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "中田平",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "有田",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 3090
+    },
+    {
+      "from": "三代橋",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 3090
+    },
+    {
+      "from": "黒川",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "蔵宿",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "西有田",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "大木",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "山谷",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "夫婦石",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "金武",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "川東",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "伊万里",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "東山代",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "里",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "楠久",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "鳴石",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "久原",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "波瀬",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "福島口",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "今福",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "鷹島口",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "前浜",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "調川",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "松浦",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "御厨",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "西木場",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "東田平",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "中田平",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "有田",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 3090
+    },
+    {
+      "from": "三代橋",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 3090
+    },
+    {
+      "from": "黒川",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "蔵宿",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "西有田",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "大木",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "山谷",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "夫婦石",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "金武",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "川東",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "伊万里",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "東山代",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "里",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "楠久",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "鳴石",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "久原",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "波瀬",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "福島口",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "今福",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "鷹島口",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "前浜",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "調川",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "松浦",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "御厨",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "西木場",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "東田平",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "中田平",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "有田",
+      "to": "佐世保",
+      "km": null,
+      "fare": 3090
+    },
+    {
+      "from": "三代橋",
+      "to": "佐世保",
+      "km": null,
+      "fare": 3090
+    },
+    {
+      "from": "黒川",
+      "to": "佐世保",
+      "km": null,
+      "fare": 3090
+    },
+    {
+      "from": "蔵宿",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "西有田",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "大木",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "山谷",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2960
+    },
+    {
+      "from": "夫婦石",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "金武",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "川東",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2840
+    },
+    {
+      "from": "伊万里",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2730
+    },
+    {
+      "from": "東山代",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "里",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "楠久",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2610
+    },
+    {
+      "from": "鳴石",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "久原",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "波瀬",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2480
+    },
+    {
+      "from": "浦ノ崎",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "福島口",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "今福",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2360
+    },
+    {
+      "from": "鷹島口",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "前浜",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "調川",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "松浦",
+      "to": "佐世保",
+      "km": null,
+      "fare": 2120
+    },
+    {
+      "from": "松浦発電所前",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1990
+    },
+    {
+      "from": "御厨",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1870
+    },
+    {
+      "from": "西木場",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "東田平",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1740
+    },
+    {
+      "from": "中田平",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1590
+    },
+    {
+      "from": "たびら平戸口",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "西田平",
+      "to": "すえたちばな",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "西田平",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "すえたちばな",
+      "to": "江迎鹿町",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "高岩",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "すえたちばな",
+      "to": "高岩",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "高岩",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "いのつき",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "すえたちばな",
+      "to": "いのつき",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "いのつき",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "高岩",
+      "to": "いのつき",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "西田平",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "すえたちばな",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "高岩",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "いのつき",
+      "to": "潜竜ヶ滝",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "吉井",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "すえたちばな",
+      "to": "吉井",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "吉井",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "高岩",
+      "to": "吉井",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "いのつき",
+      "to": "吉井",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "吉井",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "西田平",
+      "to": "神田",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "すえたちばな",
+      "to": "神田",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "神田",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "高岩",
+      "to": "神田",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "いのつき",
+      "to": "神田",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "神田",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "吉井",
+      "to": "神田",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "すえたちばな",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "高岩",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "いのつき",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "吉井",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "神田",
+      "to": "清峰高校前",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "西田平",
+      "to": "佐々",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "すえたちばな",
+      "to": "佐々",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "佐々",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "高岩",
+      "to": "佐々",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "いのつき",
+      "to": "佐々",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "佐々",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "吉井",
+      "to": "佐々",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "神田",
+      "to": "佐々",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "清峰高校前",
+      "to": "佐々",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "小浦",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "すえたちばな",
+      "to": "小浦",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "小浦",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "高岩",
+      "to": "小浦",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "いのつき",
+      "to": "小浦",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "小浦",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "吉井",
+      "to": "小浦",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "神田",
+      "to": "小浦",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "清峰高校前",
+      "to": "小浦",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "佐々",
+      "to": "小浦",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "真申",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "すえたちばな",
+      "to": "真申",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "真申",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "高岩",
+      "to": "真申",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "いのつき",
+      "to": "真申",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "真申",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "吉井",
+      "to": "真申",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "神田",
+      "to": "真申",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "清峰高校前",
+      "to": "真申",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "佐々",
+      "to": "真申",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "小浦",
+      "to": "真申",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "棚方",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "すえたちばな",
+      "to": "棚方",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "棚方",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "高岩",
+      "to": "棚方",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "いのつき",
+      "to": "棚方",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "棚方",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "吉井",
+      "to": "棚方",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "神田",
+      "to": "棚方",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "清峰高校前",
+      "to": "棚方",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "佐々",
+      "to": "棚方",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "小浦",
+      "to": "棚方",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "真申",
+      "to": "棚方",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "西田平",
+      "to": "相浦",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "すえたちばな",
+      "to": "相浦",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "相浦",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "高岩",
+      "to": "相浦",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "いのつき",
+      "to": "相浦",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "相浦",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "吉井",
+      "to": "相浦",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "神田",
+      "to": "相浦",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "清峰高校前",
+      "to": "相浦",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "佐々",
+      "to": "相浦",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "小浦",
+      "to": "相浦",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "真申",
+      "to": "相浦",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "棚方",
+      "to": "相浦",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "大学",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "すえたちばな",
+      "to": "大学",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "大学",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "高岩",
+      "to": "大学",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "いのつき",
+      "to": "大学",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "大学",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "吉井",
+      "to": "大学",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "神田",
+      "to": "大学",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "清峰高校前",
+      "to": "大学",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "佐々",
+      "to": "大学",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "小浦",
+      "to": "大学",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "真申",
+      "to": "大学",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "棚方",
+      "to": "大学",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "相浦",
+      "to": "大学",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "上相浦",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "すえたちばな",
+      "to": "上相浦",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "上相浦",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "高岩",
+      "to": "上相浦",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "いのつき",
+      "to": "上相浦",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "上相浦",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "吉井",
+      "to": "上相浦",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "神田",
+      "to": "上相浦",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "清峰高校前",
+      "to": "上相浦",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "佐々",
+      "to": "上相浦",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "小浦",
+      "to": "上相浦",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "真申",
+      "to": "上相浦",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "棚方",
+      "to": "上相浦",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "相浦",
+      "to": "上相浦",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "大学",
+      "to": "上相浦",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "西田平",
+      "to": "本山",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "すえたちばな",
+      "to": "本山",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "本山",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "高岩",
+      "to": "本山",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "いのつき",
+      "to": "本山",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "本山",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "吉井",
+      "to": "本山",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "神田",
+      "to": "本山",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "清峰高校前",
+      "to": "本山",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "佐々",
+      "to": "本山",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "小浦",
+      "to": "本山",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "真申",
+      "to": "本山",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "棚方",
+      "to": "本山",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "相浦",
+      "to": "本山",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "大学",
+      "to": "本山",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "上相浦",
+      "to": "本山",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "中里",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "すえたちばな",
+      "to": "中里",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "中里",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "高岩",
+      "to": "中里",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "いのつき",
+      "to": "中里",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "中里",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "吉井",
+      "to": "中里",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "神田",
+      "to": "中里",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "清峰高校前",
+      "to": "中里",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "佐々",
+      "to": "中里",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "小浦",
+      "to": "中里",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "真申",
+      "to": "中里",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "棚方",
+      "to": "中里",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "相浦",
+      "to": "中里",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "大学",
+      "to": "中里",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "上相浦",
+      "to": "中里",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "本山",
+      "to": "中里",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "西田平",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "すえたちばな",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "高岩",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "いのつき",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "吉井",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "神田",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "清峰高校前",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "佐々",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "小浦",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "真申",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "棚方",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "相浦",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "大学",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "上相浦",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "本山",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "中里",
+      "to": "皆瀬",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "野中",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "すえたちばな",
+      "to": "野中",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "野中",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "高岩",
+      "to": "野中",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "いのつき",
+      "to": "野中",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "野中",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "吉井",
+      "to": "野中",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "神田",
+      "to": "野中",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "清峰高校前",
+      "to": "野中",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "佐々",
+      "to": "野中",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "小浦",
+      "to": "野中",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "真申",
+      "to": "野中",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "棚方",
+      "to": "野中",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "相浦",
+      "to": "野中",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "大学",
+      "to": "野中",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "上相浦",
+      "to": "野中",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "本山",
+      "to": "野中",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "中里",
+      "to": "野中",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "皆瀬",
+      "to": "野中",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "西田平",
+      "to": "左石",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "すえたちばな",
+      "to": "左石",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "左石",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "高岩",
+      "to": "左石",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "いのつき",
+      "to": "左石",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "左石",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "吉井",
+      "to": "左石",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "神田",
+      "to": "左石",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "清峰高校前",
+      "to": "左石",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "佐々",
+      "to": "左石",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "小浦",
+      "to": "左石",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "真申",
+      "to": "左石",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "棚方",
+      "to": "左石",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "相浦",
+      "to": "左石",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "大学",
+      "to": "左石",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "上相浦",
+      "to": "左石",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "本山",
+      "to": "左石",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "中里",
+      "to": "左石",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "皆瀬",
+      "to": "左石",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "野中",
+      "to": "左石",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "すえたちばな",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "高岩",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "いのつき",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "吉井",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "神田",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "清峰高校前",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "佐々",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "小浦",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "真申",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "棚方",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "相浦",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "大学",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "上相浦",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "本山",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "中里",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "皆瀬",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "野中",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "左石",
+      "to": "泉福寺",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "西田平",
+      "to": "山の田",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "すえたちばな",
+      "to": "山の田",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "山の田",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "高岩",
+      "to": "山の田",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "いのつき",
+      "to": "山の田",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "山の田",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "吉井",
+      "to": "山の田",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "神田",
+      "to": "山の田",
+      "km": null,
+      "fare": 750
+    },
+    {
+      "from": "清峰高校前",
+      "to": "山の田",
+      "km": null,
+      "fare": 680
+    },
+    {
+      "from": "佐々",
+      "to": "山の田",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "小浦",
+      "to": "山の田",
+      "km": null,
+      "fare": 570
+    },
+    {
+      "from": "真申",
+      "to": "山の田",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "棚方",
+      "to": "山の田",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "相浦",
+      "to": "山の田",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "大学",
+      "to": "山の田",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "上相浦",
+      "to": "山の田",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "本山",
+      "to": "山の田",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "中里",
+      "to": "山の田",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "皆瀬",
+      "to": "山の田",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "野中",
+      "to": "山の田",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "左石",
+      "to": "山の田",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "泉福寺",
+      "to": "山の田",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "すえたちばな",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "高岩",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "いのつき",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "吉井",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "神田",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "清峰高校前",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "佐々",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "小浦",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "真申",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "棚方",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 550
+    },
+    {
+      "from": "相浦",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "大学",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "上相浦",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "本山",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "中里",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "皆瀬",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "野中",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "左石",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "泉福寺",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "山の田",
+      "to": "北佐世保",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西田平",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "すえたちばな",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "高岩",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "いのつき",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "吉井",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "神田",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "清峰高校前",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "佐々",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "小浦",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "真申",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "棚方",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "相浦",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "大学",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "上相浦",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "本山",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "中里",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "皆瀬",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 370
+    },
+    {
+      "from": "野中",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "左石",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "泉福寺",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "山の田",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "北佐世保",
+      "to": "中佐世保",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "西田平",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "すえたちばな",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "高岩",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "いのつき",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "吉井",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "神田",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "清峰高校前",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 770
+    },
+    {
+      "from": "佐々",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "小浦",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "真申",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "棚方",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 610
+    },
+    {
+      "from": "相浦",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "大学",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "上相浦",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "本山",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "中里",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "皆瀬",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 370
+    },
+    {
+      "from": "野中",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "左石",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "泉福寺",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "山の田",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "北佐世保",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "中佐世保",
+      "to": "佐世保中央",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "西田平",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1460
+    },
+    {
+      "from": "すえたちばな",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1330
+    },
+    {
+      "from": "江迎鹿町",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "高岩",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1200
+    },
+    {
+      "from": "いのつき",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "潜竜ヶ滝",
+      "to": "佐世保",
+      "km": null,
+      "fare": 1060
+    },
+    {
+      "from": "吉井",
+      "to": "佐世保",
+      "km": null,
+      "fare": 950
+    },
+    {
+      "from": "神田",
+      "to": "佐世保",
+      "km": null,
+      "fare": 870
+    },
+    {
+      "from": "清峰高校前",
+      "to": "佐世保",
+      "km": null,
+      "fare": 810
+    },
+    {
+      "from": "佐々",
+      "to": "佐世保",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "小浦",
+      "to": "佐世保",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "真申",
+      "to": "佐世保",
+      "km": null,
+      "fare": 650
+    },
+    {
+      "from": "棚方",
+      "to": "佐世保",
+      "km": null,
+      "fare": 630
+    },
+    {
+      "from": "相浦",
+      "to": "佐世保",
+      "km": null,
+      "fare": 520
+    },
+    {
+      "from": "大学",
+      "to": "佐世保",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "上相浦",
+      "to": "佐世保",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "本山",
+      "to": "佐世保",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "中里",
+      "to": "佐世保",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "皆瀬",
+      "to": "佐世保",
+      "km": null,
+      "fare": 370
+    },
+    {
+      "from": "野中",
+      "to": "佐世保",
+      "km": null,
+      "fare": 330
+    },
+    {
+      "from": "左石",
+      "to": "佐世保",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "泉福寺",
+      "to": "佐世保",
+      "km": null,
+      "fare": 270
+    },
+    {
+      "from": "山の田",
+      "to": "佐世保",
+      "km": null,
+      "fare": 240
+    },
+    {
+      "from": "北佐世保",
+      "to": "佐世保",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "中佐世保",
+      "to": "佐世保",
+      "km": null,
+      "fare": 200
+    },
+    {
+      "from": "佐世保中央",
+      "to": "佐世保",
+      "km": null,
+      "fare": 200
+    }
+  ]
+}

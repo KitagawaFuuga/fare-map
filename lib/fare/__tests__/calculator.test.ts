@@ -123,6 +123,8 @@ import linimoOverride from "@/data/fare-overrides/linimo.json";
 import sanrikuOverride from "@/data/fare-overrides/sanriku.json";
 import orangeOverride from "@/data/fare-overrides/orange.json";
 import tosakuroGomenAdjacentOverride from "@/data/fare-overrides/tosakuro-gomen-adjacent.json";
+import tenhamaOverride from "@/data/fare-overrides/tenhama.json";
+import matsuuraOverride from "@/data/fare-overrides/matsuura.json";
 
 const rules = [
   jrEast,
@@ -242,6 +244,8 @@ const overrides = [
   sanrikuOverride,
   orangeOverride,
   tosakuroGomenAdjacentOverride,
+  tenhamaOverride,
+  matsuuraOverride,
   meitetsuComputedOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地方鉄道・しなの鉄道の距離表は枝刈りの下界専用で、公表営業キロではなく

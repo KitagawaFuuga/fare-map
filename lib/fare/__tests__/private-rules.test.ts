@@ -291,6 +291,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("hojo"),
       override("johoku"),
       override("shigaraki"),
+      override("kurobe"),
     ],
   );
 
@@ -380,6 +381,9 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["信楽高原鐵道", "貴生川", "信楽", 470],
     ["信楽高原鐵道", "貴生川", "紫香楽宮跡", 410],
     ["信楽高原鐵道", "玉桂寺前", "信楽", 210],
+    // 黒部峡谷鉄道: 公式サイトの運賃（10月1日〜11月30日、全区間運行時）
+    ["黒部峡谷鉄道", "宇奈月", "欅平", 2480],
+    ["黒部峡谷鉄道", "黒薙", "鐘釣", 950],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

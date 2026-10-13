@@ -191,6 +191,7 @@ import guidewayOverride from "@/data/fare-overrides/guideway.json";
 import hojoOverride from "@/data/fare-overrides/hojo.json";
 import johokuOverride from "@/data/fare-overrides/johoku.json";
 import shigarakiOverride from "@/data/fare-overrides/shigaraki.json";
+import kurobeOverride from "@/data/fare-overrides/kurobe.json";
 import kitakyuComputedOverride from "@/data/fare-overrides/kitakyu-computed.json";
 
 const rules = [
@@ -379,6 +380,7 @@ const overrides = [
   hojoOverride,
   johokuOverride,
   shigarakiOverride,
+  kurobeOverride,
   kitakyuComputedOverride,
   meitetsuComputedOverride,
 ].map((o) => fareOverrideSchema.parse(o));

@@ -53,6 +53,7 @@ python scripts/fare/extract/<id>.py <PDFを置いたディレクトリ>
 | `yuri-kogen.py` | 由利高原鉄道 12駅・66ペア | 不要（普通運賃表PDFを画像にして書き写した値をスクリプトに持つ）。出力は `data/fare-overrides/yuri-kogen.json` に直接まとめた |
 | `hokuetsu.py` | 北越急行 線内12駅・66ペア | `unchin.pdf`（ほくほく線運賃表、2026年版）。出力は `data/fare-overrides/hokuetsu.json` に直接まとめた |
 | `hitachinaka.py` | ひたちなか海浜鉄道 11駅・55ペア | 不要（`fare_2021.pdf` を画像にして書き写した値をスクリプトに持つ）。出力は `data/fare-overrides/hitachinaka.json` に直接まとめた |
+| `gakunan.py` | 岳南鉄道 10駅・45ペア | `gakunan.html`（公式サイトの運賃表ページ）。出力は `data/fare-overrides/gakunan.json` に直接まとめた |
 
 万葉線と北陸鉄道は運賃表が画像（PDFではない）なので、画像を読んで手で書き起こした。
 北九州モノレール・ニューシャトル・リニモは公式サイトや Wikipedia の HTML の表を書き起こした

@@ -280,6 +280,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("yuri-kogen"),
       override("hokuetsu"),
       override("hitachinaka"),
+      override("gakunan"),
     ],
   );
 
@@ -345,6 +346,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["ひたちなか海浜鉄道", "勝田", "阿字ヶ浦", 570],
     ["ひたちなか海浜鉄道", "勝田", "那珂湊", 350],
     ["ひたちなか海浜鉄道", "工機前", "美乃浜学園", 460],
+    // 岳南鉄道: 公式の運賃表（2023年10月から）
+    ["岳南鉄道", "吉原", "岳南江尾", 370],
+    ["岳南鉄道", "吉原", "ジヤトコ前（ジヤトコ１地区前）", 220],
+    ["岳南鉄道", "本吉原", "岳南江尾", 310],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

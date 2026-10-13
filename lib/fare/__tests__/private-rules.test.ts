@@ -287,6 +287,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("hitachinaka"),
       override("gakunan"),
       override("yagan"),
+      override("guideway"),
     ],
   );
 
@@ -360,6 +361,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["野岩鉄道", "新藤原", "会津高原尾瀬口", 1090],
     ["野岩鉄道", "龍王峡", "男鹿高原", 920],
     ["野岩鉄道", "川治温泉", "川治湯元", 200],
+    // 名古屋ガイドウェイバス: 公式の高架区間運賃表（区制 200・230・250円）
+    ["名古屋ガイドウェイバス", "大曽根", "小幡緑地", 250],
+    ["名古屋ガイドウェイバス", "守山", "小幡緑地", 230],
+    ["名古屋ガイドウェイバス", "大曽根", "砂田橋", 200],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

@@ -55,6 +55,7 @@ python scripts/fare/extract/<id>.py <PDFを置いたディレクトリ>
 | `hitachinaka.py` | ひたちなか海浜鉄道 11駅・55ペア | 不要（`fare_2021.pdf` を画像にして書き写した値をスクリプトに持つ）。出力は `data/fare-overrides/hitachinaka.json` に直接まとめた |
 | `gakunan.py` | 岳南鉄道 10駅・45ペア | `gakunan.html`（公式サイトの運賃表ページ）。出力は `data/fare-overrides/gakunan.json` に直接まとめた |
 | `yagan.py` | 野岩鉄道 9駅・36ペア | `yagan.html`（公式サイトの運賃ページ）。出力は `data/fare-overrides/yagan.json` に直接まとめた |
+| `guideway.py` | 名古屋ガイドウェイバス 9停留所・36ペア | 不要（高架区間運賃表の画像を書き起こした値をスクリプトに持つ）。出力は `data/fare-overrides/guideway.json` に直接まとめた |
 
 万葉線と北陸鉄道は運賃表が画像（PDFではない）なので、画像を読んで手で書き起こした。
 北九州モノレール・ニューシャトル・リニモは公式サイトや Wikipedia の HTML の表を書き起こした

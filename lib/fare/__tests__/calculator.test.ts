@@ -98,6 +98,7 @@ import mizushimaRinkai from "@/data/fare-rules/mizushima-rinkai.json";
 import utsunomiyaLrt from "@/data/fare-rules/utsunomiya-lrt.json";
 import noto from "@/data/fare-rules/noto.json";
 import okayamaKido from "@/data/fare-rules/okayama-kido.json";
+import kobeKosoku from "@/data/fare-rules/kobe-kosoku.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -281,6 +282,7 @@ const rules = [
   utsunomiyaLrt,
   noto,
   okayamaKido,
+  kobeKosoku,
   keihan,
   tokyu,
   odakyu,

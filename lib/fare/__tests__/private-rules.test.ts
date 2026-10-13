@@ -278,6 +278,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("kumagawa"),
       override("tsugaru"),
       override("yuri-kogen"),
+      override("hokuetsu"),
     ],
   );
 
@@ -335,6 +336,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["由利高原鉄道", "羽後本荘", "矢島", 610],
     ["由利高原鉄道", "前郷", "矢島", 400],
     ["由利高原鉄道", "黒沢", "曲沢", 180],
+    // 北越急行: 公式のほくほく線運賃表（2026年版、線内は2018年12月改定から据え置き）
+    ["北越急行", "六日町", "犀潟", 1310],
+    ["北越急行", "十日町", "まつだい", 350],
+    ["北越急行", "くびき", "犀潟", 240],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

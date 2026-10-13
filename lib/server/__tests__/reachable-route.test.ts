@@ -20,7 +20,11 @@ describe("GET /api/reachable のレート制限", () => {
   it("同じ IP から容量を超えて叩くと 429 を返す", async () => {
     const ip = "203.0.113.1";
     const query = `from=${SHINJUKU}&budget=200`;
-    // 容量ぶんは通る。2回目以降はキャッシュに当たるので探索は走らない。
+    // トークンは毎秒回復するので、数えている途中にグラフの読み込みと探索で時間を
+    // 使うと1つ回復して429にならない（全体実行の負荷で2秒を超えて落ちていた）。
+    // 別の IP で先に1回呼んで、グラフと結果のキャッシュを温めておく
+    expect((await call(query, "203.0.113.250")).status).toBe(200);
+    // 容量ぶんは通る。キャッシュに当たるので探索は走らない。
     for (let i = 0; i < RATE_LIMIT_CAPACITY; i++) {
       expect((await call(query, ip)).status).toBe(200);
     }

@@ -288,6 +288,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("gakunan"),
       override("yagan"),
       override("guideway"),
+      override("hojo"),
     ],
   );
 
@@ -365,6 +366,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["名古屋ガイドウェイバス", "大曽根", "小幡緑地", 250],
     ["名古屋ガイドウェイバス", "守山", "小幡緑地", 230],
     ["名古屋ガイドウェイバス", "大曽根", "砂田橋", 200],
+    // 北条鉄道: 公式サイトの運賃表
+    ["北条鉄道", "粟生", "北条町", 420],
+    ["北条鉄道", "粟生", "網引", 210],
+    ["北条鉄道", "播磨横田", "北条町", 210],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

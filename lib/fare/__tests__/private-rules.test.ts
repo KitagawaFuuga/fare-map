@@ -63,6 +63,7 @@ const calc = createFareCalculator([
     "ibara",
     "chizu",
     "donan-isaribi",
+    "nishikigawa",
   ].map(rule),
 ]);
 
@@ -208,6 +209,9 @@ describe("公式の駅間表との照合", () => {
     // 道南いさりび鉄道: 2025年4月改定
     ["道南いさりび鉄道", "2.0km", 2.0, 210],
     ["道南いさりび鉄道", "五稜郭→木古内", 37.8, 1080],
+    // 錦川鉄道: 2019年10月改定
+    ["錦川鉄道", "3.0km", 3.0, 170],
+    ["錦川鉄道", "川西→錦町", 32.7, 980],
     // ディズニーリゾートライン: 2024年3月改定の均一運賃
     ["舞浜リゾートライン", "1.0km", 1.0, 300],
     ["舞浜リゾートライン", "1周", 5.0, 300],
@@ -232,7 +236,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
         beyond: { fromKm: 100, baseFare: 9999, ratePerKm: 0 },
       },
     ],
-    [override("sendai-airport")],
+    [override("sendai-airport"), override("akechi")],
   );
 
   it.each([
@@ -240,6 +244,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["仙台空港鉄道", "名取", "仙台空港", 420],
     ["仙台空港鉄道", "杜せきのした", "仙台空港", 310],
     ["仙台空港鉄道", "美田園", "名取", 220],
+    // 明知鉄道: 2019年10月改定の駅間運賃表（三角表）
+    ["明知鉄道", "恵那", "明智", 690],
+    ["明知鉄道", "岩村", "明智", 370],
+    ["明知鉄道", "恵那", "東野", 200],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

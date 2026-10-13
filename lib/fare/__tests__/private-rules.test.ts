@@ -277,6 +277,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("moka"),
       override("kumagawa"),
       override("tsugaru"),
+      override("yuri-kogen"),
     ],
   );
 
@@ -330,6 +331,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["津軽鉄道", "津軽五所川原", "津軽中里", 870],
     ["津軽鉄道", "金木", "津軽中里", 400],
     ["津軽鉄道", "嘉瀬", "金木", 180],
+    // 由利高原鉄道: 公式の鳥海山ろく線運賃表（2019年10月改正）
+    ["由利高原鉄道", "羽後本荘", "矢島", 610],
+    ["由利高原鉄道", "前郷", "矢島", 400],
+    ["由利高原鉄道", "黒沢", "曲沢", 180],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

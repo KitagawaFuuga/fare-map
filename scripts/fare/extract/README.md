@@ -50,6 +50,7 @@ python scripts/fare/extract/<id>.py <PDFを置いたディレクトリ>
 | `moka.py`             | 真岡鐵道 17駅・136ペア              | `moka.html`（公式サイトの運賃表ページ）。出力は `data/fare-overrides/moka.json` に直接まとめた |
 | `kumagawa.py`         | くま川鉄道 14駅・91ペア             | 不要（時刻表画像の運賃表を書き起こした値をスクリプトに持つ）。出力は `data/fare-overrides/kumagawa.json` に直接まとめた |
 | `tsugaru.py` | 津軽鉄道 12駅・66ペア | 不要（普通旅客運賃表PDFの値を書き写してスクリプトに持つ）。出力は `data/fare-overrides/tsugaru.json` に直接まとめた |
+| `yuri-kogen.py` | 由利高原鉄道 12駅・66ペア | 不要（普通運賃表PDFを画像にして書き写した値をスクリプトに持つ）。出力は `data/fare-overrides/yuri-kogen.json` に直接まとめた |
 
 万葉線と北陸鉄道は運賃表が画像（PDFではない）なので、画像を読んで手で書き起こした。
 北九州モノレール・ニューシャトル・リニモは公式サイトや Wikipedia の HTML の表を書き起こした

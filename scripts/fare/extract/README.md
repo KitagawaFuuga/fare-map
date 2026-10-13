@@ -60,6 +60,7 @@ python scripts/fare/extract/<id>.py <PDFを置いたディレクトリ>
 | `johoku.py` | 東海交通事業 城北線 6駅・15ペア | 不要（運賃表の画像を書き起こした値をスクリプトに持つ）。出力は `data/fare-overrides/johoku.json` に直接まとめた |
 | `shigaraki.py` | 信楽高原鐵道 6駅・15ペア | `shigaraki.html`（公式サイトの時刻表・運賃ページ）。出力は `data/fare-overrides/shigaraki.json` に直接まとめた |
 | `eizan.py` | 叡山電鉄 17駅・136ペア | 不要（各駅間の普通運賃の画像を書き起こした値をスクリプトに持つ）。出力は `data/fare-overrides/eizan.json` に直接まとめた |
+| `chikuho.py` | 筑豊電気鉄道 20駅・190ペア | `kaitei.pdf`（運賃改定のお知らせ、2026-07-18 改定の4ページ目）。出力は `data/fare-overrides/chikuho.json` に直接まとめた |
 
 万葉線と北陸鉄道は運賃表が画像（PDFではない）なので、画像を読んで手で書き起こした。
 北九州モノレール・ニューシャトル・リニモは公式サイトや Wikipedia の HTML の表を書き起こした

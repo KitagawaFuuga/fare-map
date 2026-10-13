@@ -294,6 +294,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("kurobe"),
       override("asa-kaigan"),
       override("eizan"),
+      override("chikuho"),
     ],
   );
 
@@ -394,6 +395,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["叡山電鉄", "出町柳", "八瀬比叡山口", 280],
     ["叡山電鉄", "宝ヶ池", "鞍馬", 410],
     ["叡山電鉄", "三宅八幡", "八幡前", 280],
+    // 筑豊電気鉄道: 公式の営業粁程及び運賃表（2026年7月18日改定、区制）
+    ["筑豊電気鉄道", "黒崎駅前", "筑豊直方", 480],
+    ["筑豊電気鉄道", "黒崎駅前", "楠橋", 450],
+    ["筑豊電気鉄道", "今池", "筑豊中間", 270],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

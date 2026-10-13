@@ -275,6 +275,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("yamagata-tetsudo"),
       override("watetsu"),
       override("moka"),
+      override("kumagawa"),
     ],
   );
 
@@ -320,6 +321,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["真岡鐵道", "下館", "茂木", 1050],
     ["真岡鐵道", "下館二高前", "真岡", 480],
     ["真岡鐵道", "益子", "茂木", 560],
+    // くま川鉄道: 公式の時刻表画像の運賃表（2026年9月改正）。川村・東多良木は改称前の名前
+    ["くま川鉄道", "人吉温泉", "湯前", 700],
+    ["くま川鉄道", "川村", "湯前", 650],
+    ["くま川鉄道", "多良木", "東多良木", 190],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

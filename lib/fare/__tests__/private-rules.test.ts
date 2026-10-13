@@ -276,6 +276,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("watetsu"),
       override("moka"),
       override("kumagawa"),
+      override("tsugaru"),
     ],
   );
 
@@ -325,6 +326,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["くま川鉄道", "人吉温泉", "湯前", 700],
     ["くま川鉄道", "川村", "湯前", 650],
     ["くま川鉄道", "多良木", "東多良木", 190],
+    // 津軽鉄道: 公式の普通旅客運賃表（2019年10月改正）
+    ["津軽鉄道", "津軽五所川原", "津軽中里", 870],
+    ["津軽鉄道", "金木", "津軽中里", 400],
+    ["津軽鉄道", "嘉瀬", "金木", 180],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

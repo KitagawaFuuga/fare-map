@@ -270,6 +270,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("fukutetsu"),
       override("oigawa"),
       override("yamagata-tetsudo"),
+      override("watetsu"),
     ],
   );
 
@@ -307,6 +308,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["山形鉄道", "赤湯", "荒砥", 760],
     ["山形鉄道", "あやめ公園", "荒砥", 430],
     ["山形鉄道", "時庭", "白兎", 390],
+    // わたらせ渓谷鐵道: 公式サイトの普通旅客運賃表（2019年10月改定）
+    ["わたらせ渓谷鐵道", "桐生", "間藤", 1130],
+    ["わたらせ渓谷鐵道", "大間々", "通洞", 940],
+    ["わたらせ渓谷鐵道", "足尾", "間藤", 190],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

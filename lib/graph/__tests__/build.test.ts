@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildGraph, mergeExtraStations } from "@/lib/graph/build";
+import {
+  applyStationCorrections,
+  buildGraph,
+  mergeExtraStations,
+} from "@/lib/graph/build";
 
 const input = {
   companies: [{ company_cd: "1", company_name: "テスト鉄道" }],
@@ -333,5 +337,45 @@ describe("mergeExtraStations (extra-stations)", () => {
     expect(() =>
       mergeExtraStations(input.stations, [{ ...extra, station_cd: "S1" }]),
     ).toThrow(/station.csv に既に存在します/);
+  });
+});
+
+// 元データが改称・廃止に追いついていない駅を一次情報で直す定義。
+// 駅データ.jp の2026年版でも、くま川鉄道の川村（現 相良十島）などが旧名のまま残る。
+describe("applyStationCorrections (station-corrections)", () => {
+  it("改称した駅の名前を新しい名前にする", () => {
+    const corrected = applyStationCorrections(input.stations, {
+      renames: [{ station_cd: "S2", from: "い駅", to: "新い駅" }],
+      closures: [],
+    });
+    expect(corrected.find((s) => s.station_cd === "S2")?.station_name).toBe(
+      "新い駅",
+    );
+  });
+
+  it("廃止された駅を落とす", () => {
+    const corrected = applyStationCorrections(input.stations, {
+      renames: [],
+      closures: [{ station_cd: "S2", name: "い駅" }],
+    });
+    expect(corrected.map((s) => s.station_cd)).toEqual(["S1", "S3"]);
+  });
+
+  it("元データの駅名が旧名と違えば例外（元データが直ったら定義を消すため）", () => {
+    expect(() =>
+      applyStationCorrections(input.stations, {
+        renames: [{ station_cd: "S2", from: "う駅", to: "新い駅" }],
+        closures: [],
+      }),
+    ).toThrow(/station-corrections/);
+  });
+
+  it("廃止駅が元データに無ければ例外（元データが廃止を反映したら定義を消すため）", () => {
+    expect(() =>
+      applyStationCorrections(input.stations, {
+        renames: [],
+        closures: [{ station_cd: "S9", name: "お駅" }],
+      }),
+    ).toThrow(/station-corrections/);
   });
 });

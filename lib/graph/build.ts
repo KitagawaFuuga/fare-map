@@ -53,6 +53,43 @@ export function mergeExtraStations(
   return [...stations, ...extra];
 }
 
+export interface StationCorrections {
+  renames: { station_cd: string; from: string; to: string }[];
+  closures: { station_cd: string; name: string }[];
+}
+
+export function applyStationCorrections(
+  stations: Record<string, string>[],
+  corrections: StationCorrections,
+): Record<string, string>[] {
+  const renameByCd = new Map(corrections.renames.map((r) => [r.station_cd, r]));
+  // 元データの名前が旧名と合わないなら、元データが改称に追いついたか駅コードが
+  // 振り直された。黙って上書きすると別の駅の名前を変えかねないので止める
+  for (const r of corrections.renames) {
+    const s = stations.find((x) => x.station_cd === r.station_cd);
+    if (s?.station_name !== r.from) {
+      throw new Error(
+        `station-corrections: ${r.station_cd} は「${r.from}」のはずが「${s?.station_name ?? "（無し）"}」です。` +
+          `元データが更新された可能性があるため data/station-corrections.json を確認してください`,
+      );
+    }
+  }
+  for (const c of corrections.closures) {
+    const s = stations.find((x) => x.station_cd === c.station_cd);
+    if (s?.station_name !== c.name) {
+      throw new Error(
+        `station-corrections: 廃止駅 ${c.station_cd}（${c.name}）が元データに見当たりません。` +
+          `元データが廃止を反映した可能性があるため data/station-corrections.json を確認してください`,
+      );
+    }
+  }
+  const closed = new Set(corrections.closures.map((c) => c.station_cd));
+  return stations.filter((s) => !closed.has(s.station_cd ?? "")).map((s) => {
+    const rename = renameByCd.get(s.station_cd ?? "");
+    return rename ? { ...s, station_name: rename.to } : s;
+  });
+}
+
 // 別駅扱いでも徒歩で乗り換えられるとみなす距離。大きくすると無関係な駅どうしが
 // 繋がり運賃が不当に安くなるため、実際に乗換案内が案内する範囲に寄せた値。
 const TRANSFER_RADIUS_KM = 0.3;

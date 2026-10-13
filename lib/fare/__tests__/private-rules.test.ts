@@ -293,6 +293,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("shigaraki"),
       override("kurobe"),
       override("asa-kaigan"),
+      override("eizan"),
     ],
   );
 
@@ -388,6 +389,11 @@ describe("駅ペアの運賃表（override）との照合", () => {
     // 阿佐海岸鉄道（DMV）: 公式サイトの運賃表（2024年3月）
     ["阿佐海岸鉄道", "阿波海南", "甲浦", 500],
     ["阿佐海岸鉄道", "海部", "宍喰", 300],
+    // 叡山電鉄: 公式の各駅間の普通運賃（2023年4月改定、区制）
+    ["叡山電鉄", "出町柳", "鞍馬", 470],
+    ["叡山電鉄", "出町柳", "八瀬比叡山口", 280],
+    ["叡山電鉄", "宝ヶ池", "鞍馬", 410],
+    ["叡山電鉄", "三宅八幡", "八幡前", 280],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

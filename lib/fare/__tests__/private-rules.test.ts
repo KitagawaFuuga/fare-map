@@ -70,6 +70,7 @@ const calc = createFareCalculator([
     "mizushima-rinkai",
     "utsunomiya-lrt",
     "noto",
+    "okayama-kido",
   ].map(rule),
 ]);
 
@@ -242,6 +243,8 @@ describe("公式の駅間表との照合", () => {
     ["舞浜リゾートライン", "1周", 5.0, 300],
     // 嵯峨野観光鉄道（トロッコ列車）: 2022年4月改定の均一運賃
     ["嵯峨野観光鉄道", "トロッコ嵯峨→トロッコ亀岡", 7.3, 880],
+    // 岡山電気軌道: 2025年10月改定で全線160円均一
+    ["岡山電気軌道", "岡山駅前→東山・おかでんミュージアム駅", 3.1, 160],
   ] as const)("%s %s（%fkm）は %i 円", (operator, _pair, km, fare) => {
     expect(calc.estimate(operator, km)).toBe(fare);
   });

@@ -41,6 +41,7 @@ python scripts/fare/extract/<id>.py <PDFを置いたディレクトリ>
 | `orange.py`           | 肥薩おれんじ鉄道 28駅・378ペア      | `orange.pdf`（普通運賃三角表、2024-10-01）                                                                  |
 | `tenhama.py`          | 天竜浜名湖鉄道 39駅・741ペア        | `tenhama.pdf`（全体の運賃表、2024-10-01）                                                                   |
 | `matsuura.py`         | 松浦鉄道 57駅・1596ペア             | `matsuura.pdf`（駅間普通旅客運賃表、2024-10-01、3ページ）                                                   |
+| `fukutetsu.py`        | 福井鉄道 25駅・300ペア              | `fukutetsu.pdf`（普通旅客運賃表、2024-03-16）。出力は `data/fare-overrides/fukutetsu.json` に直接まとめた   |
 | `ichibata.py`         | 一畑電車 26駅・325ペア              | `ichibata.pdf`（全駅普通旅客運賃表、2025-03-01）。出力は `data/fare-overrides/ichibata.json` に直接まとめた |
 | `abukuma.py`          | 阿武隈急行 24駅・276ペア            | `abukyu.pdf`（運賃表、2019-10-01）。出力は `data/fare-overrides/abukuma.json` に直接まとめた                |
 

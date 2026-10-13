@@ -267,6 +267,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("wakasa"),
       override("abukuma"),
       override("ichibata"),
+      override("fukutetsu"),
     ],
   );
 
@@ -291,6 +292,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["一畑電車", "電鉄出雲市", "出雲大社前", 550],
     ["一畑電車", "出雲大社前", "松江しんじ湖温泉", 900],
     ["一畑電車", "松江しんじ湖温泉", "電鉄出雲市", 770],
+    // 福井鉄道: 公式の普通旅客運賃表（2024年3月改定）。軌道線の均一区間は180円
+    ["福井鉄道", "福井駅", "たけふ新", 450],
+    ["福井鉄道", "田原町", "福井駅", 180],
+    ["福井鉄道", "赤十字前", "商工会議所前", 210],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

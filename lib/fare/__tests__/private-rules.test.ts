@@ -271,6 +271,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("oigawa"),
       override("yamagata-tetsudo"),
       override("watetsu"),
+      override("moka"),
     ],
   );
 
@@ -312,6 +313,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["わたらせ渓谷鐵道", "桐生", "間藤", 1130],
     ["わたらせ渓谷鐵道", "大間々", "通洞", 940],
     ["わたらせ渓谷鐵道", "足尾", "間藤", 190],
+    // 真岡鐵道: 公式サイトの運賃表（2019年10月改定）。表の「二高前」は下館二高前
+    ["真岡鐵道", "下館", "茂木", 1050],
+    ["真岡鐵道", "下館二高前", "真岡", 480],
+    ["真岡鐵道", "益子", "茂木", 560],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

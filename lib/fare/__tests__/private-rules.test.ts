@@ -279,6 +279,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("tsugaru"),
       override("yuri-kogen"),
       override("hokuetsu"),
+      override("hitachinaka"),
     ],
   );
 
@@ -340,6 +341,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["北越急行", "六日町", "犀潟", 1310],
     ["北越急行", "十日町", "まつだい", 350],
     ["北越急行", "くびき", "犀潟", 240],
+    // ひたちなか海浜鉄道: 公式の普通旅客運賃表。工機前は日工前の旧名
+    ["ひたちなか海浜鉄道", "勝田", "阿字ヶ浦", 570],
+    ["ひたちなか海浜鉄道", "勝田", "那珂湊", 350],
+    ["ひたちなか海浜鉄道", "工機前", "美乃浜学園", 460],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

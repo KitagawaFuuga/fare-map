@@ -91,6 +91,10 @@ import ibara from "@/data/fare-rules/ibara.json";
 import chizu from "@/data/fare-rules/chizu.json";
 import donanIsaribi from "@/data/fare-rules/donan-isaribi.json";
 import nishikigawa from "@/data/fare-rules/nishikigawa.json";
+import hakoneTozan from "@/data/fare-rules/hakone-tozan.json";
+import mizuma from "@/data/fare-rules/mizuma.json";
+import yamaman from "@/data/fare-rules/yamaman.json";
+import mizushimaRinkai from "@/data/fare-rules/mizushima-rinkai.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -253,6 +257,10 @@ const rules = [
   chizu,
   donanIsaribi,
   nishikigawa,
+  hakoneTozan,
+  mizuma,
+  yamaman,
+  mizushimaRinkai,
   keihan,
   tokyu,
   odakyu,

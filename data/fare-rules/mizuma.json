@@ -1,0 +1,20 @@
+{
+  "id": "mizuma",
+  "operators": ["水間鉄道"],
+  "table": [
+    [1.5, 200],
+    [3, 250],
+    [4.5, 300],
+    [5.5, 330]
+  ],
+  "beyond": {
+    "fromKm": 5.5,
+    "baseFare": 330,
+    "ratePerKm": 30
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/水間鉄道",
+    "fetchedAt": "2026-10-13",
+    "note": "水間鉄道水間線の大人普通旅客運賃（2024年4月1日改定）。0.1km単位の帯（〜1.5km 200円、1.6〜3.0km 250円、3.1〜4.5km 300円、4.6〜5.5km 330円）。全線5.5km。キロ帯の表は Wikipedia の会社の記事。"
+  }
+}

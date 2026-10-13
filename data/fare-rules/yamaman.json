@@ -1,0 +1,15 @@
+{
+  "id": "yamaman",
+  "operators": ["山万"],
+  "table": [[100, 260]],
+  "beyond": {
+    "fromKm": 100,
+    "baseFare": 260,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/山万ユーカリが丘線",
+    "fetchedAt": "2026-10-13",
+    "note": "山万ユーカリが丘線の大人運賃（2026年6月13日改定）。全線均一260円。Wikipedia による。"
+  }
+}

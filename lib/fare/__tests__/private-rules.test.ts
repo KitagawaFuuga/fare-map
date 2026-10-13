@@ -290,6 +290,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("guideway"),
       override("hojo"),
       override("johoku"),
+      override("shigaraki"),
     ],
   );
 
@@ -375,6 +376,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["東海交通事業", "枇杷島", "勝川", 450],
     ["東海交通事業", "小田井", "勝川", 390],
     ["東海交通事業", "比良", "味美", 230],
+    // 信楽高原鐵道: 公式サイトの運賃表
+    ["信楽高原鐵道", "貴生川", "信楽", 470],
+    ["信楽高原鐵道", "貴生川", "紫香楽宮跡", 410],
+    ["信楽高原鐵道", "玉桂寺前", "信楽", 210],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

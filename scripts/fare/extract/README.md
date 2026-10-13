@@ -58,6 +58,7 @@ python scripts/fare/extract/<id>.py <PDFを置いたディレクトリ>
 | `guideway.py` | 名古屋ガイドウェイバス 9停留所・36ペア | 不要（高架区間運賃表の画像を書き起こした値をスクリプトに持つ）。出力は `data/fare-overrides/guideway.json` に直接まとめた |
 | `hojo.py` | 北条鉄道 8駅・28ペア | `hojo.html`（公式サイトの運賃ページ）。出力は `data/fare-overrides/hojo.json` に直接まとめた |
 | `johoku.py` | 東海交通事業 城北線 6駅・15ペア | 不要（運賃表の画像を書き起こした値をスクリプトに持つ）。出力は `data/fare-overrides/johoku.json` に直接まとめた |
+| `shigaraki.py` | 信楽高原鐵道 6駅・15ペア | `shigaraki.html`（公式サイトの時刻表・運賃ページ）。出力は `data/fare-overrides/shigaraki.json` に直接まとめた |
 
 万葉線と北陸鉄道は運賃表が画像（PDFではない）なので、画像を読んで手で書き起こした。
 北九州モノレール・ニューシャトル・リニモは公式サイトや Wikipedia の HTML の表を書き起こした

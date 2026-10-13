@@ -174,6 +174,7 @@ import wakasaOverride from "@/data/fare-overrides/wakasa.json";
 import abukumaOverride from "@/data/fare-overrides/abukuma.json";
 import ichibataOverride from "@/data/fare-overrides/ichibata.json";
 import fukutetsuOverride from "@/data/fare-overrides/fukutetsu.json";
+import oigawaOverride from "@/data/fare-overrides/oigawa.json";
 import kitakyuComputedOverride from "@/data/fare-overrides/kitakyu-computed.json";
 
 const rules = [
@@ -345,6 +346,7 @@ const overrides = [
   abukumaOverride,
   ichibataOverride,
   fukutetsuOverride,
+  oigawaOverride,
   kitakyuComputedOverride,
   meitetsuComputedOverride,
 ].map((o) => fareOverrideSchema.parse(o));

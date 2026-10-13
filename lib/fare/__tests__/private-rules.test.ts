@@ -268,6 +268,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("abukuma"),
       override("ichibata"),
       override("fukutetsu"),
+      override("oigawa"),
     ],
   );
 
@@ -296,6 +297,11 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["福井鉄道", "福井駅", "たけふ新", 450],
     ["福井鉄道", "田原町", "福井駅", 180],
     ["福井鉄道", "赤十字前", "商工会議所前", 210],
+    // 大井川鐵道: 公式サイトの大井川本線 発駅別運賃表（金谷〜川根温泉笹間渡、2026年4月）
+    ["大井川鐵道", "金谷", "川根温泉笹間渡", 920],
+    ["大井川鐵道", "金谷", "新金谷", 150],
+    // 大和田発の表には笹間渡の行が無いので、笹間渡発の表の値
+    ["大井川鐵道", "大和田", "川根温泉笹間渡", 280],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

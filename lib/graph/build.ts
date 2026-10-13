@@ -84,10 +84,12 @@ export function applyStationCorrections(
     }
   }
   const closed = new Set(corrections.closures.map((c) => c.station_cd));
-  return stations.filter((s) => !closed.has(s.station_cd ?? "")).map((s) => {
-    const rename = renameByCd.get(s.station_cd ?? "");
-    return rename ? { ...s, station_name: rename.to } : s;
-  });
+  return stations
+    .filter((s) => !closed.has(s.station_cd ?? ""))
+    .map((s) => {
+      const rename = renameByCd.get(s.station_cd ?? "");
+      return rename ? { ...s, station_name: rename.to } : s;
+    });
 }
 
 // 別駅扱いでも徒歩で乗り換えられるとみなす距離。大きくすると無関係な駅どうしが

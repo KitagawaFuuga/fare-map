@@ -269,6 +269,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("ichibata"),
       override("fukutetsu"),
       override("oigawa"),
+      override("yamagata-tetsudo"),
     ],
   );
 
@@ -302,6 +303,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["大井川鐵道", "金谷", "新金谷", 150],
     // 大和田発の表には笹間渡の行が無いので、笹間渡発の表の値
     ["大井川鐵道", "大和田", "川根温泉笹間渡", 280],
+    // 山形鉄道: 公式サイトのフラワー長井線 運賃表（三角表）
+    ["山形鉄道", "赤湯", "荒砥", 760],
+    ["山形鉄道", "あやめ公園", "荒砥", 430],
+    ["山形鉄道", "時庭", "白兎", 390],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

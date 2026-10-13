@@ -45,6 +45,7 @@ python scripts/fare/extract/<id>.py <PDFを置いたディレクトリ>
 | `ichibata.py`         | 一畑電車 26駅・325ペア              | `ichibata.pdf`（全駅普通旅客運賃表、2025-03-01）。出力は `data/fare-overrides/ichibata.json` に直接まとめた |
 | `abukuma.py`          | 阿武隈急行 24駅・276ペア            | `abukyu.pdf`（運賃表、2019-10-01）。出力は `data/fare-overrides/abukuma.json` に直接まとめた                |
 | `daitetsu.py`         | 大井川鐵道 大井川本線 12駅・66ペア  | `daitetsu.html`（公式サイトの発駅別運賃表ページ）。出力は `data/fare-overrides/oigawa.json` に直接まとめた  |
+| `flower-nagai.py`     | 山形鉄道 17駅・136ペア              | `flower-nagai.html`（公式サイトの運賃表ページ）。出力は `data/fare-overrides/yamagata-tetsudo.json` に直接まとめた |
 
 万葉線と北陸鉄道は運賃表が画像（PDFではない）なので、画像を読んで手で書き起こした。
 北九州モノレール・ニューシャトル・リニモは公式サイトや Wikipedia の HTML の表を書き起こした

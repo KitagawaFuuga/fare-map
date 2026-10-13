@@ -23,6 +23,12 @@
       "from": "9940322",
       "to": "9940323",
       "note": "安茂里〜長野"
+    },
+    {
+      "lineId": "99909",
+      "from": "9990901",
+      "to": "9990903",
+      "note": "黒崎駅前〜熊西（西黒崎の廃止で直結。data/station-corrections.json）"
     }
   ],
   "source": {

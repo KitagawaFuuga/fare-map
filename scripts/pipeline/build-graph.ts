@@ -1,10 +1,12 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { parseCsv } from "@/lib/graph/csv";
 import {
+  applyStationCorrections,
   buildGraph,
   mergeExtraStations,
   type ExtraJoin,
   type OperatorSplit,
+  type StationCorrections,
 } from "@/lib/graph/build";
 import {
   buildCalibration,
@@ -47,11 +49,19 @@ const extraStations = (
   }
 ).stations;
 
+// 元データが追いついていない改称・廃止を直す（lib/graph/build.ts の applyStationCorrections）
+const stationCorrections = JSON.parse(
+  readFileSync("data/station-corrections.json", "utf8"),
+) as StationCorrections;
+
 const graph = buildGraph(
   {
     companies: raw("company.csv"),
     lines: raw("line.csv"),
-    stations: mergeExtraStations(raw("station.csv"), extraStations),
+    stations: mergeExtraStations(
+      applyStationCorrections(raw("station.csv"), stationCorrections),
+      extraStations,
+    ),
     joins: raw("join.csv"),
   },
   splits,
@@ -120,7 +130,23 @@ if (existsSync("data/station-km.json")) {
   const stationKm = JSON.parse(
     readFileSync("data/station-km.json", "utf8"),
   ) as { edges: StationKmEdge[] };
-  const applied = applyStationKm(graph, stationKm.edges);
+  // station-km は公式の営業キロ表から作るので旧駅名のまま。グラフ側を改称したら
+  // こちらの駅名も読み替えないと、その駅に接する区間の実キロが落ちる
+  // （川村のように同名の別駅があるので、事業者も合わせて引く）
+  const renamed = new Map(
+    stationCorrections.renames.map((r) => [
+      `${graph.nodes[r.station_cd]?.operator}\u0000${r.from}`,
+      r.to,
+    ]),
+  );
+  const renameOf = (operator: string, name: string) =>
+    renamed.get(`${operator}\u0000${name}`) ?? name;
+  const renameEdge = (e: StationKmEdge): StationKmEdge => ({
+    ...e,
+    from: renameOf(e.operator, e.from),
+    to: renameOf(e.operator, e.to),
+  });
+  const applied = applyStationKm(graph, stationKm.edges.map(renameEdge));
   process.stdout.write(
     `station-km: ${applied.replaced} エッジを実営業キロに置き換え` +
       `（推定との差の合計 ${applied.totalDelta.toFixed(1)}km、` +

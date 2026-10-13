@@ -40,10 +40,6 @@ for k, row in enumerate(ROWS):
     for frm, v in enumerate(row):
         fare[(frm, to)] = v
 
-# 駅データ（graph.json）は改称前の駅名のまま。位置は同じなので出力だけ旧名にする
-GRAPH_NAMES = {"相良十島": "川村", "多良木青蓮寺": "東多良木"}
-name = [GRAPH_NAMES.get(s, s) for s in STATIONS]
-
 n = len(STATIONS)
 pairs = []
 for i in range(n):
@@ -52,7 +48,7 @@ for i in range(n):
             raise SystemExit(f"{STATIONS[i]}→{STATIONS[j]}: 手前の駅より安い")
         if j > i + 1 and fare[(i, j)] < fare[(i + 1, j)]:
             raise SystemExit(f"{STATIONS[i]}→{STATIONS[j]}: 発駅が遠いほうが安い")
-        pairs.append({"from": name[i], "to": name[j], "km": None, "fare": fare[(i, j)]})
+        pairs.append({"from": STATIONS[i], "to": STATIONS[j], "km": None, "fare": fare[(i, j)]})
 
 out_dir = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("FARE_PDF_DIR", ".")
 out = os.path.join(out_dir, "kumagawa-pairs.json")

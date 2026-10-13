@@ -5,10 +5,12 @@
 import { readFileSync } from "node:fs";
 import { parseCsv } from "@/lib/graph/csv";
 import {
+  applyStationCorrections,
   buildGraph,
   mergeExtraStations,
   type ExtraJoin,
   type OperatorSplit,
+  type StationCorrections,
 } from "@/lib/graph/build";
 import { calibratedKm, type CalibrationTable } from "@/lib/graph/calibrate";
 import type { StationKmEdge } from "@/lib/graph/apply-station-km";
@@ -32,9 +34,14 @@ const g = buildGraph(
   {
     companies: raw("company.csv"),
     lines: raw("line.csv"),
-    // グラフ生成（build-graph.ts）と同じく、元データから消えた駅を補う
+    // グラフ生成（build-graph.ts）と同じく、改称・廃止を直し、元データから消えた駅を補う
     stations: mergeExtraStations(
-      raw("station.csv"),
+      applyStationCorrections(
+        raw("station.csv"),
+        JSON.parse(
+          readFileSync("data/station-corrections.json", "utf8"),
+        ) as StationCorrections,
+      ),
       (
         JSON.parse(readFileSync("data/extra-stations.json", "utf8")) as {
           stations: Record<string, string>[];

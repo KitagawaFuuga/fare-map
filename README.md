@@ -120,6 +120,8 @@ CI（`.github/workflows/ci.yml`）は push / PR ごとに lint / format:check / 
   （無料・要ログイン）で取得した CSV を `data/raw/` に置き、`npm run pipeline:fetch` で
   正式な名前にそろえる（現在は2026年版。以前使っていたミラー ny-a/ekidata は2021年で更新停止）。
   しなの鉄道の篠ノ井〜長野の4駅は2026年版に無いため、2021年版の行を `data/extra-stations.json` で補っている。
+  2026年版が反映していない改称（川村→相良十島、東多良木→多良木青蓮寺、工機前→日工前）と
+  廃止（西黒崎）は、各社の公表資料をもとに `data/station-corrections.json` で直している。
 - 実営業キロ（`data/calibration.json`、および `graph.json` の `km` への距離補正）:
   [全国鉄道運行本数データ](https://gtfs-gis.jp/railway_honsu/) / CC BY 4.0。
 - 運賃表・特定運賃（`data/fare-rules`、`data/fare-overrides`）: 各鉄道事業者が公表する

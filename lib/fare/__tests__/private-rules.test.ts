@@ -261,7 +261,12 @@ describe("駅ペアの運賃表（override）との照合", () => {
         beyond: { fromKm: 100, baseFare: 9999, ratePerKm: 0 },
       },
     ],
-    [override("sendai-airport"), override("akechi"), override("wakasa")],
+    [
+      override("sendai-airport"),
+      override("akechi"),
+      override("wakasa"),
+      override("abukuma"),
+    ],
   );
 
   it.each([
@@ -277,6 +282,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["若桜鉄道", "郡家", "若桜", 440],
     ["若桜鉄道", "郡家", "八頭高校前", 100],
     ["若桜鉄道", "丹比", "若桜", 270],
+    // 阿武隈急行: 公式の運賃表（2019年10月改正、三角表）
+    ["阿武隈急行", "福島", "槻木", 980],
+    ["阿武隈急行", "梁川", "丸森", 570],
+    ["阿武隈急行", "東船岡", "槻木", 260],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

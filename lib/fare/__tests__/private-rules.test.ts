@@ -286,6 +286,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("hokuetsu"),
       override("hitachinaka"),
       override("gakunan"),
+      override("yagan"),
     ],
   );
 
@@ -355,6 +356,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["岳南鉄道", "吉原", "岳南江尾", 370],
     ["岳南鉄道", "吉原", "ジヤトコ前（ジヤトコ１地区前）", 220],
     ["岳南鉄道", "本吉原", "岳南江尾", 310],
+    // 野岩鉄道: 公式の会津鬼怒川線 片道普通運賃表
+    ["野岩鉄道", "新藤原", "会津高原尾瀬口", 1090],
+    ["野岩鉄道", "龍王峡", "男鹿高原", 920],
+    ["野岩鉄道", "川治温泉", "川治湯元", 200],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

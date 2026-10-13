@@ -266,6 +266,7 @@ describe("駅ペアの運賃表（override）との照合", () => {
       override("akechi"),
       override("wakasa"),
       override("abukuma"),
+      override("ichibata"),
     ],
   );
 
@@ -286,6 +287,10 @@ describe("駅ペアの運賃表（override）との照合", () => {
     ["阿武隈急行", "福島", "槻木", 980],
     ["阿武隈急行", "梁川", "丸森", 570],
     ["阿武隈急行", "東船岡", "槻木", 260],
+    // 一畑電車: 公式の全駅普通旅客運賃表（2025年3月改定）。報道の額とも一致
+    ["一畑電車", "電鉄出雲市", "出雲大社前", 550],
+    ["一畑電車", "出雲大社前", "松江しんじ湖温泉", 900],
+    ["一畑電車", "松江しんじ湖温泉", "電鉄出雲市", 770],
   ] as const)("%s %s→%s は %i 円", (operator, from, to, fare) => {
     expect(withOverrides.estimate(operator, 1, from, to)).toBe(fare);
   });

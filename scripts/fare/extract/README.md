@@ -27,21 +27,22 @@ python scripts/fare/extract/<id>.py <PDFを置いたディレクトリ>
 結果を `data/fare-sources/<id>.json` の `pairs` に反映すると、
 `lib/fare/__tests__/fare-sources.test.ts` が距離帯＋特定運賃での再現を検証する。
 
-| スクリプト            | 対象                                | 必要なPDF                                                                                    |
-| --------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
-| `chitetsu.py`         | 富山地方鉄道 鉄道線 67駅・2211ペア  | `ct_57f926382b6e9c826ae79da324e7afe6.pdf`                                                    |
-| `echizen.py`          | えちぜん鉄道 44駅・946ペア          | `ez_fare.pdf`（旅客運賃表）、`ez_kilo.pdf`（営業キロ表）                                     |
-| `shinano.py`          | しなの鉄道線 23駅・253ペア          | `sr.pdf` の2ページ目                                                                         |
-| `shinano-kita.py`     | 北しなの線を列にした表 204ペア      | `sr.pdf` の6ページ目                                                                         |
-| `tokitetsu.py`        | えちごトキめき鉄道 22駅・231ペア    | `tok.pdf`                                                                                    |
-| `jr-west-special.py`  | JR西日本 大阪附近の特定区間 341区間 | `jrw.pdf`（2024-05-15 京阪神運賃体系見直しプレス、別紙4）                                    |
-| `chiba-monorail.py`   | 千葉都市モノレール 18駅・153ペア    | `chiba.pdf`（普通旅客運賃表、2019-10-01）                                                    |
-| `kobe-new-transit.ts` | 神戸新交通 18駅・81ペア             | `knt.html`（公式サイトの運賃表ページ。`npx tsx` で実行）                                     |
-| `sanriku.py`          | 三陸鉄道 41駅・820ペア              | `sanriku.pdf`（普通運賃表、2026-03-14 改正）                                                 |
-| `orange.py`           | 肥薩おれんじ鉄道 28駅・378ペア      | `orange.pdf`（普通運賃三角表、2024-10-01）                                                   |
-| `tenhama.py`          | 天竜浜名湖鉄道 39駅・741ペア        | `tenhama.pdf`（全体の運賃表、2024-10-01）                                                    |
-| `matsuura.py`         | 松浦鉄道 57駅・1596ペア             | `matsuura.pdf`（駅間普通旅客運賃表、2024-10-01、3ページ）                                    |
-| `abukuma.py`          | 阿武隈急行 24駅・276ペア            | `abukyu.pdf`（運賃表、2019-10-01）。出力は `data/fare-overrides/abukuma.json` に直接まとめた |
+| スクリプト            | 対象                                | 必要なPDF                                                                                                   |
+| --------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `chitetsu.py`         | 富山地方鉄道 鉄道線 67駅・2211ペア  | `ct_57f926382b6e9c826ae79da324e7afe6.pdf`                                                                   |
+| `echizen.py`          | えちぜん鉄道 44駅・946ペア          | `ez_fare.pdf`（旅客運賃表）、`ez_kilo.pdf`（営業キロ表）                                                    |
+| `shinano.py`          | しなの鉄道線 23駅・253ペア          | `sr.pdf` の2ページ目                                                                                        |
+| `shinano-kita.py`     | 北しなの線を列にした表 204ペア      | `sr.pdf` の6ページ目                                                                                        |
+| `tokitetsu.py`        | えちごトキめき鉄道 22駅・231ペア    | `tok.pdf`                                                                                                   |
+| `jr-west-special.py`  | JR西日本 大阪附近の特定区間 341区間 | `jrw.pdf`（2024-05-15 京阪神運賃体系見直しプレス、別紙4）                                                   |
+| `chiba-monorail.py`   | 千葉都市モノレール 18駅・153ペア    | `chiba.pdf`（普通旅客運賃表、2019-10-01）                                                                   |
+| `kobe-new-transit.ts` | 神戸新交通 18駅・81ペア             | `knt.html`（公式サイトの運賃表ページ。`npx tsx` で実行）                                                    |
+| `sanriku.py`          | 三陸鉄道 41駅・820ペア              | `sanriku.pdf`（普通運賃表、2026-03-14 改正）                                                                |
+| `orange.py`           | 肥薩おれんじ鉄道 28駅・378ペア      | `orange.pdf`（普通運賃三角表、2024-10-01）                                                                  |
+| `tenhama.py`          | 天竜浜名湖鉄道 39駅・741ペア        | `tenhama.pdf`（全体の運賃表、2024-10-01）                                                                   |
+| `matsuura.py`         | 松浦鉄道 57駅・1596ペア             | `matsuura.pdf`（駅間普通旅客運賃表、2024-10-01、3ページ）                                                   |
+| `ichibata.py`         | 一畑電車 26駅・325ペア              | `ichibata.pdf`（全駅普通旅客運賃表、2025-03-01）。出力は `data/fare-overrides/ichibata.json` に直接まとめた |
+| `abukuma.py`          | 阿武隈急行 24駅・276ペア            | `abukyu.pdf`（運賃表、2019-10-01）。出力は `data/fare-overrides/abukuma.json` に直接まとめた                |
 
 万葉線と北陸鉄道は運賃表が画像（PDFではない）なので、画像を読んで手で書き起こした。
 北九州モノレール・ニューシャトル・リニモは公式サイトや Wikipedia の HTML の表を書き起こした

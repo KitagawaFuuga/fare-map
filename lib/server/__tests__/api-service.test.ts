@@ -60,6 +60,11 @@ describe("suggestStations", () => {
     expect(r.length).toBe(1);
     expect(r[0]?.name).toBe("新宿");
   });
+
+  it("候補に座標を含める（選んだ時点で出発駅を地図に描くため）", () => {
+    const [shinjuku] = suggestStations(store, "新宿");
+    expect(shinjuku).toMatchObject({ lat: 35.69, lng: 139.7 });
+  });
 });
 
 describe("reachable", () => {

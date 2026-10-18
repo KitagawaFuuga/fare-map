@@ -9,6 +9,9 @@ export interface StationSuggestion {
   name: string;
   lineName: string;
   operator: string;
+  // 選んだ時点で出発駅を地図に描くのに使う（同じ駅の別路線ノードとは数十mずれ得るが表示には十分）
+  lat: number;
+  lng: number;
 }
 
 // 全駅（約1万件）の曖昧検索インデックスは構築コストが高いので、GraphStore ごとに
@@ -48,6 +51,8 @@ export function suggestStations(
       name: item.name,
       lineName: item.lineName,
       operator: item.operator,
+      lat: item.lat,
+      lng: item.lng,
     });
     if (out.length >= limit) break;
   }

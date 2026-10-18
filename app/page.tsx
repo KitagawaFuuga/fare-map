@@ -7,7 +7,7 @@ import BottomSheet from "@/components/BottomSheet";
 import FareLegend from "@/components/FareLegend";
 import SearchPanel from "@/components/SearchPanel";
 import StationList from "@/components/StationList";
-import { useReachable } from "@/hooks/use-reachable";
+import { useReachable, type ReachableStation } from "@/hooks/use-reachable";
 import type { SheetState } from "@/lib/sheet";
 
 // maplibre は初期化時に window/document を直接触るため、サーバー側レンダリングで
@@ -19,7 +19,7 @@ export default function Home() {
   // 出発駅は駅名の入力（SearchPanel）だけで決める。地図のクリックや現在地からは決めない
   const [from, setFrom] = useState<{ id: string; name: string } | null>(null);
   const [budget, setBudget] = useState(500);
-  const [focus, setFocus] = useState<{ lat: number; lng: number } | null>(null);
+  const [focus, setFocus] = useState<ReachableStation | null>(null);
   const [sheet, setSheet] = useState<SheetState>("half");
   const { data, loading, error, search } = useReachable();
 

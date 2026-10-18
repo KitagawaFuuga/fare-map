@@ -5,7 +5,8 @@ import type { ReachableStation } from "@/hooks/use-reachable";
 
 export interface StationListProps {
   stations: ReachableStation[];
-  onPick(s: { lat: number; lng: number }): void;
+  // 駅の情報ごと渡す（地図側でその駅の吹き出しを開くため）
+  onPick(s: ReachableStation): void;
 }
 
 export default function StationList({ stations, onPick }: StationListProps) {
@@ -19,7 +20,7 @@ export default function StationList({ stations, onPick }: StationListProps) {
             <button
               type="button"
               className="flex w-full items-center gap-2 px-1 py-2 text-left hover:bg-gray-50"
-              onClick={() => onPick({ lat: s.lat, lng: s.lng })}
+              onClick={() => onPick(s)}
             >
               <span
                 className="inline-block h-3 w-3 shrink-0 rounded-full"

@@ -246,6 +246,49 @@ test("初期表示の範囲外の駅から検索すると、地図が結果の�
     .toBeGreaterThan(30);
 });
 
+// 黒崎駅前から予算230円で検索する（到達駅は八幡・陣原・熊西の3駅で、地図はそこへ寄る）
+async function searchKurosaki(page: Page): Promise<void> {
+  await stubTiles(page);
+  await page.goto("/");
+  const panel = sidebar(page);
+  await panel.getByPlaceholder("駅名を入力").fill("黒崎駅前");
+  await panel
+    .getByRole("button", { name: /^黒崎駅前/ })
+    .first()
+    .click();
+  await panel.locator('input[type="number"]').fill("230");
+  await panel.getByRole("button", { name: "検索" }).click();
+  await expect(panel.getByText(/\d+ 駅に到達可能/)).toBeVisible({
+    timeout: 30_000,
+  });
+}
+
+test("一覧の駅を押すと、地図のその駅に吹き出しが出る", async ({ page }) => {
+  test.setTimeout(60_000);
+  await searchKurosaki(page);
+
+  await sidebar(page).locator("li").filter({ hasText: "熊西" }).click();
+
+  const popup = page.locator(".maplibregl-popup");
+  await expect(popup).toContainText("熊西", { timeout: 10_000 });
+  await expect(popup).toContainText("概算 230円");
+});
+
+test("駅の円は寄った地図で押しやすい大きさに描かれる", async ({ page }) => {
+  // 以前は半径 5px 固定で小さかった。ズームに合わせて大きくする（寄った地図で約 10px）
+  test.setTimeout(60_000);
+  await searchKurosaki(page);
+
+  // 3駅の円の緑の画素の合計。半径 5px だと 1 駅あたり内側の 50 画素前後にしかならない
+  const canvas = page.locator("canvas.maplibregl-canvas");
+  await expect
+    .poll(async () => greenPixels(await canvas.screenshot()), {
+      timeout: 20_000,
+      intervals: [1_000],
+    })
+    .toBeGreaterThan(400);
+});
+
 test("先の入力の候補が遅れて届いても、最新の入力の候補が表示される", async ({
   page,
 }) => {

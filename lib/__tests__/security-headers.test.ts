@@ -43,10 +43,10 @@ describe("securityHeaders", () => {
     expect(value).toContain("microphone=()");
   });
 
-  it("現在地ボタンが使うので geolocation は自サイトにだけ許可する", () => {
-    // components/LocateButton.tsx が navigator.geolocation を呼ぶ。
-    // ここを camera 等と同じく () にすると現在地取得が黙って失敗する。
-    expect(header("Permissions-Policy")).toContain("geolocation=(self)");
+  it("現在地は使わないので geolocation も無効にする", () => {
+    // 現在地ボタン（現在地の最寄り駅を出発駅にする）は外した。
+    // 出発駅は駅名の入力だけで決める
+    expect(header("Permissions-Policy")).toContain("geolocation=()");
   });
 });
 

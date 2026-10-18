@@ -40,10 +40,9 @@ export const securityHeaders: SecurityHeader[] = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  // 現在地ボタン(components/LocateButton.tsx)が geolocation を使う。
-  // それ以外の強い権限は使っていないので閉じる。
+  // 強い権限はどれも使っていないので閉じる（現在地ボタンは外したので geolocation も）。
   {
     key: "Permissions-Policy",
-    value: "geolocation=(self), camera=(), microphone=(), payment=()",
+    value: "geolocation=(), camera=(), microphone=(), payment=()",
   },
 ];

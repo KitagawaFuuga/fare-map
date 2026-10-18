@@ -1,5 +1,4 @@
 import Fuse from "fuse.js";
-import { haversineKm } from "@/lib/geo";
 import { bracketOf } from "@/lib/brackets";
 import { findReachable } from "@/lib/search/reachable";
 import type { RailGraph, StationNode } from "@/lib/graph/types";
@@ -53,34 +52,6 @@ export function suggestStations(
     if (out.length >= limit) break;
   }
   return out;
-}
-
-// 座標から最寄り駅を1件返す（地図タップ・現在地ボタンの着地点）。
-// 空間インデックスを持たず全ノードを総当たりするが、1万件の距離計算は
-// 数ミリ秒で終わり、呼ばれる頻度も低いので最適化していない。
-export function nearestStation(
-  store: GraphStore,
-  lat: number,
-  lng: number,
-): StationSuggestion & { lat: number; lng: number } {
-  let bestNode: StationNode | undefined;
-  let bestKm = Infinity;
-  for (const n of Object.values(store.graph.nodes)) {
-    const km = haversineKm({ lat, lng }, n);
-    if (km < bestKm) {
-      bestKm = km;
-      bestNode = n;
-    }
-  }
-  if (!bestNode) throw new Error("グラフが空");
-  return {
-    id: bestNode.id,
-    name: bestNode.name,
-    lineName: bestNode.lineName,
-    operator: bestNode.operator,
-    lat: bestNode.lat,
-    lng: bestNode.lng,
-  };
 }
 
 export interface ReachableResult {

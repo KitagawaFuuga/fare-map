@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createGraphStore } from "@/lib/server/graph-store";
 import {
-  nearestStation,
   reachable,
   suggestStations,
   walkStationIds,
@@ -60,12 +59,6 @@ describe("suggestStations", () => {
     // S1・S3 は同一グループ (G_SHINJUKU) の新宿駅なので代表 1 件のみ返る
     expect(r.length).toBe(1);
     expect(r[0]?.name).toBe("新宿");
-  });
-});
-
-describe("nearestStation", () => {
-  it("最も近い駅を返す", () => {
-    expect(nearestStation(store, 35.684, 139.702).name).toBe("代々木");
   });
 });
 

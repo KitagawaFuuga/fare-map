@@ -5,12 +5,10 @@ import { useCallback, useState } from "react";
 import BudgetInput from "@/components/BudgetInput";
 import BottomSheet from "@/components/BottomSheet";
 import FareLegend from "@/components/FareLegend";
-import LocateButton from "@/components/LocateButton";
 import SearchPanel from "@/components/SearchPanel";
 import StationList from "@/components/StationList";
 import { useReachable } from "@/hooks/use-reachable";
 import type { SheetState } from "@/lib/sheet";
-import type { StationSuggestion } from "@/lib/server/api-service";
 
 // maplibre は初期化時に window/document を直接触るため、サーバー側レンダリングで
 // 落ちる。"use client" は「ブラウザでも動く」宣言であって SSR を止めないので、
@@ -18,26 +16,12 @@ import type { StationSuggestion } from "@/lib/server/api-service";
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 export default function Home() {
+  // 出発駅は駅名の入力（SearchPanel）だけで決める。地図のクリックや現在地からは決めない
   const [from, setFrom] = useState<{ id: string; name: string } | null>(null);
   const [budget, setBudget] = useState(500);
   const [focus, setFocus] = useState<{ lat: number; lng: number } | null>(null);
   const [sheet, setSheet] = useState<SheetState>("half");
   const { data, loading, error, search } = useReachable();
-
-  // 座標 → 出発駅の変換。地図タップと現在地ボタンはどちらも「緯度経度が得られる」
-  // 点で同じなので同一ハンドラを共有する。範囲外の座標は API が 400 を返し、
-  // ここで何もせず戻るので既存の選択状態は壊れない。
-  const setFromByCoords = useCallback(async (lat: number, lng: number) => {
-    const res = await fetch(`/api/stations/nearest?lat=${lat}&lng=${lng}`);
-    if (!res.ok) return;
-    const body = (await res.json()) as {
-      station: StationSuggestion & { lat: number; lng: number };
-    };
-    setFrom({ id: body.station.id, name: body.station.name });
-    // 地図を寄せるのはタップ座標ではなく「見つかった駅」の座標。
-    // そうしないと表示中の駅名と地図の中心がずれる。
-    setFocus({ lat: body.station.lat, lng: body.station.lng });
-  }, []);
 
   const runSearch = useCallback(async () => {
     // ボタンの disabled とは別の二重の防御。この行のおかげで以降 from は非 null 扱いになる
@@ -90,9 +74,7 @@ export default function Home() {
           // 徒歩の印の差し替えでは meta は同じオブジェクトのまま（use-reachable の
           // loadWalkMarks）なので、新しい検索結果のときだけ変わる
           resultKey={data?.meta}
-          onMapClick={setFromByCoords}
         />
-        <LocateButton onLocate={setFromByCoords} />
       </div>
       <BottomSheet state={sheet} onStateChange={setSheet}>
         {panel}

@@ -93,6 +93,43 @@ test("駅名を入力すると候補が出て、選ぶと出発駅になる", as
   await expect(panel.getByText("選択中: 新宿", { exact: true })).toBeVisible();
 });
 
+test("地図をクリックしても出発駅は変わらない（出発駅は駅名の入力だけで決める）", async ({
+  page,
+}) => {
+  // 以前は地図の空白クリックで最寄り駅が出発駅になり、駅の円を少し外して押すと
+  // 意図せず出発駅が変わっていた
+  await stubTiles(page);
+  const nearestCalls: string[] = [];
+  page.on("request", (r) => {
+    if (r.url().includes("/api/stations/nearest")) nearestCalls.push(r.url());
+  });
+  await page.goto("/");
+
+  const panel = sidebar(page);
+  await panel.getByPlaceholder("駅名を入力").fill("新宿");
+  await panel.getByRole("button", { name: /^新宿/ }).first().click();
+  await expect(panel.getByText("選択中: 新宿", { exact: true })).toBeVisible();
+
+  const canvas = page.locator("canvas.maplibregl-canvas");
+  await expect(canvas).toBeVisible();
+  // 地図の load 後にクリックの処理が登録されるので、load を待ってから押す
+  await page.waitForTimeout(3_000);
+  await canvas.click({ position: { x: 200, y: 200 } });
+  await page.waitForTimeout(2_000);
+
+  expect(nearestCalls).toEqual([]);
+  await expect(panel.getByText("選択中: 新宿", { exact: true })).toBeVisible();
+});
+
+test("現在地から出発駅を決めるボタンは無い", async ({ page }) => {
+  await stubTiles(page);
+  await page.goto("/");
+  await expect(page.locator("canvas.maplibregl-canvas")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "現在地から探す" }),
+  ).toHaveCount(0);
+});
+
 test("予算を入れて検索すると到達可能駅が出る", async ({ page }) => {
   await stubTiles(page);
   await page.goto("/");

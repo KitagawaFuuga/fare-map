@@ -9,7 +9,6 @@ import {
   type ExpressionSpecification,
   type GeoJSONSource,
   type MapLayerMouseEvent,
-  type MapMouseEvent,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { BRACKET_COLORS } from "@/lib/brackets";
@@ -24,7 +23,6 @@ export interface MapViewProps {
   // 徒歩の印が後から届いて stations が差し替わるだけでは寄せ直さない
   // （利用者が動かした地図が勝手に戻らないように）
   resultKey: unknown;
-  onMapClick(lat: number, lng: number): void;
 }
 
 const SOURCE_ID = "reachable";
@@ -75,21 +73,20 @@ function buildCircleColorExpression(): ExpressionSpecification {
   ];
 }
 
+// 出発駅は駅名の入力だけで決める。地図のクリックで出発駅を変えると、駅の円を
+// 少し外して押しただけで意図せず変わってしまうため、地図は表示と駅の情報だけを担う
 export default function MapView({
   stations,
   fromName,
   focus,
   resultKey,
-  onMapClick,
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   // 地図の初期化 useEffect は [] で1度きり。その中で登録するイベントハンドラは
   // 最初の props を閉じ込めてしまうため、最新値を ref 経由で参照する。
   // 依存配列に入れて作り直すと、地図ごと再生成されて表示が飛ぶ。
-  const onMapClickRef = useRef(onMapClick);
   const fromNameRef = useRef(fromName);
-  onMapClickRef.current = onMapClick;
   fromNameRef.current = fromName;
   // 地図の load より先に検索結果が届くと、下の setData はソースが無くて空振りする。
   // load でソースを作るときに最新の結果を入れられるよう、ref にも持っておく
@@ -167,14 +164,6 @@ export default function MapView({
         };
         el.appendChild(a);
         new Popup().setLngLat(e.lngLat).setDOMContent(el).addTo(map);
-      });
-
-      // 地図の空白クリック = 出発駅の変更。ただし上の駅クリックと同時に発火するので、
-      // その場所に駅の円があるかを調べ、無いときだけ出発駅を差し替える。
-      map.on("click", (e: MapMouseEvent) => {
-        const hits = map.queryRenderedFeatures(e.point, { layers: [LAYER_ID] });
-        if (hits.length === 0)
-          onMapClickRef.current(e.lngLat.lat, e.lngLat.lng);
       });
     });
 

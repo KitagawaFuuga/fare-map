@@ -87,6 +87,9 @@ export default function Home() {
           stations={data?.stations ?? []}
           fromName={from?.name ?? null}
           focus={focus}
+          // 徒歩の印の差し替えでは meta は同じオブジェクトのまま（use-reachable の
+          // loadWalkMarks）なので、新しい検索結果のときだけ変わる
+          resultKey={data?.meta}
           onMapClick={setFromByCoords}
         />
         <LocateButton onLocate={setFromByCoords} />

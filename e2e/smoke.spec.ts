@@ -22,6 +22,23 @@ async function stubTiles(page: Page): Promise<void> {
   });
 }
 
+// 地図のスクリーンショットのうち、500円以下の駅の円の色（緑 #16a34a）の画素数。
+// 地図側は GeoJSON ソースに描くだけで DOM に要素が出ないので、画素で数える。
+async function greenPixels(png: Buffer): Promise<number> {
+  const { data, info } = await sharp(png)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  let n = 0;
+  for (let k = 0; k < data.length; k += info.channels)
+    if (
+      Math.abs(data[k]! - 0x16) < 10 &&
+      Math.abs(data[k + 1]! - 0xa3) < 10 &&
+      Math.abs(data[k + 2]! - 0x4a) < 10
+    )
+      n++;
+  return n;
+}
+
 // 同じパネルがサイドバー(デスクトップ)とボトムシート(md:hidden)の2箇所に描画される。
 // デスクトップ幅で走らせるので、サイドバー側だけを触る。
 const sidebar = (page: Page) => page.locator("aside");
@@ -151,27 +168,45 @@ test("地図の読み込みより先に検索結果が届いても、駅の円�
     timeout: 30_000,
   });
 
-  // 円の色（500円以下の緑 #16a34a）の画素が地図に現れるまで待つ
+  // 円の色（500円以下の緑）の画素が地図に現れるまで待つ
   const canvas = page.locator("canvas.maplibregl-canvas");
   await expect
-    .poll(
-      async () => {
-        const { data, info } = await sharp(await canvas.screenshot())
-          .raw()
-          .toBuffer({ resolveWithObject: true });
-        let n = 0;
-        for (let k = 0; k < data.length; k += info.channels)
-          if (
-            Math.abs(data[k]! - 0x16) < 10 &&
-            Math.abs(data[k + 1]! - 0xa3) < 10 &&
-            Math.abs(data[k + 2]! - 0x4a) < 10
-          )
-            n++;
-        return n;
-      },
-      { timeout: 30_000, intervals: [1_000] },
-    )
+    .poll(async () => greenPixels(await canvas.screenshot()), {
+      timeout: 30_000,
+      intervals: [1_000],
+    })
     .toBeGreaterThan(100);
+});
+
+test("初期表示の範囲外の駅から検索すると、地図が結果の駅へ移って円が見える", async ({
+  page,
+}) => {
+  // 地図は東京を表示して始まる。検索しても地図が動かなかったので、黒崎駅前
+  // （北九州）から検索すると一覧には結果が出るのに地図には何も描かれなかった。
+  test.setTimeout(60_000);
+  await stubTiles(page);
+  await page.goto("/");
+
+  const panel = sidebar(page);
+  await panel.getByPlaceholder("駅名を入力").fill("黒崎駅前");
+  await panel
+    .getByRole("button", { name: /^黒崎駅前/ })
+    .first()
+    .click();
+  await panel.locator('input[type="number"]').fill("230");
+  await panel.getByRole("button", { name: "検索" }).click();
+  await expect(panel.getByText(/\d+ 駅に到達可能/)).toBeVisible({
+    timeout: 30_000,
+  });
+
+  // 一覧の駅は押さない（押すと地図が寄るので、検索だけで寄ることを確かめられない）
+  const canvas = page.locator("canvas.maplibregl-canvas");
+  await expect
+    .poll(async () => greenPixels(await canvas.screenshot()), {
+      timeout: 20_000,
+      intervals: [1_000],
+    })
+    .toBeGreaterThan(30);
 });
 
 test("先の入力の候補が遅れて届いても、最新の入力の候補が表示される", async ({

@@ -13,12 +13,17 @@ import {
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { BRACKET_COLORS } from "@/lib/brackets";
+import { boundsOf } from "@/lib/geo";
 import type { ReachableStation } from "@/hooks/use-reachable";
 
 export interface MapViewProps {
   stations: ReachableStation[];
   fromName: string | null;
   focus: { lat: number; lng: number } | null;
+  // 新しい検索結果ごとに変わる値。変わったら到達駅が全部入るように地図を寄せる。
+  // 徒歩の印が後から届いて stations が差し替わるだけでは寄せ直さない
+  // （利用者が動かした地図が勝手に戻らないように）
+  resultKey: unknown;
   onMapClick(lat: number, lng: number): void;
 }
 
@@ -74,6 +79,7 @@ export default function MapView({
   stations,
   fromName,
   focus,
+  resultKey,
   onMapClick,
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -190,6 +196,12 @@ export default function MapView({
     if (focus)
       mapRef.current?.flyTo({ center: [focus.lng, focus.lat], zoom: 12 });
   }, [focus]);
+
+  // stations は ref から読む（依存に入れると、徒歩の印の差し替えでも寄せ直してしまう）
+  useEffect(() => {
+    const bounds = boundsOf(stationsRef.current);
+    if (bounds) mapRef.current?.fitBounds(bounds, { padding: 60, maxZoom: 13 });
+  }, [resultKey]);
 
   return <div ref={containerRef} className="h-full w-full" />;
 }

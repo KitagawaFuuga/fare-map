@@ -9,6 +9,7 @@ import SearchPanel from "@/components/SearchPanel";
 import StationList from "@/components/StationList";
 import { useReachable, type ReachableStation } from "@/hooks/use-reachable";
 import type { SheetState } from "@/lib/sheet";
+import type { StationSuggestion } from "@/lib/server/api-service";
 
 // maplibre は初期化時に window/document を直接触るため、サーバー側レンダリングで
 // 落ちる。"use client" は「ブラウザでも動く」宣言であって SSR を止めないので、
@@ -17,7 +18,7 @@ const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 export default function Home() {
   // 出発駅は駅名の入力（SearchPanel）だけで決める。地図のクリックや現在地からは決めない
-  const [from, setFrom] = useState<{ id: string; name: string } | null>(null);
+  const [from, setFrom] = useState<StationSuggestion | null>(null);
   const [budget, setBudget] = useState(500);
   const [focus, setFocus] = useState<ReachableStation | null>(null);
   const [sheet, setSheet] = useState<SheetState>("half");
@@ -69,7 +70,7 @@ export default function Home() {
       <div className="relative flex-1">
         <MapView
           stations={data?.stations ?? []}
-          fromName={from?.name ?? null}
+          origin={from}
           focus={focus}
           // 徒歩の印の差し替えでは meta は同じオブジェクトのまま（use-reachable の
           // loadWalkMarks）なので、新しい検索結果のときだけ変わる

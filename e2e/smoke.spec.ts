@@ -274,6 +274,37 @@ test("一覧の駅を押すと、地図のその駅に吹き出しが出る", as
   await expect(popup).toContainText("概算 230円");
 });
 
+test("出発駅を選ぶと、地図に出発駅の印が駅名つきで出る", async ({ page }) => {
+  // 到達駅の一覧には出発駅自身が含まれないので、以前は地図のどこが起点か分からなかった
+  await stubTiles(page);
+  await page.goto("/");
+  const panel = sidebar(page);
+  await panel.getByPlaceholder("駅名を入力").fill("黒崎駅前");
+  await panel
+    .getByRole("button", { name: /^黒崎駅前/ })
+    .first()
+    .click();
+
+  const marker = page.getByLabel("出発駅: 黒崎駅前");
+  await expect(marker).toBeVisible({ timeout: 10_000 });
+  await expect(marker).toContainText("黒崎駅前");
+});
+
+test("一覧の駅を押すと、その駅に選択中の印が出る", async ({ page }) => {
+  test.setTimeout(60_000);
+  await searchKurosaki(page);
+
+  await sidebar(page).locator("li").filter({ hasText: "熊西" }).click();
+  await expect(page.getByLabel("選択中の駅: 熊西")).toBeVisible({
+    timeout: 10_000,
+  });
+
+  // 別の駅を選び直したら、印はそちらへ移る（前の駅の印は残らない）
+  await sidebar(page).locator("li").filter({ hasText: "八幡" }).click();
+  await expect(page.getByLabel("選択中の駅: 八幡")).toBeVisible();
+  await expect(page.getByLabel("選択中の駅: 熊西")).toHaveCount(0);
+});
+
 test("駅の円は寄った地図で押しやすい大きさに描かれる", async ({ page }) => {
   // 以前は半径 5px 固定で小さかった。ズームに合わせて大きくする（寄った地図で約 10px）
   test.setTimeout(60_000);

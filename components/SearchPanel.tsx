@@ -5,7 +5,8 @@ import type { StationSuggestion } from "@/lib/server/api-service";
 
 export interface SearchPanelProps {
   selected: { id: string; name: string } | null;
-  onSelect(station: { id: string; name: string }): void;
+  // 候補をそのまま渡す（座標も含むので、選んだ時点で出発駅を地図に描ける）
+  onSelect(station: StationSuggestion): void;
 }
 
 export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
@@ -99,7 +100,7 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
                 type="button"
                 className="w-full px-3 py-2 text-left hover:bg-gray-100"
                 onClick={() => {
-                  onSelect({ id: s.id, name: s.name });
+                  onSelect(s);
                   setQuery("");
                   setOpen(false);
                 }}

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
-import type { FeatureCollection } from "geojson";
+import type { FeatureCollection, Point } from "geojson";
 import {
   Map as MapLibreMap,
+  Marker,
   Popup,
   setWorkerUrl,
   type ExpressionSpecification,
@@ -17,7 +18,8 @@ import type { ReachableStation } from "@/hooks/use-reachable";
 
 export interface MapViewProps {
   stations: ReachableStation[];
-  fromName: string | null;
+  // 出発駅。到達駅の一覧には含まれないので、別の印で常に描く
+  origin: { name: string; lat: number; lng: number } | null;
   // 一覧で選ばれた駅。地図をその駅へ寄せ、円を押したときと同じ吹き出しを開く
   focus: ReachableStation | null;
   // 新しい検索結果ごとに変わる値。変わったら到達駅が全部入るように地図を寄せる。
@@ -136,29 +138,60 @@ function buildPopupContent(
   return el;
 }
 
+// 出発駅の印: 黒い丸に白い縁と、駅名のラベル。到達駅の円（色つき）と見分けられるように
+// 色を使わない。クリックは下の地図（駅の円）へ通す
+function buildOriginElement(name: string): HTMLElement {
+  const el = document.createElement("div");
+  el.setAttribute("role", "img");
+  el.setAttribute("aria-label", `出発駅: ${name}`);
+  el.className = "pointer-events-none flex items-center gap-1";
+  const dot = document.createElement("span");
+  dot.className =
+    "block h-4 w-4 shrink-0 rounded-full border-[3px] border-white bg-gray-900 shadow";
+  const label = document.createElement("span");
+  label.className =
+    "whitespace-nowrap rounded bg-gray-900/85 px-1.5 py-0.5 text-xs font-bold text-white";
+  label.textContent = name;
+  el.append(dot, label);
+  return el;
+}
+
+// 選択中の駅の印: 円の外側に重ねる太い縁取り。吹き出しを閉じても位置が分かるように残す
+function buildSelectedElement(name: string): HTMLElement {
+  const el = document.createElement("div");
+  el.setAttribute("role", "img");
+  el.setAttribute("aria-label", `選択中の駅: ${name}`);
+  el.className =
+    "pointer-events-none h-7 w-7 rounded-full border-4 border-gray-900 ring-2 ring-white";
+  return el;
+}
+
 // 出発駅は駅名の入力だけで決める。地図のクリックで出発駅を変えると、駅の円を
 // 少し外して押しただけで意図せず変わってしまうため、地図は表示と駅の情報だけを担う
 export default function MapView({
   stations,
-  fromName,
+  origin,
   focus,
   resultKey,
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
-  // 開いている吹き出しは1つだけにする（一覧で駅を選び直したら前のを閉じる）
+  // 開いている吹き出しと選択中の印は1つだけにする（選び直したら前のを消す）
   const popupRef = useRef<Popup | null>(null);
+  const selectedRef = useRef<Marker | null>(null);
+  const originMarkerRef = useRef<Marker | null>(null);
   // 地図の初期化 useEffect は [] で1度きり。その中で登録するイベントハンドラは
   // 最初の props を閉じ込めてしまうため、最新値を ref 経由で参照する。
   // 依存配列に入れて作り直すと、地図ごと再生成されて表示が飛ぶ。
-  const fromNameRef = useRef(fromName);
-  fromNameRef.current = fromName;
+  const fromNameRef = useRef(origin?.name ?? null);
+  fromNameRef.current = origin?.name ?? null;
   // 地図の load より先に検索結果が届くと、下の setData はソースが無くて空振りする。
   // load でソースを作るときに最新の結果を入れられるよう、ref にも持っておく
   const stationsRef = useRef(stations);
   stationsRef.current = stations;
 
-  const openPopup = (
+  // 駅を選んだ状態にする: 吹き出しを開き、円に選択中の印を重ねる
+  const select = (
     map: MapLibreMap,
     lngLat: [number, number],
     p: PopupStation,
@@ -168,9 +201,13 @@ export default function MapView({
       .setLngLat(lngLat)
       .setDOMContent(buildPopupContent(p, fromNameRef))
       .addTo(map);
+    selectedRef.current?.remove();
+    selectedRef.current = new Marker({ element: buildSelectedElement(p.name) })
+      .setLngLat(lngLat)
+      .addTo(map);
   };
-  const openPopupRef = useRef(openPopup);
-  openPopupRef.current = openPopup;
+  const selectRef = useRef(select);
+  selectRef.current = select;
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -203,11 +240,12 @@ export default function MapView({
       map.on("click", LAYER_ID, (e: MapLayerMouseEvent) => {
         const f = e.features?.[0];
         if (!f) return;
-        openPopupRef.current(
-          map,
-          [e.lngLat.lng, e.lngLat.lat],
-          f.properties as PopupStation,
-        );
+        // 印と吹き出しは押した点ではなく駅の位置に置く
+        const [lng, lat] = (f.geometry as Point).coordinates as [
+          number,
+          number,
+        ];
+        selectRef.current(map, [lng, lat], f.properties as PopupStation);
       });
     });
 
@@ -225,15 +263,40 @@ export default function MapView({
     src?.setData(toGeoJson(stations));
   }, [stations]);
 
+  // 出発駅の印。選び直したら置き換え、選んだ時点で地図をその駅へ寄せる
+  // （遠くの駅を選んでも印が画面の外にならないように）
+  useEffect(() => {
+    const map = mapRef.current;
+    originMarkerRef.current?.remove();
+    originMarkerRef.current = null;
+    if (!origin || !map) return;
+    originMarkerRef.current = new Marker({
+      element: buildOriginElement(origin.name),
+      // 要素の左端（丸の左端）を基準にするので、丸の中心が駅の位置に来るよう半径ぶん戻す
+      anchor: "left",
+      offset: [-8, 0],
+    })
+      .setLngLat([origin.lng, origin.lat])
+      .addTo(map);
+    map.flyTo({
+      center: [origin.lng, origin.lat],
+      zoom: Math.max(map.getZoom(), 11),
+    });
+  }, [origin]);
+
   useEffect(() => {
     const map = mapRef.current;
     if (!focus || !map) return;
     map.flyTo({ center: [focus.lng, focus.lat], zoom: 12 });
-    openPopupRef.current(map, [focus.lng, focus.lat], focus);
+    selectRef.current(map, [focus.lng, focus.lat], focus);
   }, [focus]);
 
-  // stations は ref から読む（依存に入れると、徒歩の印の差し替えでも寄せ直してしまう）
+  // 新しい検索結果が届いたら、前の結果で選んでいた駅の印と吹き出しを消し、
+  // 到達駅が全部入るように寄せる。stations は ref から読む（依存に入れると、
+  // 徒歩の印の差し替えでも寄せ直してしまう）
   useEffect(() => {
+    popupRef.current?.remove();
+    selectedRef.current?.remove();
     const bounds = boundsOf(stationsRef.current);
     if (bounds) mapRef.current?.fitBounds(bounds, { padding: 60, maxZoom: 13 });
   }, [resultKey]);

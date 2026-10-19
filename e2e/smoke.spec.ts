@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import sharp from "sharp";
+import { BRACKET_COLORS } from "../lib/brackets";
 
 // 地図タイルは外部サービス(tiles.openfreemap.org)から取る。CI を外部の障害や
 // レート制限に晒さないため、スタイル定義とタイル本体は差し替える。検証したいのは
@@ -22,18 +23,21 @@ async function stubTiles(page: Page): Promise<void> {
   });
 }
 
-// 地図のスクリーンショットのうち、500円以下の駅の円の色（緑 #16a34a）の画素数。
+// 地図のスクリーンショットのうち、500円以下の駅の円の色（BRACKET_COLORS[0]）の画素数。
 // 地図側は GeoJSON ソースに描くだけで DOM に要素が出ないので、画素で数える。
-async function greenPixels(png: Buffer): Promise<number> {
+const CHEAPEST = (BRACKET_COLORS[0].match(/[0-9a-f]{2}/gi) ?? []).map((h) =>
+  parseInt(h, 16),
+);
+async function cheapestPixels(png: Buffer): Promise<number> {
   const { data, info } = await sharp(png)
     .raw()
     .toBuffer({ resolveWithObject: true });
   let n = 0;
   for (let k = 0; k < data.length; k += info.channels)
     if (
-      Math.abs(data[k]! - 0x16) < 10 &&
-      Math.abs(data[k + 1]! - 0xa3) < 10 &&
-      Math.abs(data[k + 2]! - 0x4a) < 10
+      Math.abs(data[k]! - CHEAPEST[0]!) < 10 &&
+      Math.abs(data[k + 1]! - CHEAPEST[1]!) < 10 &&
+      Math.abs(data[k + 2]! - CHEAPEST[2]!) < 10
     )
       n++;
   return n;
@@ -130,6 +134,77 @@ test("現在地から出発駅を決めるボタンは無い", async ({ page }) 
   ).toHaveCount(0);
 });
 
+test("背景地図は色つきのスタイル（liberty）で、水域や公園が見分けられる", async ({
+  page,
+}) => {
+  const styleUrls: string[] = [];
+  page.on("request", (r) => {
+    if (r.url().includes("/styles/")) styleUrls.push(r.url());
+  });
+  await stubTiles(page);
+  await page.goto("/");
+  await expect(page.locator("canvas.maplibregl-canvas")).toBeVisible();
+  await expect.poll(() => styleUrls.length).toBeGreaterThan(0);
+  expect(styleUrls[0]).toContain("/styles/liberty");
+});
+
+test("画面の文字は BIZ UDPゴシックで組まれる", async ({ page }) => {
+  await stubTiles(page);
+  await page.goto("/");
+  const family = await page.evaluate(
+    () => getComputedStyle(document.body).fontFamily,
+  );
+  expect(family).toMatch(/BIZ[_ ]UDPGothic/);
+});
+
+test("入力欄は「〇〇から □□円で行ける駅」の文として読める", async ({
+  page,
+}) => {
+  await stubTiles(page);
+  await page.goto("/");
+  const panel = sidebar(page);
+  await expect(panel.getByText("から", { exact: true })).toBeVisible();
+  await expect(panel.getByText("円で行ける駅", { exact: true })).toBeVisible();
+});
+
+test("文の形の入力欄には見出しを重ねず、入力欄の名前は読み上げ用に持つ", async ({
+  page,
+}) => {
+  await stubTiles(page);
+  await page.goto("/");
+  const panel = sidebar(page);
+  await expect(panel.getByText("出発駅", { exact: true })).toHaveCount(0);
+  await expect(panel.getByText(/^予算: /)).toHaveCount(0);
+  await expect(panel.getByRole("textbox", { name: "出発駅" })).toBeVisible();
+  await expect(
+    panel.getByRole("spinbutton", { name: "予算（円）" }),
+  ).toBeVisible();
+});
+
+test("予算のスライダーは文の途中に挟まらず、文の下に置かれる", async ({
+  page,
+}) => {
+  await stubTiles(page);
+  await page.goto("/");
+  const panel = sidebar(page);
+  const sentenceEnd = await panel
+    .getByText("円で行ける駅", { exact: true })
+    .boundingBox();
+  const slider = await panel.getByRole("slider").boundingBox();
+  expect(slider!.y).toBeGreaterThan(sentenceEnd!.y + sentenceEnd!.height);
+});
+
+test("検索ボタンは運賃の色と同じ系統の茶で塗られる", async ({ page }) => {
+  await stubTiles(page);
+  await page.goto("/");
+  const button = sidebar(page).getByRole("button", {
+    name: "検索",
+    exact: true,
+  });
+  // #a54700（BRACKET_COLORS[3]）。白文字とのコントラストは 4.5:1 を超える
+  await expect(button).toHaveCSS("background-color", "rgb(165, 71, 0)");
+});
+
 test("予算を入れて検索すると到達可能駅が出る", async ({ page }) => {
   await stubTiles(page);
   await page.goto("/");
@@ -205,10 +280,10 @@ test("地図の読み込みより先に検索結果が届いても、駅の円�
     timeout: 30_000,
   });
 
-  // 円の色（500円以下の緑）の画素が地図に現れるまで待つ
+  // 円の色（500円以下の色）の画素が地図に現れるまで待つ
   const canvas = page.locator("canvas.maplibregl-canvas");
   await expect
-    .poll(async () => greenPixels(await canvas.screenshot()), {
+    .poll(async () => cheapestPixels(await canvas.screenshot()), {
       timeout: 30_000,
       intervals: [1_000],
     })
@@ -239,7 +314,7 @@ test("初期表示の範囲外の駅から検索すると、地図が結果の�
   // 一覧の駅は押さない（押すと地図が寄るので、検索だけで寄ることを確かめられない）
   const canvas = page.locator("canvas.maplibregl-canvas");
   await expect
-    .poll(async () => greenPixels(await canvas.screenshot()), {
+    .poll(async () => cheapestPixels(await canvas.screenshot()), {
       timeout: 20_000,
       intervals: [1_000],
     })
@@ -262,6 +337,32 @@ async function searchKurosaki(page: Page): Promise<void> {
     timeout: 30_000,
   });
 }
+
+test("一覧は運賃の段階ごとの見出しで区切られ、見出しが凡例を兼ねる", async ({
+  page,
+}) => {
+  await stubTiles(page);
+  await page.goto("/");
+  const panel = sidebar(page);
+  // 検索前は地図に点が無いので、段階の見出し（凡例）も出さない
+  await expect(panel.getByText("〜500円")).toHaveCount(0);
+
+  await panel.getByPlaceholder("駅名を入力").fill("黒崎駅前");
+  await panel
+    .getByRole("button", { name: /^黒崎駅前/ })
+    .first()
+    .click();
+  // 600円なら 500円以下と 501〜1000円の2段階に分かれる
+  await panel.locator('input[type="number"]').fill("600");
+  await panel.getByRole("button", { name: "検索" }).click();
+  await expect(panel.getByText(/\d+ 駅に到達可能/)).toBeVisible({
+    timeout: 30_000,
+  });
+  const headings = panel.getByRole("heading", { level: 3 });
+  await expect(headings).toHaveCount(2);
+  await expect(headings.nth(0)).toHaveText(/^〜500円\s*\d+駅$/);
+  await expect(headings.nth(1)).toHaveText(/^〜1000円\s*\d+駅$/);
+});
 
 test("一覧の駅を押すと、地図のその駅に吹き出しが出る", async ({ page }) => {
   test.setTimeout(60_000);
@@ -310,10 +411,10 @@ test("駅の円は寄った地図で押しやすい大きさに描かれる", as
   test.setTimeout(60_000);
   await searchKurosaki(page);
 
-  // 3駅の円の緑の画素の合計。半径 5px だと 1 駅あたり内側の 50 画素前後にしかならない
+  // 3駅の円の画素の合計。半径 5px だと 1 駅あたり内側の 50 画素前後にしかならない
   const canvas = page.locator("canvas.maplibregl-canvas");
   await expect
-    .poll(async () => greenPixels(await canvas.screenshot()), {
+    .poll(async () => cheapestPixels(await canvas.screenshot()), {
       timeout: 20_000,
       intervals: [1_000],
     })

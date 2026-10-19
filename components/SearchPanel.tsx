@@ -70,24 +70,28 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
 
   return (
     <div className="relative">
-      <label className="block text-sm font-medium">出発駅</label>
-      <input
-        type="text"
-        value={query}
-        placeholder={selected?.name ?? "駅名を入力"}
-        onChange={(e) => setQuery(e.target.value)}
-        onFocus={() => setOpen(suggestions.length > 0)}
-        ref={inputRef}
-        onKeyDown={(e) => {
-          if (e.key === "ArrowDown" && open && suggestions.length > 0) {
-            e.preventDefault();
-            focusSuggestion(0);
-          } else if (e.key === "Escape") {
-            setOpen(false);
-          }
-        }}
-        className="mt-1 w-full rounded border border-gray-300 px-3 py-2"
-      />
+      {/* 「〇〇から □□円で行ける駅」の文の前半。入力欄と助詞を1行に並べる */}
+      <div className="flex items-baseline gap-2">
+        <input
+          type="text"
+          aria-label="出発駅"
+          value={query}
+          placeholder={selected?.name ?? "駅名を入力"}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setOpen(suggestions.length > 0)}
+          ref={inputRef}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown" && open && suggestions.length > 0) {
+              e.preventDefault();
+              focusSuggestion(0);
+            } else if (e.key === "Escape") {
+              setOpen(false);
+            }
+          }}
+          className="mt-1 min-w-0 flex-1 rounded border border-gray-300 px-3 py-2 text-lg font-bold placeholder:font-normal"
+        />
+        <span className="text-lg">から</span>
+      </div>
       {open && suggestions.length > 0 && (
         <ul
           ref={listRef}

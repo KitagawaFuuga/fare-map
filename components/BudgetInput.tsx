@@ -12,24 +12,30 @@ export interface BudgetInputProps {
 export default function BudgetInput({ value, onChange }: BudgetInputProps) {
   return (
     <div>
-      <label className="block text-sm font-medium">予算: {value}円</label>
+      {/* 文の後半。数値入力と「円で行ける駅」を1行に並べる */}
+      <div className="flex items-baseline gap-2">
+        <input
+          type="number"
+          aria-label="予算（円）"
+          min={MIN_BUDGET}
+          max={MAX_BUDGET}
+          step={100}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="mt-1 w-28 rounded border border-gray-300 px-2 py-1 text-lg font-bold"
+        />
+        <span className="text-lg">円で行ける駅</span>
+      </div>
+      {/* 文を切らないよう、ざっと動かすためのスライダーは文の下に置く */}
       <input
         type="range"
+        aria-label="予算（円）"
         min={MIN_BUDGET}
         max={MAX_BUDGET}
         step={100}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="mt-1 w-full"
-      />
-      <input
-        type="number"
-        min={MIN_BUDGET}
-        max={MAX_BUDGET}
-        step={100}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="mt-1 w-28 rounded border border-gray-300 px-2 py-1"
+        className="mt-2 w-full"
       />
     </div>
   );

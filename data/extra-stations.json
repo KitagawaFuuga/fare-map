@@ -1,0 +1,77 @@
+{
+  "stations": [
+    {
+      "station_cd": "9940320",
+      "station_g_cd": "1140302",
+      "station_name": "今井",
+      "station_name_k": "",
+      "station_name_r": "",
+      "line_cd": "99403",
+      "pref_cd": "20",
+      "post": "381-2226",
+      "address": "長野市川中島町今井２９６番地",
+      "lon": "138.145347",
+      "lat": "36.595732",
+      "open_ymd": "0000-00-00",
+      "close_ymd": "0000-00-00",
+      "e_status": "0",
+      "e_sort": "9940320"
+    },
+    {
+      "station_cd": "9940321",
+      "station_g_cd": "1140303",
+      "station_name": "川中島",
+      "station_name_k": "",
+      "station_name_r": "",
+      "line_cd": "99403",
+      "pref_cd": "20",
+      "post": "381-2233",
+      "address": "長野市川中島町上氷鉋",
+      "lon": "138.150679",
+      "lat": "36.614167",
+      "open_ymd": "0000-00-00",
+      "close_ymd": "0000-00-00",
+      "e_status": "0",
+      "e_sort": "9940321"
+    },
+    {
+      "station_cd": "9940322",
+      "station_g_cd": "1140304",
+      "station_name": "安茂里",
+      "station_name_k": "",
+      "station_name_r": "",
+      "line_cd": "99403",
+      "pref_cd": "20",
+      "post": "380-0941",
+      "address": "長野市安茂里",
+      "lon": "138.161791",
+      "lat": "36.630262",
+      "open_ymd": "0000-00-00",
+      "close_ymd": "0000-00-00",
+      "e_status": "0",
+      "e_sort": "9940322"
+    },
+    {
+      "station_cd": "9940323",
+      "station_g_cd": "1140305",
+      "station_name": "長野",
+      "station_name_k": "",
+      "station_name_r": "",
+      "line_cd": "99403",
+      "pref_cd": "20",
+      "post": "380-0921",
+      "address": "長野市大字栗田１０３８番地",
+      "lon": "138.189101",
+      "lat": "36.643307",
+      "open_ymd": "0000-00-00",
+      "close_ymd": "0000-00-00",
+      "e_status": "0",
+      "e_sort": "9940323"
+    }
+  ],
+  "source": {
+    "url": "https://github.com/ny-a/ekidata (駅データ.jp 2021年版のミラー)",
+    "fetchedAt": "2026-10-10",
+    "note": "駅データ.jp の2026年版（station20260731free.csv）で、しなの鉄道線(99403)から消えた篠ノ井〜長野の4駅（今井・川中島・安茂里・長野）。JR東日本の線路だが、しなの鉄道の列車が直通し、公式運賃表にも通し運賃が載っている（data/fare-overrides/shinano.json）。2021年版の行をそのまま持ち、data/extra-joins.json の接続でつなぐ。lib/graph/build.ts の mergeExtraStations は、同じ駅コードが元データに戻ったら例外にする。"
+  }
+}

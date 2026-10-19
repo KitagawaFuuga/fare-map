@@ -1,0 +1,19 @@
+{
+  "id": "hakodate-tram",
+  "operators": ["函館市交通局"],
+  "table": [
+    [2, 250],
+    [4, 270],
+    [7, 290]
+  ],
+  "beyond": {
+    "fromKm": 7,
+    "baseFare": 300,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/函館市企業局交通部",
+    "fetchedAt": "2026-10-12",
+    "note": "函館市電の大人運賃。2025年12月1日改定の対キロ区間制: 2kmまで250円、4kmまで270円、7kmまで290円、7km超300円。境界は小数のキロ。"
+  }
+}

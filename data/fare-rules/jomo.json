@@ -1,0 +1,26 @@
+{
+  "id": "jomo",
+  "operators": ["上毛電気鉄道"],
+  "table": [
+    [2, 180],
+    [4, 230],
+    [6, 300],
+    [8, 380],
+    [11, 450],
+    [14, 520],
+    [17, 570],
+    [20, 630],
+    [23, 670],
+    [26, 690]
+  ],
+  "beyond": {
+    "fromKm": 26,
+    "baseFare": 690,
+    "ratePerKm": 20
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/上毛電気鉄道上毛線, https://jomorailway.com/fare_nomal.html",
+    "fetchedAt": "2026-10-12",
+    "note": "上毛電気鉄道上毛線の大人普通運賃（きっぷ）。2019年10月1日改定で据え置き。キロ帯の表は Wikipedia の上毛線の記事。"
+  }
+}

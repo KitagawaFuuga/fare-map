@@ -1,0 +1,30 @@
+{
+  "renames": [
+    {
+      "station_cd": "9992003",
+      "from": "川村",
+      "to": "相良十島",
+      "source": "くま川鉄道 湯前線 時刻表・運賃表（2026年9月20日改正） https://kumagawa-rail.com/time-fare/"
+    },
+    {
+      "station_cd": "9992012",
+      "from": "東多良木",
+      "to": "多良木青蓮寺",
+      "source": "くま川鉄道 湯前線 時刻表・運賃表（2026年9月20日改正） https://kumagawa-rail.com/time-fare/"
+    },
+    {
+      "station_cd": "9931508",
+      "from": "工機前",
+      "to": "日工前",
+      "source": "ひたちなか海浜鉄道 年間通学定期運賃表 http://www.hitachinaka-rail.co.jp/pass/"
+    }
+  ],
+  "closures": [
+    {
+      "station_cd": "9990902",
+      "name": "西黒崎",
+      "source": "筑豊電気鉄道「2026年7月31日 西黒崎駅を廃止いたします。」 https://www.chikutetsu.co.jp/data/topics/408_20260528nishikurosakihaishi.pdf"
+    }
+  ],
+  "note": "駅データ.jp の2026年版（station20260731free.csv）が反映していない改称・廃止を一次情報で直す。元データが追いついたら build-graph が例外を出すので、その項目を消す。"
+}

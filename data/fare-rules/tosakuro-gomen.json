@@ -1,0 +1,22 @@
+{
+  "id": "tosakuro-gomen",
+  "operators": ["土佐くろしお鉄道(ごめん・なはり線)"],
+  "table": [
+    [6, 260],
+    [12, 410],
+    [19, 560],
+    [27, 720],
+    [35, 920],
+    [43, 1080]
+  ],
+  "beyond": {
+    "fromKm": 43,
+    "baseFare": 1080,
+    "ratePerKm": 30
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/土佐くろしお鉄道, https://www.tosakuro.com/_files/ugd/310f5f_c30f6027c8894004a4c1e0618e5860ab.pdf",
+    "fetchedAt": "2026-10-12",
+    "note": "土佐くろしお鉄道 ごめん・なはり線（阿佐線）の大人普通運賃（きっぷ）。2019年10月1日改定: 初乗り6kmまで260円、12kmまで410円、19kmまで560円、27kmまで720円、35kmまで920円、43kmまで1,080円。隣り合う駅までは表にかかわらず210円で、data/fare-overrides/tosakuro-gomen-adjacent.json に持つ。公式の三角表に出てくる運賃（210・260・410・560・720・920・1,080円）と一致する。"
+  }
+}

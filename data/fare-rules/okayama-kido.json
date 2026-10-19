@@ -1,0 +1,15 @@
+{
+  "id": "okayama-kido",
+  "operators": ["岡山電気軌道"],
+  "table": [[100, 160]],
+  "beyond": {
+    "fromKm": 100,
+    "baseFare": 160,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://okayama-kido.co.jp/tram/route-map/",
+    "fetchedAt": "2026-10-13",
+    "note": "岡山電気軌道 路面電車の大人運賃（2025年10月1日改定）。東山本線・清輝橋線とも全線160円（小児80円）。柳川での乗り継ぎも通しで160円。"
+  }
+}

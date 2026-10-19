@@ -27,15 +27,44 @@ python scripts/fare/extract/<id>.py <PDFを置いたディレクトリ>
 結果を `data/fare-sources/<id>.json` の `pairs` に反映すると、
 `lib/fare/__tests__/fare-sources.test.ts` が距離帯＋特定運賃での再現を検証する。
 
-| スクリプト        | 対象                               | 必要なPDF                                                |
-| ----------------- | ---------------------------------- | -------------------------------------------------------- |
-| `chitetsu.py`     | 富山地方鉄道 鉄道線 67駅・2211ペア | `ct_57f926382b6e9c826ae79da324e7afe6.pdf`                |
-| `echizen.py`      | えちぜん鉄道 44駅・946ペア         | `ez_fare.pdf`（旅客運賃表）、`ez_kilo.pdf`（営業キロ表） |
-| `shinano.py`      | しなの鉄道線 23駅・253ペア         | `sr.pdf` の2ページ目                                     |
-| `shinano-kita.py` | 北しなの線を列にした表 204ペア     | `sr.pdf` の6ページ目                                     |
-| `tokitetsu.py`    | えちごトキめき鉄道 22駅・231ペア   | `tok.pdf`                                                |
+| スクリプト            | 対象                                | 必要なPDF                                                                                                   |
+| --------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `chitetsu.py`         | 富山地方鉄道 鉄道線 67駅・2211ペア  | `ct_57f926382b6e9c826ae79da324e7afe6.pdf`                                                                   |
+| `echizen.py`          | えちぜん鉄道 44駅・946ペア          | `ez_fare.pdf`（旅客運賃表）、`ez_kilo.pdf`（営業キロ表）                                                    |
+| `shinano.py`          | しなの鉄道線 23駅・253ペア          | `sr.pdf` の2ページ目                                                                                        |
+| `shinano-kita.py`     | 北しなの線を列にした表 204ペア      | `sr.pdf` の6ページ目                                                                                        |
+| `tokitetsu.py`        | えちごトキめき鉄道 22駅・231ペア    | `tok.pdf`                                                                                                   |
+| `jr-west-special.py`  | JR西日本 大阪附近の特定区間 341区間 | `jrw.pdf`（2024-05-15 京阪神運賃体系見直しプレス、別紙4）                                                   |
+| `chiba-monorail.py`   | 千葉都市モノレール 18駅・153ペア    | `chiba.pdf`（普通旅客運賃表、2019-10-01）                                                                   |
+| `kobe-new-transit.ts` | 神戸新交通 18駅・81ペア             | `knt.html`（公式サイトの運賃表ページ。`npx tsx` で実行）                                                    |
+| `sanriku.py`          | 三陸鉄道 41駅・820ペア              | `sanriku.pdf`（普通運賃表、2026-03-14 改正）                                                                |
+| `orange.py`           | 肥薩おれんじ鉄道 28駅・378ペア      | `orange.pdf`（普通運賃三角表、2024-10-01）                                                                  |
+| `tenhama.py`          | 天竜浜名湖鉄道 39駅・741ペア        | `tenhama.pdf`（全体の運賃表、2024-10-01）                                                                   |
+| `matsuura.py`         | 松浦鉄道 57駅・1596ペア             | `matsuura.pdf`（駅間普通旅客運賃表、2024-10-01、3ページ）                                                   |
+| `fukutetsu.py`        | 福井鉄道 25駅・300ペア              | `fukutetsu.pdf`（普通旅客運賃表、2024-03-16）。出力は `data/fare-overrides/fukutetsu.json` に直接まとめた   |
+| `ichibata.py`         | 一畑電車 26駅・325ペア              | `ichibata.pdf`（全駅普通旅客運賃表、2025-03-01）。出力は `data/fare-overrides/ichibata.json` に直接まとめた |
+| `abukuma.py`          | 阿武隈急行 24駅・276ペア            | `abukyu.pdf`（運賃表、2019-10-01）。出力は `data/fare-overrides/abukuma.json` に直接まとめた                |
+| `daitetsu.py`         | 大井川鐵道 大井川本線 12駅・66ペア  | `daitetsu.html`（公式サイトの発駅別運賃表ページ）。出力は `data/fare-overrides/oigawa.json` に直接まとめた  |
+| `flower-nagai.py`     | 山形鉄道 17駅・136ペア              | `flower-nagai.html`（公式サイトの運賃表ページ）。出力は `data/fare-overrides/yamagata-tetsudo.json` に直接まとめた |
+| `watetsu.py`          | わたらせ渓谷鐵道 17駅・136ペア      | `watetsu.html`（公式サイトの普通旅客運賃表ページ、EUC-JP）。出力は `data/fare-overrides/watetsu.json` に直接まとめた |
+| `moka.py`             | 真岡鐵道 17駅・136ペア              | `moka.html`（公式サイトの運賃表ページ）。出力は `data/fare-overrides/moka.json` に直接まとめた |
+| `kumagawa.py`         | くま川鉄道 14駅・91ペア             | 不要（時刻表画像の運賃表を書き起こした値をスクリプトに持つ）。出力は `data/fare-overrides/kumagawa.json` に直接まとめた |
+| `tsugaru.py` | 津軽鉄道 12駅・66ペア | 不要（普通旅客運賃表PDFの値を書き写してスクリプトに持つ）。出力は `data/fare-overrides/tsugaru.json` に直接まとめた |
+| `yuri-kogen.py` | 由利高原鉄道 12駅・66ペア | 不要（普通運賃表PDFを画像にして書き写した値をスクリプトに持つ）。出力は `data/fare-overrides/yuri-kogen.json` に直接まとめた |
+| `hokuetsu.py` | 北越急行 線内12駅・66ペア | `unchin.pdf`（ほくほく線運賃表、2026年版）。出力は `data/fare-overrides/hokuetsu.json` に直接まとめた |
+| `hitachinaka.py` | ひたちなか海浜鉄道 11駅・55ペア | 不要（`fare_2021.pdf` を画像にして書き写した値をスクリプトに持つ）。出力は `data/fare-overrides/hitachinaka.json` に直接まとめた |
+| `gakunan.py` | 岳南鉄道 10駅・45ペア | `gakunan.html`（公式サイトの運賃表ページ）。出力は `data/fare-overrides/gakunan.json` に直接まとめた |
+| `yagan.py` | 野岩鉄道 9駅・36ペア | `yagan.html`（公式サイトの運賃ページ）。出力は `data/fare-overrides/yagan.json` に直接まとめた |
+| `guideway.py` | 名古屋ガイドウェイバス 9停留所・36ペア | 不要（高架区間運賃表の画像を書き起こした値をスクリプトに持つ）。出力は `data/fare-overrides/guideway.json` に直接まとめた |
+| `hojo.py` | 北条鉄道 8駅・28ペア | `hojo.html`（公式サイトの運賃ページ）。出力は `data/fare-overrides/hojo.json` に直接まとめた |
+| `johoku.py` | 東海交通事業 城北線 6駅・15ペア | 不要（運賃表の画像を書き起こした値をスクリプトに持つ）。出力は `data/fare-overrides/johoku.json` に直接まとめた |
+| `shigaraki.py` | 信楽高原鐵道 6駅・15ペア | `shigaraki.html`（公式サイトの時刻表・運賃ページ）。出力は `data/fare-overrides/shigaraki.json` に直接まとめた |
+| `eizan.py` | 叡山電鉄 17駅・136ペア | 不要（各駅間の普通運賃の画像を書き起こした値をスクリプトに持つ）。出力は `data/fare-overrides/eizan.json` に直接まとめた |
+| `chikuho.py` | 筑豊電気鉄道 20駅・190ペア | `kaitei.pdf`（運賃改定のお知らせ、2026-07-18 改定の4ページ目）。出力は `data/fare-overrides/chikuho.json` に直接まとめた |
 
 万葉線と北陸鉄道は運賃表が画像（PDFではない）なので、画像を読んで手で書き起こした。
+北九州モノレール・ニューシャトル・リニモは公式サイトや Wikipedia の HTML の表を書き起こした
+（対称性と、線路に沿って運賃が下がらないことを検算している）。
 スクリプトは無く、`data/fare-sources/` の生データが一次資料にあたる。
 
 ## このPDF群でつまずいた点

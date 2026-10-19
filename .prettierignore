@@ -9,3 +9,5 @@ package-lock.json
 AGENTS.md
 CLAUDE.md
 next-env.d.ts
+# 外部から取り込んだスキルは上流と比べられるよう整形しない（取得元は SOURCES.md）
+.claude/skills/*/

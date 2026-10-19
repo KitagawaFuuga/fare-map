@@ -1,0 +1,55 @@
+{
+  "operator": "北大阪急行電鉄",
+  "pairs": [
+    {
+      "from": "江坂",
+      "to": "箕面萱野",
+      "fare": 240
+    },
+    {
+      "from": "江坂",
+      "to": "箕面船場阪大前",
+      "fare": 220
+    },
+    {
+      "from": "千里中央",
+      "to": "箕面萱野",
+      "fare": 190
+    },
+    {
+      "from": "千里中央",
+      "to": "箕面船場阪大前",
+      "fare": 160
+    },
+    {
+      "from": "桃山台",
+      "to": "箕面萱野",
+      "fare": 200
+    },
+    {
+      "from": "桃山台",
+      "to": "箕面船場阪大前",
+      "fare": 190
+    },
+    {
+      "from": "箕面船場阪大前",
+      "to": "箕面萱野",
+      "fare": 160
+    },
+    {
+      "from": "緑地公園",
+      "to": "箕面萱野",
+      "fare": 220
+    },
+    {
+      "from": "緑地公園",
+      "to": "箕面船場阪大前",
+      "fare": 200
+    }
+  ],
+  "source": {
+    "url": "https://www.kita-kyu.co.jp/press/223/, https://www.kita-kyu.co.jp/pdf/fares.pdf",
+    "fetchedAt": "2026-10-12",
+    "note": "公式の運賃規則から計算した実額。距離帯表そのままでは引けないペアだけを持つ。加算運賃は 北大阪急行電鉄（定義と出典は data/fare-surcharges.json）。営業キロは data/graph.json。再生成は npx tsx scripts/fare/ingest/compute-fares.ts --write"
+  }
+}

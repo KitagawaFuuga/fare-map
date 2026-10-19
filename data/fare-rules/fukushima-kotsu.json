@@ -1,0 +1,24 @@
+{
+  "id": "fukushima-kotsu",
+  "operators": ["福島交通"],
+  "table": [
+    [2, 180],
+    [3, 210],
+    [4, 250],
+    [5, 280],
+    [6, 330],
+    [7, 370],
+    [8, 400],
+    [9, 420]
+  ],
+  "beyond": {
+    "fromKm": 9,
+    "baseFare": 430,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/福島交通飯坂線",
+    "fetchedAt": "2026-10-12",
+    "note": "福島交通飯坂線の大人普通旅客運賃（2025年5月17日改定）。キロ程別の表（初乗り〜2km 180円 〜 8km超〜9km 420円、9km超は430円均一）。全線9.2km。キロ帯の表は Wikipedia。"
+  }
+}

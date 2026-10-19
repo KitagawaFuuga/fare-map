@@ -1,0 +1,19 @@
+{
+  "id": "yurikamome",
+  "operators": ["ゆりかもめ"],
+  "table": [
+    [2, 190],
+    [5, 260],
+    [8, 330]
+  ],
+  "beyond": {
+    "fromKm": 8,
+    "baseFare": 390,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://www.yurikamome.co.jp/ticket/about/normal.html, https://jikokuhyo.train-times.net/data/yurikamome_fare",
+    "fetchedAt": "2026-10-11",
+    "note": "ゆりかもめの大人普通運賃（きっぷ）。2019年10月1日改定: 2.0kmまで190円、5.0kmまで260円、8.0kmまで330円、8.1km以上390円。金額4段階は公式ページ、キロの境界は二次資料による。境界は小数のキロ程。"
+  }
+}

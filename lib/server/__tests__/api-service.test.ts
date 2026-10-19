@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createGraphStore } from "@/lib/server/graph-store";
 import {
-  nearestStation,
   reachable,
   suggestStations,
+  walkStationIds,
 } from "@/lib/server/api-service";
 import type { RailGraph } from "@/lib/graph/types";
 
@@ -60,11 +60,10 @@ describe("suggestStations", () => {
     expect(r.length).toBe(1);
     expect(r[0]?.name).toBe("新宿");
   });
-});
 
-describe("nearestStation", () => {
-  it("最も近い駅を返す", () => {
-    expect(nearestStation(store, 35.684, 139.702).name).toBe("代々木");
+  it("候補に座標を含める（選んだ時点で出発駅を地図に描くため）", () => {
+    const [shinjuku] = suggestStations(store, "新宿");
+    expect(shinjuku).toMatchObject({ lat: 35.69, lng: 139.7 });
   });
 });
 
@@ -120,31 +119,27 @@ const walkGraph: RailGraph = {
 };
 const walkStore = createGraphStore(walkGraph, rules);
 
-describe("reachable の viaWalk 判定", () => {
+describe("walkStationIds（徒歩ありの判定）", () => {
   const res = reachable(walkStore, "W0", 2000);
-  const byName = new Map(res.stations.map((s) => [s.name, s]));
+  const walk = new Set(walkStationIds(walkStore, res));
+  const idOf = (name: string) => res.stations.find((s) => s.name === name)?.id;
 
-  it("徒歩連絡を通らないと同じ運賃で行けない駅に viaWalk が立つ", () => {
-    const dest = byName.get("目的地");
-    expect(dest).toBeDefined();
-    expect(dest?.viaWalk).toBe(true);
+  it("運賃の結果には徒歩の判定を含めない（探索を1回で済ませるため）", () => {
+    expect(res.stations.every((s) => !("viaWalk" in s))).toBe(true);
   });
 
-  it("徒歩を使わずに着ける駅には viaWalk が立たない", () => {
-    expect(byName.get("乗換元")?.viaWalk).toBe(false);
-    expect(byName.get("迂回")?.viaWalk).toBe(false);
+  it("徒歩連絡を通らないと同じ運賃で行けない駅を返す", () => {
+    expect(idOf("目的地")).toBeDefined();
+    expect(walk.has(idOf("目的地")!)).toBe(true);
   });
 
-  it("meta.viaWalkCount が viaWalk の件数と一致する", () => {
-    expect(res.meta.viaWalkCount).toBe(
-      res.stations.filter((s) => s.viaWalk).length,
-    );
-    expect(res.meta.viaWalkCount).toBeGreaterThan(0);
+  it("徒歩を使わずに着ける駅は返さない", () => {
+    expect(walk.has(idOf("乗換元")!)).toBe(false);
+    expect(walk.has(idOf("迂回")!)).toBe(false);
   });
 
-  it("徒歩連絡が無いグラフでは誰にも viaWalk が立たない", () => {
+  it("徒歩連絡が無いグラフでは何も返さない", () => {
     const r = reachable(store, "S1", 2000);
-    expect(r.stations.every((s) => !s.viaWalk)).toBe(true);
-    expect(r.meta.viaWalkCount).toBe(0);
+    expect(walkStationIds(store, r)).toEqual([]);
   });
 });

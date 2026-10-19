@@ -1,0 +1,2279 @@
+{
+  "id": "orange",
+  "operator": "肥薩おれんじ鉄道",
+  "source": {
+    "url": "https://www.hs-orange.com/page973.html (普通運賃（大人・小児）三角運賃表 https://www.hs-orange.com/common/UploadFileOutput.ashx?c_id=3&id=973&sub_id=1&flid=3069)",
+    "fetchedAt": "2026-10-12",
+    "note": "肥薩おれんじ鉄道の公式の普通運賃三角表（2024年10月1日改定）から scripts/fare/extract/orange.py で取り出した全378ペアの大人運賃（きっぷ）。表は大人・小児の2段で、全組で小児運賃が大人運賃の半額（10円未満切り上げ）になることを抽出時に検算した。Wikipedia のキロ帯の表は56〜60kmが1,580円と不自然で、三角表を正とした。営業キロは表に無いので null。"
+  },
+  "pairs": [
+    {
+      "from": "八代",
+      "to": "肥後高田",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "八代",
+      "to": "日奈久温泉",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "八代",
+      "to": "肥後二見",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "八代",
+      "to": "上田浦",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "八代",
+      "to": "御立岬公園",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "八代",
+      "to": "肥後田浦",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "八代",
+      "to": "海浦",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "八代",
+      "to": "佐敷",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "八代",
+      "to": "湯浦",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "八代",
+      "to": "津奈木",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "八代",
+      "to": "新水俣",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "八代",
+      "to": "水俣",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "八代",
+      "to": "袋",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "八代",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "八代",
+      "to": "出水",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "八代",
+      "to": "西出水",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "八代",
+      "to": "高尾野",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "八代",
+      "to": "野田郷",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "八代",
+      "to": "折口",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "八代",
+      "to": "阿久根",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "八代",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "八代",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "八代",
+      "to": "西方",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "八代",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 2640
+    },
+    {
+      "from": "八代",
+      "to": "草道",
+      "km": null,
+      "fare": 2640
+    },
+    {
+      "from": "八代",
+      "to": "上川内",
+      "km": null,
+      "fare": 2810
+    },
+    {
+      "from": "八代",
+      "to": "川内",
+      "km": null,
+      "fare": 2810
+    },
+    {
+      "from": "肥後高田",
+      "to": "日奈久温泉",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "肥後高田",
+      "to": "肥後二見",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "肥後高田",
+      "to": "上田浦",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "肥後高田",
+      "to": "御立岬公園",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "肥後高田",
+      "to": "肥後田浦",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "肥後高田",
+      "to": "海浦",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "肥後高田",
+      "to": "佐敷",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "肥後高田",
+      "to": "湯浦",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "肥後高田",
+      "to": "津奈木",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "肥後高田",
+      "to": "新水俣",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "肥後高田",
+      "to": "水俣",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "肥後高田",
+      "to": "袋",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "肥後高田",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "肥後高田",
+      "to": "出水",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "肥後高田",
+      "to": "西出水",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "肥後高田",
+      "to": "高尾野",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "肥後高田",
+      "to": "野田郷",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "肥後高田",
+      "to": "折口",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "肥後高田",
+      "to": "阿久根",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "肥後高田",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "肥後高田",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "肥後高田",
+      "to": "西方",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "肥後高田",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "肥後高田",
+      "to": "草道",
+      "km": null,
+      "fare": 2640
+    },
+    {
+      "from": "肥後高田",
+      "to": "上川内",
+      "km": null,
+      "fare": 2640
+    },
+    {
+      "from": "肥後高田",
+      "to": "川内",
+      "km": null,
+      "fare": 2810
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "肥後二見",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "上田浦",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "御立岬公園",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "肥後田浦",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "海浦",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "佐敷",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "湯浦",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "津奈木",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "新水俣",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "水俣",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "袋",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "出水",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "西出水",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "高尾野",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "野田郷",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "折口",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "阿久根",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "西方",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "草道",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "上川内",
+      "km": null,
+      "fare": 2640
+    },
+    {
+      "from": "日奈久温泉",
+      "to": "川内",
+      "km": null,
+      "fare": 2640
+    },
+    {
+      "from": "肥後二見",
+      "to": "上田浦",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "肥後二見",
+      "to": "御立岬公園",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "肥後二見",
+      "to": "肥後田浦",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "肥後二見",
+      "to": "海浦",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "肥後二見",
+      "to": "佐敷",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "肥後二見",
+      "to": "湯浦",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "肥後二見",
+      "to": "津奈木",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "肥後二見",
+      "to": "新水俣",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "肥後二見",
+      "to": "水俣",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "肥後二見",
+      "to": "袋",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "肥後二見",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "肥後二見",
+      "to": "出水",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "肥後二見",
+      "to": "西出水",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "肥後二見",
+      "to": "高尾野",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "肥後二見",
+      "to": "野田郷",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "肥後二見",
+      "to": "折口",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "肥後二見",
+      "to": "阿久根",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "肥後二見",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "肥後二見",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "肥後二見",
+      "to": "西方",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "肥後二見",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "肥後二見",
+      "to": "草道",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "肥後二見",
+      "to": "上川内",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "肥後二見",
+      "to": "川内",
+      "km": null,
+      "fare": 2640
+    },
+    {
+      "from": "上田浦",
+      "to": "御立岬公園",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "上田浦",
+      "to": "肥後田浦",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "上田浦",
+      "to": "海浦",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "上田浦",
+      "to": "佐敷",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "上田浦",
+      "to": "湯浦",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "上田浦",
+      "to": "津奈木",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "上田浦",
+      "to": "新水俣",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "上田浦",
+      "to": "水俣",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "上田浦",
+      "to": "袋",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "上田浦",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "上田浦",
+      "to": "出水",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "上田浦",
+      "to": "西出水",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "上田浦",
+      "to": "高尾野",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "上田浦",
+      "to": "野田郷",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "上田浦",
+      "to": "折口",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "上田浦",
+      "to": "阿久根",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "上田浦",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "上田浦",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "上田浦",
+      "to": "西方",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "上田浦",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "上田浦",
+      "to": "草道",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "上田浦",
+      "to": "上川内",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "上田浦",
+      "to": "川内",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "御立岬公園",
+      "to": "肥後田浦",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "御立岬公園",
+      "to": "海浦",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "御立岬公園",
+      "to": "佐敷",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "御立岬公園",
+      "to": "湯浦",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "御立岬公園",
+      "to": "津奈木",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "御立岬公園",
+      "to": "新水俣",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "御立岬公園",
+      "to": "水俣",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "御立岬公園",
+      "to": "袋",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "御立岬公園",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "御立岬公園",
+      "to": "出水",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "御立岬公園",
+      "to": "西出水",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "御立岬公園",
+      "to": "高尾野",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "御立岬公園",
+      "to": "野田郷",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "御立岬公園",
+      "to": "折口",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "御立岬公園",
+      "to": "阿久根",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "御立岬公園",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "御立岬公園",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "御立岬公園",
+      "to": "西方",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "御立岬公園",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "御立岬公園",
+      "to": "草道",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "御立岬公園",
+      "to": "上川内",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "御立岬公園",
+      "to": "川内",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "肥後田浦",
+      "to": "海浦",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "肥後田浦",
+      "to": "佐敷",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "肥後田浦",
+      "to": "湯浦",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "肥後田浦",
+      "to": "津奈木",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "肥後田浦",
+      "to": "新水俣",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "肥後田浦",
+      "to": "水俣",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "肥後田浦",
+      "to": "袋",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "肥後田浦",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "肥後田浦",
+      "to": "出水",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "肥後田浦",
+      "to": "西出水",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "肥後田浦",
+      "to": "高尾野",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "肥後田浦",
+      "to": "野田郷",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "肥後田浦",
+      "to": "折口",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "肥後田浦",
+      "to": "阿久根",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "肥後田浦",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "肥後田浦",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "肥後田浦",
+      "to": "西方",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "肥後田浦",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "肥後田浦",
+      "to": "草道",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "肥後田浦",
+      "to": "上川内",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "肥後田浦",
+      "to": "川内",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "海浦",
+      "to": "佐敷",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "海浦",
+      "to": "湯浦",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "海浦",
+      "to": "津奈木",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "海浦",
+      "to": "新水俣",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "海浦",
+      "to": "水俣",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "海浦",
+      "to": "袋",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "海浦",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "海浦",
+      "to": "出水",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "海浦",
+      "to": "西出水",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "海浦",
+      "to": "高尾野",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "海浦",
+      "to": "野田郷",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "海浦",
+      "to": "折口",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "海浦",
+      "to": "阿久根",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "海浦",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "海浦",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "海浦",
+      "to": "西方",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "海浦",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "海浦",
+      "to": "草道",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "海浦",
+      "to": "上川内",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "海浦",
+      "to": "川内",
+      "km": null,
+      "fare": 2450
+    },
+    {
+      "from": "佐敷",
+      "to": "湯浦",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "佐敷",
+      "to": "津奈木",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "佐敷",
+      "to": "新水俣",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "佐敷",
+      "to": "水俣",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "佐敷",
+      "to": "袋",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "佐敷",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "佐敷",
+      "to": "出水",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "佐敷",
+      "to": "西出水",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "佐敷",
+      "to": "高尾野",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "佐敷",
+      "to": "野田郷",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "佐敷",
+      "to": "折口",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "佐敷",
+      "to": "阿久根",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "佐敷",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "佐敷",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "佐敷",
+      "to": "西方",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "佐敷",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "佐敷",
+      "to": "草道",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "佐敷",
+      "to": "上川内",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "佐敷",
+      "to": "川内",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "湯浦",
+      "to": "津奈木",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "湯浦",
+      "to": "新水俣",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "湯浦",
+      "to": "水俣",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "湯浦",
+      "to": "袋",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "湯浦",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "湯浦",
+      "to": "出水",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "湯浦",
+      "to": "西出水",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "湯浦",
+      "to": "高尾野",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "湯浦",
+      "to": "野田郷",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "湯浦",
+      "to": "折口",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "湯浦",
+      "to": "阿久根",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "湯浦",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "湯浦",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "湯浦",
+      "to": "西方",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "湯浦",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "湯浦",
+      "to": "草道",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "湯浦",
+      "to": "上川内",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "湯浦",
+      "to": "川内",
+      "km": null,
+      "fare": 2240
+    },
+    {
+      "from": "津奈木",
+      "to": "新水俣",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "津奈木",
+      "to": "水俣",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "津奈木",
+      "to": "袋",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "津奈木",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "津奈木",
+      "to": "出水",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "津奈木",
+      "to": "西出水",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "津奈木",
+      "to": "高尾野",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "津奈木",
+      "to": "野田郷",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "津奈木",
+      "to": "折口",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "津奈木",
+      "to": "阿久根",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "津奈木",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "津奈木",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "津奈木",
+      "to": "西方",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "津奈木",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "津奈木",
+      "to": "草道",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "津奈木",
+      "to": "上川内",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "津奈木",
+      "to": "川内",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "新水俣",
+      "to": "水俣",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "新水俣",
+      "to": "袋",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "新水俣",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "新水俣",
+      "to": "出水",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "新水俣",
+      "to": "西出水",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "新水俣",
+      "to": "高尾野",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "新水俣",
+      "to": "野田郷",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "新水俣",
+      "to": "折口",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "新水俣",
+      "to": "阿久根",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "新水俣",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "新水俣",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "新水俣",
+      "to": "西方",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "新水俣",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "新水俣",
+      "to": "草道",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "新水俣",
+      "to": "上川内",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "新水俣",
+      "to": "川内",
+      "km": null,
+      "fare": 2040
+    },
+    {
+      "from": "水俣",
+      "to": "袋",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "水俣",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "水俣",
+      "to": "出水",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "水俣",
+      "to": "西出水",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "水俣",
+      "to": "高尾野",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "水俣",
+      "to": "野田郷",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "水俣",
+      "to": "折口",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "水俣",
+      "to": "阿久根",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "水俣",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "水俣",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "水俣",
+      "to": "西方",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "水俣",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "水俣",
+      "to": "草道",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "水俣",
+      "to": "上川内",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "水俣",
+      "to": "川内",
+      "km": null,
+      "fare": 1830
+    },
+    {
+      "from": "袋",
+      "to": "米ノ津",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "袋",
+      "to": "出水",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "袋",
+      "to": "西出水",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "袋",
+      "to": "高尾野",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "袋",
+      "to": "野田郷",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "袋",
+      "to": "折口",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "袋",
+      "to": "阿久根",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "袋",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "袋",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "袋",
+      "to": "西方",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "袋",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "袋",
+      "to": "草道",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "袋",
+      "to": "上川内",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "袋",
+      "to": "川内",
+      "km": null,
+      "fare": 1790
+    },
+    {
+      "from": "米ノ津",
+      "to": "出水",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "米ノ津",
+      "to": "西出水",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "米ノ津",
+      "to": "高尾野",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "米ノ津",
+      "to": "野田郷",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "米ノ津",
+      "to": "折口",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "米ノ津",
+      "to": "阿久根",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "米ノ津",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "米ノ津",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "米ノ津",
+      "to": "西方",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "米ノ津",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "米ノ津",
+      "to": "草道",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "米ノ津",
+      "to": "上川内",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "米ノ津",
+      "to": "川内",
+      "km": null,
+      "fare": 1580
+    },
+    {
+      "from": "出水",
+      "to": "西出水",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "出水",
+      "to": "高尾野",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "出水",
+      "to": "野田郷",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "出水",
+      "to": "折口",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "出水",
+      "to": "阿久根",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "出水",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "出水",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "出水",
+      "to": "西方",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "出水",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "出水",
+      "to": "草道",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "出水",
+      "to": "上川内",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "出水",
+      "to": "川内",
+      "km": null,
+      "fare": 1550
+    },
+    {
+      "from": "西出水",
+      "to": "高尾野",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "西出水",
+      "to": "野田郷",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "西出水",
+      "to": "折口",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "西出水",
+      "to": "阿久根",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "西出水",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "西出水",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "西出水",
+      "to": "西方",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "西出水",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "西出水",
+      "to": "草道",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "西出水",
+      "to": "上川内",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "西出水",
+      "to": "川内",
+      "km": null,
+      "fare": 1410
+    },
+    {
+      "from": "高尾野",
+      "to": "野田郷",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "高尾野",
+      "to": "折口",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "高尾野",
+      "to": "阿久根",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "高尾野",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "高尾野",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "高尾野",
+      "to": "西方",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "高尾野",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "高尾野",
+      "to": "草道",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "高尾野",
+      "to": "上川内",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "高尾野",
+      "to": "川内",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "野田郷",
+      "to": "折口",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "野田郷",
+      "to": "阿久根",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "野田郷",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "野田郷",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "野田郷",
+      "to": "西方",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "野田郷",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "野田郷",
+      "to": "草道",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "野田郷",
+      "to": "上川内",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "野田郷",
+      "to": "川内",
+      "km": null,
+      "fare": 1270
+    },
+    {
+      "from": "折口",
+      "to": "阿久根",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "折口",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "折口",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "折口",
+      "to": "西方",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "折口",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "折口",
+      "to": "草道",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "折口",
+      "to": "上川内",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "折口",
+      "to": "川内",
+      "km": null,
+      "fare": 1120
+    },
+    {
+      "from": "阿久根",
+      "to": "牛ノ浜",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "阿久根",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "阿久根",
+      "to": "西方",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "阿久根",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "阿久根",
+      "to": "草道",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "阿久根",
+      "to": "上川内",
+      "km": null,
+      "fare": 840
+    },
+    {
+      "from": "阿久根",
+      "to": "川内",
+      "km": null,
+      "fare": 980
+    },
+    {
+      "from": "牛ノ浜",
+      "to": "薩摩大川",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "牛ノ浜",
+      "to": "西方",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "牛ノ浜",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "牛ノ浜",
+      "to": "草道",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "牛ノ浜",
+      "to": "上川内",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "牛ノ浜",
+      "to": "川内",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "薩摩大川",
+      "to": "西方",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "薩摩大川",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "薩摩大川",
+      "to": "草道",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "薩摩大川",
+      "to": "上川内",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "薩摩大川",
+      "to": "川内",
+      "km": null,
+      "fare": 700
+    },
+    {
+      "from": "西方",
+      "to": "薩摩高城",
+      "km": null,
+      "fare": 230
+    },
+    {
+      "from": "西方",
+      "to": "草道",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "西方",
+      "to": "上川内",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "西方",
+      "to": "川内",
+      "km": null,
+      "fare": 590
+    },
+    {
+      "from": "薩摩高城",
+      "to": "草道",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "薩摩高城",
+      "to": "上川内",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "薩摩高城",
+      "to": "川内",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "草道",
+      "to": "上川内",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "草道",
+      "to": "川内",
+      "km": null,
+      "fare": 400
+    },
+    {
+      "from": "上川内",
+      "to": "川内",
+      "km": null,
+      "fare": 290
+    }
+  ]
+}

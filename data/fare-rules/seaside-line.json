@@ -1,0 +1,19 @@
+{
+  "id": "seaside-line",
+  "operators": ["横浜シーサイドライン"],
+  "table": [
+    [2, 240],
+    [4, 270],
+    [7, 300]
+  ],
+  "beyond": {
+    "fromKm": 7,
+    "baseFare": 320,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://www.seasideline.co.jp/fare_ticket/document/commuter_pass_normal10.pdf",
+    "fetchedAt": "2026-10-12",
+    "note": "金沢シーサイドラインの大人普通運賃（きっぷ）。2019年10月1日改定。公式の普通旅客運賃表・営業キロ程表（全駅間の行列）から帯を読んだ: 2.0kmまで240円、4.0kmまで270円、7.0kmまで300円、それを超えると320円。表の全78組で営業キロと運賃がこの帯に従うことを確かめた（境界の例: 鳥浜〜幸浦2.1km 270円、新杉田〜幸浦4.3km 300円、並木中央〜金沢八景7.3km 320円）。"
+  }
+}

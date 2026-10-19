@@ -1,0 +1,15 @@
+{
+  "id": "sagano",
+  "operators": ["嵯峨野観光鉄道"],
+  "table": [[100, 880]],
+  "beyond": {
+    "fromKm": 100,
+    "baseFare": 880,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/嵯峨野観光鉄道嵯峨野観光線",
+    "fetchedAt": "2026-10-12",
+    "note": "嵯峨野観光鉄道（トロッコ列車）の大人普通運賃（2022年4月改定）。全線均一880円。全席指定で、運賃に座席の指定が含まれる。Wikipedia による。"
+  }
+}

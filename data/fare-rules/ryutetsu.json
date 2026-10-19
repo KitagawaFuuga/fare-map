@@ -1,0 +1,21 @@
+{
+  "id": "ryutetsu",
+  "operators": ["流鉄"],
+  "table": [
+    [2, 140],
+    [3, 150],
+    [4, 190],
+    [5, 200],
+    [6, 220]
+  ],
+  "beyond": {
+    "fromKm": 6,
+    "baseFare": 220,
+    "ratePerKm": 20
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/流鉄流山線",
+    "fetchedAt": "2026-10-12",
+    "note": "流鉄流山線の大人旅客運賃（2024年4月1日改定）。キロ程別の表（初乗り2km 140円 〜 6km 220円。4km超〜5kmの200円は設定のみで該当区間なし）。全線5.7kmなので beyond は使われない。キロ帯の表は Wikipedia。"
+  }
+}

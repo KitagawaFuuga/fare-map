@@ -11,6 +11,8 @@ import jrEast from "@/data/fare-rules/jr-east.json";
 import jrCentral from "@/data/fare-rules/jr-central.json";
 import jrWest from "@/data/fare-rules/jr-west.json";
 import jrHonshuKasan from "@/data/fare-rules/jr-honshu-kasan.json";
+import jrKyushuKasan from "@/data/fare-rules/jr-kyushu-kasan.json";
+import jrShikokuKasan from "@/data/fare-rules/jr-shikoku-kasan.json";
 import jrKyushu from "@/data/fare-rules/jr-kyushu.json";
 import jrHokkaido from "@/data/fare-rules/jr-hokkaido.json";
 import jrShikoku from "@/data/fare-rules/jr-shikoku.json";
@@ -29,6 +31,74 @@ import hiroshimaDentetsu from "@/data/fare-rules/hiroshima-dentetsu.json";
 import keio from "@/data/fare-rules/keio.json";
 import keikyu from "@/data/fare-rules/keikyu.json";
 import keisei from "@/data/fare-rules/keisei.json";
+import keiseiMatsudo from "@/data/fare-rules/keisei-matsudo.json";
+import kyotoSubway from "@/data/fare-rules/kyoto-subway.json";
+import kobeSubway from "@/data/fare-rules/kobe-subway.json";
+import tsukubaExpress from "@/data/fare-rules/tsukuba-express.json";
+import rinkai from "@/data/fare-rules/rinkai.json";
+import minatomirai from "@/data/fare-rules/minatomirai.json";
+import hokuso from "@/data/fare-rules/hokuso.json";
+import tokyoMonorail from "@/data/fare-rules/tokyo-monorail.json";
+import yurikamome from "@/data/fare-rules/yurikamome.json";
+import tamaMonorail from "@/data/fare-rules/tama-monorail.json";
+import osakaMonorail from "@/data/fare-rules/osaka-monorail.json";
+import hapiLine from "@/data/fare-rules/hapi-line.json";
+import irIshikawa from "@/data/fare-rules/ir-ishikawa.json";
+import ainokazeToyama from "@/data/fare-rules/ainokaze-toyama.json";
+import aoimori from "@/data/fare-rules/aoimori.json";
+import igr from "@/data/fare-rules/igr.json";
+import astram from "@/data/fare-rules/astram.json";
+import seasideLine from "@/data/fare-rules/seaside-line.json";
+import aonami from "@/data/fare-rules/aonami.json";
+import tosakuroNakamura from "@/data/fare-rules/tosakuro-nakamura.json";
+import tosakuroGomen from "@/data/fare-rules/tosakuro-gomen.json";
+import heichiku from "@/data/fare-rules/heichiku.json";
+import heichikuRetro from "@/data/fare-rules/heichiku-retro.json";
+import tango from "@/data/fare-rules/tango.json";
+import akitaNairiku from "@/data/fare-rules/akita-nairiku.json";
+import kantoRailway from "@/data/fare-rules/kanto-railway.json";
+import sangi from "@/data/fare-rules/sangi.json";
+import konan from "@/data/fare-rules/konan.json";
+import yoro from "@/data/fare-rules/yoro.json";
+import hakodateTram from "@/data/fare-rules/hakodate-tram.json";
+import izuhakone from "@/data/fare-rules/izuhakone.json";
+import joshin from "@/data/fare-rules/joshin.json";
+import jomo from "@/data/fare-rules/jomo.json";
+import shizutetsu from "@/data/fare-rules/shizutetsu.json";
+import entetsu from "@/data/fare-rules/entetsu.json";
+import noseden from "@/data/fare-rules/noseden.json";
+import kitakyu from "@/data/fare-rules/kitakyu.json";
+import shimabara from "@/data/fare-rules/shimabara.json";
+import fujikyu from "@/data/fare-rules/fujikyu.json";
+import kashimaRinkai from "@/data/fare-rules/kashima-rinkai.json";
+import uedaDentetsu from "@/data/fare-rules/ueda-dentetsu.json";
+import alpico from "@/data/fare-rules/alpico.json";
+import fukushimaKotsu from "@/data/fare-rules/fukushima-kotsu.json";
+import choshi from "@/data/fare-rules/choshi.json";
+import shonanMonorail from "@/data/fare-rules/shonan-monorail.json";
+import ryutetsu from "@/data/fare-rules/ryutetsu.json";
+import maihamaResortLine from "@/data/fare-rules/maihama-resort-line.json";
+import sagano from "@/data/fare-rules/sagano.json";
+import aizu from "@/data/fare-rules/aizu.json";
+import kumamotoDentetsu from "@/data/fare-rules/kumamoto-dentetsu.json";
+import izukyu from "@/data/fare-rules/izukyu.json";
+import enoden from "@/data/fare-rules/enoden.json";
+import kominato from "@/data/fare-rules/kominato.json";
+import isumi from "@/data/fare-rules/isumi.json";
+import wakayamaDentetsu from "@/data/fare-rules/wakayama-dentetsu.json";
+import iga from "@/data/fare-rules/iga.json";
+import ibara from "@/data/fare-rules/ibara.json";
+import chizu from "@/data/fare-rules/chizu.json";
+import donanIsaribi from "@/data/fare-rules/donan-isaribi.json";
+import nishikigawa from "@/data/fare-rules/nishikigawa.json";
+import hakoneTozan from "@/data/fare-rules/hakone-tozan.json";
+import mizuma from "@/data/fare-rules/mizuma.json";
+import yamaman from "@/data/fare-rules/yamaman.json";
+import mizushimaRinkai from "@/data/fare-rules/mizushima-rinkai.json";
+import utsunomiyaLrt from "@/data/fare-rules/utsunomiya-lrt.json";
+import noto from "@/data/fare-rules/noto.json";
+import okayamaKido from "@/data/fare-rules/okayama-kido.json";
+import kobeKosoku from "@/data/fare-rules/kobe-kosoku.json";
 import keihan from "@/data/fare-rules/keihan.json";
 import tokyu from "@/data/fare-rules/tokyu.json";
 import odakyu from "@/data/fare-rules/odakyu.json";
@@ -65,6 +135,8 @@ import chitetsu from "@/data/fare-rules/chitetsu.json";
 import echizen from "@/data/fare-rules/echizen.json";
 import tokitetsu from "@/data/fare-rules/tokitetsu.json";
 import shinano from "@/data/fare-rules/shinano.json";
+import toeiToden from "@/data/fare-rules/toei-toden.json";
+import toeiToneri from "@/data/fare-rules/toei-toneri.json";
 import jrWestOverride from "@/data/fare-overrides/jr-west.json";
 import jrEastOverride from "@/data/fare-overrides/jr-east.json";
 import keikyuOverride from "@/data/fare-overrides/keikyu.json";
@@ -76,12 +148,62 @@ import chitetsuOverride from "@/data/fare-overrides/chitetsu.json";
 import echizenOverride from "@/data/fare-overrides/echizen.json";
 import tokitetsuOverride from "@/data/fare-overrides/tokitetsu.json";
 import shinanoOverride from "@/data/fare-overrides/shinano.json";
+import toeiSubwayOverride from "@/data/fare-overrides/toei-subway.json";
+import toeiTodenOverride from "@/data/fare-overrides/toei-toden.json";
+import toeiToneriOverride from "@/data/fare-overrides/toei-toneri.json";
+import kotodenOverride from "@/data/fare-overrides/kotoden.json";
+import yuiRailOverride from "@/data/fare-overrides/yui-rail.json";
+import sapporoOverride from "@/data/fare-overrides/sapporo.json";
+import jrKyushuComputedOverride from "@/data/fare-overrides/jr-kyushu-computed.json";
+import jrWestSetoComputedOverride from "@/data/fare-overrides/jr-west-seto-computed.json";
+import kintetsuComputedOverride from "@/data/fare-overrides/kintetsu-computed.json";
+import meitetsuComputedOverride from "@/data/fare-overrides/meitetsu-computed.json";
+import nankaiComputedOverride from "@/data/fare-overrides/nankai-computed.json";
+import chibaMonorailOverride from "@/data/fare-overrides/chiba-monorail.json";
+import kobeNewTransitOverride from "@/data/fare-overrides/kobe-new-transit.json";
+import kitakyushuMonorailOverride from "@/data/fare-overrides/kitakyushu-monorail.json";
+import newShuttleOverride from "@/data/fare-overrides/new-shuttle.json";
+import linimoOverride from "@/data/fare-overrides/linimo.json";
+import sanrikuOverride from "@/data/fare-overrides/sanriku.json";
+import orangeOverride from "@/data/fare-overrides/orange.json";
+import tosakuroGomenAdjacentOverride from "@/data/fare-overrides/tosakuro-gomen-adjacent.json";
+import tenhamaOverride from "@/data/fare-overrides/tenhama.json";
+import matsuuraOverride from "@/data/fare-overrides/matsuura.json";
+import akitaNairikuSpecialOverride from "@/data/fare-overrides/akita-nairiku-special.json";
+import sendaiAirportOverride from "@/data/fare-overrides/sendai-airport.json";
+import akechiOverride from "@/data/fare-overrides/akechi.json";
+import wakasaOverride from "@/data/fare-overrides/wakasa.json";
+import abukumaOverride from "@/data/fare-overrides/abukuma.json";
+import ichibataOverride from "@/data/fare-overrides/ichibata.json";
+import fukutetsuOverride from "@/data/fare-overrides/fukutetsu.json";
+import oigawaOverride from "@/data/fare-overrides/oigawa.json";
+import yamagataTetsudoOverride from "@/data/fare-overrides/yamagata-tetsudo.json";
+import watetsuOverride from "@/data/fare-overrides/watetsu.json";
+import mokaOverride from "@/data/fare-overrides/moka.json";
+import kumagawaOverride from "@/data/fare-overrides/kumagawa.json";
+import tsugaruOverride from "@/data/fare-overrides/tsugaru.json";
+import yuriKogenOverride from "@/data/fare-overrides/yuri-kogen.json";
+import hokuetsuOverride from "@/data/fare-overrides/hokuetsu.json";
+import hitachinakaOverride from "@/data/fare-overrides/hitachinaka.json";
+import gakunanOverride from "@/data/fare-overrides/gakunan.json";
+import yaganOverride from "@/data/fare-overrides/yagan.json";
+import guidewayOverride from "@/data/fare-overrides/guideway.json";
+import hojoOverride from "@/data/fare-overrides/hojo.json";
+import johokuOverride from "@/data/fare-overrides/johoku.json";
+import shigarakiOverride from "@/data/fare-overrides/shigaraki.json";
+import kurobeOverride from "@/data/fare-overrides/kurobe.json";
+import asaKaiganOverride from "@/data/fare-overrides/asa-kaigan.json";
+import eizanOverride from "@/data/fare-overrides/eizan.json";
+import chikuhoOverride from "@/data/fare-overrides/chikuho.json";
+import kitakyuComputedOverride from "@/data/fare-overrides/kitakyu-computed.json";
 
 const rules = [
   jrEast,
   jrCentral,
   jrWest,
   jrHonshuKasan,
+  jrKyushuKasan,
+  jrShikokuKasan,
   jrKyushu,
   jrHokkaido,
   jrShikoku,
@@ -91,6 +213,8 @@ const rules = [
   generic,
   tokyoMetro,
   toei,
+  toeiToden,
+  toeiToneri,
   osakaMetro,
   nagoyaCity,
   nankai,
@@ -100,6 +224,74 @@ const rules = [
   keio,
   keikyu,
   keisei,
+  keiseiMatsudo,
+  kyotoSubway,
+  kobeSubway,
+  tsukubaExpress,
+  rinkai,
+  minatomirai,
+  hokuso,
+  tokyoMonorail,
+  yurikamome,
+  tamaMonorail,
+  osakaMonorail,
+  hapiLine,
+  irIshikawa,
+  ainokazeToyama,
+  aoimori,
+  igr,
+  astram,
+  seasideLine,
+  aonami,
+  tosakuroNakamura,
+  tosakuroGomen,
+  heichiku,
+  heichikuRetro,
+  tango,
+  akitaNairiku,
+  kantoRailway,
+  sangi,
+  konan,
+  yoro,
+  hakodateTram,
+  izuhakone,
+  joshin,
+  jomo,
+  shizutetsu,
+  entetsu,
+  noseden,
+  kitakyu,
+  shimabara,
+  fujikyu,
+  kashimaRinkai,
+  uedaDentetsu,
+  alpico,
+  fukushimaKotsu,
+  choshi,
+  shonanMonorail,
+  ryutetsu,
+  maihamaResortLine,
+  sagano,
+  aizu,
+  kumamotoDentetsu,
+  izukyu,
+  enoden,
+  kominato,
+  isumi,
+  wakayamaDentetsu,
+  iga,
+  ibara,
+  chizu,
+  donanIsaribi,
+  nishikigawa,
+  hakoneTozan,
+  mizuma,
+  yamaman,
+  mizushimaRinkai,
+  utsunomiyaLrt,
+  noto,
+  okayamaKido,
+  kobeKosoku,
   keihan,
   tokyu,
   odakyu,
@@ -149,14 +341,65 @@ const overrides = [
   echizenOverride,
   tokitetsuOverride,
   shinanoOverride,
+  toeiSubwayOverride,
+  toeiTodenOverride,
+  toeiToneriOverride,
+  kotodenOverride,
+  yuiRailOverride,
+  sapporoOverride,
+  jrKyushuComputedOverride,
+  jrWestSetoComputedOverride,
+  kintetsuComputedOverride,
+  nankaiComputedOverride,
+  chibaMonorailOverride,
+  kobeNewTransitOverride,
+  kitakyushuMonorailOverride,
+  newShuttleOverride,
+  linimoOverride,
+  sanrikuOverride,
+  orangeOverride,
+  tosakuroGomenAdjacentOverride,
+  tenhamaOverride,
+  matsuuraOverride,
+  akitaNairikuSpecialOverride,
+  sendaiAirportOverride,
+  akechiOverride,
+  wakasaOverride,
+  abukumaOverride,
+  ichibataOverride,
+  fukutetsuOverride,
+  oigawaOverride,
+  yamagataTetsudoOverride,
+  watetsuOverride,
+  mokaOverride,
+  kumagawaOverride,
+  tsugaruOverride,
+  yuriKogenOverride,
+  hokuetsuOverride,
+  hitachinakaOverride,
+  gakunanOverride,
+  yaganOverride,
+  guidewayOverride,
+  hojoOverride,
+  johokuOverride,
+  shigarakiOverride,
+  kurobeOverride,
+  asaKaiganOverride,
+  eizanOverride,
+  chikuhoOverride,
+  kitakyuComputedOverride,
+  meitetsuComputedOverride,
 ].map((o) => fareOverrideSchema.parse(o));
 // 富山地方鉄道・しなの鉄道の距離表は枝刈りの下界専用で、公表営業キロではなく
 // graph.json の駅間距離（座標から求めて実営業キロで補正した値）で帯を切ってある。
 // 探索が calculator に渡すのもこの距離なので、検証も同じ距離でなければ意味がない
 // （公表営業キロで検証していたときは、実際には5ペアで下界が破れているのに緑だった）。
+// 探索が運賃を引くのに使うのは営業キロではなく運賃計算キロ（GraphEdge.fareKm）。
+// 擬制キロのある事業者はこちらで検証しなければ意味がない
 const graphKmCache = new Map<string, Map<string, number>>();
-function graphKmOf(operator: string): Map<string, number> {
-  const hit = graphKmCache.get(operator);
+function graphKmOf(operator: string, useFareKm = false): Map<string, number> {
+  const cacheKey = useFareKm ? `${operator}:fare` : operator;
+  const hit = graphKmCache.get(cacheKey);
   if (hit) return hit;
   const graph = JSON.parse(
     readFileSync("data/graph.json", "utf8"),
@@ -175,8 +418,9 @@ function graphKmOf(operator: string): Map<string, number> {
     if (!inSet.has(e.from) || !inSet.has(e.to)) continue;
     // transfer は区間を確定しないので、同一事業者内のものは距離0の辺として含める
     if (e.kind === "rail" && e.operator !== operator) continue;
-    link(e.from, e.to, e.km);
-    link(e.to, e.from, e.km);
+    const km = useFareKm ? (e.fareKm ?? e.km) : e.km;
+    link(e.from, e.to, km);
+    link(e.to, e.from, km);
   }
   const byName = new Map<string, string[]>();
   for (const id of ids) {
@@ -212,8 +456,12 @@ function graphKmOf(operator: string): Map<string, number> {
       if (Number.isFinite(km)) out.set([from, to].sort().join("\u0000"), km);
     }
   }
+  graphKmCache.set(cacheKey, out);
   return out;
 }
+
+/** 探索が運賃を引くのに使う距離（運賃計算キロ） */
+const graphFareKmOf = (operator: string) => graphKmOf(operator, true);
 
 const calc = createFareCalculator(rules, overrides);
 
@@ -260,9 +508,11 @@ describe("FareCalculator", () => {
     expect(calc.estimate("JR東日本", 0)).toBe(0);
   });
 
+  // JR東日本の表は基準額表と同じ3400kmまで帯を持つので、外挿が効くのはその先だけ
+  // （実在の経路はここまで届かない）。以前は100km超をすべて外挿で近似していた
   it("表を超える距離は賃率で外挿し 10 円単位に丸める", () => {
-    const fare = calc.estimate("JR東日本", 150);
-    expect(fare).toBe(Math.ceil((1790 + 50 * 16.96) / 10) * 10);
+    const fare = calc.estimate("JR東日本", 3500);
+    expect(fare).toBe(Math.ceil((31570 + 100 * 16.2) / 10) * 10);
   });
 
   it("未知の事業者はフォールバック表を使う", () => {
@@ -377,6 +627,66 @@ describe("FareCalculator", () => {
     it("初乗り運賃(1〜3km)が210円", () => {
       expect(calc.estimate("JR北海道", 2)).toBe(210);
     });
+
+    // 100km超は公式の普通旅客運賃PDF（幹線61帯・1400kmまで）から入れた。
+    // 以前は100kmまでの16帯と22.0円/kmの線形外挿で、348.5kmでは7,710円と
+    // 実額より560円高く出ていた（到達できる駅を落とす側の誤り）。
+    // 出典: ekitan.com (2026-09-25取得、乗車券のみ)
+    it("札幌→釧路 348.5km は 7,150円", () => {
+      expect(calc.estimate("JR北海道", 348.5)).toBe(7150);
+    });
+
+    it("100kmを超えても線形には増えない（賃率が下がる）", () => {
+      // 200km→400kmで運賃は2倍にならない
+      const a = calc.estimate("JR北海道", 200);
+      const b = calc.estimate("JR北海道", 400);
+      expect(b).toBeLessThan(a * 2);
+    });
+  });
+
+  describe("加算運賃（JR）", () => {
+    // 出典: JR九州 運賃改定ガイドブック p4「加算運賃」。
+    // 宮崎空港線 田吉〜宮崎空港の130円。ガイドブックの例では宮崎〜宮崎空港が
+    // 運賃計算キロ6.2kmで普通運賃270円＋加算130円＝400円。
+    // 本実装は370円で30円低い。原因は加算運賃ではなく、graph.json が同じ物理区間を
+    // 運転系統名ごとに重複して持っており（南宮崎〜田吉が「JR宮崎空港線」＝幹線と
+    // 「JR日南線」＝地方交通線の2本）、最短経路が擬制キロの小さいほうを選ぶこと。
+    // 加算運賃を入れる前は240円だったので、改善してはいる。
+    it("宮崎→宮崎空港に加算運賃130円が乗る", () => {
+      const km = graphFareKmOf("JR九州").get(
+        ["宮崎", "宮崎空港"].sort().join("\u0000"),
+      );
+      expect(km).toBeDefined();
+      expect(
+        calc.estimate("JR九州", km!, "宮崎", "宮崎空港") -
+          calc.estimate("JR九州", km!),
+      ).toBe(130);
+    });
+
+    it("宮崎空港を通らない区間には加算運賃が乗らない", () => {
+      const km = graphFareKmOf("JR九州").get(
+        ["宮崎", "田吉"].sort().join("\u0000"),
+      );
+      expect(km).toBeDefined();
+      expect(calc.estimate("JR九州", km!, "宮崎", "田吉")).toBe(
+        calc.estimate("JR九州", km!),
+      );
+    });
+
+    // 出典: JR四国の公開加算額表（本四備讃線 児島〜宇多津18.1kmの110円を含む）。
+    // graph.json ではこの区間が瀬戸大橋線としてJR西日本のエッジになっている。
+    // JR西日本（1,150駅）の全駅間距離を作るので数秒かかり、全体を並列実行すると
+    // 既定の5秒を超えて落ちる（値の誤りではない）。時間を延ばしておく
+    it("岡山→宇多津に本四備讃線の加算運賃110円が乗る", () => {
+      const km = graphFareKmOf("JR西日本").get(
+        ["岡山", "宇多津"].sort().join("\u0000"),
+      );
+      expect(km).toBeDefined();
+      expect(
+        calc.estimate("JR西日本", km!, "岡山", "宇多津") -
+          calc.estimate("JR西日本", km!),
+      ).toBe(110);
+    }, 60_000);
   });
 
   describe("JR四国", () => {
@@ -407,6 +717,60 @@ describe("FareCalculator", () => {
     it("初乗り運賃(1〜3km)が180円", () => {
       expect(calc.estimate("近畿日本鉄道", 2)).toBe(180);
     });
+
+    it("100kmを超えても公式の帯どおり（外挿していない）", () => {
+      // 賃率14円/kmで外挿すると2,370円になってしまう区間
+      expect(calc.estimate("近畿日本鉄道", 150)).toBe(2310);
+    });
+
+    // 距離を直値で書いてはいけない。実行時に使われるのは graph.json の距離なので、
+    // 直値だとグラフ側が狂っても気づけない。実際に全国鉄道運行本数データの
+    // 難波線の区間キロが2.8km（正しくは2.0km）だったため 190.5km と出ており、
+    // 181〜190km帯の2,860円ではなく191〜200km帯の3,000円になっていた。
+    // 差し替えは data/kilometrage-corrections.json。
+    it("大阪難波→近鉄名古屋は 189.7km で 2,860円（graph.json の距離で検証）", () => {
+      const km = graphFareKmOf("近畿日本鉄道").get(
+        ["大阪難波", "近鉄名古屋"].sort().join("\u0000"),
+      );
+      expect(km).toBeCloseTo(189.7, 1);
+      expect(calc.estimate("近畿日本鉄道", km!, "大阪難波", "近鉄名古屋")).toBe(
+        2860,
+      );
+    });
+
+    // 鳥羽線・けいはんな線・吉野線・湯の山線・志摩線には加算運賃がかかる。
+    // 距離帯表は加算前の額なので、入れないと実額より安く出る（到達できない駅を
+    // 到達できると言う側の誤り）。data/fare-overrides/kintetsu-computed.json に
+    // 「距離帯の額＋加算額」を焼いてある。
+    //
+    // この3点は加算額表の対象路線を特定するのに使った実運賃そのもの。
+    // 生成の過程が変わっても、ここが合わなくなったら気づける。
+    describe("加算運賃（実運賃で照合した3区間）", () => {
+      it("大阪難波→賢島 は 2,770円（表2,710＋鳥羽線30＋志摩線30）", () => {
+        expect(calc.estimate("近畿日本鉄道", 195.2, "大阪難波", "賢島")).toBe(
+          2770,
+        );
+      });
+
+      it("近鉄四日市→湯の山温泉 は 460円（表430＋湯の山線30）", () => {
+        expect(
+          calc.estimate("近畿日本鉄道", 15.4, "近鉄四日市", "湯の山温泉"),
+        ).toBe(460);
+      });
+
+      it("大阪阿部野橋→吉野 は 1,170円（表1,140＋吉野線30）", () => {
+        expect(
+          calc.estimate("近畿日本鉄道", 64.9, "大阪阿部野橋", "吉野"),
+        ).toBe(1170);
+      });
+
+      it("加算対象を通らない区間には加算しない", () => {
+        // 大阪難波→近鉄奈良は奈良線だけで完結する
+        expect(
+          calc.estimate("近畿日本鉄道", 32.8, "大阪難波", "近鉄奈良"),
+        ).toBe(680);
+      });
+    });
   });
 
   describe("名古屋鉄道（2024年3月16日改定後）", () => {
@@ -414,8 +778,36 @@ describe("FareCalculator", () => {
     // 名鉄名古屋～犬山（犬山線）は加算運賃対象路線（知多新線・豊田線・羽島線・空港線）にも
     // 特定運賃区間（名古屋本線の金山〜一宮系統）にも該当しない一般区間。
     // 実運賃はekitan.comの運賃検索(2026-08-29取得)で照合し表と完全一致
-    it("名鉄名古屋→犬山 28.2km、実運賃630円（犬山線）", () => {
-      expect(calc.estimate("名古屋鉄道", 28.2)).toBe(630);
+    // 名鉄は線区ごとに擬制率をかけた運賃計算キロで運賃を決める（A線区=名古屋本線は
+    // そのまま、B線区15%増、C線区25%増）。営業キロのまま距離帯を引くと安く出る。
+    // data/fare-overrides/meitetsu-computed.json に計算済みの実額を焼いてある。
+    //
+    // この4点は実運賃そのもの。距離はグラフの営業キロを渡して、
+    // 生成の過程が変わったら落ちるようにしてある。
+    it("名鉄名古屋→犬山 は 630円（営業キロ27.9のままだと570円）", () => {
+      const key = ["名鉄名古屋", "犬山"].sort().join("\u0000");
+      // 探索は運賃計算キロで引く。擬制キロが効いて 630円 になる
+      expect(
+        calc.estimate("名古屋鉄道", graphFareKmOf("名古屋鉄道").get(key)!),
+      ).toBe(630);
+      // 営業キロのままだと1帯安い。直っていることを同時に固定する
+      expect(
+        calc.estimate("名古屋鉄道", graphKmOf("名古屋鉄道").get(key)!),
+      ).toBe(570);
+    });
+
+    it.each([
+      ["常滑", "中部国際空港", 330],
+      ["太田川", "中部国際空港", 650],
+      ["名鉄名古屋", "中部国際空港", 980],
+    ])("%s→%s は %i円（擬制キロ＋空港線の加算運賃）", (from, to, fare) => {
+      const d = graphFareKmOf("名古屋鉄道").get(
+        [from, to].sort().join("\u0000"),
+      );
+      expect(d).toBeDefined();
+      expect(
+        calc.estimate("名古屋鉄道", d!, from as string, to as string),
+      ).toBe(fare);
     });
 
     it("初乗り運賃(1〜3km)が180円", () => {
@@ -432,6 +824,20 @@ describe("FareCalculator", () => {
 
     it("初乗り運賃(1〜4km)が160円", () => {
       expect(calc.estimate("東武鉄道", 3)).toBe(160);
+    });
+
+    // 小泉線は館林〜東小泉〜太田を、遠回りな伊勢崎線経由に合わせた擬制キロ
+    // 20.1km で運賃計算する（実キロは16.2km）。実キロで引くと330円で50円安く
+    // 出るが、この擬制キロは全国鉄道運行本数データの区間営業キロ（館林〜東小泉
+    // 11.0km）の側にすでに入っており、graph.json の km がそれになっている。
+    // 名鉄やJR地方交通線のように fareKm で持つ必要はない。
+    // 実運賃は ekitan.com (2026-09-25取得) で380円/20.1kmを確認。
+    it("小泉線の館林→太田は擬制キロ20.1kmで380円（実キロ16.2kmなら330円）", () => {
+      expect(
+        graphKmOf("東武鉄道").get(["館林", "太田"].sort().join("\u0000")),
+      ).toBeCloseTo(20.1, 3);
+      expect(calc.estimate("東武鉄道", 20.1)).toBe(380);
+      expect(calc.estimate("東武鉄道", 16.2)).toBe(330);
     });
   });
 
@@ -1316,7 +1722,13 @@ describe("FareCalculator", () => {
       expect(calc.estimate("しなの鉄道", 18.0, "上田", "小諸")).toBe(410);
     });
 
-    // 距離表は下界専用。実運賃は override から引く
+    // 探索は confirmedFare + lowerBound で枝を刈るので、lowerBound が実運賃を
+    // 上回ると予算内の経路を取りこぼす。ここで守るのはその不変条件。
+    //
+    // lowerBound は override の駅別最小額と min を取るため、距離表が実額を
+    // 上回っていても隠れてしまう。ここで見るのは距離表そのもの。
+    // 表は scripts/fare/derive-lower-bound.ts が実額行列と graph.json の距離から
+    // 作っており、この不変条件が表の生成規則そのものになっている。
     it("距離表は全435ペアの実運賃を上回らない（graph.json の実距離で検証）", () => {
       const km = graphKmOf("しなの鉄道");
       expect(shinanoOverride.pairs).toHaveLength(435);
@@ -1888,5 +2300,59 @@ describe("FareCalculator", () => {
       expect(() => bare.estimateHonshuThrough(50, 10)).toThrow();
       expect(() => bare.honshuThroughBaseFare(50)).toThrow();
     });
+  });
+});
+
+describe("地方交通線の表 (localTable)", () => {
+  const calcL = createFareCalculator([
+    {
+      id: "fallback",
+      operators: [],
+      table: [[100, 999]],
+      beyond: { fromKm: 100, baseFare: 999, ratePerKm: 0 },
+    },
+    {
+      id: "opj",
+      operators: ["OpJ"],
+      table: [
+        [10, 100],
+        [20, 200],
+      ],
+      localTable: [
+        [10, 110],
+        [15, 150],
+      ],
+      beyond: { fromKm: 20, baseFare: 200, ratePerKm: 10 },
+    },
+  ]);
+
+  it("営業キロ（localKm）を渡すと地方交通線の表で引く", () => {
+    expect(calcL.estimate("OpJ", 16.5, "A", "B", 15)).toBe(150);
+  });
+
+  it("地方交通線の表の範囲を超えたら運賃計算キロで幹線の表を引く", () => {
+    // 公式の地方交通線の表は途中の距離までしか無い（本州の基準額は200kmまで）
+    expect(calcL.estimate("OpJ", 17.6, "A", "B", 16)).toBe(200);
+  });
+
+  it("localKm を渡さなければ幹線の表", () => {
+    expect(calcL.estimate("OpJ", 16.5, "A", "B")).toBe(200);
+  });
+
+  it("地方交通線の表を持たない事業者は localKm を無視する", () => {
+    expect(calcL.estimate("Other", 50, "A", "B", 10)).toBe(999);
+    expect(calcL.hasLocalTable("Other")).toBe(false);
+    expect(calcL.hasLocalTable("OpJ")).toBe(true);
+  });
+
+  it("下界は地方交通線の表を下回らない", () => {
+    // 地方交通線だけのまま進めば150円、幹線に入れば200円以上。下界は安いほう
+    expect(calcL.lowerBound("OpJ", 16.5, undefined, 15)).toBe(150);
+    expect(calcL.lowerBound("OpJ", 16.5)).toBe(200);
+  });
+
+  it("地方交通線の表のほうが高い距離では、下界は幹線の表", () => {
+    // 7〜9kmのように地方交通線の表が高い帯がある。幹線に入れば安くなりうる
+    expect(calcL.lowerBound("OpJ", 9.9, undefined, 9)).toBe(100);
   });
 });

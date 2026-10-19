@@ -1,0 +1,11 @@
+{
+  "id": "toei-toden",
+  "operators": ["東京都交通局(都電)"],
+  "table": [[100, 170]],
+  "beyond": { "fromKm": 100, "baseFare": 170, "ratePerKm": 0 },
+  "source": {
+    "url": "https://www.kotsu.metro.tokyo.jp/toden/fare/, https://api-public.odpt.org/api/v4/odpt:RailwayFare?odpt:operator=odpt.Operator:Toei",
+    "fetchedAt": "2026-09-24",
+    "note": "都電荒川線（東京さくらトラム）の全線均一運賃170円（きっぷ・大人）。ODPT の odpt:RailwayFare で荒川線内の全435ペア（有向870件）がすべて170円であることを確認済み。均一運賃なので距離帯は1本だけ置き、全線12.2kmを確実に覆うよう上限を100kmにしてある。地下鉄4線（対キロ区間制）とは別体系のため data/operator-splits.json で事業者を分けている。"
+  }
+}

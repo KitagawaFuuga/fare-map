@@ -1,0 +1,2057 @@
+{
+  "id": "jr-west",
+  "operator": "JR西日本",
+  "source": {
+    "url": "https://www.westjr.co.jp/press/article/items/240515_00_press_keihanshin_unchin.pdf",
+    "fetchedAt": "2026-09-28",
+    "note": "JR西日本プレスリリース「京阪神都市圏における運賃体系の見直しについて」(2024-05-15) 別紙4「大阪附近の特定区間における普通旅客運賃…の特定」の普通運賃、全341区間。2025年4月1日から適用。並行する私鉄との競合区間に設定された、上限運賃より安価な区間別運賃で、距離帯表より優先する。抽出は scripts/fare/extract/jr-west-special.py。区間名は縦書きで1文字ずつ改行されており、区切りの「・」がテキスト層に無い1行（ＪＲ総持寺・神戸）は他の行の駅名で割った。駅名はPDFの表記のまま持ち、グラフ側の表記（JR総持寺は半角、ＪＲ難波は全角）への対応は lib/graph/station-name.ts の graphNameResolver で行う。以前は主要48区間の抜粋だけを持っていた。48区間は全件の抽出と値が一致した（JR総持寺の全角半角だけ違った）。検算: 特定運賃は上限運賃より安いので、グラフ距離で引いた幹線の運賃以下になるはず。341区間中339区間が満たし、残る2区間（山崎-元町・向日町-住吉、いずれも1,110円）はグラフの距離が59.7kmと実際（約60.1km）より短く、1段安い帯を引いているため。PDFの行はずれていない。km は資料に無いので null（特定運賃でしか引かない）。"
+  },
+  "pairs": [
+    {
+      "from": "大阪",
+      "to": "京都",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "大阪",
+      "to": "西大路",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "大阪",
+      "to": "桂川",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "大阪",
+      "to": "向日町",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "大阪",
+      "to": "長岡京",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "大阪",
+      "to": "山崎",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "大阪",
+      "to": "島本",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "大阪",
+      "to": "高槻",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "大阪",
+      "to": "摂津富田",
+      "km": null,
+      "fare": 290
+    },
+    {
+      "from": "大阪",
+      "to": "ＪＲ総持寺",
+      "km": null,
+      "fare": 280
+    },
+    {
+      "from": "大阪",
+      "to": "神戸",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "大阪",
+      "to": "元町",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "大阪",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "大阪",
+      "to": "灘",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "大阪",
+      "to": "摩耶",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "大阪",
+      "to": "六甲道",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "大阪",
+      "to": "住吉",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "大阪",
+      "to": "摂津本山",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "大阪",
+      "to": "甲南山手",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "大阪",
+      "to": "芦屋",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "大阪",
+      "to": "さくら夙川",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "大阪",
+      "to": "西宮",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "大阪",
+      "to": "宝塚",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "大阪",
+      "to": "中山寺",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "大阪",
+      "to": "川西池田",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "大阪",
+      "to": "北伊丹",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "新大阪",
+      "to": "京都",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "新大阪",
+      "to": "西大路",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "新大阪",
+      "to": "桂川",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "新大阪",
+      "to": "向日町",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "新大阪",
+      "to": "長岡京",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "新大阪",
+      "to": "山崎",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "新大阪",
+      "to": "島本",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "新大阪",
+      "to": "高槻",
+      "km": null,
+      "fare": 280
+    },
+    {
+      "from": "東淀川",
+      "to": "京都",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "東淀川",
+      "to": "西大路",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "東淀川",
+      "to": "桂川",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "東淀川",
+      "to": "向日町",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "東淀川",
+      "to": "長岡京",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "東淀川",
+      "to": "山崎",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "東淀川",
+      "to": "島本",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "東淀川",
+      "to": "高槻",
+      "km": null,
+      "fare": 280
+    },
+    {
+      "from": "吹田",
+      "to": "京都",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "吹田",
+      "to": "西大路",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "吹田",
+      "to": "桂川",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "吹田",
+      "to": "向日町",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "吹田",
+      "to": "長岡京",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "吹田",
+      "to": "山崎",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "岸辺",
+      "to": "京都",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "岸辺",
+      "to": "西大路",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "岸辺",
+      "to": "桂川",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "岸辺",
+      "to": "向日町",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "岸辺",
+      "to": "長岡京",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "千里丘",
+      "to": "京都",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "千里丘",
+      "to": "西大路",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "千里丘",
+      "to": "桂川",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "千里丘",
+      "to": "向日町",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "千里丘",
+      "to": "長岡京",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "茨木",
+      "to": "京都",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "茨木",
+      "to": "西大路",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "茨木",
+      "to": "桂川",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "茨木",
+      "to": "向日町",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "ＪＲ総持寺",
+      "to": "京都",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "ＪＲ総持寺",
+      "to": "西大路",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "ＪＲ総持寺",
+      "to": "桂川",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "摂津富田",
+      "to": "京都",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "摂津富田",
+      "to": "西大路",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "高槻",
+      "to": "京都",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "吹田",
+      "to": "神戸",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "岸辺",
+      "to": "神戸",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "岸辺",
+      "to": "元町",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "岸辺",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "千里丘",
+      "to": "神戸",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "千里丘",
+      "to": "元町",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "千里丘",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "茨木",
+      "to": "神戸",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "茨木",
+      "to": "元町",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "茨木",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "茨木",
+      "to": "灘",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "茨木",
+      "to": "摩耶",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "茨木",
+      "to": "六甲道",
+      "km": null,
+      "fare": 730
+    },
+    {
+      "from": "ＪＲ総持寺",
+      "to": "神戸",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "ＪＲ総持寺",
+      "to": "元町",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "ＪＲ総持寺",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "摂津富田",
+      "to": "神戸",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "摂津富田",
+      "to": "元町",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "摂津富田",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "摂津富田",
+      "to": "灘",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "摂津富田",
+      "to": "摩耶",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "高槻",
+      "to": "神戸",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "高槻",
+      "to": "元町",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "高槻",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "高槻",
+      "to": "灘",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "高槻",
+      "to": "摩耶",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "高槻",
+      "to": "六甲道",
+      "km": null,
+      "fare": 830
+    },
+    {
+      "from": "山崎",
+      "to": "神戸",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "山崎",
+      "to": "元町",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "長岡京",
+      "to": "神戸",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "長岡京",
+      "to": "元町",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "長岡京",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "長岡京",
+      "to": "灘",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "向日町",
+      "to": "神戸",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "向日町",
+      "to": "元町",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "向日町",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "向日町",
+      "to": "灘",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "向日町",
+      "to": "摩耶",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "向日町",
+      "to": "六甲道",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "向日町",
+      "to": "住吉",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "桂川",
+      "to": "神戸",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "桂川",
+      "to": "元町",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "桂川",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "桂川",
+      "to": "灘",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "桂川",
+      "to": "摩耶",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "桂川",
+      "to": "六甲道",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "桂川",
+      "to": "住吉",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西大路",
+      "to": "神戸",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西大路",
+      "to": "元町",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西大路",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西大路",
+      "to": "灘",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西大路",
+      "to": "摩耶",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西大路",
+      "to": "六甲道",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西大路",
+      "to": "住吉",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西大路",
+      "to": "摂津本山",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "西大路",
+      "to": "甲南山手",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "京都",
+      "to": "神戸",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "京都",
+      "to": "元町",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "京都",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "京都",
+      "to": "灘",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "京都",
+      "to": "摩耶",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "京都",
+      "to": "六甲道",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "京都",
+      "to": "住吉",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "京都",
+      "to": "摂津本山",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "京都",
+      "to": "甲南山手",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "京都",
+      "to": "芦屋",
+      "km": null,
+      "fare": 1110
+    },
+    {
+      "from": "京都",
+      "to": "奈良",
+      "km": null,
+      "fare": 720
+    },
+    {
+      "from": "京都",
+      "to": "城陽",
+      "km": null,
+      "fare": 380
+    },
+    {
+      "from": "京都",
+      "to": "新田",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "京都",
+      "to": "ＪＲ小倉",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "東福寺",
+      "to": "奈良",
+      "km": null,
+      "fare": 720
+    },
+    {
+      "from": "東福寺",
+      "to": "城陽",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "東福寺",
+      "to": "新田",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "東福寺",
+      "to": "ＪＲ小倉",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "稲荷",
+      "to": "城陽",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "稲荷",
+      "to": "新田",
+      "km": null,
+      "fare": 310
+    },
+    {
+      "from": "ＪＲ藤森",
+      "to": "城陽",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "塚本",
+      "to": "神戸",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "塚本",
+      "to": "元町",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "塚本",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "塚本",
+      "to": "灘",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "塚本",
+      "to": "摩耶",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "塚本",
+      "to": "六甲道",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "塚本",
+      "to": "住吉",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "塚本",
+      "to": "摂津本山",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "塚本",
+      "to": "甲南山手",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "塚本",
+      "to": "芦屋",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "塚本",
+      "to": "宝塚",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "塚本",
+      "to": "中山寺",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "塚本",
+      "to": "川西池田",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "尼崎",
+      "to": "神戸",
+      "km": null,
+      "fare": 430
+    },
+    {
+      "from": "尼崎",
+      "to": "元町",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "尼崎",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "尼崎",
+      "to": "灘",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "尼崎",
+      "to": "摩耶",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "尼崎",
+      "to": "六甲道",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "尼崎",
+      "to": "住吉",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "尼崎",
+      "to": "宝塚",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "塚口",
+      "to": "宝塚",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "立花",
+      "to": "神戸",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "立花",
+      "to": "元町",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "立花",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "立花",
+      "to": "灘",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "立花",
+      "to": "摩耶",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "立花",
+      "to": "六甲道",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "甲子園口",
+      "to": "神戸",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "甲子園口",
+      "to": "元町",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "甲子園口",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "甲子園口",
+      "to": "灘",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "西宮",
+      "to": "神戸",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "西宮",
+      "to": "元町",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "西宮",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "さくら夙川",
+      "to": "神戸",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "ＪＲ難波",
+      "to": "奈良",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "ＪＲ難波",
+      "to": "郡山",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "ＪＲ難波",
+      "to": "大和小泉",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "ＪＲ難波",
+      "to": "法隆寺",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "ＪＲ難波",
+      "to": "王寺",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "ＪＲ難波",
+      "to": "三郷",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "ＪＲ難波",
+      "to": "河内堅上",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "今宮",
+      "to": "奈良",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "今宮",
+      "to": "郡山",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "今宮",
+      "to": "大和小泉",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "今宮",
+      "to": "法隆寺",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "今宮",
+      "to": "王寺",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "今宮",
+      "to": "三郷",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "新今宮",
+      "to": "奈良",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "新今宮",
+      "to": "郡山",
+      "km": null,
+      "fare": 580
+    },
+    {
+      "from": "新今宮",
+      "to": "大和小泉",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "新今宮",
+      "to": "法隆寺",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "新今宮",
+      "to": "王寺",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "新今宮",
+      "to": "三郷",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "東部市場前",
+      "to": "奈良",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "東部市場前",
+      "to": "郡山",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "東部市場前",
+      "to": "大和小泉",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "東部市場前",
+      "to": "法隆寺",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "東部市場前",
+      "to": "王寺",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "東部市場前",
+      "to": "三郷",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "平野",
+      "to": "奈良",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "平野",
+      "to": "郡山",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "平野",
+      "to": "大和小泉",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "平野",
+      "to": "法隆寺",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "平野",
+      "to": "王寺",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "平野",
+      "to": "三郷",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "加美",
+      "to": "奈良",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "加美",
+      "to": "郡山",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "加美",
+      "to": "大和小泉",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "加美",
+      "to": "法隆寺",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "加美",
+      "to": "王寺",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "久宝寺",
+      "to": "奈良",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "久宝寺",
+      "to": "郡山",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "久宝寺",
+      "to": "大和小泉",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "久宝寺",
+      "to": "法隆寺",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "八尾",
+      "to": "奈良",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "八尾",
+      "to": "郡山",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "八尾",
+      "to": "大和小泉",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "八尾",
+      "to": "法隆寺",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "志紀",
+      "to": "奈良",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "志紀",
+      "to": "郡山",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "志紀",
+      "to": "大和小泉",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "柏原",
+      "to": "奈良",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "柏原",
+      "to": "郡山",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "柏原",
+      "to": "大和小泉",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "高井田",
+      "to": "奈良",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "高井田",
+      "to": "郡山",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "河内堅上",
+      "to": "奈良",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "三郷",
+      "to": "奈良",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "天王寺",
+      "to": "奈良",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "天王寺",
+      "to": "郡山",
+      "km": null,
+      "fare": 510
+    },
+    {
+      "from": "天王寺",
+      "to": "大和小泉",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "天王寺",
+      "to": "法隆寺",
+      "km": null,
+      "fare": 490
+    },
+    {
+      "from": "天王寺",
+      "to": "王寺",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "天王寺",
+      "to": "三郷",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "天王寺",
+      "to": "河内堅上",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "天王寺",
+      "to": "和歌山",
+      "km": null,
+      "fare": 900
+    },
+    {
+      "from": "天王寺",
+      "to": "紀伊中ノ島",
+      "km": null,
+      "fare": 900
+    },
+    {
+      "from": "天王寺",
+      "to": "六十谷",
+      "km": null,
+      "fare": 900
+    },
+    {
+      "from": "天王寺",
+      "to": "紀伊",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "美章園",
+      "to": "和歌山",
+      "km": null,
+      "fare": 900
+    },
+    {
+      "from": "美章園",
+      "to": "紀伊中ノ島",
+      "km": null,
+      "fare": 900
+    },
+    {
+      "from": "美章園",
+      "to": "六十谷",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "美章園",
+      "to": "紀伊",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "南田辺",
+      "to": "和歌山",
+      "km": null,
+      "fare": 900
+    },
+    {
+      "from": "南田辺",
+      "to": "紀伊中ノ島",
+      "km": null,
+      "fare": 900
+    },
+    {
+      "from": "南田辺",
+      "to": "六十谷",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "南田辺",
+      "to": "紀伊",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "鶴ケ丘",
+      "to": "和歌山",
+      "km": null,
+      "fare": 900
+    },
+    {
+      "from": "鶴ケ丘",
+      "to": "紀伊中ノ島",
+      "km": null,
+      "fare": 900
+    },
+    {
+      "from": "鶴ケ丘",
+      "to": "六十谷",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "長居",
+      "to": "和歌山",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "長居",
+      "to": "紀伊中ノ島",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "長居",
+      "to": "六十谷",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "我孫子町",
+      "to": "和歌山",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "我孫子町",
+      "to": "紀伊中ノ島",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "我孫子町",
+      "to": "六十谷",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "杉本町",
+      "to": "和歌山",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "杉本町",
+      "to": "紀伊中ノ島",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "杉本町",
+      "to": "六十谷",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "浅香",
+      "to": "和歌山",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "浅香",
+      "to": "紀伊中ノ島",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "堺市",
+      "to": "和歌山",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "堺市",
+      "to": "紀伊中ノ島",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "三国ケ丘",
+      "to": "和歌山",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "百舌鳥",
+      "to": "和歌山",
+      "km": null,
+      "fare": 880
+    },
+    {
+      "from": "北新地",
+      "to": "神戸",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "北新地",
+      "to": "元町",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "北新地",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "北新地",
+      "to": "灘",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "北新地",
+      "to": "摩耶",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "北新地",
+      "to": "六甲道",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "北新地",
+      "to": "住吉",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "北新地",
+      "to": "摂津本山",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "北新地",
+      "to": "甲南山手",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "北新地",
+      "to": "芦屋",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "北新地",
+      "to": "さくら夙川",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "北新地",
+      "to": "西宮",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "新福島",
+      "to": "神戸",
+      "km": null,
+      "fare": 460
+    },
+    {
+      "from": "新福島",
+      "to": "元町",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "新福島",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "新福島",
+      "to": "灘",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "新福島",
+      "to": "摩耶",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "新福島",
+      "to": "六甲道",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "新福島",
+      "to": "住吉",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "新福島",
+      "to": "摂津本山",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "新福島",
+      "to": "甲南山手",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "新福島",
+      "to": "芦屋",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "新福島",
+      "to": "さくら夙川",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "新福島",
+      "to": "西宮",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "海老江",
+      "to": "神戸",
+      "km": null,
+      "fare": 450
+    },
+    {
+      "from": "海老江",
+      "to": "元町",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "海老江",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "海老江",
+      "to": "灘",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "海老江",
+      "to": "摩耶",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "海老江",
+      "to": "六甲道",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "海老江",
+      "to": "住吉",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "海老江",
+      "to": "摂津本山",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "海老江",
+      "to": "甲南山手",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "海老江",
+      "to": "芦屋",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "海老江",
+      "to": "さくら夙川",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "御幣島",
+      "to": "神戸",
+      "km": null,
+      "fare": 450
+    },
+    {
+      "from": "御幣島",
+      "to": "元町",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "御幣島",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "御幣島",
+      "to": "灘",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "御幣島",
+      "to": "摩耶",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "御幣島",
+      "to": "六甲道",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "御幣島",
+      "to": "住吉",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "御幣島",
+      "to": "摂津本山",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "御幣島",
+      "to": "甲南山手",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "御幣島",
+      "to": "芦屋",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "加島",
+      "to": "神戸",
+      "km": null,
+      "fare": 450
+    },
+    {
+      "from": "加島",
+      "to": "元町",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "加島",
+      "to": "三ノ宮",
+      "km": null,
+      "fare": 420
+    },
+    {
+      "from": "加島",
+      "to": "灘",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "加島",
+      "to": "摩耶",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "加島",
+      "to": "六甲道",
+      "km": null,
+      "fare": 410
+    },
+    {
+      "from": "加島",
+      "to": "住吉",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "加島",
+      "to": "摂津本山",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "加島",
+      "to": "甲南山手",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "北新地",
+      "to": "宝塚",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "北新地",
+      "to": "中山寺",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "北新地",
+      "to": "川西池田",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "北新地",
+      "to": "北伊丹",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "新福島",
+      "to": "宝塚",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "新福島",
+      "to": "中山寺",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "新福島",
+      "to": "川西池田",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "新福島",
+      "to": "北伊丹",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "海老江",
+      "to": "宝塚",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "海老江",
+      "to": "中山寺",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "海老江",
+      "to": "川西池田",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "御幣島",
+      "to": "宝塚",
+      "km": null,
+      "fare": 340
+    },
+    {
+      "from": "御幣島",
+      "to": "中山寺",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "加島",
+      "to": "宝塚",
+      "km": null,
+      "fare": 320
+    },
+    {
+      "from": "加島",
+      "to": "中山寺",
+      "km": null,
+      "fare": 320
+    }
+  ]
+}

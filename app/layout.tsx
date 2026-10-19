@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
+import { BIZ_UDPGothic } from "next/font/google";
 import "./globals.css";
+
+// 駅名の数字・カナを読み分けやすい UD 書体。日本語のサブセットは無く、
+// グリフが多くて先読みすると重いので preload しない
+const bizUdpGothic = BIZ_UDPGothic({
+  weight: ["400", "700"],
+  display: "swap",
+  preload: false,
+});
 
 export const metadata: Metadata = {
   title: "fare-map",
@@ -13,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body className={bizUdpGothic.className}>{children}</body>
     </html>
   );
 }

@@ -1,0 +1,21 @@
+{
+  "id": "iga",
+  "operators": ["伊賀鉄道"],
+  "table": [
+    [3, 220],
+    [6, 280],
+    [10, 330],
+    [14, 400],
+    [17, 450]
+  ],
+  "beyond": {
+    "fromKm": 17,
+    "baseFare": 450,
+    "ratePerKm": 15
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/伊賀鉄道",
+    "fetchedAt": "2026-10-13",
+    "note": "伊賀鉄道伊賀線の大人普通運賃（2025年2月1日改定）。キロ程別の表（1〜3km 220円 〜 15〜17km 450円）。1km未満は切り上げ。全線16.6km。キロ帯の表は Wikipedia の会社の記事。"
+  }
+}

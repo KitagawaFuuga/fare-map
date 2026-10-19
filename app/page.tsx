@@ -4,11 +4,9 @@ import dynamic from "next/dynamic";
 import { useCallback, useState } from "react";
 import BudgetInput from "@/components/BudgetInput";
 import BottomSheet from "@/components/BottomSheet";
-import FareLegend from "@/components/FareLegend";
-import LocateButton from "@/components/LocateButton";
 import SearchPanel from "@/components/SearchPanel";
 import StationList from "@/components/StationList";
-import { useReachable } from "@/hooks/use-reachable";
+import { useReachable, type ReachableStation } from "@/hooks/use-reachable";
 import type { SheetState } from "@/lib/sheet";
 import type { StationSuggestion } from "@/lib/server/api-service";
 
@@ -18,26 +16,12 @@ import type { StationSuggestion } from "@/lib/server/api-service";
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 export default function Home() {
-  const [from, setFrom] = useState<{ id: string; name: string } | null>(null);
+  // 出発駅は駅名の入力（SearchPanel）だけで決める。地図のクリックや現在地からは決めない
+  const [from, setFrom] = useState<StationSuggestion | null>(null);
   const [budget, setBudget] = useState(500);
-  const [focus, setFocus] = useState<{ lat: number; lng: number } | null>(null);
+  const [focus, setFocus] = useState<ReachableStation | null>(null);
   const [sheet, setSheet] = useState<SheetState>("half");
   const { data, loading, error, search } = useReachable();
-
-  // 座標 → 出発駅の変換。地図タップと現在地ボタンはどちらも「緯度経度が得られる」
-  // 点で同じなので同一ハンドラを共有する。範囲外の座標は API が 400 を返し、
-  // ここで何もせず戻るので既存の選択状態は壊れない。
-  const setFromByCoords = useCallback(async (lat: number, lng: number) => {
-    const res = await fetch(`/api/stations/nearest?lat=${lat}&lng=${lng}`);
-    if (!res.ok) return;
-    const body = (await res.json()) as {
-      station: StationSuggestion & { lat: number; lng: number };
-    };
-    setFrom({ id: body.station.id, name: body.station.name });
-    // 地図を寄せるのはタップ座標ではなく「見つかった駅」の座標。
-    // そうしないと表示中の駅名と地図の中心がずれる。
-    setFocus({ lat: body.station.lat, lng: body.station.lng });
-  }, []);
 
   const runSearch = useCallback(async () => {
     // ボタンの disabled とは別の二重の防御。この行のおかげで以降 from は非 null 扱いになる
@@ -58,16 +42,19 @@ export default function Home() {
         type="button"
         disabled={!from || loading}
         onClick={runSearch}
-        className="w-full rounded bg-blue-600 py-2 font-medium text-white disabled:opacity-40"
+        className="w-full rounded bg-[#a54700] py-2 font-medium text-white disabled:opacity-40"
       >
         {loading ? "検索中…" : "検索"}
       </button>
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <FareLegend />
       <StationList stations={data?.stations ?? []} onPick={setFocus} />
+      {/* CC BY 4.0 のデータ（運行本数データ・公共交通オープンデータセンター）は
+          表示が条件なので、出典から外さないこと。詳細は README の出典節 */}
       <footer className="pt-4 text-xs text-gray-400">
-        出典: OpenStreetMap / OpenFreeMap /
-        駅データ.jp。運賃は距離ベースの概算です。
+        出典: OpenStreetMap / OpenFreeMap / 駅データ.jp / 全国鉄道運行本数データ
+        / 公共交通オープンデータセンター /
+        高松琴平電気鉄道・沖縄都市モノレール・札幌市交通局の公開GTFS
+        （最後の4つは CC BY 4.0）。運賃は概算です。
       </footer>
     </div>
   );
@@ -81,11 +68,12 @@ export default function Home() {
       <div className="relative flex-1">
         <MapView
           stations={data?.stations ?? []}
-          fromName={from?.name ?? null}
+          origin={from}
           focus={focus}
-          onMapClick={setFromByCoords}
+          // 徒歩の印の差し替えでは meta は同じオブジェクトのまま（use-reachable の
+          // loadWalkMarks）なので、新しい検索結果のときだけ変わる
+          resultKey={data?.meta}
         />
-        <LocateButton onLocate={setFromByCoords} />
       </div>
       <BottomSheet state={sheet} onStateChange={setSheet}>
         {panel}

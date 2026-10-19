@@ -1,0 +1,18 @@
+{
+  "id": "minatomirai",
+  "operators": ["横浜高速鉄道"],
+  "table": [
+    [3, 200],
+    [5, 230]
+  ],
+  "beyond": {
+    "fromKm": 5,
+    "baseFare": 230,
+    "ratePerKm": 30
+  },
+  "source": {
+    "url": "https://www.mm21railway.co.jp/info/ticket.html",
+    "fetchedAt": "2026-10-11",
+    "note": "みなとみらい線の大人普通運賃（きっぷ）。2023年3月18日改定: 1〜3km 200円、4〜5km 230円。公式の駅間運賃表で横浜〜元町・中華街（4.1km）230円、横浜〜日本大通り 230円、馬車道〜横浜 200円。全線4.1kmなので beyond は使われない。東急東横線との直通は会社ごとに別々に計算する（合算）。"
+  }
+}

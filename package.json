@@ -26,7 +26,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "description": "",
   "dependencies": {
     "clsx": "^2.1.1",
@@ -39,6 +39,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@nizos/probity": "^1.10.1",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/geojson": "^7946.0.16",
@@ -50,6 +51,7 @@
     "eslint-config-prettier": "^10.1.8",
     "postcss": "^8.5.26",
     "prettier": "^3.9.6",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
     "typescript": "npm:@typescript/typescript6@^6.0.2",

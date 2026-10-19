@@ -1,0 +1,15 @@
+{
+  "id": "maihama-resort-line",
+  "operators": ["舞浜リゾートライン"],
+  "table": [[100, 300]],
+  "beyond": {
+    "fromKm": 100,
+    "baseFare": 300,
+    "ratePerKm": 0
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/ディズニーリゾートライン",
+    "fetchedAt": "2026-10-12",
+    "note": "ディズニーリゾートラインの大人普通運賃（2024年3月16日改定）。全線均一300円。キロ帯は持たず、表は1行だけ。Wikipedia による。"
+  }
+}

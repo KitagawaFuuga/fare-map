@@ -1,0 +1,21 @@
+{
+  "id": "kitakyu",
+  "operators": ["北大阪急行電鉄"],
+  "table": [
+    [2, 100],
+    [4, 130],
+    [6, 140],
+    [8, 160],
+    [10, 180]
+  ],
+  "beyond": {
+    "fromKm": 10,
+    "baseFare": 180,
+    "ratePerKm": 20
+  },
+  "source": {
+    "url": "https://ja.wikipedia.org/wiki/北大阪急行電鉄, https://www.kita-kyu.co.jp/pdf/fares.pdf",
+    "fetchedAt": "2026-10-12",
+    "note": "北大阪急行電鉄（南北線）の大人普通運賃（きっぷ）の基本運賃。2024年3月23日改定の区制: 2.0kmまで100円、4.0kmまで130円、6.0kmまで140円、8.0kmまで160円、10.0kmまで180円。延伸区間（千里中央〜箕面萱野）を含む乗車には60円が加算され、data/fare-surcharges.json の kitakyu-extension で持つ（千里中央〜箕面萱野は130円＋60円＝190円）。Osaka Metro との乗継割引は未対応（高く出る側）。"
+  }
+}

@@ -6,10 +6,16 @@ import {
   type FareCalculator,
 } from "@/lib/fare/calculator";
 import {
+  buildSpecialCities,
+  specialCitiesFileSchema,
+} from "@/lib/fare/special-cities";
+import {
   fareOverrideSchema,
   fareRuleSchema,
+  fareZoneSchema,
   type FareOverride,
   type FareRule,
+  type FareZone,
 } from "@/lib/fare/types";
 
 export interface GraphStore {
@@ -21,8 +27,18 @@ export function createGraphStore(
   graph: RailGraph,
   rules: FareRule[],
   overrides?: FareOverride[],
+  zones?: FareZone[],
+  specialCities?: unknown,
 ): GraphStore {
-  return { graph, calc: createFareCalculator(rules, overrides) };
+  // 特定都区市内は中心駅からの距離をグラフで測るので、グラフと一緒に組み立てる
+  const cities =
+    specialCities === undefined
+      ? undefined
+      : buildSpecialCities(graph, specialCitiesFileSchema.parse(specialCities));
+  return {
+    graph,
+    calc: createFareCalculator(rules, overrides, zones, cities),
+  };
 }
 
 // data/graph.json は約3MBあり、読み込みと JSON.parse だけで数百ミリ秒かかる。
@@ -55,7 +71,20 @@ export function getGraphStore(): GraphStore {
           JSON.parse(readFileSync(path.join(overridesDir, f), "utf8")),
         ),
       );
-    cached = createGraphStore(graph, rules, overrides);
+    // 区間運賃（JR西日本の電車特定区間）。発着の両駅が区間内なら事業者の表の代わりに引く
+    const zones = (
+      JSON.parse(
+        readFileSync(path.join(process.cwd(), "data/fare-zones.json"), "utf8"),
+      ) as { zones: unknown[] }
+    ).zones.map((z) => fareZoneSchema.parse(z));
+    // JRの特定都区市内・東京山手線内。区域内の駅からの長距離は中心駅から計算する
+    const specialCities: unknown = JSON.parse(
+      readFileSync(
+        path.join(process.cwd(), "data/special-cities.json"),
+        "utf8",
+      ),
+    );
+    cached = createGraphStore(graph, rules, overrides, zones, specialCities);
   }
   return cached;
 }

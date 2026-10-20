@@ -123,7 +123,11 @@ CI（`.github/workflows/ci.yml`）は push / PR ごとに lint / format:check / 
   2026年版が反映していない改称（川村→相良十島、東多良木→多良木青蓮寺、工機前→日工前）と
   廃止（西黒崎）は、各社の公表資料をもとに `data/station-corrections.json` で直している。
 - 実営業キロ（`data/calibration.json`、および `graph.json` の `km` への距離補正）:
-  [全国鉄道運行本数データ](https://gtfs-gis.jp/railway_honsu/) / CC BY 4.0。
+  [全国鉄道運行本数データ](https://gtfs-gis.jp/railway_honsu/) / CC BY 4.0、ODbL 1.0。
+  配布元は「CC-BY 4.0、ODbL」と両方を掲げていて、どちらか一方を選べるとは書いていないため、
+  両方の条件に従う。CC BY 4.0 の出典表示は画面の出典欄で行っている。ODbL の継承条件に従い、
+  これを加工して作った `data/calibration.json` と `data/graph.json` の `km` は、
+  ODbL 1.0（https://opendatacommons.org/licenses/odbl/1-0/ ）のもとでも提供する。
 - 運賃表・特定運賃（`data/fare-rules`、`data/fare-overrides`）: 各鉄道事業者が公表する
   運賃表から作成。抽出手順は `scripts/fare/extract/README.md` を参照。
 - 東京都交通局の全駅ペア運賃（`data/fare-sources/toei-*.json` および対応する

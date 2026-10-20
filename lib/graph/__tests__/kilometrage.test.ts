@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseCsv } from "@/lib/graph/csv";
 import {
@@ -33,11 +33,15 @@ describe("buildKilometrageFix", () => {
   });
 });
 
-// 差し替えが空振りしていたら意味がない。CSVの実データに当てて確認する
-describe("data/kilometrage-corrections.json", () => {
-  const rows = parseCsv(
-    readFileSync("data/raw/kilometrage.csv", "utf8").replace(/"/g, ""),
-  );
+// 差し替えが空振りしていたら意味がない。CSVの実データに当てて確認する。
+// CSV は data/raw/（.gitignore）に置く手元の取得物なので、無い CI では飛ばす。
+// 飛ばした describe も中身は読み込まれるため、読み込み自体もファイルの有無で分ける
+const RAW_KM = "data/raw/kilometrage.csv";
+const hasRawKm = existsSync(RAW_KM);
+describe.skipIf(!hasRawKm)("data/kilometrage-corrections.json", () => {
+  const rows = hasRawKm
+    ? parseCsv(readFileSync(RAW_KM, "utf8").replace(/"/g, ""))
+    : [];
 
   it.each(corrections.map((c) => [c.operator, c.from, c.to, c.csvKm] as const))(
     "%s %s-%s は CSV に %f km で実在する",

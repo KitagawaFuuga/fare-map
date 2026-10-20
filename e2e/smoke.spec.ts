@@ -157,6 +157,17 @@ test("画面の文字は BIZ UDPゴシックで組まれる", async ({ page }) =
   expect(family).toMatch(/BIZ[_ ]UDPGothic/);
 });
 
+test("出典欄に、CC BY のデータを加工して使っていることと ODbL のデータがあることが出る", async ({
+  page,
+}) => {
+  // CC BY 4.0 は改変の有無の表示を、ODbL は派生物にその旨の表示を求める
+  await stubTiles(page);
+  await page.goto("/");
+  const footer = sidebar(page).locator("footer");
+  await expect(footer).toContainText("加工して使用");
+  await expect(footer).toContainText("ODbL");
+});
+
 test("入力欄は「〇〇から □□円で行ける駅」の文として読める", async ({
   page,
 }) => {

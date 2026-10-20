@@ -168,6 +168,34 @@ test("出典欄に、CC BY のデータを加工して使っていることと O
   await expect(footer).toContainText("ODbL");
 });
 
+test("ファビコンとホーム画面用のアイコンがあり、どちらも実際に取得できる", async ({
+  page,
+  request,
+}) => {
+  await stubTiles(page);
+  await page.goto("/");
+  const icon = await page
+    .locator('head link[rel="icon"][type="image/svg+xml"]')
+    .getAttribute("href");
+  const apple = await page
+    .locator('head link[rel="apple-touch-icon"]')
+    .getAttribute("href");
+  expect(icon).not.toBeNull();
+  expect(apple).not.toBeNull();
+  for (const href of [icon!, apple!]) {
+    const res = await request.get(href);
+    expect(res.status(), href).toBe(200);
+  }
+});
+
+test("サイドバーの見出しにアイコンと同じ形のロゴが付く", async ({ page }) => {
+  await stubTiles(page);
+  await page.goto("/");
+  const heading = sidebar(page).getByRole("heading", { level: 1 });
+  await expect(heading).toHaveText("fare-map");
+  await expect(heading.locator("svg")).toBeVisible();
+});
+
 test("入力欄は「〇〇から □□円で行ける駅」の文として読める", async ({
   page,
 }) => {

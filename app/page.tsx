@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useState } from "react";
 import BudgetInput from "@/components/BudgetInput";
+import Logo from "@/components/Logo";
 import BottomSheet from "@/components/BottomSheet";
 import SearchPanel from "@/components/SearchPanel";
 import StationList from "@/components/StationList";
@@ -64,7 +65,10 @@ export default function Home() {
   return (
     <main className="flex h-dvh">
       <aside className="hidden w-96 shrink-0 overflow-y-auto border-r border-gray-200 p-4 md:block">
-        <h1 className="mb-4 text-lg font-bold">fare-map</h1>
+        <h1 className="mb-4 flex items-center gap-2 text-lg font-bold">
+          <Logo className="h-7 w-7" />
+          fare-map
+        </h1>
         {panel}
       </aside>
       <div className="relative flex-1">

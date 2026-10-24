@@ -1,0 +1,19 @@
+# 依存の更新を月1回、種類ごとに1つの PR にまとめて出す（個人開発で PR が溢れないように）。
+# 脆弱性の修正（Dependabot security updates）はこの間隔に関係なく、見つかりしだい出る。
+# PR は main の保護ルールで CI（test・e2e）の通過が必須なので、壊れる更新は Merge できない。
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      npm:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]

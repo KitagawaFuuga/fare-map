@@ -31,31 +31,31 @@
   "dependencies": {
     "clsx": "^2.1.1",
     "fuse.js": "^7.5.0",
-    "maplibre-gl": "^6.5.0",
-    "next": "^16.3.2",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "maplibre-gl": "^6.15.0",
+    "next": "^16.4.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "tailwind-merge": "^3.6.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@nizos/probity": "^1.10.1",
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/geojson": "^7946.0.16",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@typescript/native": "npm:typescript@^7.0.2",
-    "eslint": "^10.9.0",
+    "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
-    "postcss": "^8.5.26",
-    "prettier": "^3.9.6",
+    "postcss": "^8.5.31",
+    "prettier": "^3.9.10",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "typescript-eslint": "^8.67.0",
-    "vitest": "^5.0.1"
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^5.0.5"
   }
 }

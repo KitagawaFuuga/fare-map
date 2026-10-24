@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseCsv } from "@/lib/graph/csv";
 import {
@@ -23,13 +23,17 @@ describe("csvOperatorOf", () => {
 
 // 別名を1つでも間違えると、別事業者の区間キロを正解として採用してしまう。
 // 対応表そのものを実データで検証する
-describe("data/operator-aliases.json", () => {
+// 実営業キロの CSV は data/raw/（.gitignore）に置く手元の取得物なので、無い CI では飛ばす。
+// 飛ばした describe も中身は読み込まれるため、読み込み自体もファイルの有無で分ける
+const RAW_KM = "data/raw/kilometrage.csv";
+const hasRawKm = existsSync(RAW_KM);
+describe.skipIf(!hasRawKm)("data/operator-aliases.json", () => {
   const graph = JSON.parse(
     readFileSync("data/graph.json", "utf8"),
   ) as RailGraph;
-  const kmRows = parseCsv(
-    readFileSync("data/raw/kilometrage.csv", "utf8").replace(/"/g, ""),
-  );
+  const kmRows = hasRawKm
+    ? parseCsv(readFileSync(RAW_KM, "utf8").replace(/"/g, ""))
+    : [];
   const namesOf = new Map<string, Set<string>>();
   for (const n of Object.values(graph.nodes)) {
     const s = namesOf.get(n.operator) ?? new Set<string>();

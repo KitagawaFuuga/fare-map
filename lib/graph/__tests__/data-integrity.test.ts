@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { ExtraJoin, OperatorSplit } from "@/lib/graph/build";
 import type { RailGraph } from "@/lib/graph/types";
@@ -104,16 +104,21 @@ describe("data/extra-joins.json と graph.json の整合", () => {
   // 元データが更新されて接続が追加されたら、補完定義は不要になる。残したままだと
   // 同じ区間に2本エッジが張られて距離が狂う。グラフを作り直す前に気づけるよう、
   // コミット済みグラフではなく元データ(join.csv)と直接突き合わせる
-  it("補った接続が元データ(join.csv)に無いこと", () => {
-    const joins = parseCsv(readFileSync("data/raw/join.csv", "utf8"));
-    const inRaw = new Set(
-      joins.map((j) =>
-        [j.station_cd1 ?? "", j.station_cd2 ?? ""].sort().join("\u0000"),
-      ),
-    );
-    const redundant = extraJoins
-      .filter((j) => inRaw.has([j.from, j.to].sort().join("\u0000")))
-      .map((j) => `${j.lineId} ${j.from}-${j.to}`);
-    expect(redundant).toEqual([]);
-  });
+  // 元データは駅データ.jp の会員ダウンロードで、リポジトリに置いていない（.gitignore）。
+  // 置いていない CI では照合できないので飛ばし、手元でだけ確かめる
+  it.skipIf(!existsSync("data/raw/join.csv"))(
+    "補った接続が元データ(join.csv)に無いこと",
+    () => {
+      const joins = parseCsv(readFileSync("data/raw/join.csv", "utf8"));
+      const inRaw = new Set(
+        joins.map((j) =>
+          [j.station_cd1 ?? "", j.station_cd2 ?? ""].sort().join("\u0000"),
+        ),
+      );
+      const redundant = extraJoins
+        .filter((j) => inRaw.has([j.from, j.to].sort().join("\u0000")))
+        .map((j) => `${j.lineId} ${j.from}-${j.to}`);
+      expect(redundant).toEqual([]);
+    },
+  );
 });

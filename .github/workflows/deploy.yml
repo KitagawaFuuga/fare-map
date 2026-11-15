@@ -28,8 +28,22 @@ jobs:
       - run: npm run typecheck
       - run: npm run test
 
+  # CI と同じ E2E。デプロイを止める位置に置く（docs/decisions/0002-e2e-before-deploy.md）
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+
   deploy:
-    needs: test
+    needs: [test, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

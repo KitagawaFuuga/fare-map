@@ -11,7 +11,9 @@ on:
 
 concurrency:
   group: deploy-${{ github.ref }}
-  cancel-in-progress: true
+  # 途中で止めると、latest だけ進んで Container App は古い版のまま、という
+  # ずれが起きうる。後から来た実行は待たせて、前の実行を最後まで走らせる。
+  cancel-in-progress: false
 
 jobs:
   test:
@@ -25,6 +27,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm run format:check
       - run: npm run typecheck
       - run: npm run test
 
@@ -41,9 +44,17 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
 
   deploy:
     needs: [test, e2e]
+    # workflow_dispatch はどのブランチでも実行できる。main 以外を本番に出さない
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

@@ -2,6 +2,7 @@
 
 - 日付: 2026-11-15
 - 状態: 採用
+- 決めた人: ユーザー（AI の提案を承認）
 
 ## 背景
 
@@ -33,3 +34,5 @@ main が最新の状態で検査されていること（strict）も必須にし
 - 変更はすべて PR 経由になり、PR の説明が開発の履歴になる
 - 文書だけの修正でも CI を待つ（3分程度）
 - Dependabot の PR は、他の PR をマージするたびに rebase が要る
+- 保護はリポジトリの設定で、ファイルには残らない。効いているかは次で確かめる:
+  `gh api repos/KitagawaFuuga/fare-map/branches/main/protection -q '.required_status_checks.contexts'`

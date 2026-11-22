@@ -118,8 +118,8 @@ jobs:
         with:
           context: .
           push: true
+          # latest は本番に切り替えたあとで付ける（Tag latest）
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/fare-map:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/fare-map:${{ steps.meta.outputs.tag }}
           cache-from: type=gha
 
@@ -128,9 +128,107 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Update Azure Container App
+      # ここから下は、新しい版を利用者に流さずに起動して確かめ、通ったときだけ
+      # 切り替える（docs/decisions/0003-verify-before-traffic.md）。
+      # 失敗したら利用者は今の版のまま、新しい版は止めて終わる。
+
+      # 複数の版を同時に動かせるモードにし、今の版に流れを固定する。固定しないと
+      # 新しい版を作った時点で 100% がそちらへ流れる。2回目以降は何も変わらない。
+      - name: Pin traffic to the serving revision
+        id: pin
         run: |
-          az containerapp update \
-            --name fare-map \
-            --resource-group fare-map-rg \
-            --image ${{ secrets.DOCKERHUB_USERNAME }}/fare-map:${{ steps.meta.outputs.tag }}
+          A="--name fare-map --resource-group fare-map-rg"
+          az containerapp revision set-mode $A --mode multiple -o none
+          CUR=$(az containerapp revision list $A \
+            --query "[?properties.trafficWeight > \`0\`].name | [0]" -o tsv)
+          if [ -z "$CUR" ]; then
+            echo "::error::流れを受けている版が見つからない"
+            exit 1
+          fi
+          az containerapp ingress traffic set $A --revision-weight "$CUR=100" -o none
+          echo "current=$CUR" >> "$GITHUB_OUTPUT"
+
+      # 版の名前は英小文字で始める必要があり、SHA は数字で始まりうるので v を前に付ける。
+      # 再実行で同じ名前にならないよう、実行番号と試行回数も入れる。
+      - name: Create candidate revision
+        id: candidate
+        run: |
+          A="--name fare-map --resource-group fare-map-rg"
+          SUFFIX="v${{ github.run_number }}-${{ github.run_attempt }}-${{ steps.meta.outputs.tag }}"
+          az containerapp update $A \
+            --image ${{ secrets.DOCKERHUB_USERNAME }}/fare-map:${{ steps.meta.outputs.tag }} \
+            --revision-suffix "$SUFFIX" -o none
+          NEW="fare-map--$SUFFIX"
+          echo "name=$NEW" >> "$GITHUB_OUTPUT"
+          # ラベルを付けた版には、本番とは別の専用 URL で届く
+          az containerapp revision label add $A --label candidate --revision "$NEW" --yes -o none
+          FQDN=$(az containerapp show $A --query properties.configuration.ingress.fqdn -o tsv)
+          echo "url=https://fare-map---candidate.${FQDN#fare-map.}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      # 0台から起動する直後は遅く、E2E がタイムアウトする。駅の候補が返るまで待つ
+      # （返るなら graph.json の読み込みまで済んでいる）。
+      - name: Wait for candidate
+        run: |
+          for i in $(seq 1 36); do
+            if curl -fsS "${{ steps.candidate.outputs.url }}/api/stations?q=%E6%96%B0%E5%AE%BF" -o /dev/null; then
+              echo "応答あり（${i}回目）"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::新しい版が3分以内に応答しなかった"
+          exit 1
+
+      - name: Verify candidate
+        env:
+          E2E_BASE_URL: ${{ steps.candidate.outputs.url }}
+        run: npx playwright test --grep @prod --project chromium
+
+      - name: Promote candidate
+        run: |
+          az containerapp ingress traffic set --name fare-map --resource-group fare-map-rg \
+            --revision-weight "${{ steps.candidate.outputs.name }}=100" "${{ steps.pin.outputs.current }}=0" -o none
+          echo "本番を ${{ steps.candidate.outputs.name }} に切り替えた"
+
+      # 前の版を止める。失敗しても本番の流れには影響しないので、警告だけにする
+      - name: Deactivate previous revision
+        continue-on-error: true
+        run: |
+          az containerapp revision deactivate --name fare-map --resource-group fare-map-rg \
+            --revision "${{ steps.pin.outputs.current }}" -o none
+
+      - name: Tag latest
+        run: |
+          docker buildx imagetools create \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/fare-map:latest \
+            ${{ secrets.DOCKERHUB_USERNAME }}/fare-map:${{ steps.meta.outputs.tag }}
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-candidate
+          path: playwright-report/
+          retention-days: 7
+
+      # 確認に落ちたら新しい版を止める。利用者は前の版のまま。
+      # Promote の後で落ちた場合（Tag latest など）は、本番はもう新しい版なので止めない。
+      - name: Discard candidate
+        if: failure() && steps.candidate.outputs.name != '' && steps.pin.outputs.current != ''
+        run: |
+          A="--name fare-map --resource-group fare-map-rg"
+          SERVING=$(az containerapp revision list $A \
+            --query "[?properties.trafficWeight > \`0\`].name | [0]" -o tsv)
+          if [ "$SERVING" = "${{ steps.candidate.outputs.name }}" ]; then
+            echo "::warning::本番は新しい版に切り替わっているので止めない"
+            exit 0
+          fi
+          az containerapp revision label remove $A --label candidate -o none || true
+          az containerapp revision deactivate $A --revision "${{ steps.candidate.outputs.name }}" -o none
+          echo "::error::新しい版は確認に通らなかったので止めた。本番は $SERVING のまま"

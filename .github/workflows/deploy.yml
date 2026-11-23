@@ -11,8 +11,8 @@ on:
 
 concurrency:
   group: deploy-${{ github.ref }}
-  # 途中で止めると、latest だけ進んで Container App は古い版のまま、という
-  # ずれが起きうる。後から来た実行は待たせて、前の実行を最後まで走らせる。
+  # 途中で止めると、流れを固定したまま・確認中の版が動いたまま、という状態が
+  # 残りうる。後から来た実行は待たせて、前の実行を最後まで走らせる。
   cancel-in-progress: false
 
 jobs:
@@ -47,8 +47,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: e2e-results
+          path: test-results/
           retention-days: 7
 
   deploy:
@@ -56,9 +56,17 @@ jobs:
     # workflow_dispatch はどのブランチでも実行できる。main 以外を本番に出さない
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+
+      # 本番前の確認（Verify candidate）で使う。時間のかかる準備は、流れを固定する前に済ませる
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
 
       - name: Set image tag (commit SHA)
         id: meta
@@ -139,13 +147,23 @@ jobs:
         run: |
           A="--name fare-map --resource-group fare-map-rg"
           az containerapp revision set-mode $A --mode multiple -o none
-          CUR=$(az containerapp revision list $A \
-            --query "[?properties.trafficWeight > \`0\`].name | [0]" -o tsv)
-          if [ -z "$CUR" ]; then
-            echo "::error::流れを受けている版が見つからない"
+          SERVING=$(az containerapp revision list $A \
+            --query "[?properties.trafficWeight > \`0\`].name" -o tsv)
+          # 流れが複数の版に分かれていたら、どれを残すか機械では決められないので止める
+          if [ "$(echo "$SERVING" | grep -c .)" -ne 1 ]; then
+            echo "::error::流れを受けている版が1つではない: $(echo $SERVING)"
             exit 1
           fi
+          CUR="$SERVING"
           az containerapp ingress traffic set $A --revision-weight "$CUR=100" -o none
+          # 単一モードの「最新の版に流す」設定が残っていると、新しい版を作った
+          # 時点でそちらに流れる。残っていないことを確かめてから先へ進む
+          LATEST=$(az containerapp ingress traffic show $A \
+            --query "length([?latestRevision && weight > \`0\`])" -o tsv)
+          if [ "$LATEST" != "0" ]; then
+            echo "::error::最新の版へ流す設定が残っている"
+            exit 1
+          fi
           echo "current=$CUR" >> "$GITHUB_OUTPUT"
 
       # 版の名前は英小文字で始める必要があり、SHA は数字で始まりうるので v を前に付ける。
@@ -165,26 +183,29 @@ jobs:
           FQDN=$(az containerapp show $A --query properties.configuration.ingress.fqdn -o tsv)
           echo "url=https://fare-map---candidate.${FQDN#fare-map.}" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-
       # 0台から起動する直後は遅く、E2E がタイムアウトする。駅の候補が返るまで待つ
-      # （返るなら graph.json の読み込みまで済んでいる）。
+      # （返るなら graph.json の読み込みまで済んでいる）。1回の要求にも上限を付け、
+      # 応答しないまま固まって全体の待ち時間を超えないようにする。
       - name: Wait for candidate
         run: |
           for i in $(seq 1 36); do
-            if curl -fsS "${{ steps.candidate.outputs.url }}/api/stations?q=%E6%96%B0%E5%AE%BF" -o /dev/null; then
-              echo "応答あり（${i}回目）"
-              exit 0
+            if curl -fsS --max-time 10 "${{ steps.candidate.outputs.url }}/api/stations?q=%E6%96%B0%E5%AE%BF" -o /tmp/candidate.json; then
+              break
             fi
             sleep 5
           done
-          echo "::error::新しい版が3分以内に応答しなかった"
-          exit 1
+          if ! test -s /tmp/candidate.json; then
+            echo "::error::新しい版が応答しなかった"
+            exit 1
+          fi
+          node -e '
+            const b = require("/tmp/candidate.json");
+            if (!Array.isArray(b.stations) || b.stations.length === 0) {
+              console.error("駅が返らなかった:", JSON.stringify(b).slice(0, 300));
+              process.exit(1);
+            }
+            console.log("応答あり:", b.stations.length, "件");
+          '
 
       - name: Verify candidate
         env:
@@ -197,10 +218,12 @@ jobs:
             --revision-weight "${{ steps.candidate.outputs.name }}=100" "${{ steps.pin.outputs.current }}=0" -o none
           echo "本番を ${{ steps.candidate.outputs.name }} に切り替えた"
 
-      # 前の版を止める。失敗しても本番の流れには影響しないので、警告だけにする
+      # 前の版を止める。切り替えの直後に止めると処理中の検索が落ちるので、少し待つ。
+      # 失敗しても本番の流れには影響しないので、警告だけにする
       - name: Deactivate previous revision
         continue-on-error: true
         run: |
+          sleep 30
           az containerapp revision deactivate --name fare-map --resource-group fare-map-rg \
             --revision "${{ steps.pin.outputs.current }}" -o none
 
@@ -210,17 +233,20 @@ jobs:
             -t ${{ secrets.DOCKERHUB_USERNAME }}/fare-map:latest \
             ${{ secrets.DOCKERHUB_USERNAME }}/fare-map:${{ steps.meta.outputs.tag }}
 
+      # CI では reporter が github だけで playwright-report/ は作られない。
+      # 失敗時のトレースとスクリーンショットは test-results/ に出る
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-candidate
-          path: playwright-report/
+          name: e2e-results-candidate
+          path: test-results/
           retention-days: 7
 
-      # 確認に落ちたら新しい版を止める。利用者は前の版のまま。
+      # 確認に落ちたら新しい版を止める。利用者は前の版のまま。時間切れや取り消しで
+      # 止まった場合も同じ（failure() だけだと、そのときは走らない）。
       # Promote の後で落ちた場合（Tag latest など）は、本番はもう新しい版なので止めない。
       - name: Discard candidate
-        if: failure() && steps.candidate.outputs.name != '' && steps.pin.outputs.current != ''
+        if: (failure() || cancelled()) && steps.candidate.outputs.name != '' && steps.pin.outputs.current != ''
         run: |
           A="--name fare-map --resource-group fare-map-rg"
           SERVING=$(az containerapp revision list $A \

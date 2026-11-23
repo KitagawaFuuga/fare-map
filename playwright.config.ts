@@ -4,7 +4,8 @@ const PORT = 3100;
 
 // 指定されたら、手元でサーバーを立てずにその URL に対して走らせる。デプロイ時に
 // 本番へ切り替える前の版を確かめるのに使う（.github/workflows/deploy.yml）。
-const externalBaseURL = process.env.E2E_BASE_URL;
+// 空文字は未指定と同じに扱う（?? だと baseURL が "" になり、webServer も立たない）
+const externalBaseURL = process.env.E2E_BASE_URL || undefined;
 
 // E2E は本番ビルドに対して走らせる。maplibre のワーカー解決は dev と本番で
 // 挙動が違い（Turbopack のチャンク URL が変わる）、検出したいのは本番側の

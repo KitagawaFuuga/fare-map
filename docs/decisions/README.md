@@ -38,3 +38,4 @@
 - [0001: main は CI が通った変更だけを受け付ける](0001-protect-main.md)
 - [0002: デプロイの前にも E2E を走らせる](0002-e2e-before-deploy.md)
 - [0003: 新しい版は確かめてから本番に流す](0003-verify-before-traffic.md)
+- [0004: テストの検出力をミューテーションテストで測る](0004-mutation-testing.md)

@@ -47,41 +47,50 @@ async function cheapestPixels(png: Buffer): Promise<number> {
 // デスクトップ幅で走らせるので、サイドバー側だけを触る。
 const sidebar = (page: Page) => page.locator("aside");
 
-test("地図が初期化され、maplibre のワーカーが 404 にならない", async ({
-  page,
-}) => {
-  // Turbopack のチャンク URL と node_modules 上の相対位置がずれると、maplibre の
-  // ワーカーが 404 になりタイルが永久に読み込み中で止まる（過去に発生）。
-  // ビルドも typecheck も通ってしまうため、ブラウザで開く以外に検出できない。
-  const badResponses: string[] = [];
-  page.on("response", (res) => {
-    if (res.status() >= 400 && /maplibre-gl.*\.mjs/.test(res.url())) {
-      badResponses.push(`${res.status()} ${res.url()}`);
-    }
-  });
-  const workerErrors: string[] = [];
-  page.on("console", (msg) => {
-    if (msg.type() === "error" && /worker|maplibre/i.test(msg.text())) {
-      workerErrors.push(msg.text());
-    }
-  });
+// @prod の付いたテストは、デプロイ時に本番へ切り替える前の版にも走らせる
+// （.github/workflows/deploy.yml）。本番のレート制限に当たらないよう、
+// 検索を伴うものは最小限にしてある。
+const PROD = { tag: "@prod" };
 
-  await stubTiles(page);
-  await page.goto("/");
+test(
+  "地図が初期化され、maplibre のワーカーが 404 にならない",
+  PROD,
+  async ({ page }) => {
+    // Turbopack のチャンク URL と node_modules 上の相対位置がずれると、maplibre の
+    // ワーカーが 404 になりタイルが永久に読み込み中で止まる（過去に発生）。
+    // ビルドも typecheck も通ってしまうため、ブラウザで開く以外に検出できない。
+    const badResponses: string[] = [];
+    page.on("response", (res) => {
+      if (res.status() >= 400 && /maplibre-gl.*\.mjs/.test(res.url())) {
+        badResponses.push(`${res.status()} ${res.url()}`);
+      }
+    });
+    const workerErrors: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error" && /worker|maplibre/i.test(msg.text())) {
+        workerErrors.push(msg.text());
+      }
+    });
 
-  // ワーカーの解決に失敗すると maplibre は canvas を描かないまま止まる。
-  await expect(page.locator("canvas.maplibregl-canvas")).toBeVisible({
-    timeout: 30_000,
-  });
+    await stubTiles(page);
+    await page.goto("/");
 
-  const workerStatus = await page.evaluate(
-    async () => (await fetch("/maplibre-gl-worker.mjs")).status,
-  );
-  expect(workerStatus, "public/ のワーカー実体が配信されていること").toBe(200);
+    // ワーカーの解決に失敗すると maplibre は canvas を描かないまま止まる。
+    await expect(page.locator("canvas.maplibregl-canvas")).toBeVisible({
+      timeout: 30_000,
+    });
 
-  expect(badResponses).toEqual([]);
-  expect(workerErrors).toEqual([]);
-});
+    const workerStatus = await page.evaluate(
+      async () => (await fetch("/maplibre-gl-worker.mjs")).status,
+    );
+    expect(workerStatus, "public/ のワーカー実体が配信されていること").toBe(
+      200,
+    );
+
+    expect(badResponses).toEqual([]);
+    expect(workerErrors).toEqual([]);
+  },
+);
 
 test("駅名を入力すると候補が出て、選ぶと出発駅になる", async ({ page }) => {
   await stubTiles(page);
@@ -244,7 +253,7 @@ test("検索ボタンは運賃の色と同じ系統の茶で塗られる", async
   await expect(button).toHaveCSS("background-color", "rgb(165, 71, 0)");
 });
 
-test("予算を入れて検索すると到達可能駅が出る", async ({ page }) => {
+test("予算を入れて検索すると到達可能駅が出る", PROD, async ({ page }) => {
   await stubTiles(page);
   await page.goto("/");
 
@@ -329,36 +338,38 @@ test("地図の読み込みより先に検索結果が届いても、駅の円�
     .toBeGreaterThan(100);
 });
 
-test("初期表示の範囲外の駅から検索すると、地図が結果の駅へ移って円が見える", async ({
-  page,
-}) => {
-  // 地図は東京を表示して始まる。検索しても地図が動かなかったので、黒崎駅前
-  // （北九州）から検索すると一覧には結果が出るのに地図には何も描かれなかった。
-  test.setTimeout(60_000);
-  await stubTiles(page);
-  await page.goto("/");
+test(
+  "初期表示の範囲外の駅から検索すると、地図が結果の駅へ移って円が見える",
+  PROD,
+  async ({ page }) => {
+    // 地図は東京を表示して始まる。検索しても地図が動かなかったので、黒崎駅前
+    // （北九州）から検索すると一覧には結果が出るのに地図には何も描かれなかった。
+    test.setTimeout(60_000);
+    await stubTiles(page);
+    await page.goto("/");
 
-  const panel = sidebar(page);
-  await panel.getByPlaceholder("駅名を入力").fill("黒崎駅前");
-  await panel
-    .getByRole("button", { name: /^黒崎駅前/ })
-    .first()
-    .click();
-  await panel.locator('input[type="number"]').fill("230");
-  await panel.getByRole("button", { name: "検索" }).click();
-  await expect(panel.getByText(/\d+ 駅に到達可能/)).toBeVisible({
-    timeout: 30_000,
-  });
+    const panel = sidebar(page);
+    await panel.getByPlaceholder("駅名を入力").fill("黒崎駅前");
+    await panel
+      .getByRole("button", { name: /^黒崎駅前/ })
+      .first()
+      .click();
+    await panel.locator('input[type="number"]').fill("230");
+    await panel.getByRole("button", { name: "検索" }).click();
+    await expect(panel.getByText(/\d+ 駅に到達可能/)).toBeVisible({
+      timeout: 30_000,
+    });
 
-  // 一覧の駅は押さない（押すと地図が寄るので、検索だけで寄ることを確かめられない）
-  const canvas = page.locator("canvas.maplibregl-canvas");
-  await expect
-    .poll(async () => cheapestPixels(await canvas.screenshot()), {
-      timeout: 20_000,
-      intervals: [1_000],
-    })
-    .toBeGreaterThan(30);
-});
+    // 一覧の駅は押さない（押すと地図が寄るので、検索だけで寄ることを確かめられない）
+    const canvas = page.locator("canvas.maplibregl-canvas");
+    await expect
+      .poll(async () => cheapestPixels(await canvas.screenshot()), {
+        timeout: 20_000,
+        intervals: [1_000],
+      })
+      .toBeGreaterThan(30);
+  },
+);
 
 // 黒崎駅前から予算230円で検索する（到達駅は八幡・陣原・熊西の3駅で、地図はそこへ寄る）
 async function searchKurosaki(page: Page): Promise<void> {

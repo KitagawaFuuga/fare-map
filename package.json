@@ -13,6 +13,7 @@
     "build": "node scripts/copy-maplibre-worker.mjs && next build",
     "start": "next start",
     "test": "vitest run",
+    "test:mutation": "stryker run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -41,6 +42,8 @@
   "devDependencies": {
     "@nizos/probity": "^1.10.1",
     "@playwright/test": "^1.63.0",
+    "@stryker-mutator/core": "10.1.1",
+    "@stryker-mutator/vitest-runner": "10.1.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^26.2.0",

@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createFareCalculator } from "@/lib/fare/calculator";
 import {
   buildSpecialCities,
@@ -284,17 +284,6 @@ const CASES: Case[] = [
     note: "大手私鉄の短距離",
   },
 ];
-
-// 距離表は事業者の全駅ぶんをダイクストラで作るので、JR東日本（1,619駅）では数秒かかる。
-// 最初のテストで作ると、全体を並列実行したときに既定の5秒を超えて落ちる。
-// 先にまとめて作っておき、個々のテストは引くだけにする。
-beforeAll(() => {
-  for (const c of CASES) {
-    kmOf(c.operator, false);
-    kmOf(c.operator, true);
-  }
-  kmOf("JR西日本", true);
-}, 120_000);
 
 describe.each(CASES)("$from→$to（$operator）", (c) => {
   it(`営業キロが公表の ${c.officialKm}km と合う`, () => {

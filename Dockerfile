@@ -14,14 +14,19 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
+# root では動かさず、ベースイメージにある node ユーザー（uid 1000）で動かす。
+# Next.js の with-docker の見本どおり、standalone 以下（Next が書き込む .next を含む）は node の持ち物にする。
+# standalone には data/ も含まれるので、data/ も node から書き込める（アプリは実行中にファイルを書かない）。
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+COPY --from=builder --chown=node:node /app/public ./public
 COPY --from=builder /app/data/graph.json ./data/graph.json
 COPY --from=builder /app/data/fare-rules ./data/fare-rules
 COPY --from=builder /app/data/fare-overrides ./data/fare-overrides
 COPY --from=builder /app/data/fare-zones.json ./data/fare-zones.json
 COPY --from=builder /app/data/special-cities.json ./data/special-cities.json
+
+USER node
 
 EXPOSE 3000
 

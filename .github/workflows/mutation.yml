@@ -11,7 +11,8 @@ on:
 
 concurrency:
   group: mutation
-  cancel-in-progress: true
+  # 週ごとに比べるので、手動の実行で定期の実行を止めない（後から来た方が待つ）
+  cancel-in-progress: false
 
 jobs:
   stryker:

@@ -15,8 +15,8 @@ AI の誤りは [docs/ai-incidents.md](ai-incidents.md) に分けて残し、こ
 | 探索 | `lib/search/reachable.ts`。運賃と距離の Pareto 集合を持つ最良優先探索（設計は [search-design.md](search-design.md)） |
 | 運賃 | `lib/fare/`。距離帯の運賃表、事業者ごとの特定運賃、加算額 |
 | データ | `data/graph.json` などをコミットしておき、実行時は読むだけ。作り直しは `scripts/pipeline/` |
-| 配信 | Docker イメージを Azure Container Apps へ。`main` への merge がそのままデプロイ |
-| CI | GitHub Actions（`ci.yml`、`deploy.yml`） |
+| 配信 | Docker イメージ（`node` ユーザーで実行）を Azure Container Apps へ。`main` への merge がそのままデプロイ |
+| CI | GitHub Actions（`ci.yml`、`deploy.yml`、`codeql.yml`）。部品はコミットハッシュで固定し、トークンは読み取りだけ |
 
 Next.js 16 は学習データと API が違う。コードを書く前に `node_modules/next/dist/docs/` の該当ページを読む（[AGENTS.md](../AGENTS.md)）。
 
@@ -41,6 +41,7 @@ docs/         このメモ、設計判断、テストの記録
 - **設計判断**: 選択肢が2つ以上あった決定は `docs/decisions/` に1件1ファイル。データの出典・デプロイ・公開範囲に関わるものはユーザーが選ぶ。
 - **テストの検出力**: テストは書いた直後は通るので、わざと壊して落ちることを確かめてからコミットする。
 - **デプロイ前**: main は CI が通った変更だけ（[0001](decisions/0001-protect-main.md)）、デプロイ前にも E2E（[0002](decisions/0002-e2e-before-deploy.md)）、新しい版は確かめてから本番に流す（[0003](decisions/0003-verify-before-traffic.md)）。
+- **供給網**: `uses:` はハッシュとバージョンのコメントで書き、Dependabot の更新 PR で両方を一緒に上げる。脆弱性の報告は `SECURITY.md` の窓口から（[0006](decisions/0006-supply-chain-hardening.md)）。
 - **データの正しさ**: 運賃は運賃表との一致ではなく実額で確かめる。表の読み取りを変えたら新旧を比較する。
 
 ## コマンド

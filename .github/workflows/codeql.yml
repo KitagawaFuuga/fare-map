@@ -1,0 +1,39 @@
+name: CodeQL
+
+# コードを実行せずに読んで、危ない書き方（入力をそのまま出す、パスに混ぜるなど）を探す。
+# 雛形は actions/starter-workflows の code-scanning/codeql.yml（docs/decisions/0006）
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # 依存やルールの更新で新しく見つかるものを拾うため、コードが変わらなくても週1回流す
+    - cron: "30 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      # 結果を Security タブに送る
+      security-events: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # actions はワークフロー自体（注入やトークンの扱い）を見る
+        language: [javascript-typescript, actions]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: github/codeql-action/init@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - uses: github/codeql-action/analyze@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          category: "/language:${{ matrix.language }}"

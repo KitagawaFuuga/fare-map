@@ -463,6 +463,11 @@ function graphKmOf(operator: string, useFareKm = false): Map<string, number> {
 /** 探索が運賃を引くのに使う距離（運賃計算キロ） */
 const graphFareKmOf = (operator: string) => graphKmOf(operator, true);
 
+// graphKmOf を呼ぶテスト用。全駅間の最短距離を求めるので1件数秒かかり、
+// ミューテーションテスト（vitest.stryker.config.ts）で壊し方ごとに流し直すと終わらない。
+// そこでだけ飛ばす。普段の CI では流れる
+const itGraph = process.env.SKIP_REAL_DATA === "1" ? it.skip : it;
+
 const calc = createFareCalculator(rules, overrides);
 
 // 本番(lib/server/graph-store.ts)は data/fare-rules/ をディレクトリごと読むが、この
@@ -652,7 +657,7 @@ describe("FareCalculator", () => {
     // 運転系統名ごとに重複して持っており（南宮崎〜田吉が「JR宮崎空港線」＝幹線と
     // 「JR日南線」＝地方交通線の2本）、最短経路が擬制キロの小さいほうを選ぶこと。
     // 加算運賃を入れる前は240円だったので、改善してはいる。
-    it("宮崎→宮崎空港に加算運賃130円が乗る", () => {
+    itGraph("宮崎→宮崎空港に加算運賃130円が乗る", () => {
       const km = graphFareKmOf("JR九州").get(
         ["宮崎", "宮崎空港"].sort().join("\u0000"),
       );
@@ -663,7 +668,7 @@ describe("FareCalculator", () => {
       ).toBe(130);
     });
 
-    it("宮崎空港を通らない区間には加算運賃が乗らない", () => {
+    itGraph("宮崎空港を通らない区間には加算運賃が乗らない", () => {
       const km = graphFareKmOf("JR九州").get(
         ["宮崎", "田吉"].sort().join("\u0000"),
       );
@@ -677,16 +682,20 @@ describe("FareCalculator", () => {
     // graph.json ではこの区間が瀬戸大橋線としてJR西日本のエッジになっている。
     // JR西日本（1,150駅）の全駅間距離を作るので数秒かかり、全体を並列実行すると
     // 既定の5秒を超えて落ちる（値の誤りではない）。時間を延ばしておく
-    it("岡山→宇多津に本四備讃線の加算運賃110円が乗る", () => {
-      const km = graphFareKmOf("JR西日本").get(
-        ["岡山", "宇多津"].sort().join("\u0000"),
-      );
-      expect(km).toBeDefined();
-      expect(
-        calc.estimate("JR西日本", km!, "岡山", "宇多津") -
-          calc.estimate("JR西日本", km!),
-      ).toBe(110);
-    }, 60_000);
+    itGraph(
+      "岡山→宇多津に本四備讃線の加算運賃110円が乗る",
+      () => {
+        const km = graphFareKmOf("JR西日本").get(
+          ["岡山", "宇多津"].sort().join("\u0000"),
+        );
+        expect(km).toBeDefined();
+        expect(
+          calc.estimate("JR西日本", km!, "岡山", "宇多津") -
+            calc.estimate("JR西日本", km!),
+        ).toBe(110);
+      },
+      60_000,
+    );
   });
 
   describe("JR四国", () => {
@@ -728,15 +737,18 @@ describe("FareCalculator", () => {
     // 難波線の区間キロが2.8km（正しくは2.0km）だったため 190.5km と出ており、
     // 181〜190km帯の2,860円ではなく191〜200km帯の3,000円になっていた。
     // 差し替えは data/kilometrage-corrections.json。
-    it("大阪難波→近鉄名古屋は 189.7km で 2,860円（graph.json の距離で検証）", () => {
-      const km = graphFareKmOf("近畿日本鉄道").get(
-        ["大阪難波", "近鉄名古屋"].sort().join("\u0000"),
-      );
-      expect(km).toBeCloseTo(189.7, 1);
-      expect(calc.estimate("近畿日本鉄道", km!, "大阪難波", "近鉄名古屋")).toBe(
-        2860,
-      );
-    });
+    itGraph(
+      "大阪難波→近鉄名古屋は 189.7km で 2,860円（graph.json の距離で検証）",
+      () => {
+        const km = graphFareKmOf("近畿日本鉄道").get(
+          ["大阪難波", "近鉄名古屋"].sort().join("\u0000"),
+        );
+        expect(km).toBeCloseTo(189.7, 1);
+        expect(
+          calc.estimate("近畿日本鉄道", km!, "大阪難波", "近鉄名古屋"),
+        ).toBe(2860);
+      },
+    );
 
     // 鳥羽線・けいはんな線・吉野線・湯の山線・志摩線には加算運賃がかかる。
     // 距離帯表は加算前の額なので、入れないと実額より安く出る（到達できない駅を
@@ -784,7 +796,7 @@ describe("FareCalculator", () => {
     //
     // この4点は実運賃そのもの。距離はグラフの営業キロを渡して、
     // 生成の過程が変わったら落ちるようにしてある。
-    it("名鉄名古屋→犬山 は 630円（営業キロ27.9のままだと570円）", () => {
+    itGraph("名鉄名古屋→犬山 は 630円（営業キロ27.9のままだと570円）", () => {
       const key = ["名鉄名古屋", "犬山"].sort().join("\u0000");
       // 探索は運賃計算キロで引く。擬制キロが効いて 630円 になる
       expect(
@@ -796,7 +808,7 @@ describe("FareCalculator", () => {
       ).toBe(570);
     });
 
-    it.each([
+    itGraph.each([
       ["常滑", "中部国際空港", 330],
       ["太田川", "中部国際空港", 650],
       ["名鉄名古屋", "中部国際空港", 980],
@@ -832,13 +844,16 @@ describe("FareCalculator", () => {
     // 11.0km）の側にすでに入っており、graph.json の km がそれになっている。
     // 名鉄やJR地方交通線のように fareKm で持つ必要はない。
     // 実運賃は ekitan.com (2026-09-25取得) で380円/20.1kmを確認。
-    it("小泉線の館林→太田は擬制キロ20.1kmで380円（実キロ16.2kmなら330円）", () => {
-      expect(
-        graphKmOf("東武鉄道").get(["館林", "太田"].sort().join("\u0000")),
-      ).toBeCloseTo(20.1, 3);
-      expect(calc.estimate("東武鉄道", 20.1)).toBe(380);
-      expect(calc.estimate("東武鉄道", 16.2)).toBe(330);
-    });
+    itGraph(
+      "小泉線の館林→太田は擬制キロ20.1kmで380円（実キロ16.2kmなら330円）",
+      () => {
+        expect(
+          graphKmOf("東武鉄道").get(["館林", "太田"].sort().join("\u0000")),
+        ).toBeCloseTo(20.1, 3);
+        expect(calc.estimate("東武鉄道", 20.1)).toBe(380);
+        expect(calc.estimate("東武鉄道", 16.2)).toBe(330);
+      },
+    );
   });
 
   describe("特定運賃（駅ペア単位の割引運賃）", () => {
@@ -1626,28 +1641,31 @@ describe("FareCalculator", () => {
     // 距離表は「各距離での最小運賃」の階段。枝刈りの下界に使うので実運賃を超えてはいけない
     // 枝刈りの下界としての正しさ。graph を再生成して駅間距離が動くと帯の境界を
     // またいで壊れうる（境界の余裕は最小6m）ので、実距離で全ペアを検査する
-    it("距離表は全2211ペアの実運賃を上回らない（graph.json の実距離で検証）", () => {
-      const km = graphKmOf("富山地方鉄道");
-      expect(chitetsuOverride.pairs).toHaveLength(2211);
-      let checked = 0;
-      for (const p of chitetsuOverride.pairs) {
-        const d = km.get([p.from, p.to].sort().join("\u0000"));
-        expect(
-          d,
-          `${p.from}-${p.to} の距離が graph.json から取れない`,
-        ).toBeDefined();
-        expect(
-          calc.estimate("富山地方鉄道", d!),
-          `${p.from}→${p.to} ${d!.toFixed(3)}km`,
-        ).toBeLessThanOrEqual(p.fare);
-        checked++;
-      }
-      expect(checked).toBe(2211);
-    });
+    itGraph(
+      "距離表は全2211ペアの実運賃を上回らない（graph.json の実距離で検証）",
+      () => {
+        const km = graphKmOf("富山地方鉄道");
+        expect(chitetsuOverride.pairs).toHaveLength(2211);
+        let checked = 0;
+        for (const p of chitetsuOverride.pairs) {
+          const d = km.get([p.from, p.to].sort().join("\u0000"));
+          expect(
+            d,
+            `${p.from}-${p.to} の距離が graph.json から取れない`,
+          ).toBeDefined();
+          expect(
+            calc.estimate("富山地方鉄道", d!),
+            `${p.from}→${p.to} ${d!.toFixed(3)}km`,
+          ).toBeLessThanOrEqual(p.fare);
+          checked++;
+        }
+        expect(checked).toBe(2211);
+      },
+    );
 
     // override が丸ごと消えても距離表が同じ値を返すペアが多く、代表値のテストでは
     // 欠落を検出できない。件数と、距離表と食い違う値が実際に引けることの両方を見る
-    it("override は全2211ペア揃っていて、距離表と違う値が引ける", () => {
+    itGraph("override は全2211ペア揃っていて、距離表と違う値が引ける", () => {
       const km = graphKmOf("富山地方鉄道");
       const differing = chitetsuOverride.pairs.filter((p) => {
         const d = km.get([p.from, p.to].sort().join("\u0000"));
@@ -1729,21 +1747,24 @@ describe("FareCalculator", () => {
     // 上回っていても隠れてしまう。ここで見るのは距離表そのもの。
     // 表は scripts/fare/derive-lower-bound.ts が実額行列と graph.json の距離から
     // 作っており、この不変条件が表の生成規則そのものになっている。
-    it("距離表は全435ペアの実運賃を上回らない（graph.json の実距離で検証）", () => {
-      const km = graphKmOf("しなの鉄道");
-      expect(shinanoOverride.pairs).toHaveLength(435);
-      for (const p of shinanoOverride.pairs) {
-        const d = km.get([p.from, p.to].sort().join("\u0000"));
-        expect(
-          d,
-          `${p.from}-${p.to} の距離が graph.json から取れない`,
-        ).toBeDefined();
-        expect(
-          calc.estimate("しなの鉄道", d!),
-          `${p.from}→${p.to} ${d!.toFixed(3)}km`,
-        ).toBeLessThanOrEqual(p.fare);
-      }
-    });
+    itGraph(
+      "距離表は全435ペアの実運賃を上回らない（graph.json の実距離で検証）",
+      () => {
+        const km = graphKmOf("しなの鉄道");
+        expect(shinanoOverride.pairs).toHaveLength(435);
+        for (const p of shinanoOverride.pairs) {
+          const d = km.get([p.from, p.to].sort().join("\u0000"));
+          expect(
+            d,
+            `${p.from}-${p.to} の距離が graph.json から取れない`,
+          ).toBeDefined();
+          expect(
+            calc.estimate("しなの鉄道", d!),
+            `${p.from}→${p.to} ${d!.toFixed(3)}km`,
+          ).toBeLessThanOrEqual(p.fare);
+        }
+      },
+    );
 
     // 1つの事業者名の中に賃率の違う3つの体系が同居する。同じ距離でも値が違うので
     // 距離表では表せず、全ペアを override で持っている

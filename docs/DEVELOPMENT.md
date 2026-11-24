@@ -48,12 +48,10 @@ docs/         このメモ、設計判断、テストの記録
 | やること | コマンド |
 |----------|----------|
 | 起動 | `npm i && npm run dev`（http://localhost:3000） |
-| 単体テスト | `npm test`（実データを使うテストを飛ばすなら `SKIP_REAL_DATA=1`） |
-| 型検査・lint | `npm run typecheck` / `npm run lint` |
-| E2E | `npm run e2e` |
 | データの作り直し | `npm run pipeline:fetch` → `pipeline:build` → `pipeline:validate`（手順は `scripts/pipeline/README.md`） |
 
-Windows では vitest を大文字の `C:` のパスから流す（小文字の `c:` だと全ファイルが 0 test で落ちる）。
+テスト・型検査・lint・整形・E2E など、変更を終える前に流す確認は [CLAUDE.md の「コマンド」](../CLAUDE.md) にまとめてある（CI と同じ並び）。
+ここに写すと片方だけ直されてずれるので、一覧はそちらだけに置く。
 
 ## 環境変数と秘密情報
 

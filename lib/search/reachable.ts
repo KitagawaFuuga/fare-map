@@ -28,6 +28,10 @@ interface SearchState {
   // （通し運賃の地方交通線の扱いは未対応。換算キロで幹線の表を引く近似のまま）
   segmentAllLocal: boolean;
   segmentLocalKm: number; // 進行中区間の営業キロ。segmentAllLocal の間だけ意味を持つ
+  // 進行中区間で最後に着いた駅（その事業者を降りる駅）。乗換の辺では動かさない。
+  // stationId は乗換で移った先になるので、名前の違う駅へ歩く乗換（大阪→梅田）の後に
+  // stationId の名前で区間を引くと、駅ペアの特定運賃（大阪〜高槻 290円）が当たらない
+  segmentEndId: string;
   fare: number; // confirmedFare + 進行中区間の運賃。状態生成時に確定する
   entry: ParetoEntry; // pop 時の生死判定を O(1) にするための挿入先への参照
 }
@@ -254,6 +258,18 @@ function runSearch(
   // 読み替えるので、同じ距離でも区域外の起点とは将来の運賃が違う。区域内の起点どうしは
   // 区域でまとめる（発駅〜中心駅の違いが効くのは遠回りの経路だけ。近似の範囲は
   // docs/search-design.md「特定都区市内」）。区切りの "|" は駅名・区間 id に現れない。
+  //
+  // 名前の違う駅へ歩いて乗り換えた直後は、区間の運賃を「降りた駅」（segmentEndId）で引く。
+  // 同じ駅に直接乗って着いた状態とは、この先の運賃（駅ペアの特定運賃が当たるか）が違うので、
+  // 降りた駅の名前で bucket を分ける（walkedKey）。分けないと、距離の短い「歩いて着いた」
+  // 状態が特定運賃の当たる状態を支配して追い出す（A→T 特定運賃100円が A→S＋徒歩の200円に負けた）
+  const walkedKey = (s: {
+    stationId: string;
+    segmentEndId: string;
+  }): string => {
+    const end = nameOf(s.segmentEndId);
+    return end === nameOf(s.stationId) ? "" : `|walked:${end ?? ""}`;
+  };
   const originBucketKey = (
     segmentOperator: string,
     segmentFromId: string,
@@ -315,6 +331,7 @@ function runSearch(
     honshuThroughEastKm: 0,
     segmentAllLocal: false,
     segmentLocalKm: 0,
+    segmentEndId: fromId,
     fare: 0,
     entry: initialEntry,
   };
@@ -331,8 +348,7 @@ function runSearch(
     for (const edge of adjacency.get(state.stationId) ?? []) {
       let next: SearchState;
       if (edge.kind === "transfer") {
-        // stationId だけ差し替えて fare を引き継ぐと、override 判定に使う「現在駅名」
-        // が乗り換え前のままになる。必ず再計算する。
+        // 乗換では区間の終点（segmentEndId）を動かさない。運賃はその事業者を降りた駅までで引く
         next = {
           ...state,
           stationId: edge.to,
@@ -346,7 +362,7 @@ function runSearch(
               state.honshuThroughKm,
               state.honshuThroughEastKm,
               nameOf(state.segmentFromId),
-              nameOf(edge.to),
+              nameOf(state.segmentEndId),
               localKmOf(state),
               nameOf(state.fareFromId),
             ),
@@ -363,6 +379,7 @@ function runSearch(
           segmentKm,
           segmentAllLocal,
           segmentLocalKm,
+          segmentEndId: edge.to,
           fare:
             state.confirmedFare +
             evaluateSegmentFare(
@@ -403,6 +420,7 @@ function runSearch(
           honshuThroughEastKm,
           segmentAllLocal: false,
           segmentLocalKm: 0,
+          segmentEndId: edge.to,
           fare:
             state.confirmedFare +
             calc.estimateHonshuThrough(
@@ -426,7 +444,7 @@ function runSearch(
             state.honshuThroughKm,
             state.honshuThroughEastKm,
             nameOf(state.segmentFromId),
-            nameOf(state.stationId),
+            nameOf(state.segmentEndId),
             localKmOf(state),
             nameOf(state.fareFromId),
           );
@@ -442,6 +460,7 @@ function runSearch(
           honshuThroughEastKm: 0,
           segmentAllLocal: edge.localKm !== undefined,
           segmentLocalKm: edge.localKm ?? 0,
+          segmentEndId: edge.to,
           fare:
             confirmedFare +
             calc.estimate(
@@ -481,7 +500,7 @@ function runSearch(
           next.fareFromId,
           next.isHonshuThrough,
           next.confirmedFare,
-        ),
+        ) + walkedKey(next),
         flagsKey(next.isHonshuThrough, next.segmentAllLocal),
       );
       const nextEntry: ParetoEntry = {

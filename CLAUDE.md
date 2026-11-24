@@ -1,5 +1,15 @@
 @AGENTS.md
-@docs/DEVELOPMENT.md
+
+# コマンド
+
+新しい worktree では最初に `npm i`。終わったと言う前に、変えた範囲に合わせて次を流し、出力を確かめる。
+
+- 単体テスト: `npm test`、1ファイルだけなら `npx vitest run lib/fare/__tests__/calculator.test.ts`
+  （Windows ではパスを大文字の `C:` から始める。小文字の `c:` だと全ファイルが 0 test で落ちる）
+- 型検査: `npm run typecheck`、lint: `npm run lint`、整形: `npm run format:check`
+- E2E: `npm run e2e`
+
+構成・技術の選び方・手順を変える前に `docs/DEVELOPMENT.md` を読み、変えたら更新する。
 
 # TDD
 

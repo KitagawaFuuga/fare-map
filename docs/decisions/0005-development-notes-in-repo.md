@@ -11,7 +11,7 @@ AI の記憶（auto memory）は手元の PC にしか無く、ハマりどこ�
 
 ## 選択肢
 
-- 案A: `docs/DEVELOPMENT.md` をリポジトリに置き、CLAUDE.md から読み込む。GitHub で誰でも読める。
+- 案A: `docs/DEVELOPMENT.md` をリポジトリに置く。GitHub で誰でも読める。
   作り方を外に説明できるが、キーなどを書き込むと公開されてしまう
 - 案B: `CLAUDE.local.md` など手元だけに置く。漏れる心配は無いが、他の PC や読み手からは見えない
 
@@ -22,6 +22,9 @@ AI の記憶（auto memory）は手元の PC にしか無く、ハマりどこ�
 ## 結果
 
 - 構成・手順・参照資料が変わったら AI が `docs/DEVELOPMENT.md` を更新する。決めた経緯はこれまでどおり `docs/decisions/` に書く。
+- CLAUDE.md からは `@` で読み込まず、「変える前に読む」の1行で案内する。Anthropic の Claude Code ベストプラクティスが
+  CLAUDE.md に構成やファイル配置を書かないよう勧めていて（Claude はリポジトリを自分で読めるため）、読み込むと
+  毎回の文脈を使うから。CLAUDE.md には代わりに、終わる前に流すコマンドを置く（AI の判断）。
 - 公開されるので、キー・トークンの値は書かず、環境変数の名前だけを書く。ユーザーレベルの PreToolUse フック
   （`~/.claude/hooks/secret-scan.cjs`）が、`.md` にキーらしい値を書き込もうとしたら止める。
   このフックはリポジトリの外にあるので、他の PC で作業するときは効かない。

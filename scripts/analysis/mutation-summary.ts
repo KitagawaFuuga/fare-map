@@ -14,8 +14,27 @@ export interface Counts {
   timeout: number;
   survived: number;
   noCoverage: number;
-  // 捕まえた割合（%）。Stryker の mutation score と同じ定義
-  score: number;
+  // 捕まえた割合（%）。Stryker の mutation score と同じ定義。
+  // 有効な壊し方が0件なら null（Stryker も NaN を返す。100% と出すと壊れた実行が正常に見える）
+  score: number | null;
+}
+
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+// Stryker の版が上がって形が変わったとき、どこが違うかを言って落ちる
+export function parseReport(json: unknown): Report {
+  if (!isRecord(json) || !isRecord(json.files)) {
+    throw new Error("mutation.json に files がありません");
+  }
+  for (const [path, f] of Object.entries(json.files)) {
+    const ok =
+      isRecord(f) &&
+      Array.isArray(f.mutants) &&
+      f.mutants.every((m) => isRecord(m) && typeof m.status === "string");
+    if (!ok) throw new Error(`${path} の mutants の形が想定と違います`);
+  }
+  return json as unknown as Report;
 }
 
 export interface Summary {
@@ -38,7 +57,7 @@ function count(statuses: string[]): Counts {
     timeout,
     survived,
     noCoverage,
-    score: valid === 0 ? 100 : ((killed + timeout) / valid) * 100,
+    score: valid === 0 ? null : ((killed + timeout) / valid) * 100,
   };
 }
 
@@ -52,7 +71,7 @@ export function summarize(report: Report): Summary {
   return { total: count(all), files };
 }
 
-const pct = (n: number) => `${n.toFixed(1)}%`;
+const pct = (n: number | null) => (n === null ? "N/A" : `${n.toFixed(1)}%`);
 
 // 見逃しのあるファイルを上位 limit 件まで載せる。全部載せると数十行になり読まれない
 export function toMarkdown(s: Summary, limit: number): string {
@@ -64,16 +83,22 @@ export function toMarkdown(s: Summary, limit: number): string {
       (f) =>
         `| ${f.path} | ${pct(f.score)} | ${f.survived} | ${f.noCoverage} |`,
     );
+  const table =
+    rows.length === 0
+      ? ["見逃しはありません"]
+      : [
+          `見逃しの多いファイル（上位 ${rows.length} 件）`,
+          "",
+          "| ファイル | スコア | 見逃し | テストが無い |",
+          "| --- | --- | --- | --- |",
+          ...rows,
+        ];
   return [
     "## ミューテーションテスト",
     "",
     `スコア: ${pct(t.score)}（捕まえた ${t.killed + t.timeout} / 見逃し ${t.survived} / テストが無い ${t.noCoverage}）`,
     "",
-    `見逃しの多いファイル（上位 ${limit} 件）`,
-    "",
-    "| ファイル | スコア | 見逃し | テストが無い |",
-    "| --- | --- | --- | --- |",
-    ...rows,
+    ...table,
     "",
   ].join("\n");
 }
@@ -84,6 +109,6 @@ if (
   import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
   const file = process.argv[2] ?? "reports/mutation/mutation.json";
-  const report = JSON.parse(readFileSync(file, "utf8")) as Report;
+  const report = parseReport(JSON.parse(readFileSync(file, "utf8")) as unknown);
   process.stdout.write(toMarkdown(summarize(report), 15));
 }

@@ -70,6 +70,14 @@ function cityApplies(city: SpecialCity, km: number): boolean {
   return km > city.minKm && km <= (city.maxKm ?? Infinity);
 }
 
+// 区間の距離は駅間キロの足し算なので、足す順番で 15 が 15.000000000000002 になる。
+// 運賃表は「15km 以下」のように境目で区切るので、この誤差だけで1つ上の運賃帯になり、
+// 往復で運賃が食い違っていた（JR山口線 篠目→地福 240円、地福→篠目 330円）。
+// 駅間キロは小数2桁までなので、それより十分細かい桁で丸めて誤差だけを消す
+function withoutFloatNoise(km: number): number {
+  return Math.round(km * 1e6) / 1e6;
+}
+
 // 方向を問わず引けるよう並べ替えてから繋ぐ。区切りは駅名に現れない文字
 function pairKey(a: string, b: string): string {
   return [a, b].sort().join("\u0000");
@@ -377,16 +385,18 @@ export function createFareCalculator(
   }
 
   // 地方交通線の表で引いた運賃。表を持たない事業者、表の範囲外なら undefined
-  function localFare(operator: string, localKm: number): number | undefined {
+  function localFare(operator: string, rawKm: number): number | undefined {
     const table = byOperator.get(operator)?.localTable;
+    const localKm = withoutFloatNoise(rawKm);
     if (table === undefined || localKm <= 0) return undefined;
     return table.find((row) => localKm <= row[0])?.[1];
   }
 
   function fareFromTable(
     rule: Pick<FareRule, "table" | "beyond">,
-    km: number,
+    rawKm: number,
   ): number {
+    const km = withoutFloatNoise(rawKm);
     if (km <= 0) return 0;
     // maxKm 昇順なので「km <= maxKm の最初の行」を二分探索で探せる（昇順は zod が強制）
     const table = rule.table;

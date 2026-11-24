@@ -16,7 +16,7 @@ AI の誤りは [docs/ai-incidents.md](ai-incidents.md) に分けて残し、こ
 | 運賃 | `lib/fare/`。距離帯の運賃表、事業者ごとの特定運賃、加算額 |
 | データ | `data/graph.json` などをコミットしておき、実行時は読むだけ。作り直しは `scripts/pipeline/` |
 | 配信 | Docker イメージ（`node` ユーザーで実行）を Azure Container Apps へ。`main` への merge がそのままデプロイ |
-| CI | GitHub Actions（`ci.yml`、`deploy.yml`、`codeql.yml`）。部品はコミットハッシュで固定し、トークンは読み取りだけ |
+| CI | GitHub Actions（`ci.yml`、`deploy.yml`、`codeql.yml`）。部品はコミットハッシュで固定し、トークンは既定で読み取りだけ（CodeQL の結果送信だけ `security-events: write`） |
 
 Next.js 16 は学習データと API が違う。コードを書く前に `node_modules/next/dist/docs/` の該当ページを読む（[AGENTS.md](../AGENTS.md)）。
 

@@ -12,7 +12,7 @@ OpenSSF Scorecard の検査項目と照らし合わせたところ、次が抜�
   すり替わった中身が CI で動き、デプロイのジョブに渡る Docker Hub と Azure の認証情報が盗まれうる
 - GITHUB_TOKEN の権限を指定しておらず、リポジトリの既定の権限で動いていた
 - 静的解析が無かった。脆弱性の連絡先（SECURITY.md）が無かった
-- コンテナが root で動いていた。Dependabot が Dockerfile を見ていなかった
+- コンテナが root で動いていた
 
 ## 選択肢
 
@@ -28,11 +28,15 @@ OpenSSF Scorecard の検査項目と照らし合わせたところ、次が抜�
 - 部品はコミットハッシュで固定する（案A）。今の major のまま、その時点の最新の patch に合わせた
 - CodeQL はワークフローを置く（案A）。対象は JavaScript/TypeScript と Actions のワークフロー
 - 連絡先は private vulnerability reporting（案A）。リポジトリの Settings → Advanced Security で有効にする（ユーザーの操作）
-- ベースイメージはタグのまま、Dependabot に docker を加える（案A）。Dependabot は月1回なので、ダイジェストで固定すると
-  修正が最大1か月遅れるため
+- ベースイメージはタグのまま（案A）。Dependabot は月1回なので、ダイジェストで固定すると修正が最大1か月遅れるため。
+  当初は Dependabot に docker を加えて Node の大きい版の更新を知らせる予定だったが、レビューで2つの問題が見つかり外した（AI の判断）:
+  CI はイメージを作らないので壊れる更新でも merge でき、merge がそのままデプロイになる。また Dependabot はワークフローの
+  `node-version: 24` を上げられないので、本番の Node と CI で試す Node がずれる（奇数の非 LTS 版も提案される）。
+  Node の大きい版は、Dockerfile とワークフローの `node-version` を同じ PR で手で上げる
 - GITHUB_TOKEN はワークフローの既定を `contents: read` にし、CodeQL のジョブにだけ `security-events: write` を足す
 - コンテナは `node` ユーザーで動かす（Next.js の with-docker の見本と同じ）。standalone の出力に `data/` も含まれるため、
-  `data/` も node から書き込める。アプリは実行中にファイルを書かないので、それ以上は絞らない
+  `data/` 以下のフォルダは node の持ち物、あとから COPY する JSON のファイルは root の持ち物と混在する。
+  アプリは実行中にファイルを書かないので、それ以上は絞らない
 
 ## 結果
 

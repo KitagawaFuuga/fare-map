@@ -16,3 +16,4 @@
 | 2026-11-24 | `docs/DEVELOPMENT.md` を CLAUDE.md から `@` で毎回読み込むようにしたが、構成やファイル配置を CLAUDE.md に入れないという Anthropic のベストプラクティスに反し、毎回の文脈を使っていた | 人の確認（公式ドキュメントとの照合） | マージ前 | 読み込みをやめ、CLAUDE.md には終わる前に流すコマンドと「変える前に読む」の1行を置いた |
 | 2026-11-25 | DEVELOPMENT.md に、どのコードも読まない `SKIP_REAL_DATA=1` を書いた（別の作業ツリーの未コミットの変更を見て書いていた）。コマンドの一覧が CLAUDE.md と二重になり、片方は format:check が抜けていた | レビュー（/code-review） | マージ前 | 変数の記述を消し、確認のコマンドは CLAUDE.md だけに置いた |
 | 2026-11-25 | Dockerfile を node ユーザーで動かす変更で「data/ は root の持ち物のまま」とコメントと 0006 に書いたが、Next の standalone 出力に data/ が含まれ、node の持ち物になっていた | 人の確認（コンテナを起動して ls -ld で確かめた） | マージ前 | コメントと 0006 を事実に合わせた |
+| 2026-11-25 | Dependabot に docker を加えたが、CI はイメージを作らないので壊れる更新でも merge でき（merge がそのままデプロイ）、ワークフローの node-version は上がらず本番と CI の Node がずれる。Dockerfile のコメントは data/ の持ち主の混在（フォルダは node、JSON は root）を書き落としていた | レビュー（/code-review） | マージ前 | docker を外して Node の大きい版は手で上げることにし、コメントと 0006 を直した |

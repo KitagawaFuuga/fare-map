@@ -107,14 +107,16 @@ export function createFareCalculator(
       minOverrideByOperatorStation.get(o.operator) ?? new Map<string, number>();
     let min = minOverrideByOperator.get(o.operator) ?? Infinity;
     const bumpStationMin = (station: string, fare: number) => {
-      const cur = byStation.get(station) ?? Infinity;
-      if (fare < cur) byStation.set(station, fare);
+      byStation.set(
+        station,
+        Math.min(byStation.get(station) ?? Infinity, fare),
+      );
     };
     for (const p of o.pairs) {
       map.set(pairKey(p.from, p.to), p.fare);
       stations.add(p.from);
       stations.add(p.to);
-      if (p.fare < min) min = p.fare;
+      min = Math.min(min, p.fare);
       bumpStationMin(p.from, p.fare);
       bumpStationMin(p.to, p.fare);
     }
@@ -202,6 +204,10 @@ export function createFareCalculator(
       new Map(
         [...byName].map(([name, list]) => [
           name,
+          // 区切りは区域の id が別の id とつながって見えないためのもの。区域の id は
+          // 都市名の英字（tokyo、yamanote など。data/special-cities.json）で、区切りを
+          // 無くしても別の組み合わせと同じ文字列にならない
+          // Stryker disable next-line StringLiteral: 外しても結果が同じ（上のコメント）
           list.map(({ city }) => city.id).join("+"),
         ]),
       ),
@@ -218,12 +224,18 @@ export function createFareCalculator(
     fromName: string | undefined,
     toName: string | undefined,
   ): { km: number; eastShrink: number } | undefined {
+    // 速くするための近道。外しても、下で区域を調べて同じく読み替えない
+    // Stryker disable next-line ConditionalExpression,EqualityOperator: 外しても結果が同じ（上のコメント）
     if (km <= (cityReachByGroup.get(group) ?? Infinity)) return undefined;
     const byName = citiesByStation.get(group);
+    // 以下の3つの早期 return は、外しても結果が同じ（区域の無いグループは上の
+    // cityReach で返り、駅名が無ければ下の centerKm が引けず読み替えない）
+    // Stryker disable next-line ConditionalExpression,LogicalOperator: 外しても結果が同じ（上のコメント）
     if (byName === undefined || fromName === undefined || toName === undefined)
       return undefined;
     const fromCities = byName.get(fromName);
     const toCities = byName.get(toName);
+    // Stryker disable next-line ConditionalExpression: 外しても下のループが空で回るだけ
     if (fromCities === undefined && toCities === undefined) return undefined;
     let origin: { city: SpecialCity; km: number } | undefined;
     let dest: { city: SpecialCity; km: number } | undefined;
@@ -231,8 +243,10 @@ export function createFareCalculator(
     for (const { city, stations } of fromCities ?? []) {
       const dFrom = city.centerKm.get(fromName);
       const dTo = city.centerKm.get(toName);
-      if (dFrom === undefined || dTo === undefined || stations.has(toName))
-        continue;
+      if (stations.has(toName)) continue;
+      // 距離が無いと下の k が NaN になり cityApplies が偽になるので、外しても結果が同じ
+      // Stryker disable next-line ConditionalExpression,LogicalOperator: 外しても結果が同じ（上のコメント）
+      if (dFrom === undefined || dTo === undefined) continue;
       const k = Math.max(km - dFrom, dTo);
       if (cityApplies(city, k)) {
         origin = { city, km: k };
@@ -242,8 +256,9 @@ export function createFareCalculator(
     for (const { city, stations } of toCities ?? []) {
       const dFrom = city.centerKm.get(fromName);
       const dTo = city.centerKm.get(toName);
-      if (dFrom === undefined || dTo === undefined || stations.has(fromName))
-        continue;
+      if (stations.has(fromName)) continue;
+      // Stryker disable next-line ConditionalExpression,LogicalOperator: 発駅側と同じ理由で、外しても結果が同じ
+      if (dFrom === undefined || dTo === undefined) continue;
       const k = Math.max(km - dTo, dFrom);
       if (cityApplies(city, k)) {
         dest = { city, km: k };
@@ -254,8 +269,10 @@ export function createFareCalculator(
       // 発着とも区域内なら中心駅どうし
       const between = origin.city.centerKm.get(dest.city.center);
       // 第86条は中心駅どうしが200kmを超えるときだけ。そうでなければ読み替えない
+      // 中心駅が同じなら between は 0 で、下の比較でも返る。この比較は念のため
+      // Stryker disable next-line ConditionalExpression: 外しても結果が同じ（上のコメント）
+      if (origin.city.center === dest.city.center) return undefined;
       if (
-        origin.city.center === dest.city.center ||
         between === undefined ||
         between <= Math.max(origin.city.minKm, dest.city.minKm)
       )

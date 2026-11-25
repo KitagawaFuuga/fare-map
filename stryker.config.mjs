@@ -9,9 +9,9 @@ export default {
   mutate: ["lib/**/*.ts", "!lib/**/__tests__/**"],
   // 壊した箇所を通るテストだけを流す。全テストを毎回流すと数千倍の時間がかかる
   coverageAnalysis: "perTest",
-  // 最初に全テストを1回流してどのテストがどこを通るかを記録する。計測用の処理が
-  // 入るぶん普段（約30秒）よりずっと遅く、既定の5分では探索のテストが終わらない
-  dryRunTimeoutMinutes: 30,
+  // 最初に全テストを1回流してどのテストがどこを通るかを記録する。手元で約1分半
+  // （2026-11-24）。GitHub の実行環境は遅いので、既定の5分では足りないことがある
+  dryRunTimeoutMinutes: 10,
   // 型検査を外す対象を lib/ に限る。既定だと .claude/ の HTML まで読みに行って警告が出る
   disableTypeChecks: "lib/**/*.ts",
   reporters: ["clear-text", "progress", "html", "json"],

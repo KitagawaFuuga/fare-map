@@ -11,13 +11,15 @@ on:
 
 concurrency:
   group: mutation
-  # 週ごとに比べるので、手動の実行で定期の実行を止めない（後から来た方が待つ）
+  # 週ごとに比べるので、手動の実行で定期の実行を止めない（後から来た方が待つ）。
+  # ただし待てるのは1つだけで、さらに来ると前に待っていた方が取り消される。
+  # 定期の実行が待っている間は、手動で重ねて流さない
   cancel-in-progress: false
 
 jobs:
   stryker:
     runs-on: ubuntu-latest
-    # 手元（8コア）で約14分。GitHub の実行環境は4コアなので倍以上を見込む
+    # 手元（8コア）で約24分（2026-11-24）。GitHub の実行環境は4コアなので倍程度を見込む
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4

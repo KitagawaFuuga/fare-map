@@ -121,6 +121,80 @@ describe("特定都区市内（旅客営業規則 第86条）", () => {
     expect(calc.lowerBound("甲JR", 50, "A")).toBe(500);
   });
 
+  // 下界が緩すぎると探索で枝を刈れず遅くなる。読み替えで下がりうる分だけ下げる
+  describe("下界は読み替えで下がりうる分だけ下げる", () => {
+    // 下界の項は発駅ごとにキャッシュされる。共有の calc だと前のテストの値が残り、
+    // ミューテーションテストで変化を見逃すので、テストごとに作る
+    const fresh = () =>
+      createFareCalculator(
+        [perKm("kou", ["甲JR"]), fallback],
+        [],
+        [],
+        [cityX, cityY],
+      );
+
+    it("区域内の発駅からは、中心駅からの距離まで下げる", () => {
+      // A の項: 自区域 max(km−5, 200)、区域Yへ max(km−5−4, 300)
+      const c = fresh();
+      expect(c.lowerBound("甲JR", 255, "A")).toBe(2500);
+      expect(c.lowerBound("甲JR", 309, "A")).toBe(3000);
+    });
+
+    it("区域外の発駅からは、着駅側の区域の半径か中心駅までの距離まで下げる", () => {
+      // Far1 の項: 区域X max(km−8, 250)、区域Y max(km−4, 200)
+      const c = fresh();
+      expect(c.lowerBound("甲JR", 258, "Far1")).toBe(2500);
+      expect(c.lowerBound("甲JR", 253, "Far1")).toBe(2490);
+    });
+
+    it("中心駅までの距離が分からない区域は、下界の計算に使わない", () => {
+      // Far3 は区域Yの距離を持たない。区域Xだけで max(210−8, 202)
+      expect(fresh().lowerBound("甲JR", 210, "Far3")).toBe(2020);
+    });
+
+    it("中心駅どうしの距離が分からない区域の組は、下界の計算に使わない", () => {
+      const noK: SpecialCity = {
+        ...cityX,
+        centerKm: new Map([...cityX.centerKm].filter(([name]) => name !== "K")),
+      };
+      const c = createFareCalculator(
+        [perKm("kou", ["甲JR"]), fallback],
+        [],
+        [],
+        [noK, cityY],
+      );
+      expect(c.lowerBound("甲JR", 255, "A")).toBe(2500);
+    });
+
+    it("発駅が分からなければ、発着とも最大の半径だけ下げる", () => {
+      // 半径は区域Xの 8km。max(255−16, 200)
+      expect(fresh().lowerBound("甲JR", 255)).toBe(2390);
+    });
+
+    it("同じ条件の区域が2つあっても、片方は下界の計算に残す", () => {
+      const twin = (id: string, center: string, near: string): SpecialCity => ({
+        id,
+        center,
+        operator: "甲JR",
+        minKm: 200,
+        stations: [center, near],
+        centerKm: new Map([
+          [center, 0],
+          [near, 4],
+          ["S", 250],
+        ]),
+      });
+      const c = createFareCalculator(
+        [perKm("kou", ["甲JR"]), fallback],
+        [],
+        [],
+        [twin("d1", "C1", "N1"), twin("d2", "C2", "N2")],
+      );
+      // どちらの区域でも max(260−4, 250)
+      expect(c.lowerBound("甲JR", 260, "S")).toBe(2560);
+    });
+  });
+
   it("区域の駅なら区域の id を返す", () => {
     expect(calc.specialCityKeyOf("甲JR", "A", false, Infinity)).toBe("x");
     expect(calc.specialCityKeyOf("甲JR", "Far1", false, Infinity)).toBe(
@@ -131,6 +205,30 @@ describe("特定都区市内（旅客営業規則 第86条）", () => {
   it("残りの予算が規則の最低運賃（200kmの運賃）未満なら区域として扱わない", () => {
     expect(calc.specialCityKeyOf("甲JR", "A", false, 1990)).toBe(undefined);
     expect(calc.specialCityKeyOf("甲JR", "A", false, 2000)).toBe("x");
+  });
+
+  it("2つの区域に入る駅は、予算で使える区域だけの id を返す", () => {
+    const city = (id: string, center: string, minKm: number): SpecialCity => ({
+      id,
+      center,
+      operator: "甲JR",
+      minKm,
+      stations: [center, "S"],
+      centerKm: new Map([
+        [center, 0],
+        ["S", 3],
+      ]),
+    });
+    const c = createFareCalculator(
+      [perKm("kou", ["甲JR"]), fallback],
+      [],
+      [],
+      [city("p", "P", 100), city("q", "Q", 300)],
+    );
+    // 規則の最低運賃は p が 1000円、q が 3000円
+    expect(c.specialCityKeyOf("甲JR", "S", false, Infinity)).toBe("p+q");
+    expect(c.specialCityKeyOf("甲JR", "S", false, 1500)).toBe("p");
+    expect(c.specialCityKeyOf("甲JR", "S", false, 999)).toBe(undefined);
   });
 
   it("発着とも区域内でも、中心駅どうしが200km以下なら読み替えない", () => {
@@ -276,6 +374,15 @@ describe("特定都区市内とJR本州3社の通し運賃", () => {
   it("通し運賃の下界も読み替え後の運賃を上回らない", () => {
     expect(calc.honshuThroughBaseFare(255, "A")).toBeLessThanOrEqual(2500);
     expect(calc.honshuThroughBaseFare(258, "Far1")).toBeLessThanOrEqual(2500);
+  });
+
+  it("通し運賃の下界は読み替えで下がりうる分だけ下げる", () => {
+    // 下界の項のキャッシュが前のテストから残らないよう作り直す
+    const c = createFareCalculator([base, kasan, fallback], [], [], [eastCity]);
+    expect(c.honshuThroughBaseFare(255, "A")).toBe(2500);
+    expect(c.honshuThroughBaseFare(258, "Far1")).toBe(2500);
+    // 発駅が分からなければ max(255−16, 200)
+    expect(c.honshuThroughBaseFare(255)).toBe(2390);
   });
 
   // 加算額: 100kmまで100円、200kmまで200円（区域内の5kmが効くと帯が変わる）

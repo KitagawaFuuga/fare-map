@@ -1,0 +1,51 @@
+name: Mutation testing
+
+# 週1回、lib/ のコードを機械的に壊してテストが捕まえられるかを測る
+# （docs/decisions/0004-mutation-testing.md）。いまは測るだけでマージは止めない。
+# 数週分の結果を見てから、PR で止める基準を決める。
+on:
+  schedule:
+    # 月曜 03:00 JST
+    - cron: "0 18 * * 0"
+  workflow_dispatch:
+
+# 読むだけでよい。142パッケージの npm ci がリポジトリへの書き込み権限を持たないようにする
+permissions:
+  contents: read
+
+concurrency:
+  group: mutation
+  # 週ごとに比べるので、手動の実行で定期の実行を止めない（後から来た方が待つ）。
+  # ただし待てるのは1つだけで、さらに来ると前に待っていた方が取り消される。
+  # 定期の実行が待っている間は、手動で重ねて流さない
+  cancel-in-progress: false
+
+jobs:
+  stryker:
+    runs-on: ubuntu-latest
+    # 手元（8コア）で約24分（2026-11-24）。GitHub の実行環境は4コアなので倍程度を見込む
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:mutation
+
+      # スコアと見逃しの多いファイルを、この実行の要約欄に出す
+      - name: Summary
+        if: always()
+        run: |
+          if test -f reports/mutation/mutation.json; then
+            npx tsx scripts/analysis/mutation-summary.ts reports/mutation/mutation.json >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # 見逃した箇所の一覧（HTML）と生データ。基準を決めるときに数週分を見比べる
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: mutation-report
+          path: reports/mutation/
+          retention-days: 90

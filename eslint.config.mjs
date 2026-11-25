@@ -13,6 +13,9 @@ export default tseslint.config(
       "public/maplibre-gl-shared.mjs",
       "test-results/**",
       "playwright-report/**",
+      // Stryker の作業用コピー（落ちると残る）と結果
+      ".stryker-tmp/**",
+      "reports/**",
     ],
   },
   ...tseslint.configs.recommended,

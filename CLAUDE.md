@@ -18,6 +18,10 @@
 PreToolUse フックの Probity（`probity.config.ts`）が、赤のテストがない実装・テストの同時複数追加・過剰実装をブロックする。
 ブロックされたら理由に従ってテストから書き直す。フックを外したり対象外のパスに逃がしたりしない。
 
+全国の路線網（`data/graph.json`）を読むテストと、1件が数秒かかるテスト（リポジトリ全体を読むなど）は
+`*.slow.test.ts` の名前にする。ミューテーションテストはこの名前で除外している（`vitest.stryker.config.ts`）。
+路線網を読むほうは `lib/__tests__/slow-test-naming.test.ts` が検査し、計測中に readFileSync・fs/promises・JSON の import で読むと `vitest.stryker.setup.ts` が落とす。単体テストは小さな路線網を自分で組む。
+
 # 記録
 
 開発の経緯をコードの外に残す。どれも作業のついでに書き、ユーザーに書かせない。

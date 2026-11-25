@@ -17,3 +17,4 @@
 | 2026-11-25 | DEVELOPMENT.md に、どのコードも読まない `SKIP_REAL_DATA=1` を書いた（別の作業ツリーの未コミットの変更を見て書いていた）。コマンドの一覧が CLAUDE.md と二重になり、片方は format:check が抜けていた | レビュー（/code-review） | マージ前 | 変数の記述を消し、確認のコマンドは CLAUDE.md だけに置いた |
 | 2026-11-25 | Dockerfile を node ユーザーで動かす変更で「data/ は root の持ち物のまま」とコメントと 0006 に書いたが、Next の standalone 出力に data/ が含まれ、node の持ち物になっていた | 人の確認（コンテナを起動して ls -ld で確かめた） | マージ前 | コメントと 0006 を事実に合わせた |
 | 2026-11-25 | Dependabot に docker を加えたが、CI はイメージを作らないので壊れる更新でも merge でき（merge がそのままデプロイ）、ワークフローの node-version は上がらず本番と CI の Node がずれる。Dockerfile のコメントは data/ の持ち主の混在（フォルダは node、JSON は root）を書き落としていた | レビュー（/code-review） | マージ前 | docker を外して Node の大きい版は手で上げることにし、コメントと 0006 を直した |
+| 2026-11-25 | CodeQL を「無い」と判断して codeql.yml を足したが、公開時から default setup が有効で、両立できずワークフローの解析が SARIF の処理で失敗した | CI（#20 の CodeQL） | マージ前 | codeql.yml を外して default setup を残し、0006 を直した。案を出す前にリポジトリの今の設定（`gh api .../code-scanning/default-setup`）を確かめる |

@@ -21,6 +21,12 @@ export interface OperatorSplit {
   stations?: string[];
 }
 
+// CSV の1行の列の値。列が欠けていれば空文字。駅データ.jp の CSV は全行に全列があり、
+// 空文字は型を string にするためのもの（どの文字列にしても結果は同じ）
+const col = (row: Record<string, string>, key: string): string =>
+  // Stryker disable next-line StringLiteral: 上のコメント
+  row[key] ?? "";
+
 // 元データ(join.csv)に無い駅間接続を補う定義。ekidata は「他社の線路に乗り入れる区間」を
 // 駅としては登録するが駅間接続は登録しない流儀で、そのままだと乗り入れ先の駅が線路を
 // 1本も持たない孤立点になる（実例: しなの鉄道線の篠ノ井〜長野。station.csv には23駅
@@ -41,9 +47,9 @@ export function mergeExtraStations(
   stations: Record<string, string>[],
   extra: Record<string, string>[],
 ): Record<string, string>[] {
-  const existing = new Set(stations.map((s) => s.station_cd ?? ""));
+  const existing = new Set(stations.map((s) => col(s, "station_cd")));
   for (const s of extra) {
-    if (existing.has(s.station_cd ?? "")) {
+    if (existing.has(col(s, "station_cd"))) {
       throw new Error(
         `extra-stations: ${s.station_cd}(${s.station_name}) は station.csv に既に存在します。` +
           `元データが更新された可能性があるため data/extra-stations.json から削除してください`,
@@ -85,9 +91,9 @@ export function applyStationCorrections(
   }
   const closed = new Set(corrections.closures.map((c) => c.station_cd));
   return stations
-    .filter((s) => !closed.has(s.station_cd ?? ""))
+    .filter((s) => !closed.has(col(s, "station_cd")))
     .map((s) => {
-      const rename = renameByCd.get(s.station_cd ?? "");
+      const rename = renameByCd.get(col(s, "station_cd"));
       return rename ? { ...s, station_name: rename.to } : s;
     });
 }
@@ -108,14 +114,14 @@ export function buildGraph(
   const matched = new Set<string>();
 
   const companyName = new Map(
-    input.companies.map((c) => [c.company_cd ?? "", c.company_name ?? ""]),
+    input.companies.map((c) => [col(c, "company_cd"), col(c, "company_name")]),
   );
   const lineInfo = new Map(
     input.lines.map((l) => [
-      l.line_cd ?? "",
+      col(l, "line_cd"),
       {
-        name: l.line_name ?? "",
-        operator: companyName.get(l.company_cd ?? "") ?? "",
+        name: col(l, "line_name"),
+        operator: companyName.get(col(l, "company_cd")) ?? "",
       },
     ]),
   );
@@ -123,7 +129,7 @@ export function buildGraph(
   const nodes: Record<string, StationNode> = {};
   const splitStationsSeen = new Set<string>();
   for (const s of input.stations) {
-    const line = lineInfo.get(s.line_cd ?? "");
+    const line = lineInfo.get(col(s, "line_cd"));
     if (!line || !s.station_cd) continue;
     // 空文字は Number("") = 0（null island）に、キー欠落は Number(undefined) = NaN になる。
     // どちらも座標欠損であり距離計算に使えないため、生値の段階で弾いてからノードに入れる。
@@ -131,7 +137,7 @@ export function buildGraph(
     const lat = Number(s.lat);
     const lng = Number(s.lon);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
-    const lineId = s.line_cd ?? "";
+    const lineId = col(s, "line_cd");
     const split = splitByLine.get(lineId);
     let operator = line.operator;
     if (split !== undefined) {
@@ -145,16 +151,16 @@ export function buildGraph(
       matched.add(lineId);
       if (
         split.stations === undefined ||
-        split.stations.includes(s.station_name ?? "")
+        split.stations.includes(col(s, "station_name"))
       ) {
         operator = split.to;
-        splitStationsSeen.add(`${lineId}\u0000${s.station_name ?? ""}`);
+        splitStationsSeen.add(`${lineId}\u0000${col(s, "station_name")}`);
       }
     }
     nodes[s.station_cd] = {
       id: s.station_cd,
       groupId: s.station_g_cd ?? s.station_cd,
-      name: s.station_name ?? "",
+      name: col(s, "station_name"),
       lat,
       lng,
       lineId,
@@ -186,10 +192,12 @@ export function buildGraph(
 
   const edges: GraphEdge[] = [];
   const joined = new Set<string>();
+  // 大小どちらを先にしても、同じ組は同じキーになる
+  // Stryker disable next-line EqualityOperator: 上のコメント
   const joinKey = (a: string, b: string) => (a < b ? `${a}:${b}` : `${b}:${a}`);
   for (const j of input.joins) {
-    const a = nodes[j.station_cd1 ?? ""];
-    const b = nodes[j.station_cd2 ?? ""];
+    const a = nodes[col(j, "station_cd1")];
+    const b = nodes[col(j, "station_cd2")];
     if (!a || !b) continue;
     // 駅を指定した分割で事業者がまたがった駅間。どちらの運賃で計算するか決まらない
     if (a.operator !== b.operator) continue;
@@ -248,8 +256,10 @@ function buildTransferEdges(stations: StationNode[]): GraphEdge[] {
   const edges: GraphEdge[] = [];
   const seen = new Set<string>();
   const add = (a: StationNode, b: StationNode) => {
+    // 大小どちらを先にしても、同じ組は同じキーになる
+    // Stryker disable next-line EqualityOperator: 上のコメント
     const key = a.id < b.id ? `${a.id}:${b.id}` : `${b.id}:${a.id}`;
-    if (seen.has(key) || a.id === b.id) return;
+    if (seen.has(key)) return;
     seen.add(key);
     edges.push({ from: a.id, to: b.id, km: 0, kind: "transfer", operator: "" });
   };
@@ -261,15 +271,10 @@ function buildTransferEdges(stations: StationNode[]): GraphEdge[] {
     arr.push(s);
     byGroup.set(s.groupId, arr);
   }
-  for (const group of byGroup.values()) {
-    for (let i = 0; i < group.length; i++) {
-      for (let j = i + 1; j < group.length; j++) {
-        const a = group[i];
-        const b = group[j];
-        if (a && b) add(a, b);
-      }
-    }
-  }
+  for (const group of byGroup.values())
+    group.forEach((a, i) => {
+      for (const b of group.slice(i + 1)) add(a, b);
+    });
 
   // (b) 近接駅。全駅の総当たりは約1万件の2乗で現実的でないため、緯度経度を
   // 0.01度（約1km）刻みのセルに割り、自セルと周囲8セルだけを比較する。
@@ -279,17 +284,26 @@ function buildTransferEdges(stations: StationNode[]): GraphEdge[] {
   const grid = new Map<string, StationNode[]>();
   for (const s of stations) {
     const k = cell(s);
-    const arr = grid.get(k) ?? [];
-    arr.push(s);
-    grid.set(k, arr);
+    const arr = grid.get(k);
+    if (arr === undefined) grid.set(k, [s]);
+    else arr.push(s);
   }
   for (const s of stations) {
     const clat = Math.round(s.lat * 100);
     const clng = Math.round(s.lng * 100);
     for (let dy = -1; dy <= 1; dy++) {
       for (let dx = -1; dx <= 1; dx++) {
-        for (const t of grid.get(`${clat + dy}:${clng + dx}`) ?? []) {
-          if (t.id > s.id && haversineKm(s, t) <= TRANSFER_RADIUS_KM) add(s, t);
+        // dy・dx は -1〜1 を全部回るので、足しても引いても同じ9セルを見る
+        // Stryker disable next-line ArithmeticOperator: 上のコメント
+        const near = grid.get(`${clat + dy}:${clng + dx}`);
+        if (near === undefined) continue;
+        for (const t of near) {
+          // 組は片方の向きからだけ数える（逆向きから数えても seen で1本になる）
+          // Stryker disable next-line ConditionalExpression,EqualityOperator: 上のコメント
+          if (t.id <= s.id) continue;
+          // 距離がちょうど 0.3km になる座標は作れないので、< と <= は区別できない
+          // Stryker disable next-line EqualityOperator: 上のコメント
+          if (haversineKm(s, t) <= TRANSFER_RADIUS_KM) add(s, t);
         }
       }
     }

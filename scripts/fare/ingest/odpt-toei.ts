@@ -292,7 +292,7 @@ function main(write: boolean): Promise<void> {
             `都営の距離帯は公式の区分そのものなので、これは運賃側ではなく ` +
             `data/graph.json の営業キロ（座標から推定し実営業キロで補正した値）の誤差で ` +
             `帯の境界をまたいだぶんである。実額は ODPT の odpt:RailwayFare。` +
-            `data/fare-sources/${g.id}.json と合わせて lib/fare/__tests__/fare-sources.test.ts が全ペア一致を検証する。`,
+            `data/fare-sources/${g.id}.json と合わせて lib/fare/__tests__/fare-sources.slow.test.ts が全ペア一致を検証する。`,
         },
       };
       writeFileSync(overridePath, `${JSON.stringify(override, null, 2)}\n`);

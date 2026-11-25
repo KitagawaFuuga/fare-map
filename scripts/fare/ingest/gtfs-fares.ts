@@ -303,7 +303,7 @@ async function main(): Promise<void> {
               note:
                 `data/fare-rules/ の距離帯では引けないペア（${overridePairs.length}/${pairs.length}）。` +
                 `${note} data/fare-sources/${id}.json と合わせて ` +
-                `lib/fare/__tests__/fare-sources.test.ts が全ペア一致を検証する。`,
+                `lib/fare/__tests__/fare-sources.slow.test.ts が全ペア一致を検証する。`,
             },
           },
           null,

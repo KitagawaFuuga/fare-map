@@ -1,4 +1,5 @@
 import type { RailGraph } from "@/lib/graph/types";
+import { MinHeap } from "@/lib/search/heap";
 
 // 事業者内の駅間営業キロを駅名で引くための表を作る。
 //
@@ -53,23 +54,25 @@ export function buildOperatorKmTable(
   }
   const nameOf = new Map(nodes.map((n) => [n.id, n.name]));
 
+  // 始点の駅名ごとの距離。問い合わせがあった駅名の分だけ求めて覚えておく。
+  // JR西日本（1247ノード）は全駅名ぶん先に求めると約3秒かかり、テストが
+  // 時間切れで落ちていた。検証で聞かれる始点は全駅名のごく一部
   const table = new Map<string, Map<string, number>>();
-  for (const [name, starts] of idsByName) {
+  const from = (name: string): Map<string, number> | undefined => {
+    const hit = table.get(name);
+    if (hit !== undefined) return hit;
+    const starts = idsByName.get(name);
+    if (starts === undefined) return undefined;
     const distance = new Map<string, number>();
-    // 駅数が数百規模なので、二分ヒープを持たず毎回最小値を線形に探す
-    const queue: { id: string; km: number }[] = [];
+    const queue = new MinHeap<{ id: string; km: number }>(
+      (x, y) => x.km - y.km,
+    );
     for (const id of starts) {
       distance.set(id, 0);
       queue.push({ id, km: 0 });
     }
-    while (queue.length > 0) {
-      let best = 0;
-      for (let i = 1; i < queue.length; i++) {
-        const q = queue[i];
-        const b = queue[best];
-        if (q !== undefined && b !== undefined && q.km < b.km) best = i;
-      }
-      const current = queue.splice(best, 1)[0];
+    while (queue.size > 0) {
+      const current = queue.pop();
       if (current === undefined) break;
       if (current.km > (distance.get(current.id) ?? Infinity)) continue;
       for (const edge of adjacency.get(current.id) ?? []) {
@@ -87,7 +90,8 @@ export function buildOperatorKmTable(
       if (km < (byName.get(other) ?? Infinity)) byName.set(other, km);
     }
     table.set(name, byName);
-  }
+    return byName;
+  };
 
-  return (a, b) => table.get(a)?.get(b) ?? null;
+  return (a, b) => from(a)?.get(b) ?? null;
 }

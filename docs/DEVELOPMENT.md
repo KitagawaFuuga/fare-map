@@ -40,6 +40,7 @@ docs/         このメモ、設計判断、テストの記録
 - **TDD**: `lib/`・`app/`・`components/` は赤のテストを先に書く。Probity（`probity.config.ts`）が PreToolUse で強制する。
 - **設計判断**: 選択肢が2つ以上あった決定は `docs/decisions/` に1件1ファイル。データの出典・デプロイ・公開範囲に関わるものはユーザーが選ぶ。
 - **テストの検出力**: テストは書いた直後は通るので、わざと壊して落ちることを確かめてからコミットする。
+  ミューテーションテスト（Stryker）で `lib/` を週1回壊して測る（[0004](decisions/0004-mutation-testing.md)）。全国の路線網を読むテストや1件が数秒かかるテストは `*.slow.test.ts` の名前にする（計測から外す目印）。
 - **デプロイ前**: main は CI が通った変更だけ（[0001](decisions/0001-protect-main.md)）、デプロイ前にも E2E（[0002](decisions/0002-e2e-before-deploy.md)）、新しい版は確かめてから本番に流す（[0003](decisions/0003-verify-before-traffic.md)）。
 - **供給網**: `uses:` はハッシュとバージョンのコメントで書き、Dependabot の更新 PR で両方を一緒に上げる。脆弱性の報告は `SECURITY.md` の窓口から（[0006](decisions/0006-supply-chain-hardening.md)）。
 - **データの正しさ**: 運賃は運賃表との一致ではなく実額で確かめる。表の読み取りを変えたら新旧を比較する。

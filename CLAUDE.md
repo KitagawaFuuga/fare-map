@@ -1,11 +1,26 @@
 @AGENTS.md
 
+# コマンド
+
+新しい worktree では最初に `npm i`。終わったと言う前に、変えた範囲に合わせて次を流し、出力を確かめる。
+
+- 単体テスト: `npm test`、1ファイルだけなら `npx vitest run lib/fare/__tests__/calculator.test.ts`
+  （Windows ではパスを大文字の `C:` から始める。小文字の `c:` だと全ファイルが 0 test で落ちる）
+- 型検査: `npm run typecheck`、lint: `npm run lint`、整形: `npm run format:check`
+- E2E: `npm run e2e`
+
+構成・技術の選び方・手順を変える前に `docs/DEVELOPMENT.md` を読み、変えたら更新する。
+
 # TDD
 
 `lib/` `app/` `components/` の変更は必ず TDD で行う。実装前に `superpowers:test-driven-development` スキルを使い、
 失敗するテストを1つ書いて赤を確認してから最小の実装を書く。
 PreToolUse フックの Probity（`probity.config.ts`）が、赤のテストがない実装・テストの同時複数追加・過剰実装をブロックする。
 ブロックされたら理由に従ってテストから書き直す。フックを外したり対象外のパスに逃がしたりしない。
+
+全国の路線網（`data/graph.json`）を読むテストと、1件が数秒かかるテスト（リポジトリ全体を読むなど）は
+`*.slow.test.ts` の名前にする。ミューテーションテストはこの名前で除外している（`vitest.stryker.config.ts`）。
+路線網を読むほうは `lib/__tests__/slow-test-naming.test.ts` が検査し、計測中に readFileSync・fs/promises・JSON の import で読むと `vitest.stryker.setup.ts` が落とす。単体テストは小さな路線網を自分で組む。
 
 # 記録
 

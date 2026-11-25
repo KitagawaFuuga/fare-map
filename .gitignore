@@ -14,3 +14,7 @@ public/maplibre-gl-shared.mjs
 /playwright-report/
 /blob-report/
 /.playwright/
+
+# Stryker
+/reports/
+/.stryker-tmp/

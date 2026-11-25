@@ -38,4 +38,7 @@
 - [0001: main は CI が通った変更だけを受け付ける](0001-protect-main.md)
 - [0002: デプロイの前にも E2E を走らせる](0002-e2e-before-deploy.md)
 - [0003: 新しい版は確かめてから本番に流す](0003-verify-before-traffic.md)
-- [0005: 計算で作る特定運賃を、距離の誤差を直したコードで作り直して同じ PR に入れる](0005-regenerate-computed-fares.md)
+- [0004: テストの検出力をミューテーションテストで測る](0004-mutation-testing.md)
+- [0005: 作り方の要約をリポジトリに置いて公開する](0005-development-notes-in-repo.md)
+- [0006: CI と配信の守りを固める](0006-supply-chain-hardening.md)
+- [0007: 計算で作る特定運賃を、距離の誤差を直したコードで作り直して同じ PR に入れる](0007-regenerate-computed-fares.md)

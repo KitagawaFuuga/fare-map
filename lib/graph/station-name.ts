@@ -66,7 +66,7 @@ export const STATION_RENAMES: Record<string, string> = {
  * matchKey で吸収する。グラフに無ければ undefined。
  *
  * 特定運賃の生成（scripts/fare/derive-overrides.ts）と、その検証
- * （lib/fare/__tests__/fare-sources.test.ts）で同じ規則を使うこと。
+ * （lib/fare/__tests__/fare-sources.slow.test.ts）で同じ規則を使うこと。
  * 片方だけ寄せると、生成された特定運賃をテストが引けなくなる。
  */
 export function graphNameResolver(

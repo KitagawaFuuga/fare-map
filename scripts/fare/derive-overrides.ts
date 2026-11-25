@@ -9,7 +9,7 @@
 // 運賃が黙って変わる（2026-09-25に実営業キロを53.7%→81.1%に広げたとき、29ペアで
 // 実額と違う運賃が出るようになった）。全ペア持てば距離に依存しなくなる。
 //
-// 増えるのは1万ペア弱で、距離表の正しさは lib/fare/__tests__/fare-sources.test.ts が
+// 増えるのは1万ペア弱で、距離表の正しさは lib/fare/__tests__/fare-sources.slow.test.ts が
 // 別に検証しているため、特定運賃で覆っても距離表の誤りは隠れない。
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { fareOverrideSchema } from "@/lib/fare/types";

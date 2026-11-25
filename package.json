@@ -50,7 +50,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@typescript/native": "npm:typescript@^7.0.2",
-    "eslint": "^10.9.0",
+    "eslint": "^10.15.0",
     "eslint-config-prettier": "^10.1.8",
     "postcss": "^8.5.26",
     "prettier": "^3.9.6",
@@ -58,7 +58,7 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "typescript-eslint": "^8.67.0",
-    "vitest": "^5.0.1"
+    "typescript-eslint": "^8.74.0",
+    "vitest": "^5.1.1"
   }
 }

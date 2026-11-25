@@ -10,6 +10,23 @@ import base from "./vitest.config";
 export default mergeConfig(
   base,
   defineConfig({
+    // JSON として import された路線網も止める（fs を通らないので setupFiles では止まらない）
+    plugins: [
+      {
+        name: "block-graph-json",
+        enforce: "pre",
+        load(id: string) {
+          if (
+            id.replaceAll("\\", "/").split("?")[0]?.endsWith("data/graph.json")
+          ) {
+            throw new Error(
+              "ミューテーションテストでは data/graph.json を読めません。このテストは *.slow.test.ts の名前にしてください",
+            );
+          }
+          return null;
+        },
+      },
+    ],
     test: {
       exclude: ["**/*.slow.test.ts"],
       // 名前を付け忘れても、路線網を読んだ時点で落とす

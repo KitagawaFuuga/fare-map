@@ -16,6 +16,18 @@ import type { StationSuggestion } from "@/lib/server/api-service";
 // ssr: false を明示する必要がある。副次的に初期バンドルからも外れる。
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
+// 0件のときに一覧が消えるだけだと「何も起きなかった」ように見えるので、そう書く。
+// 予算は入力欄の今の値ではなく、検索したときの値（meta）を出す
+function statusText(
+  loading: boolean,
+  data: { stations: unknown[]; meta: { budget: number } } | null,
+): string {
+  if (loading || !data) return "";
+  if (data.stations.length === 0)
+    return `${data.meta.budget}円で行ける駅はありません。予算を上げてみてください。`;
+  return `${data.stations.length} 駅に到達可能`;
+}
+
 export default function Home() {
   // 出発駅は駅名の入力（SearchPanel）だけで決める。地図のクリックや現在地からは決めない
   const [from, setFrom] = useState<StationSuggestion | null>(null);
@@ -47,7 +59,16 @@ export default function Home() {
       >
         {loading ? "検索中…" : "検索"}
       </button>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {/* 結果は見た目だけでなく読み上げでも伝える（WCAG 4.1.3）。status は中身が
+          変わったときに読み上げられるので、空のままでも常に置いておく */}
+      <p role="status" className="text-sm text-gray-600">
+        {statusText(loading, data)}
+      </p>
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
       <StationList stations={data?.stations ?? []} onPick={setFocus} />
       {/* CC BY 4.0 のデータ（運行本数データ・公共交通オープンデータセンター）は
           表示が条件なので、出典から外さないこと。改変の有無（加工して使用）と、

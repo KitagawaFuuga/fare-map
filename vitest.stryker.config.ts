@@ -12,6 +12,8 @@ export default mergeConfig(
   defineConfig({
     test: {
       exclude: ["**/*.slow.test.ts"],
+      // 名前を付け忘れても、路線網を読んだ時点で落とす
+      setupFiles: ["./vitest.stryker.setup.ts"],
       // 計測が入ると遅くなるので、1件あたりの制限を既定の5秒から延ばす
       testTimeout: 60_000,
     },

@@ -2098,3 +2098,48 @@ describe("距離の小数の誤差（区間の距離を逆順に足すと 15 が
     ).toBe(240);
   });
 });
+
+describe("createFareCalculator の入力の検査", () => {
+  const rule = (operators: string[]) =>
+    fareRuleSchema.parse({
+      id: operators.join("") || "fallback",
+      operators,
+      table: [[10, 100]],
+      beyond: { fromKm: 10, baseFare: 100, ratePerKm: 10 },
+    });
+
+  it("どの事業者にも当たらない運賃ルール（operators: []）が無ければ例外になる", () => {
+    expect(() => createFareCalculator([rule(["OpA"])])).toThrow(
+      "フォールバック",
+    );
+  });
+
+  it("1事業者に区間運賃が2つあれば例外になる", () => {
+    const zone = (id: string) => ({
+      id,
+      operator: "OpA",
+      stations: ["P", "Q"],
+      table: [[10, 100]] as [number, number][],
+      beyond: { fromKm: 10, baseFare: 100, ratePerKm: 10 },
+      source: { url: "", fetchedAt: "", note: "" },
+    });
+    expect(() =>
+      createFareCalculator([rule([])], [], [zone("z1"), zone("z2")]),
+    ).toThrow("区間運賃が2つ");
+  });
+
+  it("下界は、後から読んだ高い特定運賃ではなく、最も安い特定運賃まで締める", () => {
+    // 距離表では 100km 1000円。特定運賃は A〜B 100円、A〜C 500円の順に並ぶ
+    const override: FareOverride = {
+      operator: "OpA",
+      pairs: [
+        { from: "A", to: "B", fare: 100 },
+        { from: "A", to: "C", fare: 500 },
+      ],
+      source: { url: "", fetchedAt: "", note: "" },
+    };
+    const calc = createFareCalculator([rule(["OpA"]), rule([])], [override]);
+    expect(calc.lowerBound("OpA", 100)).toBe(100);
+    expect(calc.lowerBound("OpA", 100, "A")).toBe(100);
+  });
+});

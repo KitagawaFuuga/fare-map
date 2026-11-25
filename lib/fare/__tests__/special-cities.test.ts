@@ -152,6 +152,69 @@ describe("特定都区市内（旅客営業規則 第86条）", () => {
     // 遠回りで 230km 乗っても、中心駅どうし 150km の読み替えはしない
     expect(nearCalc.estimate("甲JR", 230, "A", "E")).toBe(2300);
   });
+
+  it("着駅が区域内でも、中心駅から200km以下なら読み替えない", () => {
+    // Far2→A 196km（区域を調べずに返す近道 192km を超える長さ）。
+    // 読み替えは max(196−5, Far2 の 150km) = 191km で200km以下
+    expect(calc.estimate("甲JR", 196, "Far2", "A")).toBe(1960);
+  });
+
+  it("発着とも区域内で、中心駅どうしがちょうど200kmなら読み替えない", () => {
+    const at200X: SpecialCity = {
+      ...cityX,
+      centerKm: new Map([...cityX.centerKm, ["K", 200], ["E", 204]]),
+    };
+    const at200Y: SpecialCity = {
+      ...cityY,
+      centerKm: new Map([...cityY.centerKm, ["C", 200], ["A", 205]]),
+    };
+    const c = createFareCalculator(
+      [perKm("kou", ["甲JR"]), fallback],
+      [],
+      [],
+      [at200X, at200Y],
+    );
+    expect(c.estimate("甲JR", 230, "A", "E")).toBe(2300);
+  });
+
+  it("発着の区域で規則の距離が違えば、中心駅どうしは長いほうを超えなければ読み替えない", () => {
+    // 発駅側は100km超で効く区域、着駅側は200km超。中心駅どうし150km
+    const shortX: SpecialCity = {
+      ...cityX,
+      minKm: 100,
+      centerKm: new Map([...cityX.centerKm, ["K", 150], ["E", 154]]),
+    };
+    const nearY: SpecialCity = {
+      ...cityY,
+      centerKm: new Map([...cityY.centerKm, ["C", 150], ["A", 155]]),
+    };
+    const c = createFareCalculator(
+      [perKm("kou", ["甲JR"]), fallback],
+      [],
+      [],
+      [shortX, nearY],
+    );
+    expect(c.estimate("甲JR", 230, "A", "E")).toBe(2300);
+  });
+
+  it("中心駅どうしの距離が分からなければ、発着とも区域内でも読み替えない", () => {
+    const noK: SpecialCity = {
+      ...cityX,
+      centerKm: new Map([...cityX.centerKm].filter(([s]) => s !== "K")),
+    };
+    const c = createFareCalculator(
+      [perKm("kou", ["甲JR"]), fallback],
+      [],
+      [],
+      [noK, cityY],
+    );
+    expect(c.estimate("甲JR", 309, "A", "E")).toBe(3090);
+  });
+
+  it("発着とも区域内で、区域の外の距離が中心駅どうしより長ければ、そちらで引く", () => {
+    // 320km − A の 5km − E の 4km = 311km（中心駅どうしは 300km）
+    expect(calc.estimate("甲JR", 320, "A", "E")).toBe(3110);
+  });
 });
 
 describe("東京山手線内（旅客営業規則 第87条）", () => {
@@ -174,6 +237,11 @@ describe("東京山手線内（旅客営業規則 第87条）", () => {
 
   it("200kmを超えると第87条は適用しない", () => {
     expect(calc.estimate("甲JR", 255, "A", "Far1")).toBe(2550);
+  });
+
+  it("中心駅からちょうど200kmなら第87条を適用する（200km以下）", () => {
+    // A→Far2 205km。中心駅から Far2 は 150km なので、読み替えは max(205−5, 150) = 200km
+    expect(calc.estimate("甲JR", 205, "A", "Far2")).toBe(2000);
   });
 });
 
@@ -253,6 +321,68 @@ describe("特定都区市内とJR本州3社の通し運賃", () => {
       [westCity],
     );
     expect(c.estimateHonshuThrough(255, 105, "A", "Far1")).toBe(2500 + 200);
+  });
+
+  describe("発着とも区域内のとき、加算額の距離から引くのは JR東日本の区域の側だけ", () => {
+    // 加算額 = 切り上げたキロ × 10円（引いた距離がそのまま見える）
+    const kasanPerKm = perKm("kasan", ["__jr-honshu-kasan"]);
+    const throughOf = (xOperator: string, yOperator: string) =>
+      createFareCalculator(
+        [base, kasanPerKm, fallback],
+        [],
+        [],
+        [
+          { ...cityX, operator: xOperator },
+          { ...cityY, operator: yOperator },
+        ],
+      );
+
+    it("発駅側だけ JR東日本なら、発駅〜中心駅の分だけ引く", () => {
+      // 309km − A 5km − E 4km = 中心駅どうし 300km。JR東日本の区間 50km − 5km
+      expect(
+        throughOf("JR東日本", "JR西日本").estimateHonshuThrough(
+          309,
+          50,
+          "A",
+          "E",
+        ),
+      ).toBe(3000 + 450);
+    });
+
+    it("着駅側だけ JR東日本なら、中心駅〜着駅の分だけ引く", () => {
+      expect(
+        throughOf("JR西日本", "JR東日本").estimateHonshuThrough(
+          309,
+          50,
+          "A",
+          "E",
+        ),
+      ).toBe(3000 + 460);
+    });
+
+    it("両側とも JR東日本でも、縮んだ距離より多くは引かない", () => {
+      // 305km は中心駅どうしの 300km に読み替えるので、縮んだのは5km（両側の半径は9km）
+      expect(
+        throughOf("JR東日本", "JR東日本").estimateHonshuThrough(
+          305,
+          50,
+          "A",
+          "E",
+        ),
+      ).toBe(3000 + 450);
+    });
+
+    it("実際の距離が中心駅どうしより短ければ、加算額の距離は引かない", () => {
+      // 290km を中心駅どうしの 300km に読み替える（伸びる）
+      expect(
+        throughOf("JR東日本", "JR東日本").estimateHonshuThrough(
+          290,
+          50,
+          "A",
+          "E",
+        ),
+      ).toBe(3000 + 500);
+    });
   });
 });
 

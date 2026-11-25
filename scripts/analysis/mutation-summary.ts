@@ -49,8 +49,9 @@ function count(statuses: string[]): Counts {
   const timeout = n("Timeout");
   const survived = n("Survived");
   const noCoverage = n("NoCoverage");
-  // 壊したコードがコンパイルできない・実行時に落ちるものは、テストの検出力と
-  // 関係がないので分母に入れない
+  // 実行時に落ちたもの（RuntimeError）とコンパイルできないもの（CompileError）は
+  // 分母に入れない（Stryker の定義と同じ）。型検査（checkers）を入れていないので
+  // CompileError は出ず、型の合わない壊し方もそのまま実行され、テストが落ちれば捕まえた側に入る
   const valid = killed + timeout + survived + noCoverage;
   return {
     killed,

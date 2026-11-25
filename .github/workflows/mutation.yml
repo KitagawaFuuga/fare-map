@@ -23,7 +23,8 @@ concurrency:
 jobs:
   stryker:
     runs-on: ubuntu-latest
-    # 手元（8コア）で約24分（2026-11-24）。GitHub の実行環境は4コアなので倍程度を見込む
+    # GitHub での初回（2026-11-25）は約6分半。手元（Windows、8コア）では約24分かかる。
+    # 余裕を大きく取ってある。壊し方が増えて伸びてきたら見直す
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0

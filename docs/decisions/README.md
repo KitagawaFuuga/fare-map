@@ -39,3 +39,4 @@
 - [0002: デプロイの前にも E2E を走らせる](0002-e2e-before-deploy.md)
 - [0003: 新しい版は確かめてから本番に流す](0003-verify-before-traffic.md)
 - [0005: 作り方の要約をリポジトリに置いて公開する](0005-development-notes-in-repo.md)
+- [0006: CI と配信の守りを固める](0006-supply-chain-hardening.md)

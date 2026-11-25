@@ -2052,6 +2052,14 @@ describe("地方交通線の表 (localTable)", () => {
     // 7〜9kmのように地方交通線の表が高い帯がある。幹線に入れば安くなりうる
     expect(calcL.lowerBound("OpJ", 9.9, undefined, 9)).toBe(100);
   });
+
+  it("地方交通線の表の範囲を超えたら、下界は幹線の表", () => {
+    expect(calcL.lowerBound("OpJ", 17.6, undefined, 16)).toBe(200);
+  });
+
+  it("営業キロが0なら地方交通線の表を使わない", () => {
+    expect(calcL.estimate("OpJ", 16.5, "A", "B", 0)).toBe(200);
+  });
 });
 
 describe("距離の小数の誤差（区間の距離を逆順に足すと 15 が 15.000000000000002 になる）", () => {
@@ -2141,5 +2149,32 @@ describe("createFareCalculator の入力の検査", () => {
     const calc = createFareCalculator([rule(["OpA"]), rule([])], [override]);
     expect(calc.lowerBound("OpA", 100)).toBe(100);
     expect(calc.lowerBound("OpA", 100, "A")).toBe(100);
+  });
+
+  it("距離が0なら、特定運賃のある駅の組でも0円", () => {
+    const override: FareOverride = {
+      operator: "OpA",
+      pairs: [{ from: "A", to: "B", fare: 100 }],
+      source: { url: "", fetchedAt: "", note: "" },
+    };
+    const calc = createFareCalculator([rule(["OpA"]), rule([])], [override]);
+    expect(calc.estimate("OpA", 0, "A", "B")).toBe(0);
+  });
+
+  it("JR本州3社の基準額表が無ければ、通し運賃を引くと例外になる", () => {
+    const calc = createFareCalculator([rule(["__jr-honshu-kasan"]), rule([])]);
+    expect(() => calc.estimateHonshuThrough(10, 0)).toThrow("基準額表");
+    expect(() => calc.honshuThroughBaseFare(10)).toThrow("基準額表");
+  });
+
+  it("JR本州3社の加算額表が無ければ、通し運賃を引くと例外になる", () => {
+    const calc = createFareCalculator([rule(["JR東海"]), rule([])]);
+    expect(() => calc.estimateHonshuThrough(10, 0)).toThrow("加算額表");
+  });
+
+  it("距離が0なら、表が無くても通し運賃は0円", () => {
+    const calc = createFareCalculator([rule([])]);
+    expect(calc.estimateHonshuThrough(0, 0)).toBe(0);
+    expect(calc.honshuThroughBaseFare(0)).toBe(0);
   });
 });

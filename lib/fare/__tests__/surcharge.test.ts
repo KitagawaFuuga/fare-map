@@ -25,6 +25,11 @@ describe("surchargeAmount", () => {
     expect(surchargeAmount(toba, 13.2)).toBe(30);
   });
 
+  it("帯の上限を足し算の誤差でわずかに超えただけなら、その帯の額", () => {
+    // 駅間キロを足す順番で 6 が 6.000000000000001 になる
+    expect(surchargeAmount(toba, 6.000000000000001)).toBe(10);
+  });
+
   it("帯の上限ちょうどは その帯の額", () => {
     expect(surchargeAmount(toba, 6)).toBe(10);
     expect(surchargeAmount(toba, 12)).toBe(20);

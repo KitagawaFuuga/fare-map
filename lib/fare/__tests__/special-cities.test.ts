@@ -256,6 +256,22 @@ describe("特定都区市内とJR本州3社の通し運賃", () => {
   });
 });
 
+describe("特定都区市内の境目と距離の小数の誤差", () => {
+  it("中心駅からちょうど200kmなら、足し算の誤差で200kmをわずかに超えても読み替えない", () => {
+    const calc = createFareCalculator(
+      [perKm("kou", ["甲JR"]), fallback],
+      [],
+      [],
+      [cityX],
+    );
+    // A（中心から5km）→Far2（中心から150km）を遠回りして実際の距離 205km。中心駅経由に
+    // 読み替えると 200km ちょうどで、規則は効かない（205km のまま 2050円）。
+    // 駅間キロを足す順番で 205.00000000000003 になると 200km 超と判定され、
+    // 200km に読み替えて 2000円になっていた
+    expect(calc.estimate("甲JR", 205.00000000000003, "A", "Far2")).toBe(2050);
+  });
+});
+
 describe("buildSpecialCities", () => {
   const node = (id: string, name: string, operator: string) => ({
     id,

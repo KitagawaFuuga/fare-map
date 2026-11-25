@@ -1454,3 +1454,50 @@ describe("地方交通線の表 (FareRule.localTable)", () => {
     expect(found).toContain("C");
   });
 });
+
+describe("名前の違う駅へ歩いて乗り換える区間", () => {
+  it("区間の終わりで歩いて乗り換えても、降りた駅の名前で駅ペアの特定運賃が当たり、行きと帰りが同じ額になる", () => {
+    // OpA の X→Y（20km、表なら 150円）に特定運賃 90円。Y から名前の違う Z へ歩いて乗り換え、
+    // OpB で W まで。実例: JR 高槻→大阪（特定運賃 290円）で降りて地下鉄の梅田へ歩く。
+    // 区間の終点を乗換先の「梅田」として引くと特定運賃が当たらず 420円になっていた
+    const walkCalc = createFareCalculator(
+      [
+        {
+          id: "test",
+          operators: [],
+          table: [
+            [10, 100],
+            [20, 150],
+            [30, 300],
+          ],
+          beyond: { fromKm: 30, baseFare: 300, ratePerKm: 10 },
+        },
+      ],
+      [
+        {
+          operator: "OpA",
+          pairs: [{ from: "X", to: "Y", fare: 90 }],
+          source: { url: "https://example.test", fetchedAt: "", note: "" },
+        },
+      ],
+    );
+    const walkGraph: RailGraph = {
+      nodes: {
+        X: { ...node("X"), operator: "OpA" },
+        Y: { ...node("Y"), operator: "OpA" },
+        Z: { ...node("Z"), operator: "OpB" },
+        W: { ...node("W"), operator: "OpB" },
+      },
+      edges: [
+        { from: "X", to: "Y", km: 20, kind: "rail", operator: "OpA" },
+        { from: "Y", to: "Z", km: 0, kind: "transfer", operator: "" },
+        { from: "Z", to: "W", km: 5, kind: "rail", operator: "OpB" },
+      ],
+    };
+    const fareTo = (from: string, to: string) =>
+      findReachable(walkGraph, walkCalc, from, 1000).find((r) => r.id === to)
+        ?.fare;
+    // 特定運賃 90円 + OpB 5km 100円
+    expect([fareTo("X", "W"), fareTo("W", "X")]).toEqual([190, 190]);
+  });
+});

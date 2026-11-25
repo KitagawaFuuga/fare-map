@@ -49,7 +49,7 @@
   ],
   "source": {
     "url": "https://www.kita-kyu.co.jp/press/223/, https://www.kita-kyu.co.jp/pdf/fares.pdf",
-    "fetchedAt": "2026-10-12",
+    "fetchedAt": "2026-11-25",
     "note": "公式の運賃規則から計算した実額。距離帯表そのままでは引けないペアだけを持つ。加算運賃は 北大阪急行電鉄（定義と出典は data/fare-surcharges.json）。営業キロは data/graph.json。再生成は npx tsx scripts/fare/ingest/compute-fares.ts --write"
   }
 }

@@ -2053,3 +2053,48 @@ describe("地方交通線の表 (localTable)", () => {
     expect(calcL.lowerBound("OpJ", 9.9, undefined, 9)).toBe(100);
   });
 });
+
+describe("距離の小数の誤差（区間の距離を逆順に足すと 15 が 15.000000000000002 になる）", () => {
+  it("運賃表の境目をわずかに超えただけなら、境目の運賃帯で引く", () => {
+    const calcE = createFareCalculator([
+      {
+        id: "e",
+        operators: [],
+        table: [
+          [15, 240],
+          [16, 330],
+        ],
+        beyond: { fromKm: 16, baseFare: 330, ratePerKm: 10 },
+      },
+    ]);
+    expect(calcE.estimate("OpE", 15.000000000000002)).toBe(240);
+  });
+
+  it("地方交通線の表でも、境目をわずかに超えただけなら境目の運賃帯で引く", () => {
+    // 篠目→地福の実例: 営業キロ 15.0km（逆順に足すと 15.000000000000002）、換算キロ 16.5km
+    const calcL = createFareCalculator([
+      {
+        id: "fallback",
+        operators: [],
+        table: [[1, 999]],
+        beyond: { fromKm: 1, baseFare: 999, ratePerKm: 1 },
+      },
+      {
+        id: "l",
+        operators: ["OpL"],
+        table: [
+          [15, 300],
+          [17, 330],
+        ],
+        localTable: [
+          [15, 240],
+          [16, 330],
+        ],
+        beyond: { fromKm: 17, baseFare: 330, ratePerKm: 10 },
+      },
+    ]);
+    expect(
+      calcL.estimate("OpL", 16.5, undefined, undefined, 15.000000000000002),
+    ).toBe(240);
+  });
+});

@@ -1,3 +1,4 @@
+import { withoutFloatNoise } from "@/lib/fare/km";
 import type { SpecialCity } from "@/lib/fare/special-cities";
 import type { FareOverride, FareRule, FareZone } from "@/lib/fare/types";
 
@@ -66,7 +67,9 @@ export interface FareCalculator {
 }
 
 // 特定都区市内の規則が効く距離か（第86条は minKm 超、第87条は minKm 超 maxKm 以下）
-function cityApplies(city: SpecialCity, km: number): boolean {
+function cityApplies(city: SpecialCity, rawKm: number): boolean {
+  // 境目（200km ちょうど等）を足し算の誤差で越えないよう丸めて比べる
+  const km = withoutFloatNoise(rawKm);
   return km > city.minKm && km <= (city.maxKm ?? Infinity);
 }
 
@@ -377,16 +380,18 @@ export function createFareCalculator(
   }
 
   // 地方交通線の表で引いた運賃。表を持たない事業者、表の範囲外なら undefined
-  function localFare(operator: string, localKm: number): number | undefined {
+  function localFare(operator: string, rawKm: number): number | undefined {
     const table = byOperator.get(operator)?.localTable;
+    const localKm = withoutFloatNoise(rawKm);
     if (table === undefined || localKm <= 0) return undefined;
     return table.find((row) => localKm <= row[0])?.[1];
   }
 
   function fareFromTable(
     rule: Pick<FareRule, "table" | "beyond">,
-    km: number,
+    rawKm: number,
   ): number {
+    const km = withoutFloatNoise(rawKm);
     if (km <= 0) return 0;
     // maxKm 昇順なので「km <= maxKm の最初の行」を二分探索で探せる（昇順は zod が強制）
     const table = rule.table;

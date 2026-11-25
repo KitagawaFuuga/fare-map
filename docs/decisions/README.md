@@ -42,3 +42,4 @@
 - [0005: 作り方の要約をリポジトリに置いて公開する](0005-development-notes-in-repo.md)
 - [0006: CI と配信の守りを固める](0006-supply-chain-hardening.md)
 - [0007: 計算で作る特定運賃を、距離の誤差を直したコードで作り直して同じ PR に入れる](0007-regenerate-computed-fares.md)
+- [0008: アクセシビリティ・表示速度・DORA の指標を測る](0008-quality-measurements.md)

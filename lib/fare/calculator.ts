@@ -317,15 +317,22 @@ export function createFareCalculator(
     minFloor: number;
   }
   const lowerTermsCache = new Map<string, Map<string, LowerTerms>>();
-  function lowerTermsOf(group: string, fromName: string): LowerTerms {
+  function lowerTermsOf(
+    group: string,
+    fromName: string,
+    list: { city: SpecialCity; stations: Set<string>; radius: number }[],
+  ): LowerTerms {
+    // キャッシュの読み書きは壊しても毎回作り直すだけで、結果は同じ
     let byFrom = lowerTermsCache.get(group);
+    // Stryker disable next-line ConditionalExpression: キャッシュ（上のコメント）
     if (byFrom === undefined) {
       byFrom = new Map();
+      // Stryker disable next-line all: キャッシュ（上のコメント）
       lowerTermsCache.set(group, byFrom);
     }
     const hit = byFrom.get(fromName);
+    // Stryker disable next-line ConditionalExpression: キャッシュ（上のコメント）
     if (hit !== undefined) return hit;
-    const list = citiesByGroup.get(group) ?? [];
     const terms: [number, number][] = [];
     for (const { city, stations, radius } of list) {
       const dFrom = city.centerKm.get(fromName);
@@ -346,21 +353,36 @@ export function createFareCalculator(
           ]);
       }
     }
-    // 縮み幅が大きく floor も低い項があれば、その項のほうが常に小さいので落とす
+    // 縮み幅が大きく floor も低い項があれば、その項のほうが常に小さいので落とす。
+    // 落とさなくても min は同じなので、落とす条件を緩める変化は結果に出ない
+    // （条件を外す変化は、同じ項を両方落とすのでテストで捕まる）
+    // Stryker disable next-line MethodExpression: 上のコメント
     const kept = terms.filter(
       ([shrink, floor], i) =>
+        // Stryker disable next-line MethodExpression: 上のコメント
         !terms.some(
+          // Stryker disable next-line ArrowFunction: 上のコメント
           ([s2, f2], j) =>
+            // Stryker disable next-line ConditionalExpression,EqualityOperator: 上のコメント
             j !== i &&
+            // Stryker disable next-line EqualityOperator: 上のコメント
             s2 >= shrink &&
+            // Stryker disable next-line EqualityOperator: 上のコメント
             f2 <= floor &&
+            // 同じ項が2つあると、j < i が無ければ両方落ちる（この変化はテストで捕まるが、
+            // 行ごとにしか外せないので、残す項が増えるだけの変化とまとめて外す）
+            // Stryker disable next-line ConditionalExpression,LogicalOperator,EqualityOperator: 上のコメント
             (s2 > shrink || f2 < floor || j < i),
         ),
     );
     const entry = {
       terms: kept,
+      // 壊れて NaN になっても km <= minFloor で返らないだけで、km を超える下界の距離は
+      // 呼び出し側の min で消える
+      // Stryker disable next-line ArrowFunction: 上のコメント
       minFloor: Math.min(...kept.map(([, floor]) => floor)),
     };
+    // Stryker disable next-line all: キャッシュ（関数の先頭のコメント）
     byFrom.set(fromName, entry);
     return entry;
   }
@@ -373,6 +395,8 @@ export function createFareCalculator(
     // 下界の距離は minKm 以上なので、km がそれ以下なら緩める必要がない
     if (km <= (lowerReachByGroup.get(group) ?? Infinity)) return undefined;
     const list = citiesByGroup.get(group);
+    // 区域の無い group は lowerReach も無く、上で返っている
+    // Stryker disable next-line ConditionalExpression: 上のコメント
     if (list === undefined) return undefined;
     if (fromName === undefined) {
       // 発駅が分からなければ、発駅側も最大の半径だけ縮みうる
@@ -384,7 +408,9 @@ export function createFareCalculator(
       }
       return Math.max(km - 2 * maxRadius, minKm);
     }
-    const { terms, minFloor } = lowerTermsOf(group, fromName);
+    const { terms, minFloor } = lowerTermsOf(group, fromName, list);
+    // km 以上の距離を返しても、呼び出し側は km の運賃との min を取るので結果は同じ
+    // Stryker disable next-line ConditionalExpression,EqualityOperator: 上のコメント
     if (km <= minFloor) return undefined;
     let low = Infinity;
     for (const [shrink, floor] of terms)
@@ -434,6 +460,8 @@ export function createFareCalculator(
   return {
     estimate(operator, km, fromName, toName, localKm) {
       if (km <= 0) return 0;
+      // 駅が無いときに引いても、特定運賃のキーに undefined の駅は無いので当たらない
+      // Stryker disable next-line ConditionalExpression,LogicalOperator: 上のコメント
       if (fromName !== undefined && toName !== undefined) {
         const overridden = overrideByOperator
           .get(operator)
@@ -442,6 +470,8 @@ export function createFareCalculator(
       }
       const z = zoneByOperator.get(operator);
       if (
+        // 区間の無い事業者では inZone も false になる
+        // Stryker disable next-line ConditionalExpression: 上のコメント
         z !== undefined &&
         inZone(operator, fromName) &&
         inZone(operator, toName)
@@ -449,6 +479,8 @@ export function createFareCalculator(
         return fareFromTable(z.zone, km);
       const city = specialCityKm(operator, km, fromName, toName);
       if (city !== undefined) return tableFare(operator, city.km);
+      // localKm が無いまま引いても、表のどの行にも当たらず undefined になる
+      // Stryker disable next-line ConditionalExpression: 上のコメント
       if (localKm !== undefined) {
         const local = localFare(operator, localKm);
         if (local !== undefined) return local;
@@ -459,18 +491,23 @@ export function createFareCalculator(
       // 発駅が区間内なら、着駅しだいで区間の表（事業者の表以下）になりうる
       const z = zoneByOperator.get(operator);
       let table =
+        // 区間の無い事業者では inZone も false になる
+        // Stryker disable next-line ConditionalExpression: 上のコメント
         z !== undefined && inZone(operator, fromName)
           ? Math.min(fareFromTable(z.zone, km), tableFare(operator, km))
           : tableFare(operator, km);
       // 地方交通線だけの区間は、そのまま進めば地方交通線の表、幹線に入れば
       // 幹線の表（距離が伸びるので今の額以上）になる。安いほうが下界。
       // 地方交通線の表のほうが高い帯（本州の7〜10km）もあるので min を取る
+      // localKm が無いまま引いても、表のどの行にも当たらず undefined になる
+      // Stryker disable next-line ConditionalExpression: 上のコメント
       if (localKm !== undefined) {
         const local = localFare(operator, localKm);
         if (local !== undefined) table = Math.min(table, local);
       }
+      // 読み替えた距離は km を超えない（超えても運賃は km の運賃以上なので min で消える）
       const cityLowKm = specialCityLowerKm(operator, km, fromName);
-      if (cityLowKm !== undefined && cityLowKm < km)
+      if (cityLowKm !== undefined)
         table = Math.min(table, tableFare(operator, cityLowKm));
       if (fromName !== undefined) {
         const stationMin = minOverrideByOperatorStation
@@ -487,6 +524,8 @@ export function createFareCalculator(
       return Math.min(table, minOverride);
     },
     specialCityKeyOf(operator, stationName, honshuThrough, maxFare) {
+      // 駅が無いまま引いても、undefined の駅は表に無いので undefined になる
+      // Stryker disable next-line ConditionalExpression: 上のコメント
       if (stationName === undefined) return undefined;
       const group = honshuThrough ? HONSHU_CITY_GROUP : operator;
       const list = citiesByStation.get(group)?.get(stationName);
@@ -496,9 +535,14 @@ export function createFareCalculator(
       const usable = list.filter(
         ({ city }) => tableFare(tableOperator, city.minKm) <= maxFare,
       );
+      // 全部使えるときは作っておいたキーを返す（作り直しても同じ文字列）。
+      // cityKeyByStation は citiesByStation と同じ group・駅を持つ
+      // Stryker disable next-line ConditionalExpression: 上のコメント
       if (usable.length === list.length)
+        // Stryker disable next-line OptionalChaining: 上のコメント
         return cityKeyByStation.get(group)?.get(stationName);
       if (usable.length === 0) return undefined;
+      // Stryker disable next-line StringLiteral: 区切りを外しても結果が同じ（cityKeyByStation のコメント）
       return usable.map(({ city }) => city.id).join("+");
     },
     hasLocalTable(operator) {
@@ -506,10 +550,14 @@ export function createFareCalculator(
     },
     zoneOf(operator, stationName) {
       return inZone(operator, stationName)
-        ? zoneByOperator.get(operator)?.zone.id
+        ? // inZone が true なら区間がある
+          // Stryker disable next-line OptionalChaining: 上のコメント
+          zoneByOperator.get(operator)?.zone.id
         : undefined;
     },
     isOverrideAnchor(operator, stationName) {
+      // 駅が無いまま引いても、undefined の駅は表に無いので false になる
+      // Stryker disable next-line ConditionalExpression: 上のコメント
       if (stationName === undefined) return false;
       return (
         overrideStationsByOperator.get(operator)?.has(stationName) ?? false
@@ -541,9 +589,10 @@ export function createFareCalculator(
         );
       }
       const lowKm = specialCityLowerKm(HONSHU_CITY_GROUP, totalKm, fromName);
-      return lowKm !== undefined && lowKm < totalKm
-        ? tableFare(HONSHU_BASE_OPERATOR, lowKm)
-        : tableFare(HONSHU_BASE_OPERATOR, totalKm);
+      return tableFare(
+        HONSHU_BASE_OPERATOR,
+        Math.min(lowKm ?? totalKm, totalKm),
+      );
     },
   };
 }

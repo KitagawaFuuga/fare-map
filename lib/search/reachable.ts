@@ -348,26 +348,10 @@ function runSearch(
     for (const edge of adjacency.get(state.stationId) ?? []) {
       let next: SearchState;
       if (edge.kind === "transfer") {
-        // 乗換では区間の終点（segmentEndId）を動かさない。運賃はその事業者を降りた駅までで引く
-        next = {
-          ...state,
-          stationId: edge.to,
-          fare:
-            state.confirmedFare +
-            evaluateSegmentFare(
-              calc,
-              state.segmentOperator,
-              state.segmentKm,
-              state.isHonshuThrough,
-              state.honshuThroughKm,
-              state.honshuThroughEastKm,
-              nameOf(state.segmentFromId),
-              nameOf(state.segmentEndId),
-              localKmOf(state),
-              nameOf(state.fareFromId),
-            ),
-          entry: PENDING_ENTRY,
-        };
+        // 乗換では区間の終点（segmentEndId）を動かさない。運賃はその事業者を降りた駅までで
+        // 引くので、乗換の前と同じ額（state.fare）のまま。乗換先の駅名で引き直すと、
+        // 名前の違う駅へ歩いたときに駅ペアの特定運賃が外れる
+        next = { ...state, stationId: edge.to, entry: PENDING_ENTRY };
       } else if (edge.operator === state.segmentOperator) {
         const segmentKm = state.segmentKm + edge.km;
         const segmentAllLocal =
@@ -401,7 +385,8 @@ function runSearch(
         HONSHU_OPERATORS.has(edge.operator)
       ) {
         // JR本州3社どうしの会社境界。区間を確定せず通算距離を積み増して継続する
-        // （＝ここではまだ運賃を払わない）。state.stationId は直前区間の真の終端。
+        // （＝ここではまだ運賃を払わない）。次の区間は state.stationId（今いる駅）から始まる。
+        // 歩いて乗り換えた後なら、直前の区間の終点（segmentEndId）とは別の駅になる
         const honshuThroughKm = state.honshuThroughKm + state.segmentKm;
         const honshuThroughEastKm =
           state.honshuThroughEastKm +

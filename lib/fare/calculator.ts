@@ -1,3 +1,4 @@
+import { withoutFloatNoise } from "@/lib/fare/km";
 import type { SpecialCity } from "@/lib/fare/special-cities";
 import type { FareOverride, FareRule, FareZone } from "@/lib/fare/types";
 
@@ -70,14 +71,6 @@ function cityApplies(city: SpecialCity, rawKm: number): boolean {
   // 境目（200km ちょうど等）を足し算の誤差で越えないよう丸めて比べる
   const km = withoutFloatNoise(rawKm);
   return km > city.minKm && km <= (city.maxKm ?? Infinity);
-}
-
-// 区間の距離は駅間キロの足し算なので、足す順番で 15 が 15.000000000000002 になる。
-// 運賃表は「15km 以下」のように境目で区切るので、この誤差だけで1つ上の運賃帯になり、
-// 往復で運賃が食い違っていた（JR山口線 篠目→地福 240円、地福→篠目 330円）。
-// 駅間キロは小数2桁までなので、それより十分細かい桁で丸めて誤差だけを消す
-function withoutFloatNoise(km: number): number {
-  return Math.round(km * 1e6) / 1e6;
 }
 
 // 方向を問わず引けるよう並べ替えてから繋ぐ。区切りは駅名に現れない文字

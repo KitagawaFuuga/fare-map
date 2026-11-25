@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { withoutFloatNoise } from "@/lib/fare/km";
 
 // 加算運賃。新線の建設費に充てるため、特定の路線に乗った距離に応じて
 // 普通運賃に上乗せされる（例: 近鉄の鳥羽線・けいはんな線・吉野線・湯の山線・志摩線）。
@@ -78,7 +79,9 @@ export const surchargeSchema = surchargeShape.superRefine((s, ctx) => {
 export type Surcharge = z.infer<typeof surchargeShape>;
 
 /** 距離帯式: 加算対象の路線に乗った距離 km に対する加算額 */
-export function surchargeAmount(surcharge: Surcharge, km: number): number {
+export function surchargeAmount(surcharge: Surcharge, rawKm: number): number {
+  // 帯の境目を足し算の誤差で越えないよう丸める（lib/fare/km.ts）
+  const km = withoutFloatNoise(rawKm);
   // 対象の線に乗っていなければ加算は無い
   if (!(km > 0)) return 0;
   for (const [maxKm, amount] of surcharge.table ?? []) {

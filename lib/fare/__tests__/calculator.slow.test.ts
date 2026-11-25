@@ -35,11 +35,18 @@ const loadGraph = (): RailGraph =>
   (graphCache ??= JSON.parse(
     readFileSync("data/graph.json", "utf8"),
   ) as RailGraph);
+// 同じ事業者の表をテストごとに作り直さない
+const kmCache = new Map<string, (a: string, b: string) => number | null>();
 function graphKmOf(
   operator: string,
   useFareKm = false,
 ): { get: (key: string) => number | undefined } {
-  const km = buildOperatorKmTable(loadGraph(), operator, { useFareKm });
+  const cacheKey = `${operator}:${useFareKm}`;
+  let km = kmCache.get(cacheKey);
+  if (km === undefined) {
+    km = buildOperatorKmTable(loadGraph(), operator, { useFareKm });
+    kmCache.set(cacheKey, km);
+  }
   return {
     get: (key) => {
       const [a = "", b = ""] = key.split("\u0000");

@@ -9,6 +9,10 @@ on:
     - cron: "0 18 * * 0"
   workflow_dispatch:
 
+# 読むだけでよい。142パッケージの npm ci がリポジトリへの書き込み権限を持たないようにする
+permissions:
+  contents: read
+
 concurrency:
   group: mutation
   # 週ごとに比べるので、手動の実行で定期の実行を止めない（後から来た方が待つ）。

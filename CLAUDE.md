@@ -9,7 +9,7 @@ PreToolUse フックの Probity（`probity.config.ts`）が、赤のテストが
 
 全国の路線網（`data/graph.json`）を読むテストと、1件が数秒かかるテスト（リポジトリ全体を読むなど）は
 `*.slow.test.ts` の名前にする。ミューテーションテストはこの名前で除外している（`vitest.stryker.config.ts`）。
-路線網を読むほうは `lib/__tests__/slow-test-naming.test.ts` が検査する。単体テストは小さな路線網を自分で組む。
+路線網を読むほうは `lib/__tests__/slow-test-naming.test.ts` が検査し、計測中に読むと `vitest.stryker.setup.ts` が落とす。単体テストは小さな路線網を自分で組む。
 
 # 記録
 

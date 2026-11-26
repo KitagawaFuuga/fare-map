@@ -408,7 +408,8 @@ test("一覧は運賃の段階ごとの見出しで区切られ、見出しが�
   await expect(panel.getByText(/\d+ 駅に到達可能/)).toBeVisible({
     timeout: 30_000,
   });
-  const headings = panel.getByRole("heading", { level: 3 });
+  // h1（fare-map）の直下の見出しなので h2。h3 だと見出しの段を飛ばす（axe の heading-order）
+  const headings = panel.getByRole("heading", { level: 2 });
   await expect(headings).toHaveCount(2);
   await expect(headings.nth(0)).toHaveText(/^〜500円\s*\d+駅$/);
   await expect(headings.nth(1)).toHaveText(/^〜1000円\s*\d+駅$/);

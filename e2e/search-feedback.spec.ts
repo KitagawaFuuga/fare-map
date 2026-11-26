@@ -48,15 +48,43 @@ test("検索結果の件数は、読み上げ用の status で伝わる", async 
 test("行ける駅が無い予算で検索すると、何も出ないのではなく、そう伝える", async ({
   page,
 }) => {
-  // 黒崎駅前は徒歩でつながる駅が無く、100円では1駅も行けない
+  // 0件になる駅は運賃表や徒歩連絡の更新で変わるので、応答を差し替えて0件にする
   await stubTiles(page);
+  await page.route("**/api/reachable?**", (route) =>
+    route.fulfill({
+      json: { stations: [], meta: { from: "x", budget: 100, count: 0 } },
+    }),
+  );
   await page.goto("/");
-  await searchFrom(page, "黒崎駅前", "100");
+  await searchFrom(page, "新宿", "100");
 
   await expect(sidebar(page).getByRole("status")).toHaveText(
-    /行ける駅はありません/,
+    /100円で行ける駅はありません/,
     { timeout: 30_000 },
   );
+});
+
+test("成功のあとに失敗したら、前の件数を出したままにしない", async ({
+  page,
+}) => {
+  // 失敗しても前の結果は残る。件数の行がそのままだと、失敗した検索の結果として
+  // 「N 駅に到達可能」が読み上げられ、エラーと食い違う
+  await stubTiles(page);
+  await page.goto("/");
+  await searchFrom(page, "新宿", "500");
+  const status = sidebar(page).getByRole("status");
+  await expect(status).toHaveText(/\d+ 駅に到達可能/, { timeout: 30_000 });
+
+  await page.route("**/api/reachable?**", (route) =>
+    route.fulfill({ status: 500, json: { error: "テスト用の失敗" } }),
+  );
+  await sidebar(page).locator('input[type="number"]').fill("600");
+  await sidebar(page).getByRole("button", { name: "検索" }).click();
+
+  await expect(sidebar(page).getByRole("alert")).toHaveText("テスト用の失敗", {
+    timeout: 30_000,
+  });
+  await expect(status).toHaveText("");
 });
 
 test("検索に失敗したら、alert で伝わる", async ({ page }) => {

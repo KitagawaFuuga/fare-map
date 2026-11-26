@@ -496,4 +496,301 @@ describe("extractStationKm: 列の中の最長の単調部分を使う", () => {
     // 別路線ぶんは最長の単調部分に入らないので出さない
     expect(r.edgeKm.get(edgeKey("己", "庚"))).toBeUndefined();
   });
+
+  it("短い並びのあとに長い並びがあれば、長いほうを採る", () => {
+    const shortFirst = [
+      ["駅名", "累計"],
+      ["庚駅", "1.0"], // 接続路線の区間（昇順で2駅）
+      ["己駅", "2.0"],
+      ["甲駅", "0.0"],
+      ["乙駅", "3.0"],
+      ["丙駅", "7.5"],
+      ["丁駅", "10.0"],
+    ];
+    const r = extractStationKm([shortFirst], {
+      stationNames: new Set([...names, "己", "庚"]),
+      sections,
+    });
+    expect(r.edgeKm.get(edgeKey("甲", "乙"))).toBeCloseTo(3.0);
+    expect(r.edgeKm.has(edgeKey("己", "庚"))).toBe(false);
+  });
+
+  it("同じ長さの昇順と降順があれば、昇順を採る", () => {
+    // 甲〜丁 が昇順の4駅、丁〜庚 が降順の4駅
+    const tie = [
+      ["駅名", "累計"],
+      ["甲駅", "0.0"],
+      ["乙駅", "3.0"],
+      ["丙駅", "7.5"],
+      ["丁駅", "10.0"],
+      ["戊駅", "8.0"],
+      ["己駅", "5.0"],
+      ["庚駅", "2.0"],
+    ];
+    const r = extractStationKm([tie], {
+      stationNames: new Set([...names, "戊", "己", "庚"]),
+      sections,
+    });
+    expect(r.edgeKm.get(edgeKey("甲", "乙"))).toBeCloseTo(3.0);
+    expect(r.edgeKm.has(edgeKey("丁", "戊"))).toBe(false);
+  });
+
+  it("同じ累計の駅が続いても並びを切らない", () => {
+    const zeroGap = [
+      ["駅名", "累計"],
+      ["甲駅", "0.0"],
+      ["乙駅", "3.0"],
+      ["丙駅", "3.0"],
+      ["丁駅", "10.0"],
+    ];
+    const r = extractStationKm([zeroGap], { stationNames: names, sections });
+    expect(r.edgeKm.get(edgeKey("乙", "丙"))).toBe(0);
+    expect(r.edgeKm.get(edgeKey("丙", "丁"))).toBeCloseTo(7.0);
+  });
+});
+
+describe("normalizeStationName の細かい規則", () => {
+  it("末尾の記号がいくつ重なっても落とす", () => {
+    expect(normalizeStationName("乙駅#↷※")).toBe("乙");
+    expect(normalizeStationName("乙##")).toBe("乙");
+  });
+
+  it("「駅」の前に付いた記号も落とす", () => {
+    expect(normalizeStationName("乙※駅")).toBe("乙");
+  });
+
+  it("先頭の空白を落とす", () => {
+    expect(normalizeStationName(" 乙駅")).toBe("乙");
+  });
+
+  it("中身が2文字以上の脚注も落とす", () => {
+    expect(normalizeStationName("乙駅[注1]")).toBe("乙");
+  });
+
+  it("外す「駅」は末尾の1つだけ", () => {
+    expect(normalizeStationName("駅前駅")).toBe("駅前");
+    expect(normalizeStationName("駅前")).toBe("駅前");
+  });
+
+  it("特定都区市内の記号は3文字まで、空白がいくつあっても落とす", () => {
+    expect(normalizeStationName("横浜駅 浜")).toBe("横浜");
+    expect(normalizeStationName("横浜駅 山区")).toBe("横浜");
+    expect(normalizeStationName("横浜駅  浜")).toBe("横浜");
+  });
+
+  it("4文字以上の後置きや、改行を含む文は特定都区市内の記号とみなさない", () => {
+    expect(normalizeStationName("甲駅 浜松方面")).toBe("甲駅 浜松方面");
+    expect(normalizeStationName("甲\n乙駅 浜")).toBe("甲\n乙駅 浜");
+  });
+
+  it("駅ナンバリングはハイフンが無くても、空白が2つでも、先頭にあれば落とす", () => {
+    expect(normalizeStationName("Y01 甲駅")).toBe("甲");
+    expect(normalizeStationName("A-01  甲駅")).toBe("甲");
+    expect(normalizeStationName("甲 A1 乙駅")).toBe("甲 A1 乙");
+  });
+});
+
+describe("extractStationKm の数値の読み方", () => {
+  const read = (kms: string[], officialKm = 10.0) =>
+    extractStationKm(
+      [
+        [
+          ["駅名", "累計"],
+          ...["甲", "乙", "丙", "丁"].map((s, i) => [`${s}駅`, kms[i] ?? ""]),
+        ],
+      ],
+      {
+        stationNames: names,
+        sections: [{ from: "甲", to: "丁", officialKm }],
+      },
+    ).edgeKm;
+
+  it("桁区切りのカンマを外して読む", () => {
+    const km = read(["0.0", "1.0", "2.0", "1,000.0"], 1000);
+    expect(km.get(edgeKey("丙", "丁"))).toBeCloseTo(998.0);
+  });
+
+  it("整数のセルも読む", () => {
+    const km = read(["0", "3", "7", "10"]);
+    expect(km.get(edgeKey("乙", "丙"))).toBeCloseTo(4.0);
+  });
+
+  it("小数2桁のセルも読む", () => {
+    const km = read(["0.00", "3.25", "7.50", "10.00"]);
+    expect(km.get(edgeKey("甲", "乙"))).toBeCloseTo(3.25);
+  });
+
+  it("数値のうしろに単位などが続いても読む", () => {
+    const km = read(["0.0 km", "3.0 km", "7.5 km", "10.0 km"]);
+    expect(km.get(edgeKey("乙", "丙"))).toBeCloseTo(4.5);
+  });
+
+  it("「*」との間に空白があっても支線の累計とみなす", () => {
+    const r = extractStationKm(
+      [
+        [
+          ["駅名", "累計"],
+          ["甲駅", "0.0"],
+          ["乙駅", "3.0"],
+          ["戊駅", "1.5 *"],
+          ["丙駅", "7.5"],
+          ["丁駅", "10.0"],
+        ],
+      ],
+      { stationNames: new Set([...names, "戊"]), sections },
+    );
+    expect(r.edgeKm.get(edgeKey("乙", "丙"))).toBeCloseTo(4.5);
+    expect(r.edgeKm.has(edgeKey("戊", "丙"))).toBe(false);
+  });
+
+  it("くっついたセルの先頭の累計は、整数部が2桁でも読む", () => {
+    const km = read(["0.0", "13.0", "17.512.0*", "20.0"], 20.0);
+    expect(km.get(edgeKey("乙", "丙"))).toBeCloseTo(4.5);
+  });
+});
+
+describe("extractStationKm の表の読み方", () => {
+  it("行ごとにセルの数が違っても読む", () => {
+    const ragged = [
+      ["駅名", "累計", "接続路線"],
+      ["甲駅", "0.0", "甲線"],
+      ["乙駅", "3.0"],
+      ["丙駅", "7.5", "丙線"],
+      ["丁駅", "10.0"],
+    ];
+    const r = extractStationKm([ragged], { stationNames: names, sections });
+    expect(r.edgeKm.get(edgeKey("乙", "丙"))).toBeCloseTo(4.5);
+  });
+
+  it("同じ駅が2回出る表（環状線の起終点）は後ろを捨てる", () => {
+    const ring = [
+      ["駅名", "累計"],
+      ["甲駅", "0.0"],
+      ["乙駅", "3.0"],
+      ["丙駅", "7.5"],
+      ["丁駅", "10.0"],
+      ["甲駅", "12.0"],
+    ];
+    const r = extractStationKm([ring], { stationNames: names, sections });
+    expect(r.edgeKm.size).toBe(3);
+    expect(r.edgeKm.has(edgeKey("丁", "甲"))).toBe(false);
+  });
+
+  it("全部が同じ値の列（番線など）があっても、ほかの列を読む", () => {
+    const withPlatform = [
+      ["駅名", "累計", "番線"],
+      ["甲駅", "0.0", "1"],
+      ["乙駅", "3.0", "1"],
+      ["丙駅", "7.5", "1"],
+      ["丁駅", "10.0", "1"],
+    ];
+    const r = extractStationKm([withPlatform], {
+      stationNames: names,
+      sections,
+    });
+    expect(r.accepted).toEqual([
+      { table: 0, column: 1, matched: 1, contradicted: 0 },
+    ]);
+  });
+
+  it("全駅が同じ累計の列は、公表キロが0でも採らない（距離の情報が無い）", () => {
+    const flat = [
+      ["駅名", "累計"],
+      ["甲駅", "0.0"],
+      ["乙駅", "0.0"],
+    ];
+    const r = extractStationKm([flat], {
+      stationNames: names,
+      sections: [{ from: "甲", to: "乙", officialKm: 0 }],
+    });
+    expect(r.accepted).toEqual([]);
+  });
+
+  it("駅ペアの鍵は、駅名をつなげたときに同じ文字列になる組と区別する", () => {
+    // 区切りが無いと、どちらも「あいう」になる
+    expect(edgeKey("あい", "う")).not.toBe(edgeKey("あ", "いう"));
+    expect(edgeKey("乙", "甲")).toBe(edgeKey("甲", "乙"));
+  });
+
+  it("名前が空の駅がグラフにあっても、空のセルと結びつけない", () => {
+    const blankFirst = [
+      ["", "甲駅", "0.0"],
+      ["", "乙駅", "3.0"],
+      ["", "丙駅", "7.5"],
+      ["", "丁駅", "10.0"],
+    ];
+    const r = extractStationKm([blankFirst], {
+      stationNames: new Set([...names, ""]),
+      sections,
+    });
+    expect(r.edgeKm.get(edgeKey("甲", "乙"))).toBeCloseTo(3.0);
+  });
+});
+
+describe("extractStationKm の採否と結果", () => {
+  const loop = [
+    ["駅名", "累計"],
+    ["甲駅", "0.0"],
+    ["乙駅", "3.0"],
+    ["丙駅", "7.5"],
+    ["丁駅", "10.0"],
+  ];
+
+  it("区間キロとの差が許容差ちょうどなら一致、超えれば不一致とみなす", () => {
+    const withLast = (last: string) => [
+      ["駅名", "累計"],
+      ["甲駅", "0.0"],
+      ["乙駅", "3.0"],
+      ["丙駅", "7.5"],
+      ["丁駅", last],
+    ];
+    const opts = { stationNames: names, sections, toleranceKm: 0.5 };
+    expect(extractStationKm([withLast("10.5")], opts).accepted).toHaveLength(1);
+    expect(extractStationKm([withLast("10.75")], opts).accepted).toEqual([]);
+  });
+
+  it("検証できないときは、表を却下した数にも数えない", () => {
+    const r = extractStationKm([loop, loop], {
+      stationNames: names,
+      sections: [],
+    });
+    expect(r.rejected).toBe(0);
+    expect(r.accepted).toEqual([]);
+  });
+
+  it("採用した表の遠回りの値で、公表営業キロを上書きしない", () => {
+    // 甲–丁 は公表5.0km（短絡線経由）、表は遠回りの10.0km
+    const shortcut = [
+      ["駅名", "累計"],
+      ["甲駅", "0.0"],
+      ["丁駅", "5.0"],
+      ["戊駅", "6.0"],
+    ];
+    const r = extractStationKm([loop, shortcut], {
+      stationNames: new Set([...names, "戊"]),
+      sections: [
+        { from: "甲", to: "乙", officialKm: 3.0 },
+        { from: "乙", to: "丙", officialKm: 4.5 },
+        { from: "丙", to: "丁", officialKm: 2.5 },
+        { from: "甲", to: "丁", officialKm: 5.0 },
+      ],
+    });
+    // 甲–丁 が5.0のまま残っているので、2つめの表も一致して採用される
+    expect(r.rejected).toBe(0);
+    expect(r.edgeKm.get(edgeKey("丁", "戊"))).toBeCloseTo(1.0);
+  });
+
+  it("後から採った表は、先に採った表の隣接駅間を上書きしない", () => {
+    const later = [
+      ["駅名", "累計"],
+      ["丙駅", "0.0"],
+      ["丁駅", "2.6"],
+    ];
+    const r = extractStationKm([loop, later], {
+      stationNames: names,
+      sections,
+    });
+    expect(r.accepted.map((a) => a.table)).toEqual([0, 1]);
+    expect(r.edgeKm.get(edgeKey("丙", "丁"))).toBeCloseTo(2.5);
+  });
 });

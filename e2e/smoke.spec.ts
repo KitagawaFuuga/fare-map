@@ -503,3 +503,71 @@ test("先の入力の候補が遅れて届いても、最新の入力の候補�
   for (const text of await items.allInnerTexts())
     expect(text).toContain("新宿");
 });
+
+// 地図の背景（スタイル）は外部サービスから取る。落ちていると load が来ず、
+// 一覧には結果が出るのに地図には駅の円が描かれなかった
+test("地図の背景を読み込めなくても、駅の円は描かれ、背景が無いことを伝える", async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  await page.route("https://tiles.openfreemap.org/**", (route) =>
+    route.fulfill({ status: 503, body: "" }),
+  );
+  await page.goto("/");
+  await expect(page.getByText("地図の背景を読み込めませんでした")).toBeVisible({
+    timeout: 15_000,
+  });
+
+  const panel = sidebar(page);
+  await panel.getByPlaceholder("駅名を入力").fill("新宿");
+  await panel.getByRole("button", { name: /^新宿/ }).first().click();
+  await panel.locator('input[type="number"]').fill("500");
+  await panel.getByRole("button", { name: "検索" }).click();
+  await expect(panel.getByText(/\d+ 駅に到達可能/)).toBeVisible({
+    timeout: 30_000,
+  });
+
+  const canvas = page.locator("canvas.maplibregl-canvas");
+  await expect
+    .poll(async () => cheapestPixels(await canvas.screenshot()), {
+      timeout: 30_000,
+      intervals: [1_000],
+    })
+    .toBeGreaterThan(100);
+});
+
+// WebGL が使えない環境（古い端末、GPU を切った仮想マシンなど）では maplibre の
+// 初期化が例外を投げ、画面全体が壊れて一覧での検索もできなかった
+test("WebGL が使えなくても、一覧で検索でき、地図を出せないことを伝える", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (
+      this: HTMLCanvasElement,
+      type: string,
+      ...rest: unknown[]
+    ) {
+      if (/webgl/i.test(type)) return null;
+      return (original as (...a: unknown[]) => unknown).call(
+        this,
+        type,
+        ...rest,
+      );
+    } as typeof HTMLCanvasElement.prototype.getContext;
+  });
+  await stubTiles(page);
+  await page.goto("/");
+  await expect(page.getByText("この環境では地図を表示できません")).toBeVisible({
+    timeout: 15_000,
+  });
+
+  const panel = sidebar(page);
+  await panel.getByPlaceholder("駅名を入力").fill("新宿");
+  await panel.getByRole("button", { name: /^新宿/ }).first().click();
+  await panel.locator('input[type="number"]').fill("500");
+  await panel.getByRole("button", { name: "検索" }).click();
+  await expect(panel.getByText(/\d+ 駅に到達可能/)).toBeVisible({
+    timeout: 30_000,
+  });
+});

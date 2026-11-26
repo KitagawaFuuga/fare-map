@@ -26,6 +26,27 @@ describe("GET /api/route-url", () => {
     expect(blocked.status).toBe(429);
     expect(blocked.headers.get("retry-after")).toBeTruthy();
     // 別の IP は数えない
-    expect((await call("from=新宿&to=高尾", "198.51.100.21")).status).toBe(200);
+    expect((await call("from=新宿&to=高尾", "198.51.100.21")).status).toBe(302);
+  });
+
+  // 画面ではリンク（a href）から新しいタブで開くので、JSON ではなく転送で返す
+  it("経路の検索のページへ 302 で転送する", async () => {
+    vi.stubEnv("EKISPERT_API_KEY", "");
+    const res = await call(
+      `from=${encodeURIComponent("新宿")}&to=${encodeURIComponent("高尾")}`,
+      "198.51.100.22",
+    );
+    expect(res.status).toBe(302);
+    const location = res.headers.get("location") ?? "";
+    expect(location.startsWith("https://www.google.com/maps/dir/")).toBe(true);
+    expect(decodeURIComponent(location)).toContain("destination=高尾駅");
+  });
+
+  // 新しいタブに出るので、JSON ではなく読める文にする
+  it("入力が不正なら 400 で、日本語の文を返す", async () => {
+    const res = await call("from=", "198.51.100.23");
+    expect(res.status).toBe(400);
+    expect(res.headers.get("content-type")).toContain("text/plain");
+    expect(await res.text()).toContain("経路");
   });
 });

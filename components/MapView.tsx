@@ -122,18 +122,17 @@ function buildPopupContent(
     el.appendChild(note);
     el.appendChild(document.createElement("br"));
   }
+  // 普通のリンクにする。API が乗換案内のページへ転送する（app/api/route-url/route.ts）。
+  // 押してから API を待って window.open すると、ポップアップの遮断に当たり、
+  // href が無いとキーボードで辿れない
+  const from = fromNameRef.current;
+  if (!from) return el;
   const a = document.createElement("a");
   a.textContent = "経路を見る";
-  a.className = "underline text-blue-600 cursor-pointer";
-  a.onclick = async () => {
-    const from = fromNameRef.current;
-    if (!from) return;
-    const res = await fetch(
-      `/api/route-url?from=${encodeURIComponent(from)}&to=${encodeURIComponent(p.name)}`,
-    );
-    const body = (await res.json()) as { url: string };
-    window.open(body.url, "_blank", "noopener");
-  };
+  a.className = "underline text-blue-600";
+  a.href = `/api/route-url?from=${encodeURIComponent(from)}&to=${encodeURIComponent(p.name)}`;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
   el.appendChild(a);
   return el;
 }

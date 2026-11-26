@@ -503,3 +503,31 @@ test("先の入力の候補が遅れて届いても、最新の入力の候補�
   for (const text of await items.allInnerTexts())
     expect(text).toContain("新宿");
 });
+
+// 「経路を見る」は以前 href の無い a で、キーボードで辿れず、押した後に API を待ってから
+// window.open していた（ポップアップの遮断に当たる。API が失敗すると空のタブが開く）
+test("吹き出しの「経路を見る」はリンクで、押すと新しいタブで経路の検索が開く", async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  // 開いた先（Google マップ）は外部なので差し替える。E2E では駅すぱあとのキーが無い
+  await page
+    .context()
+    .route("https://www.google.com/**", (route) =>
+      route.fulfill({ contentType: "text/html", body: "<p>maps</p>" }),
+    );
+  await searchKurosaki(page);
+  await sidebar(page).locator("li").filter({ hasText: "熊西" }).click();
+
+  const link = page
+    .locator(".maplibregl-popup")
+    .getByRole("link", { name: "経路を見る" });
+  await expect(link).toHaveAttribute("target", "_blank");
+  const opened = page.waitForEvent("popup");
+  await link.click();
+  const tab = await opened;
+  await tab.waitForURL(/google\.com\/maps\/dir/);
+  const url = decodeURIComponent(tab.url());
+  expect(url).toContain("origin=黒崎駅前駅");
+  expect(url).toContain("destination=熊西駅");
+});

@@ -72,7 +72,9 @@ export function normalizeStationName(raw: string): string {
   // 空白で区切られて先頭にある形だけを落とす。駅名そのものがこの形になることは
   // 無い（「Ｂ６」のような駅名は全角で、空白でも区切られない）。
   // JR東日本は英字と数字の間も空白（「JO 19 東京駅」）
-  const stationNumber = /^[A-Za-z]{1,3}[-‐–\s　]?[0-9]{1,3}[\s　]+(?=.)/u;
+  // 番号のうしろの空白は1つだけ落とす。残りは下の trim で消える
+  const stationNumber = /^[A-Za-z]{1,3}[-‐–\s　]?[0-9]{1,3}[\s　](?=.)/u;
+  // trim は1回だけ。末尾の空白は trailingJunk が落とし、trim のあとに先頭の空白は生まれない
   return raw
     .replace(/\[[^\]]*\]/g, "")
     .replace(stationNumber, "")
@@ -82,8 +84,7 @@ export function normalizeStationName(raw: string): string {
     .trim()
     .replace(trailingJunk, "")
     .replace(/駅$/, "")
-    .replace(trailingJunk, "")
-    .trim();
+    .replace(trailingJunk, "");
 }
 
 function numberIn(cell: string): number | null {
@@ -125,13 +126,15 @@ function readChain(
       .map((cell) => lookup.get(matchKey(normalizeStationName(cell))))
       .find((n) => n !== undefined && n !== "");
     if (station === undefined) continue;
-    const km = numberIn(row[column] ?? "");
+    const cell = row[column];
+    if (cell === undefined) continue;
+    const km = numberIn(cell);
     if (km === null) continue;
     // 同じ駅が2回出る表（環状線の起終点など）は後ろを捨てる
     if (points.some((p) => p.station === station)) continue;
     points.push({ station, km });
   }
-  if (points.length < MIN_STATIONS) return null;
+  // 駅が少なすぎる列は、下の最長部分の判定が null を返す
   const run = longestMonotoneRun(points);
   if (run === null) return null;
   return { table: tableIndex, column, points: run };
@@ -165,18 +168,25 @@ function longestMonotoneRun(
     for (let i = 1; i <= points.length; i++) {
       const prev = points[i - 1];
       const cur = points[i];
+      // i は 1 から数えるので prev は必ずある。direction は ±1 なので割っても符号は同じ
       const broken =
         cur === undefined ||
+        // Stryker disable next-line ConditionalExpression: 上のコメント
         prev === undefined ||
+        // Stryker disable next-line ArithmeticOperator: 上のコメント
         (cur.km - prev.km) * direction < 0;
       if (!broken) continue;
       const run = points.slice(start, i);
       const first = run[0];
       const last = run[run.length - 1];
-      // 端が同じ値なら距離の情報が無い
+      // 端が同じ値なら距離の情報が無い。run は空にならず、端の値が違えば2駅以上あるので、
+      // 駅数と undefined の確認は型のためだけにある
       if (
+        // Stryker disable next-line ConditionalExpression,LogicalOperator: 上のコメント
         run.length >= MIN_STATIONS &&
+        // Stryker disable next-line ConditionalExpression: 上のコメント
         first !== undefined &&
+        // Stryker disable next-line ConditionalExpression: 上のコメント
         last !== undefined &&
         first.km !== last.km &&
         (best === null || run.length > best.length)
@@ -210,18 +220,15 @@ function scoreChain(
 ): { matched: number; contradicted: Set<string> } {
   let matched = 0;
   const contradicted = new Set<string>();
-  for (let i = 0; i < chain.points.length; i++) {
-    for (let j = i + 1; j < chain.points.length; j++) {
-      const a = chain.points[i];
-      const b = chain.points[j];
-      if (a === undefined || b === undefined) continue;
+  chain.points.forEach((a, i) => {
+    for (const b of chain.points.slice(i + 1)) {
       const key = edgeKey(a.station, b.station);
       const expected = known.get(key);
       if (expected === undefined) continue;
       if (Math.abs(b.km - a.km - expected) <= tolerance) matched++;
       else contradicted.add(key);
     }
-  }
+  });
   return { matched, contradicted };
 }
 
@@ -233,15 +240,15 @@ function scoreChain(
  * 上書きしない）。
  */
 function addKnownPairs(chain: Chain, known: Map<string, number>): void {
-  for (let i = 0; i < chain.points.length; i++) {
-    for (let j = i + 1; j < chain.points.length; j++) {
-      const a = chain.points[i];
-      const b = chain.points[j];
-      if (a === undefined || b === undefined) continue;
+  chain.points.forEach((a, i) => {
+    // 前の駅とのペアは登録済みで !known.has に弾かれ、同じ駅どうしの鍵は引かれないので、
+    // 全駅を回しても結果は同じ
+    // Stryker disable next-line MethodExpression,ArithmeticOperator: 上のコメント
+    for (const b of chain.points.slice(i + 1)) {
       const key = edgeKey(a.station, b.station);
       if (!known.has(key)) known.set(key, Math.abs(b.km - a.km));
     }
-  }
+  });
 }
 
 export function extractStationKm(
@@ -271,19 +278,21 @@ export function extractStationKm(
   // 最多の表から採る。記事の並び順で採ると、環状線では起点の違う路線図が駅一覧より
   // 先に入り、1周のつなぎ目をまたぐ駅ペアが遠回り側の距離で正解に載って、駅一覧の
   // ほうが食い違いだらけで棄却される（山手線の渋谷・原宿・大崎まわりが漏れた）
-  while (pending.size > 0) {
+  // 残りが無くなれば候補も無いので、下の pick === null で抜ける
+  for (;;) {
     let pick: {
       tableIndex: number;
       chain: Chain;
       matched: number;
       contradicted: Set<string>;
     } | null = null;
-    for (const tableIndex of pending) {
-      const table = tables[tableIndex];
-      if (table === undefined) continue;
+    for (const [tableIndex, table] of tables.entries()) {
+      if (!pending.has(tableIndex)) continue;
       const width = Math.max(0, ...table.map((r) => r.length));
       // 1つの表の中で複数の列が通ることがある（累計が2本ある表）。
       // 差はどちらも同じなので、説明できた組が最多の列を1本だけ採る。
+      // 列数ちょうどの列は全行が空で並びが読めないので、<= でも結果は同じ
+      // Stryker disable next-line EqualityOperator: 上のコメント
       for (let column = 0; column < width; column++) {
         const chain = readChain(table, column, lookup, tableIndex);
         if (chain === null) continue;
@@ -304,17 +313,17 @@ export function extractStationKm(
       contradicted: pick.contradicted.size,
     });
     addKnownPairs(pick.chain, known);
-    const points = pick.chain.points;
-    for (let i = 1; i < points.length; i++) {
-      const prev = points[i - 1];
-      const cur = points[i];
-      if (prev === undefined || cur === undefined) continue;
-      const key = edgeKey(prev.station, cur.station);
-      const km = Number((cur.km - prev.km).toFixed(2));
-      // 食い違ったペアは出さない（環状線の遠回りなど、路線に沿った距離が
-      // 公表営業キロと違う区間）。先に入ったほうを残す
-      if (pick.contradicted.has(key)) continue;
-      if (!result.edgeKm.has(key)) result.edgeKm.set(key, km);
+    let prev: { station: string; km: number } | undefined;
+    for (const cur of pick.chain.points) {
+      if (prev !== undefined) {
+        const key = edgeKey(prev.station, cur.station);
+        const km = Number((cur.km - prev.km).toFixed(2));
+        // 食い違ったペアは出さない（環状線の遠回りなど、路線に沿った距離が
+        // 公表営業キロと違う区間）。先に入ったほうを残す
+        if (!pick.contradicted.has(key) && !result.edgeKm.has(key))
+          result.edgeKm.set(key, km);
+      }
+      prev = cur;
     }
   }
   result.rejected = pending.size;

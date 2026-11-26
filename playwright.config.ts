@@ -32,7 +32,7 @@ export default defineConfig({
     {
       name: "mobile-chrome",
       use: { ...devices["Pixel 7"] },
-      testMatch: "**/mobile.spec.ts",
+      testMatch: ["**/mobile.spec.ts", "**/a11y.spec.ts"],
     },
   ],
   webServer: externalBaseURL

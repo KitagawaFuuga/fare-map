@@ -49,6 +49,14 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
     }
   };
 
+  // 入力欄の値は React に持たせない（uncontrolled）。持たせると、JS が届く前に打った文字が、
+  // 動き出したとき（ハイドレーション）に空の値で上書きされて消える（e2e/hydration.spec.ts）。
+  // 動き出した時点で入力欄に文字があれば、それを検索語にする
+  useEffect(() => {
+    const typed = inputRef.current?.value;
+    if (typed) setQuery(typed);
+  }, []);
+
   useEffect(() => {
     if (timer.current) clearTimeout(timer.current);
     const requestId = ++requestIdRef.current;
@@ -75,7 +83,6 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
         <input
           type="text"
           aria-label="出発駅"
-          value={query}
           placeholder={selected?.name ?? "駅名を入力"}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setOpen(suggestions.length > 0)}
@@ -106,6 +113,8 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
                 onClick={() => {
                   onSelect(s);
                   setQuery("");
+                  // uncontrolled なので、入力欄の文字は自分で消す
+                  if (inputRef.current) inputRef.current.value = "";
                   setOpen(false);
                 }}
               >

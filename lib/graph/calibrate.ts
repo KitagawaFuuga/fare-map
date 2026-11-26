@@ -43,21 +43,20 @@ function median(values: number[]): number {
   return sorted[mid] ?? 0;
 }
 
-// 同一路線（lineId）の rail エッジだけを辿る Dijkstra で from→to の直線距離合計を求める
+// 同一路線（lineId）の rail エッジだけを辿る Dijkstra で from→to の直線距離合計を求める。
+// 呼び出し側が同じ路線の駅どうしだけを渡す
 function shortestSameLineKm(
   railEdgesByLine: Map<string, GraphEdge[]>,
   from: StationNode,
   to: StationNode,
 ): number | undefined {
-  if (from.lineId !== to.lineId) return undefined;
-  if (from.id === to.id) return 0;
-
-  const edges = railEdgesByLine.get(from.lineId) ?? [];
+  const edges = railEdgesByLine.get(from.lineId);
+  if (edges === undefined) return undefined;
   const adjacency = new Map<string, { to: string; km: number }[]>();
   const addAdj = (a: string, b: string, km: number) => {
-    const arr = adjacency.get(a) ?? [];
-    arr.push({ to: b, km });
-    adjacency.set(a, arr);
+    const arr = adjacency.get(a);
+    if (arr === undefined) adjacency.set(a, [{ to: b, km }]);
+    else arr.push({ to: b, km });
   };
   for (const e of edges) {
     addAdj(e.from, e.to, e.km);
@@ -70,6 +69,8 @@ function shortestSameLineKm(
     let currentId: string | undefined;
     let currentDist = Infinity;
     for (const [id, d] of dist) {
+      // 同じ距離の駅のどれを先に取り出しても、求まる最短距離は変わらない
+      // Stryker disable next-line EqualityOperator: 上のコメント
       if (!visited.has(id) && d < currentDist) {
         currentDist = d;
         currentId = id;
@@ -78,8 +79,12 @@ function shortestSameLineKm(
     if (currentId === undefined) return undefined;
     if (currentId === to.id) return currentDist;
     visited.add(currentId);
-    for (const { to: neighborId, km } of adjacency.get(currentId) ?? []) {
+    const neighbors = adjacency.get(currentId);
+    if (neighbors === undefined) continue;
+    for (const { to: neighborId, km } of neighbors) {
       const nd = currentDist + km;
+      // 同じ距離で上書きしても値は変わらない
+      // Stryker disable next-line EqualityOperator: 上のコメント
       if (nd < (dist.get(neighborId) ?? Infinity)) dist.set(neighborId, nd);
     }
   }
@@ -126,7 +131,6 @@ function resolveSectionKm(
     if (km === undefined) continue;
     pairs.push({ from: f, to: t, km });
   }
-  if (pairs.length === 0) return undefined;
 
   const wantedLine = normalizeLineName(section.line);
   const nameMatched = pairs.filter(
@@ -146,6 +150,8 @@ function resolveSectionKm(
 export function buildCalibration(
   graph: RailGraph,
   sections: CalibrationSection[],
+  // 空でない配列に変えても、別名の無い事業者には何も足されない
+  // Stryker disable next-line ArrayDeclaration: 上のコメント
   operatorAliases: OperatorAlias[] = [],
 ): CalibrationTable {
   const aliases = new Map<string, Set<string>>();
@@ -161,9 +167,9 @@ export function buildCalibration(
     const a = graph.nodes[e.from];
     const b = graph.nodes[e.to];
     if (!a || !b || a.lineId !== b.lineId) continue;
-    const arr = railEdgesByLine.get(a.lineId) ?? [];
-    arr.push(e);
-    railEdgesByLine.set(a.lineId, arr);
+    const arr = railEdgesByLine.get(a.lineId);
+    if (arr === undefined) railEdgesByLine.set(a.lineId, [e]);
+    else arr.push(e);
   }
 
   const ratiosByLine = new Map<string, number[]>();

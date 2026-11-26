@@ -21,3 +21,6 @@ public/maplibre-gl-shared.mjs
 
 # Lighthouse CI
 /.lighthouseci/
+
+# superpowers（brainstorming の画面の作業ファイル。.last-token に接続用のトークンが入る）
+/.superpowers/

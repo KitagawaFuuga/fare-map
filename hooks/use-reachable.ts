@@ -17,9 +17,9 @@ export interface UseReachable {
   data: ReachableView | null;
   loading: boolean;
   error: string | null;
-  // 成功したら true。失敗した場合と、後発の検索に追い越されて結果を破棄した場合は false。
-  // 呼び出し側が「成功したときだけ画面を切り替える」判断に使う。
-  search(fromId: string, budget: number): Promise<boolean>;
+  // 成功したら行ける駅の数（0 もある）。失敗した場合と、後発の検索に追い越されて結果を
+  // 破棄した場合は null。呼び出し側が「結果があるときだけ画面を切り替える」判断に使う。
+  search(fromId: string, budget: number): Promise<number | null>;
 }
 
 // 前段のゲートウェイやプロキシは HTML のエラーページを返すことがある。
@@ -74,7 +74,7 @@ export function useReachable(): UseReachable {
   const search = useCallback(
     async (fromId: string, budget: number) => {
       const requestId = ++requestIdRef.current;
-      // 自分が最新の検索でなければ、結果もエラーも反映せず false を返す
+      // 自分が最新の検索でなければ、結果もエラーも反映せず null を返す
       const isStale = () => requestId !== requestIdRef.current;
       setLoading(true);
       setError(null);
@@ -84,14 +84,14 @@ export function useReachable(): UseReachable {
         );
         if (!res.ok) throw new Error(await errorMessageOf(res));
         const result = (await res.json()) as ReachableResult;
-        if (isStale()) return false;
+        if (isStale()) return null;
         setData(result);
         void loadWalkMarks(fromId, budget, isStale);
-        return true;
+        return result.stations.length;
       } catch (e) {
-        if (isStale()) return false;
+        if (isStale()) return null;
         setError(e instanceof Error ? e.message : "検索に失敗しました");
-        return false;
+        return null;
       } finally {
         // ここも世代チェックが要る。無条件に false にすると、古いレスポンスが
         // 新しいリクエストの実行中スピナーを消してしまう。

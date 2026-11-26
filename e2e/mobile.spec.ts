@@ -157,6 +157,31 @@ test.describe("ボトムシート", () => {
       .toBeLessThan(beforeSearch);
   });
 
+  test("行ける駅が0件のときはシートを畳まず、そう伝える文が画面の中に見える", async ({
+    page,
+  }) => {
+    // 0件でも検索は成功なので、成功時と同じく畳むと文がシートの外に隠れる。
+    // toBeVisible ははみ出しても通るので、画面の中にあるかで確かめる
+    await stubTiles(page);
+    await page.route("**/api/reachable?**", (route) =>
+      route.fulfill({
+        json: { stations: [], meta: { from: "x", budget: 100, count: 0 } },
+      }),
+    );
+    await page.goto("/");
+
+    const target = sheet(page);
+    await selectShinjuku(page);
+    await target.getByRole("button", { name: "検索" }).click();
+
+    const status = target.getByRole("status");
+    await expect(status).toHaveText(/100円で行ける駅はありません/, {
+      timeout: 30_000,
+    });
+    await page.waitForTimeout(500);
+    await expect(status).toBeInViewport();
+  });
+
   test("畳まれた状態からでもつまみで開き直せる", async ({ page }) => {
     await stubTiles(page);
     await page.goto("/");

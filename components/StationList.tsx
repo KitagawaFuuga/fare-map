@@ -13,7 +13,7 @@ export default function StationList({ stations, onPick }: StationListProps) {
   if (stations.length === 0) return null;
   return (
     <div>
-      <p className="text-sm text-gray-600">{stations.length} 駅に到達可能</p>
+      {/* 件数は app/page.tsx の status の行に出す（読み上げのため。ここにも書くと二重になる） */}
       {/* 段階の見出しが地図の点の凡例を兼ねる。見出しを一覧の中に置くことで、
           色と運賃の対応を一覧を読みながら確かめられる */}
       {groupByBracket(stations).map((g) => (

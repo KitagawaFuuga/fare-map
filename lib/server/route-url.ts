@@ -2,6 +2,10 @@ import { z } from "zod";
 
 const EKISPERT_ENDPOINT = "https://api.ekispert.jp/v1/json/search/course/light";
 
+// 駅すぱあとが応答しないときに待つ上限。過ぎたら Google マップのリンクにする
+// （利用者は押してから待っている。待たせ続けるより、別のリンクでも早く出すほうを取る）
+export const ROUTE_URL_TIMEOUT_MS = 3000;
+
 const ekispertResponseSchema = z
   .object({
     ResultSet: z.object({ ResourceURI: z.string() }).optional(),
@@ -38,9 +42,14 @@ export async function buildRouteUrl(
 ): Promise<string> {
   const key = process.env.EKISPERT_API_KEY;
   if (!key) return googleMapsUrl(fromName, toName);
+  // AbortSignal.timeout ではなく setTimeout で中断する（テストの偽のタイマーで進められる）
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ROUTE_URL_TIMEOUT_MS);
   try {
     const p = new URLSearchParams({ key, from: fromName, to: toName });
-    const res = await fetch(`${EKISPERT_ENDPOINT}?${p.toString()}`);
+    const res = await fetch(`${EKISPERT_ENDPOINT}?${p.toString()}`, {
+      signal: controller.signal,
+    });
     if (!res.ok) return googleMapsUrl(fromName, toName);
     const body: unknown = await res.json();
     const parsed = ekispertResponseSchema.safeParse(body);
@@ -51,5 +60,7 @@ export async function buildRouteUrl(
     return googleMapsUrl(fromName, toName);
   } catch {
     return googleMapsUrl(fromName, toName);
+  } finally {
+    clearTimeout(timer);
   }
 }

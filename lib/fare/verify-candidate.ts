@@ -84,16 +84,13 @@ function checkMissingPairs(pairs: CandidatePair[]): Finding[] {
   if (present.size >= expected) return [];
 
   const missing: string[] = [];
-  for (let i = 0; i < stations.length && missing.length < MAX_SAMPLES; i++) {
-    for (
-      let j = i + 1;
-      j < stations.length && missing.length < MAX_SAMPLES;
-      j++
-    ) {
-      const key = pairKey(stations[i] as string, stations[j] as string);
+  stations.forEach((a, i) => {
+    for (const b of stations.slice(i + 1)) {
+      if (missing.length >= MAX_SAMPLES) return;
+      const key = pairKey(a, b);
       if (!present.has(key)) missing.push(show(key));
     }
-  }
+  });
   return [
     {
       check: "missing-pairs",
@@ -125,16 +122,13 @@ function checkAllowedFares(
 /** 距離順に並べた運賃列の逆行数。ties は逆行に数えない */
 function countInversions(sorted: { km: number; fare: number }[]): number {
   let inversions = 0;
-  for (let i = 0; i < sorted.length; i++) {
-    for (let j = i + 1; j < sorted.length; j++) {
-      const a = sorted[i];
-      const b = sorted[j];
-      if (!a || !b) continue;
+  sorted.forEach((a, i) => {
+    for (const b of sorted.slice(i + 1)) {
       // 距離が等しい組は順序に意味が無いので数えない
       if (a.km === b.km) continue;
       if (a.fare > b.fare) inversions++;
     }
-  }
+  });
   return inversions;
 }
 
@@ -166,7 +160,6 @@ function inversionRates(
   for (const [station, fan] of fans) {
     if (fan.length < 3) continue;
     const comparable = (fan.length * (fan.length - 1)) / 2;
-    if (comparable === 0) continue;
     const sorted = [...fan].sort((a, b) => a.km - b.km);
     rates.push({
       station,
@@ -178,7 +171,7 @@ function inversionRates(
 }
 
 const maxRate = (rates: { rate: number }[]) =>
-  rates.reduce((m, r) => (r.rate > m ? r.rate : m), 0);
+  Math.max(0, ...rates.map((r) => r.rate));
 
 /**
  * 発駅のラベルを距離順に1つずらした版を作る。PDF の行と駅の対応を
@@ -191,6 +184,8 @@ function shiftStationLabels(
 ): CandidatePair[] | null {
   const stations = [...new Set(pairs.flatMap((p) => [p.from, p.to]))];
   const anchor = stations[0];
+  // 逆行率が出た表にしか呼ばないので、駅は必ずある
+  // Stryker disable next-line ConditionalExpression: 上のコメント
   if (anchor === undefined) return null;
   const ordered = stations
     .map((s) => ({ s, d: s === anchor ? 0 : kmBetween(anchor, s) }))

@@ -1,0 +1,32 @@
+name: DORA metrics
+
+# 月1回、直近30日の DORA の指標を集計して、この実行の要約欄に表を出す。
+# リポジトリには何も書かない。定義は scripts/analysis/dora-metrics.ts の冒頭
+on:
+  schedule:
+    - cron: "0 0 1 * *"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 集計する日数
+        default: "30"
+
+# デプロイの実行記録（actions）とコミットの比較（contents）を読むだけ
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      # 依存を使わないので npm ci はしない。Node 24 は型を取り除いて .ts をそのまま動かす
+      - run: node scripts/analysis/dora-metrics.ts "${DAYS}" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          DAYS: ${{ inputs.days || '30' }}
+          GITHUB_TOKEN: ${{ github.token }}

@@ -75,7 +75,7 @@ export default function Home() {
       {/* CC BY 4.0 のデータ（運行本数データ・公共交通オープンデータセンター）は
           表示が条件なので、出典から外さないこと。改変の有無（加工して使用）と、
           運行本数データの ODbL の表示も条件。詳細は README の出典節 */}
-      <footer className="pt-4 text-xs text-gray-400">
+      <footer className="pt-4 text-xs text-gray-500">
         出典: OpenStreetMap / OpenFreeMap / 駅データ.jp / 全国鉄道運行本数データ
         / 公共交通オープンデータセンター /
         高松琴平電気鉄道・沖縄都市モノレール・札幌市交通局の公開GTFS

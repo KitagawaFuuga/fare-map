@@ -88,3 +88,19 @@ describe("toMarkdown", () => {
     expect(row).not.toContain("⚠");
   });
 });
+
+describe("レビューの指摘（2026-11-25）", () => {
+  it("代表の回のスコアが無い（Lighthouse の失敗）なら、0 と出さずに落ちる", () => {
+    const manifest = [
+      {
+        url: "http://127.0.0.1:3200/",
+        isRepresentativeRun: true,
+        jsonPath: "a.json",
+        summary: { performance: null },
+      },
+    ];
+    expect(() =>
+      summarize(parseManifest(manifest), () => lhr(1000, 0, 0)),
+    ).toThrow(/スコア/);
+  });
+});

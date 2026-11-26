@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   computeMetrics,
+  needMorePages,
+  orderRuns,
+  parseDays,
   toMarkdown,
   type Deploy,
 } from "@/scripts/analysis/dora-metrics";
@@ -119,5 +122,65 @@ describe("toMarkdown", () => {
     expect(md).toContain("| 変更の失敗率 | 0.0%（0 / 1） |");
     expect(md).toContain("| 失敗したデプロイの復旧時間 | 該当なし |");
     expect(md).toContain("| デプロイの手戻り率 | 0.0%（0 / 1） |");
+  });
+});
+
+describe("レビューの指摘（2026-11-25）", () => {
+  it("GitHub の Revert ボタンが指す merge コミットも、失敗したデプロイとして見つける", () => {
+    // merge コミットはリードタイムから外すが、revert の対象としては探せるように mergeShas に持つ
+    const m = computeMetrics(
+      [
+        { ...deploy("d1", 10, [commit("abc1234", 9)]), mergeShas: ["fe12345"] },
+        deploy("d2", 13, [
+          commit(
+            "rev",
+            12,
+            'Revert "Merge pull request #20"\n\nThis reverts commit fe12345.',
+          ),
+        ]),
+      ],
+      period,
+    );
+    expect(m.failedDeployments).toBe(1);
+    expect(m.recoveryHours).toEqual([3]);
+    // merge コミットはリードタイムに数えない
+    expect(m.leadTimeHours.count).toBe(2);
+  });
+
+  it("本番に出る前に同じデプロイの中で戻したものは、失敗に数えない", () => {
+    const m = computeMetrics(
+      [
+        deploy("d1", 10, [
+          commit("badbad0", 8),
+          commit("rev", 9, "Revert\n\nThis reverts commit badbad0."),
+        ]),
+      ],
+      period,
+    );
+    expect(m.failedDeployments).toBe(0);
+    expect(m.recoveryHours).toEqual([]);
+  });
+
+  it("デプロイの順番は完了の時刻ではなく作られた順（再実行で後ろに回らない）", () => {
+    expect(
+      orderRuns([
+        { head_sha: "b", created_at: at(2), updated_at: at(3) },
+        { head_sha: "a", created_at: at(1), updated_at: at(9) },
+      ]).map((r) => r.head_sha),
+    ).toEqual(["a", "b"]);
+  });
+
+  it("ページは、期間より前を振り返る分まで取ってから止める", () => {
+    const from = Date.parse(at(100));
+    const lookback = 30 * 24 * H;
+    expect(needMorePages(at(100 - 24), from, lookback)).toBe(true);
+    expect(needMorePages(at(100 - 31 * 24), from, lookback)).toBe(false);
+  });
+
+  it("集計する日数が正の数でなければ、何が悪いかを言って落ちる", () => {
+    expect(parseDays(undefined)).toBe(30);
+    expect(parseDays("14")).toBe(14);
+    expect(() => parseDays("30日")).toThrow(/日数/);
+    expect(() => parseDays("0")).toThrow(/日数/);
   });
 });

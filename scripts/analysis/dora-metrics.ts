@@ -7,10 +7,11 @@
 // このリポジトリでの定め方（dora.dev は始まりと終わりの時刻や集計のしかたまでは決めていない）:
 // - デプロイ: main への push で動いた deploy.yml が成功した回（本番が切り替わった回）
 // - 変更のリードタイム: そのデプロイで初めて本番に入ったコミット（merge コミットを除く）の
-//   コミット時刻から、デプロイの完了まで。中央値
-// - 変更の失敗率: 後から revert されたコミットを含むデプロイの割合
+//   書いた時刻（author。rebase で変わらない）から、デプロイの完了まで。中央値
+// - 変更の失敗率: 後のデプロイで revert されたコミット（merge コミットも。GitHub の Revert ボタンは
+//   merge を戻す）を含むデプロイの割合。同じデプロイの中で入れて戻したものは本番に出ていないので数えない
 // - 失敗したデプロイの復旧時間: 失敗したデプロイの完了から、その revert を含むデプロイの完了まで
-// - デプロイの手戻り率: revert か、メッセージに [incident] を含むコミットを含むデプロイの割合
+// - デプロイの手戻り率: 本番に出たものを戻した revert か、メッセージに [incident] を含むコミットを含むデプロイの割合
 //   （本番の障害を直すための計画外のデプロイ。revert でなく修正で直したときは [incident] を付ける）
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
@@ -24,8 +25,11 @@ export interface Commit {
 export interface Deploy {
   sha: string;
   finishedAt: string;
-  // 1つ前の成功したデプロイから、このデプロイまでに入ったコミット
+  // 1つ前の成功したデプロイから、このデプロイまでに入ったコミット（merge コミットを除く）
   commits: Commit[];
+  // 同じ範囲の merge コミット。リードタイムには数えないが、GitHub の Revert ボタンは
+  // merge コミットを戻す（This reverts commit <merge>）ので、失敗の特定には使う
+  mergeShas?: string[];
 }
 
 export interface Period {
@@ -60,7 +64,34 @@ const revertedShas = (message: string) =>
     (m) => m[1]!,
   );
 
-const isRevert = (c: Commit) => revertedShas(c.message).length > 0;
+export interface Run {
+  head_sha: string;
+  updated_at: string;
+  created_at: string;
+}
+
+// デプロイの順番は作られた順。updated_at は再実行で変わり、古いデプロイが後ろに回って
+// 前後のデプロイの比較（compare）が空になったり二重になったりする
+export const orderRuns = <T extends Pick<Run, "created_at">>(runs: T[]): T[] =>
+  [...runs].sort((a, b) => time(a.created_at) - time(b.created_at));
+
+// 一番古い実行が「期間の始まり − 振り返る長さ」より新しければ、次のページも要る
+export const needMorePages = (
+  oldestCreatedAt: string,
+  from: number,
+  lookbackMs: number,
+): boolean => time(oldestCreatedAt) >= from - lookbackMs;
+
+export function parseDays(arg: string | undefined): number {
+  if (arg === undefined || arg === "") return 30;
+  const days = Number(arg);
+  if (!Number.isInteger(days) || days <= 0)
+    throw new Error(
+      `集計する日数は正の整数で指定してください（受け取った値: ${arg}）`,
+    );
+  return days;
+}
+
 const isIncident = (c: Commit) => /\[incident\]/i.test(c.message);
 
 export function computeMetrics(all: Deploy[], period: Period): Metrics {
@@ -82,20 +113,29 @@ export function computeMetrics(all: Deploy[], period: Period): Metrics {
     (a, b) => time(a.finishedAt) - time(b.finishedAt),
   );
   const failed = new Map<string, Deploy>();
+  const fixes = new Set<string>();
   const recoveryHours: number[] = [];
+  const shasOf = (d: Deploy) => [
+    ...d.commits.map((c) => c.sha),
+    ...(d.mergeShas ?? []),
+  ];
   for (const fix of deploys) {
     for (const target of fix.commits.flatMap((c) => revertedShas(c.message))) {
       const bad = sorted.find((d) =>
-        d.commits.some((c) => c.sha.startsWith(target)),
+        shasOf(d).some((sha) => sha.startsWith(target)),
       );
-      if (!bad || failed.has(bad.sha)) continue;
+      // 同じデプロイの中で入れて戻したもの（本番に出ていない）と、後のデプロイを戻すものは数えない
+      if (!bad || time(bad.finishedAt) >= time(fix.finishedAt)) continue;
+      fixes.add(fix.sha);
+      if (failed.has(bad.sha)) continue;
       failed.set(bad.sha, bad);
       recoveryHours.push((time(fix.finishedAt) - time(bad.finishedAt)) / HOUR);
     }
   }
   const failedInPeriod = deploys.filter((d) => failed.has(d.sha)).length;
-  const rework = deploys.filter((d) =>
-    d.commits.some((c) => isRevert(c) || isIncident(c)),
+  // 手戻りは本番の障害を直すデプロイ: 本番に出たものを戻した revert か、[incident] の印
+  const rework = deploys.filter(
+    (d) => fixes.has(d.sha) || d.commits.some((c) => isIncident(c)),
   ).length;
 
   return {
@@ -182,13 +222,10 @@ async function api(path: string): Promise<unknown> {
   return res.json();
 }
 
-interface Run {
-  head_sha: string;
-  updated_at: string;
-  created_at: string;
-}
+// 期間より前を振り返る長さ。期間内の revert が戻した、期間より前のデプロイを見つけるため
+const LOOKBACK_MS = 30 * 24 * HOUR;
 
-// 期間の最初のデプロイにも「1つ前」が要るので、期間より前の成功も1回分は取る
+// 期間の最初のデプロイの「1つ前」と、振り返る分まで取る
 async function fetchSuccessfulDeploys(
   repo: string,
   from: number,
@@ -200,19 +237,19 @@ async function fetchSuccessfulDeploys(
     )) as { workflow_runs: Run[] };
     runs.push(...body.workflow_runs);
     const oldest = body.workflow_runs.at(-1);
-    if (!oldest || time(oldest.created_at) < from) break;
+    if (!oldest || !needMorePages(oldest.created_at, from, LOOKBACK_MS)) break;
   }
-  return runs.sort((a, b) => time(a.updated_at) - time(b.updated_at));
+  return orderRuns(runs);
 }
 
 interface CompareCommit {
   sha: string;
   parents: unknown[];
-  commit: { message: string; committer: { date: string } };
+  commit: { message: string; author: { date: string } };
 }
 
 async function main() {
-  const days = Number(process.argv[2] ?? 30);
+  const days = parseDays(process.argv[2]);
   const to = new Date();
   const from = new Date(to.getTime() - days * 24 * HOUR);
   const repo = repository();
@@ -222,21 +259,26 @@ async function main() {
   for (let i = 1; i < runs.length; i++) {
     const prev = runs[i - 1]!;
     const cur = runs[i]!;
-    // 期間の前の組は失敗の特定にだけ使うので、古すぎるものは取らない
-    if (time(cur.updated_at) < from.getTime() - 30 * 24 * HOUR) continue;
+    // 期間の前の組は失敗の特定にだけ使うので、振り返る分より古いものは取らない
+    if (time(cur.created_at) < from.getTime() - LOOKBACK_MS) continue;
     const cmp = (await api(
       `repos/${repo}/compare/${prev.head_sha}...${cur.head_sha}`,
     )) as { commits: CompareCommit[] };
     deploys.push({
       sha: cur.head_sha,
+      // 再実行されたデプロイは完了が遅く出る（jobs API を引けば正確になるが、そこまではしない）
       finishedAt: cur.updated_at,
       commits: cmp.commits
         .filter((c) => c.parents.length === 1)
         .map((c) => ({
           sha: c.sha,
-          committedAt: c.commit.committer.date,
+          // committer の時刻は rebase で書き換わるので、書いた時刻（author）から測る
+          committedAt: c.commit.author.date,
           message: c.commit.message,
         })),
+      mergeShas: cmp.commits
+        .filter((c) => c.parents.length > 1)
+        .map((c) => c.sha),
     });
   }
 

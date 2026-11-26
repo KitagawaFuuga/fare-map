@@ -63,7 +63,8 @@ jobs:
         env:
           RATE_LIMIT_CAPACITY: "1000"
       - name: Summary
-        if: always()
+        # ビルドや計測が途中で落ちたときに、結果が無いことで二重に落ちないようにする
+        if: always() && hashFiles('.lighthouseci/reports/manifest.json') != ''
         run: npx tsx scripts/analysis/lighthouse-summary.ts >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()

@@ -70,9 +70,13 @@ export function summarize(
     const rep = manifest.find((e) => e.url === url && e.isRepresentativeRun);
     if (!rep) throw new Error(`${url} に代表の回がありません`);
     const lhr = readReport(rep.jsonPath);
+    // 計測が失敗した回はスコアが null になる。0 と出すと測れたように見えるので落とす
+    const score: unknown = rep.summary.performance;
+    if (typeof score !== "number")
+      throw new Error(`${url} の代表の回にスコアがありません（計測の失敗）`);
     return {
       url,
-      performance: Math.round((rep.summary.performance ?? 0) * 100),
+      performance: Math.round(score * 100),
       lcpMs: numericValue(lhr, "largest-contentful-paint"),
       cls: numericValue(lhr, "cumulative-layout-shift"),
       tbtMs: numericValue(lhr, "total-blocking-time"),

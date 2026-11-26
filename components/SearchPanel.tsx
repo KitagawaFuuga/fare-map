@@ -13,6 +13,8 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<StationSuggestion[]>([]);
   const [open, setOpen] = useState(false);
+  // 候補が0件のときと、取りに行けなかったときの文。候補が出たら消す
+  const [notice, setNotice] = useState("");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // デバウンスだけでは、先の入力の応答が後から届いたときに古い候補で上書きされる
   // （「新宿」と入力しても「新」の候補が出た）。hooks/use-reachable.ts と同じく
@@ -54,16 +56,31 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
     const requestId = ++requestIdRef.current;
     if (query.trim() === "") {
       setSuggestions([]);
+      setNotice("");
       return;
     }
     // 入力中の連打を 200ms デバウンス
     timer.current = setTimeout(async () => {
-      const res = await fetch(`/api/stations?q=${encodeURIComponent(query)}`);
-      if (res.ok) {
+      const failed = () => {
+        if (requestId !== requestIdRef.current) return;
+        setSuggestions([]);
+        setNotice("駅の候補を取得できませんでした");
+      };
+      try {
+        const res = await fetch(`/api/stations?q=${encodeURIComponent(query)}`);
+        if (!res.ok) return failed();
         const body = (await res.json()) as { stations: StationSuggestion[] };
         if (requestId !== requestIdRef.current) return;
         setSuggestions(body.stations);
+        setNotice(
+          body.stations.length === 0
+            ? `「${query.trim()}」に当てはまる駅はありません`
+            : "",
+        );
         setOpen(true);
+      } catch {
+        // 通信の失敗（オフラインなど）。黙って何も出さないと、入力が効いていないように見える
+        failed();
       }
     }, 200);
   }, [query]);
@@ -118,6 +135,14 @@ export default function SearchPanel({ selected, onSelect }: SearchPanelProps) {
           ))}
         </ul>
       )}
+      {/* 読み上げにも伝える。live region は文が入る前から置いておかないと読まれないことがある。
+          role="status" は検索結果の件数（app/page.tsx）が使っているので、ここは aria-live だけ */}
+      <p
+        aria-live="polite"
+        className={notice ? "mt-1 text-sm text-gray-600" : undefined}
+      >
+        {notice}
+      </p>
       {selected && (
         <p className="mt-1 text-sm text-gray-600">選択中: {selected.name}</p>
       )}

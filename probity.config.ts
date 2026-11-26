@@ -11,6 +11,8 @@ export default defineConfig({
         "lib/**",
         "app/**",
         "components/**",
+        // React のフック（use-reachable.ts など）も画面の振る舞いを持つアプリ本体
+        "hooks/**",
         "!lib/fare/__tests__/private-rules.test.ts",
       ],
       rules: [enforceTdd()],

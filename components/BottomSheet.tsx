@@ -39,15 +39,19 @@ export default function BottomSheet({
         touchStartY.current = null;
       }}
     >
+      {/* 見た目の棒（高さ 6px）より押せる範囲を広く取る。棒だけだと指では押しにくい */}
       <button
         type="button"
         aria-label="シートを開閉"
-        className="mx-auto mt-2 block h-1.5 w-10 rounded-full bg-gray-300"
+        aria-expanded={state !== "collapsed"}
+        className="mx-auto mt-1 flex h-6 w-16 items-center justify-center"
         onClick={() =>
           onStateChange(sheetNext(state, state === "full" ? "down" : "up"))
         }
-      />
-      <div className="h-[calc(100%-1.5rem)] overflow-y-auto px-4 pb-4 pt-2">
+      >
+        <span className="block h-1.5 w-10 rounded-full bg-gray-300" />
+      </button>
+      <div className="h-[calc(100%-1.75rem)] overflow-y-auto px-4 pb-4 pt-2">
         {children}
       </div>
     </div>

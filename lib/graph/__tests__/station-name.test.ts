@@ -94,3 +94,45 @@ describe("graphNameResolver", () => {
     expect(resolve("存在しない駅")).toBeUndefined();
   });
 });
+
+describe("matchKey の寄せ方（寄せた結果を直接確かめる）", () => {
+  it.each([
+    ["箱根ヶ崎", "箱根ケ崎"],
+    ["飛驒金山", "飛騨金山"],
+    ["髙田馬場", "高田馬場"],
+    ["川﨑", "川崎"],
+    ["小繫", "小繋"],
+    ["ＪＲ松山駅前", "JR松山駅前"],
+    ["明治神宮前〈原宿〉", "明治神宮前"],
+    ["押上(スカイツリー前)", "押上"],
+    [" 大阪 ", "大阪"],
+    ["松山市駅", "松山市"],
+    ["駅", "駅"],
+  ])("%s は %s", (name, key) => {
+    expect(matchKey(name)).toBe(key);
+  });
+
+  it("末尾でない「駅」は落とさない", () => {
+    expect(matchKey("駅前本町")).toBe("駅前本町");
+  });
+});
+
+describe("buildNameLookup の衝突", () => {
+  it("同じ鍵に3駅が当たっても、その鍵を捨てる", () => {
+    const lookup = buildNameLookup(["甲ヶ丘", "甲ケ丘", "甲ヶ丘駅"]);
+    expect(lookup.has("甲ケ丘")).toBe(false);
+  });
+
+  it("衝突した鍵だけを捨て、ほかの鍵は残す", () => {
+    const lookup = buildNameLookup(["甲ヶ丘", "乙", "甲ケ丘"]);
+    expect([...lookup]).toEqual([["乙", "乙"]]);
+  });
+});
+
+describe("graphNameResolver の改称", () => {
+  it("御立岬公園 → たのうら御立岬公園", () => {
+    expect(graphNameResolver(["たのうら御立岬公園"])("御立岬公園")).toBe(
+      "たのうら御立岬公園",
+    );
+  });
+});

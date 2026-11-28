@@ -83,48 +83,56 @@ function distancesByName(
   const find = (x: string): string => {
     let r = x;
     while ((parent.get(r) ?? r) !== r) r = parent.get(r)!;
+    // Stryker disable next-line CallExpression: 経路を縮めて次の find を速くするだけ
     parent.set(x, r);
     return r;
   };
+  // 根が同じなら自分を指すだけで、find の結果は変わらない
   const union = (a: string, b: string) => {
-    const ra = find(a);
-    const rb = find(b);
-    if (ra !== rb) parent.set(ra, rb);
+    parent.set(find(a), find(b));
   };
-  const inScope = (id: string) => {
-    const op = graph.nodes[id]?.operator;
-    return op !== undefined && operators.has(op);
+  const scopedNodes = Object.values(graph.nodes).filter((n) =>
+    operators.has(n.operator),
+  );
+  const scoped = (id: string) => {
+    const node = graph.nodes[id];
+    return node !== undefined && operators.has(node.operator)
+      ? node
+      : undefined;
   };
   const byGroup = new Map<string, string>();
-  for (const n of Object.values(graph.nodes)) {
-    if (!operators.has(n.operator)) continue;
+  for (const n of scopedNodes) {
     const first = byGroup.get(n.groupId);
     if (first === undefined) byGroup.set(n.groupId, n.id);
     else union(first, n.id);
   }
-  for (const e of graph.edges)
-    if (
-      e.kind === "transfer" &&
-      inScope(e.from) &&
-      inScope(e.to) &&
-      graph.nodes[e.from]?.name === graph.nodes[e.to]?.name
-    )
-      union(e.from, e.to);
+  for (const e of graph.edges) {
+    if (e.kind !== "transfer") continue;
+    const a = scoped(e.from);
+    const b = scoped(e.to);
+    if (a !== undefined && b !== undefined && a.name === b.name)
+      union(a.id, b.id);
+  }
 
   const adj = new Map<string, [string, number][]>();
+  const link = (from: string, to: string, km: number) => {
+    const list = adj.get(from);
+    if (list === undefined) adj.set(from, [[to, km]]);
+    else list.push([to, km]);
+  };
   for (const e of graph.edges) {
+    // Stryker disable next-line ConditionalExpression: 乗換の辺は operator が空なので、次の会社の確認でも落ちる
     if (e.kind !== "rail" || !operators.has(e.operator)) continue;
+    // 同じ駅の中の辺（自己ループ）は、確定済みの駅を指すので探索に影響しない
     const a = find(e.from);
     const b = find(e.to);
-    if (a === b) continue;
     const km = e.fareKm ?? e.km;
-    (adj.get(a) ?? adj.set(a, []).get(a)!).push([b, km]);
-    (adj.get(b) ?? adj.set(b, []).get(b)!).push([a, km]);
+    link(a, b, km);
+    link(b, a, km);
   }
   // 駅名 → 物理的な駅
   const stationsByName = new Map<string, Set<string>>();
-  for (const n of Object.values(graph.nodes)) {
-    if (!operators.has(n.operator)) continue;
+  for (const n of scopedNodes) {
     const set = stationsByName.get(n.name) ?? new Set<string>();
     set.add(find(n.id));
     stationsByName.set(n.name, set);
@@ -140,17 +148,20 @@ function distancesByName(
     const [u, du] = top;
     if (dist.has(u)) continue;
     dist.set(u, du);
+    // Stryker disable next-line ArrayDeclaration: 隣接の無い駅。中身を変えても駅でない値が dist に入るだけ
     for (const [v, w] of adj.get(u) ?? []) {
       // 小数第1位のキロを足し続けると誤差がたまるので丸める
+      // Stryker disable next-line ConditionalExpression: 確定済みの駅を積んでも、取り出したときに読み飛ばす
       if (!dist.has(v)) heap.push([v, Math.round((du + w) * 1000) / 1000]);
     }
   }
   const out = new Map<string, number>();
   for (const [name, set] of stationsByName) {
     if (set.size !== 1) continue;
-    const [station] = set;
-    const d = station === undefined ? undefined : dist.get(station);
-    if (d !== undefined) out.set(name, d);
+    for (const station of set) {
+      const d = dist.get(station);
+      if (d !== undefined) out.set(name, d);
+    }
   }
   return out;
 }

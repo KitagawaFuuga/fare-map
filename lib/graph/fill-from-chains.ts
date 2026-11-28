@@ -69,19 +69,27 @@ export function fillFromRealChains(
     const byName = adjacency.get(operator);
     if (byName === undefined || !byName.has(from) || !byName.has(to))
       return null;
+    // 以下の dist は、同じ駅を何度も広げないためだけのもの。無くても最初に取り出した
+    // to が最短なのは変わらない（重みは正で、取り出しは常に最小から）
+    // Stryker disable next-line ArrayDeclaration: 出発駅を dist に入れなくても、戻ってきたときに一度多く広げるだけ
     const dist = new Map<string, number>([[from, 0]]);
     const queue: [number, string][] = [[0, from]];
     while (queue.length > 0) {
       let best = 0;
       for (let i = 1; i < queue.length; i++)
+        // Stryker disable next-line EqualityOperator: 同じ距離のどちらを先に取り出しても最短の長さは同じ
         if (queue[i]![0] < queue[best]![0]) best = i;
       const [d, u] = queue.splice(best, 1)[0]!;
       if (u === to) return d;
+      // Stryker disable next-line ConditionalExpression,LogicalOperator: 古い候補を読み飛ばすだけ。広げ直しても結果は同じ
       if (d > (dist.get(u) ?? Infinity)) continue;
+      // Stryker disable next-line ArrayDeclaration: u は隣接表から辿った駅なので必ず隣接がある
       for (const [v, w] of byName.get(u) ?? []) {
         const nd = d + w;
         if (nd > limit) continue;
+        // Stryker disable next-line ConditionalExpression,EqualityOperator: 長い候補も積むだけで、取り出しは最小から
         if (nd < (dist.get(v) ?? Infinity)) {
+          // Stryker disable next-line CallExpression: 記録しなければ候補が増えるだけで、最短の長さは同じ
           dist.set(v, nd);
           queue.push([nd, v]);
         }
@@ -90,19 +98,16 @@ export function fillFromRealChains(
     return null;
   };
 
-  const result: FillResult = {
-    replaced: 0,
-    totalDelta: 0,
-    worst: [],
-    skippedDetour: 0,
-    detours: [],
-  };
   const changes: FillResult["worst"] = [];
+  const detours: FillResult["detours"] = [];
+  let totalDelta = 0;
   for (const edge of graph.edges) {
     if (edge.kind !== "rail") continue;
     const from = graph.nodes[edge.from]?.name;
     const to = graph.nodes[edge.to]?.name;
-    if (from === undefined || to === undefined || from === to) continue;
+    // Stryker disable next-line ConditionalExpression,LogicalOperator: 型を絞るため。駅が無ければ shortest が null を返して同じく飛ばす
+    if (from === undefined || to === undefined) continue;
+    if (from === to) continue;
     // 実営業キロが当たっている辺は触らない
     if (realKeys.has(`${edge.operator}\u0000${edgeKey(from, to)}`)) continue;
     const limit = edge.km * options.maxRatio;
@@ -111,21 +116,23 @@ export function fillFromRealChains(
       // 上限を広げれば結べるかを調べて、遠回りで捨てた数を報告する（上限なしで
       // 探すと事業者の全駅を回ることになるので5倍で打ち切る）
       const chain = shortest(edge.operator, from, to, edge.km * 5);
-      if (chain !== null) {
-        result.skippedDetour++;
-        result.detours.push({ from, to, km: edge.km, chain });
-      }
+      if (chain !== null) detours.push({ from, to, km: edge.km, chain });
       continue;
     }
     const km = Number(found.toFixed(2));
     changes.push({ from, to, before: edge.km, after: km });
-    result.totalDelta += km - edge.km;
-    result.replaced++;
+    totalDelta += km - edge.km;
     edge.km = km;
   }
-  result.detours.sort((a, b) => b.chain / b.km - a.chain / a.km);
-  result.worst = changes
-    .sort((a, b) => Math.abs(b.after - b.before) - Math.abs(a.after - a.before))
-    .slice(0, WORST_SAMPLES);
-  return result;
+  return {
+    replaced: changes.length,
+    totalDelta,
+    worst: changes
+      .sort(
+        (a, b) => Math.abs(b.after - b.before) - Math.abs(a.after - a.before),
+      )
+      .slice(0, WORST_SAMPLES),
+    skippedDetour: detours.length,
+    detours: detours.sort((a, b) => b.chain / b.km - a.chain / a.km),
+  };
 }

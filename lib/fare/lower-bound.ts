@@ -25,6 +25,7 @@ export interface LowerBoundTable {
 // 両端とも含めない。中間の 0.0105 は小数では 0.010499999… なので、3桁に丸めると
 // 安い帯の最大km（0.010）に戻り、境界の余裕が0になる
 function shortest(value: number, min: number, max: number): number {
+  // Stryker disable next-line EqualityOperator: 距離は1m単位なので中間は4桁で必ず収まり、9桁目まで行かない
   for (let digits = 3; digits <= 9; digits++) {
     const scale = 10 ** digits;
     const rounded = Math.round(value * scale) / scale;
@@ -34,9 +35,7 @@ function shortest(value: number, min: number, max: number): number {
 }
 
 export function deriveLowerBoundTable(pairs: KmFare[]): LowerBoundTable {
-  if (pairs.length === 0)
-    return { table: [], beyond: { fromKm: 0, baseFare: 0, ratePerKm: 0 } };
-
+  // ペアが無ければ帯も無く、beyond は 0km・0円になる（下の lastKm と ?? 0）
   // 距離は1m単位に丸めてから帯を作る。丸めないと、1e-14 しか違わない2つの距離に
   // 別の運賃が付いているときに境界が実距離とぴったり同値になり、距離を足す順序が
   // 違うだけ（探索とスクリプトは別々にダイクストラを回す）で帯が1つずれて下界が
@@ -44,8 +43,7 @@ export function deriveLowerBoundTable(pairs: KmFare[]): LowerBoundTable {
   const minByKm = new Map<number, number>();
   for (const p of pairs) {
     const km = Math.round(p.km * 1000) / 1000;
-    const cur = minByKm.get(km);
-    if (cur === undefined || p.fare < cur) minByKm.set(km, p.fare);
+    minByKm.set(km, Math.min(minByKm.get(km) ?? Infinity, p.fare));
   }
   const kms = [...minByKm.keys()].sort((a, b) => a - b);
 
@@ -53,8 +51,7 @@ export function deriveLowerBoundTable(pairs: KmFare[]): LowerBoundTable {
   // 最大のもの。長いほうが安いペアがあれば短い側の帯もそこまで下がる
   const lower = new Map<number, number>();
   let suffix = Infinity;
-  for (let i = kms.length - 1; i >= 0; i--) {
-    const km = kms[i]!;
+  for (const km of [...kms].reverse()) {
     suffix = Math.min(suffix, minByKm.get(km) ?? Infinity);
     lower.set(km, suffix);
   }

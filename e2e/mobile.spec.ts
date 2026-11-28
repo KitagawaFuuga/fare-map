@@ -216,3 +216,39 @@ test.describe("ボトムシート", () => {
       .toBeGreaterThan(collapsed);
   });
 });
+
+test.describe("シートのつまみ", () => {
+  // 見た目の棒は高さ 6px。押せる範囲も同じだと、指では押しにくい
+  // （WCAG 2.5.8 の 24px は、周りに押せるものが無い例外で満たしていたが、使いにくさは変わらない）
+  test("押せる範囲は、指で押せる大きさ（縦横 24px 以上）がある", async ({
+    page,
+  }) => {
+    await stubTiles(page);
+    await page.goto("/");
+    const handle = sheet(page).getByRole("button", { name: "シートを開閉" });
+    const box = await handle.boundingBox();
+    if (!box) throw new Error("つまみが描画されていない");
+    expect(box.height).toBeGreaterThanOrEqual(24);
+    expect(box.width).toBeGreaterThanOrEqual(24);
+  });
+
+  test("開いているかどうかを、読み上げにも伝える（aria-expanded）", async ({
+    page,
+    browserName,
+  }) => {
+    // 畳むには下へのスワイプが要る。WebKit は Touch を組み立てられない
+    test.skip(browserName === "webkit", "WebKit は Touch を組み立てられない");
+    await stubTiles(page);
+    await page.goto("/");
+    const target = sheet(page);
+    const handle = target.getByRole("button", { name: "シートを開閉" });
+    // 最初は半分開いている
+    await expect(handle).toHaveAttribute("aria-expanded", "true");
+
+    await swipe(target, 100); // half → collapsed
+    await expect(handle).toHaveAttribute("aria-expanded", "false");
+
+    await handle.click(); // collapsed → half
+    await expect(handle).toHaveAttribute("aria-expanded", "true");
+  });
+});

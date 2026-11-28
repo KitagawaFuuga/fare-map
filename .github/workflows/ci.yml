@@ -37,7 +37,16 @@ jobs:
       - run: npm ci
       # 本番ビルドを起動してブラウザから触る。ビルドも typecheck も通るのに
       # 地図が白いままになる類の不具合（maplibre のワーカー 404）はここでしか出ない。
-      - run: npx playwright install --with-deps chromium
+      # apt のミラーが一時的に 404 を返して落ちることがある（2026-11-26、PR #30 の e2e）。
+      # コードと関係ない失敗なので、間を空けて3回まで試す
+      - name: Install Playwright browser
+        run: |
+          for i in 1 2 3; do
+            npx playwright install --with-deps chromium && exit 0
+            echo "::warning::playwright install が失敗（$i 回目）。30 秒後に試し直す"
+            sleep 30
+          done
+          exit 1
       - run: npm run e2e
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()

@@ -94,3 +94,13 @@ test("検索結果を出した画面に、重いアクセシビリティの違�
 
   await checkA11y(page, testInfo, "results");
 });
+
+test("無いページの案内に、重いアクセシビリティの違反が無い", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/no-such-page");
+  await expect(
+    page.getByRole("heading", { name: "ページが見つかりません" }),
+  ).toBeVisible();
+  await checkA11y(page, testInfo, "not-found");
+});

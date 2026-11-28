@@ -136,3 +136,24 @@ test("駅の候補を取りに行けなかったときは、そう伝える", as
   await panel.getByPlaceholder("駅名を入力").fill("新宿");
   await expect(panel.getByText("駅の候補を取得できませんでした")).toBeVisible();
 });
+
+test("検索している間は、検索中であることが status で伝わる", async ({
+  page,
+}) => {
+  // ボタンの文字は「検索中…」に変わるが、読み上げの status は空のままで、
+  // 押した後に何が起きているかが伝わらなかった
+  await stubTiles(page);
+  let release: () => void = () => {};
+  const held = new Promise<void>((r) => (release = r));
+  await page.route("**/api/reachable?**", async (route) => {
+    await held;
+    await route.continue();
+  });
+  await page.goto("/");
+  await searchFrom(page, "新宿", "500");
+
+  const status = sidebar(page).getByRole("status");
+  await expect(status).toHaveText("検索中…");
+  release();
+  await expect(status).toHaveText(/\d+ 駅に到達可能/, { timeout: 30_000 });
+});

@@ -92,6 +92,50 @@ describe("deriveLowerBoundTable の帯境界の丸め", () => {
   });
 });
 
+describe("deriveLowerBoundTable の帯境界の余裕", () => {
+  // 0.010 と 0.011 の中間 0.0105 は小数では 0.010499999… になり、3桁に丸めると
+  // 0.010（安い帯の最大km）に戻る。境界が実距離と同値だと、足し算の誤差で
+  // 0.0100000001 になった距離が高い帯に入り、下界が実運賃を上回る
+  it("中間を丸めた値が安い帯の最大kmに戻るときは桁を増やす", () => {
+    expect(
+      deriveLowerBoundTable([
+        { km: 0.01, fare: 100 },
+        { km: 0.011, fare: 200 },
+      ]).table[0],
+    ).toEqual([0.0105, 100]);
+  });
+
+  it("どの境界も、安い帯の最大kmより大きく、次の帯の最小kmより小さい", () => {
+    // 0.01〜0.20 を 1m ずつ、運賃を交互に上げて帯を細かく切る
+    const pairs = Array.from({ length: 191 }, (_, i) => ({
+      km: (10 + i) / 1000,
+      fare: 100 + i * 10,
+    }));
+    const { table } = deriveLowerBoundTable(pairs);
+    table.slice(0, -1).forEach(([maxKm], i) => {
+      expect(maxKm).toBeGreaterThan(pairs[i]!.km);
+      expect(maxKm).toBeLessThan(pairs[i + 1]!.km);
+    });
+  });
+
+  it("入力が距離の順に並んでいなくても同じ表を作る", () => {
+    const pairs = [
+      { km: 3, fare: 300 },
+      { km: 1, fare: 150 },
+      { km: 10, fare: 400 },
+      { km: 2, fare: 150 },
+    ];
+    expect(deriveLowerBoundTable(pairs)).toEqual(
+      deriveLowerBoundTable([...pairs].sort((a, b) => a.km - b.km)),
+    );
+    expect(deriveLowerBoundTable(pairs).table).toEqual([
+      [2.5, 150],
+      [6.5, 300],
+      [10, 400],
+    ]);
+  });
+});
+
 describe("deriveLowerBoundTable の距離の丸め", () => {
   // 帯の境界が実距離とぴったり同値になると、距離を足す順序が違うだけで
   // （探索とスクリプトは別々にダイクストラを回す）帯が1つずれて下界が破れる

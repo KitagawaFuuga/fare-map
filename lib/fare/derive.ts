@@ -78,15 +78,13 @@ export function deriveFareTable(pairs: KmFarePair[]): DeriveResult {
     }
   }
 
-  const fares = [...byFare.keys()].sort((a, b) => a - b);
+  const groups = [...byFare.entries()]
+    .map(([fare, g]) => ({ fare, ...g }))
+    .sort((a, b) => a.fare - b.fare);
   const bands: DerivedBand[] = [];
-  for (let i = 0; i < fares.length; i++) {
-    const fare = fares[i];
-    if (fare === undefined) continue;
-    const cur = byFare.get(fare);
-    if (cur === undefined) continue;
-    const nextFare = fares[i + 1];
-    const next = nextFare === undefined ? undefined : byFare.get(nextFare);
+  groups.forEach((cur, i) => {
+    const { fare } = cur;
+    const next = groups[i + 1];
 
     if (next === undefined) {
       // 最終帯。上限は観測した最大キロをそのまま使う（これ以上は情報が無い）
@@ -97,16 +95,16 @@ export function deriveFareTable(pairs: KmFarePair[]): DeriveResult {
         pinned: false,
         observed: cur.count,
       });
-      continue;
+      return;
     }
 
     if (cur.max >= next.min) {
       // 安い運賃の観測キロが、高い運賃の観測キロ以上まで伸びている＝階段関数でない
       problems.push(
         `帯が重なっている: ${fare}円 が ${cur.max}km まであるのに ` +
-          `${nextFare}円 が ${next.min}km から始まる`,
+          `${next.fare}円 が ${next.min}km から始まる`,
       );
-      continue;
+      return;
     }
 
     const lo = cur.max;
@@ -124,7 +122,7 @@ export function deriveFareTable(pairs: KmFarePair[]): DeriveResult {
       pinned: candidates.length === 1,
       observed: cur.count,
     });
-  }
+  });
 
   const table: [number, number][] = bands.map((b) => [b.maxKm, b.fare]);
 

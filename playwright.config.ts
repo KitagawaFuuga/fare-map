@@ -10,7 +10,7 @@ const externalBaseURL = process.env.E2E_BASE_URL || undefined;
 // WebKit（Safari の描画エンジン）でも流す。iPhone の利用者が多いので Chromium だけでは足りない
 // （WebKit で流して、動き出す前に打った駅名が消える不具合を見つけた。PR #45）。
 // ブラウザを入れる手間と時間が増えるので、E2E_WEBKIT を付けたとき（CI の e2e-webkit ジョブ）だけ足す。
-// 必須の e2e とデプロイ前の確かめは、今までどおり Chromium だけで走る
+// e2e-webkit も merge に必須のチェック。デプロイ前の確かめは Chromium だけで走る
 const webkitProjects = process.env.E2E_WEBKIT
   ? [
       {

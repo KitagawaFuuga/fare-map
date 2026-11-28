@@ -39,20 +39,15 @@ export function applyStationKm(
     wanted.set(`${e.operator}\u0000${edgeKey(e.from, e.to)}`, e.km);
   }
 
-  const result: ApplyResult = {
-    replaced: 0,
-    totalDelta: 0,
-    worst: [],
-    unmatched: 0,
-  };
   const used = new Set<string>();
-  const changes: { from: string; to: string; before: number; after: number }[] =
-    [];
+  const changes: ApplyResult["worst"] = [];
+  let totalDelta = 0;
 
   for (const edge of graph.edges) {
     if (edge.kind !== "rail") continue;
     const from = graph.nodes[edge.from]?.name;
     const to = graph.nodes[edge.to]?.name;
+    // Stryker disable next-line ConditionalExpression,LogicalOperator: 型を絞るため。駅が無ければ鍵が当たらず同じく飛ばす
     if (from === undefined || to === undefined) continue;
     const key = `${edge.operator}\u0000${edgeKey(from, to)}`;
     const km = wanted.get(key);
@@ -61,14 +56,18 @@ export function applyStationKm(
     // 同じ駅名の組が複数エッジある（並行する別路線など）ことがあるので、
     // 一致したエッジはすべて置き換える
     changes.push({ from, to, before: edge.km, after: km });
-    result.totalDelta += Math.abs(edge.km - km);
-    result.replaced++;
+    totalDelta += Math.abs(edge.km - km);
     edge.km = km;
   }
 
-  result.unmatched = wanted.size - used.size;
-  result.worst = changes
-    .sort((a, b) => Math.abs(b.before - b.after) - Math.abs(a.before - a.after))
-    .slice(0, WORST_SAMPLES);
-  return result;
+  return {
+    replaced: changes.length,
+    totalDelta,
+    worst: changes
+      .sort(
+        (a, b) => Math.abs(b.before - b.after) - Math.abs(a.before - a.after),
+      )
+      .slice(0, WORST_SAMPLES),
+    unmatched: wanted.size - used.size,
+  };
 }

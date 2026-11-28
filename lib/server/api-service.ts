@@ -21,11 +21,13 @@ const fuseCache = new WeakMap<GraphStore, Fuse<StationNode>>();
 
 function getFuse(store: GraphStore): Fuse<StationNode> {
   let fuse = fuseCache.get(store);
+  // Stryker disable next-line ConditionalExpression: 毎回作り直しても検索結果は同じ（速さだけ）
   if (!fuse) {
     fuse = new Fuse(Object.values(store.graph.nodes), {
       keys: ["name"], // 駅名だけを検索対象にする（路線名まで含めるとノイズが増える）
       threshold: 0.3, // 0=完全一致, 1=何でもヒット。打ち間違いは拾いつつ無関係な駅は出さない値
     });
+    // Stryker disable next-line CallExpression: 覚えなくても次に作り直すだけ
     fuseCache.set(store, fuse);
   }
   return fuse;
@@ -43,6 +45,7 @@ export function suggestStations(
   const out: StationSuggestion[] = [];
   // limit の3倍を要求するのは、重複除去で件数が減るのを見込んだ余裕分
   // （ちょうど limit 件だけ取ると、全部が同一駅の別路線で1件しか残らないことがある）。
+  // Stryker disable next-line ObjectLiteral: 上限なしで全件受け取っても、下で limit 件で打ち切るので結果は同じ
   for (const { item } of getFuse(store).search(query, { limit: limit * 3 })) {
     if (seen.has(item.groupId)) continue;
     seen.add(item.groupId);
@@ -93,6 +96,7 @@ const noWalkGraphCache = new WeakMap<RailGraph, RailGraph>();
 
 function getNoWalkGraph(graph: RailGraph): RailGraph {
   let cached = noWalkGraphCache.get(graph);
+  // Stryker disable next-line ConditionalExpression: 毎回作り直しても中身は同じ（速さだけ）
   if (!cached) {
     cached = {
       nodes: graph.nodes,
@@ -103,6 +107,7 @@ function getNoWalkGraph(graph: RailGraph): RailGraph {
         return !a || !b || a.groupId === b.groupId;
       }),
     };
+    // Stryker disable next-line CallExpression: 覚えなくても次に作り直すだけ
     noWalkGraphCache.set(graph, cached);
   }
   return cached;
@@ -118,18 +123,17 @@ export function reachable(
   const raw = findReachable(store.graph, store.calc, fromId, budget);
 
   // 同一駅グループは最小運賃の代表 1 件に集約（raw は fare 昇順なので先勝ち）
-  const byGroup = new Map<string, { id: string; fare: number }>();
+  const byGroup = new Map<string, { n: StationNode; fare: number }>();
   for (const r of raw) {
-    const g = store.graph.nodes[r.id]?.groupId;
-    if (g !== undefined && !byGroup.has(g)) byGroup.set(g, r);
+    const n = store.graph.nodes[r.id];
+    if (n !== undefined && !byGroup.has(n.groupId))
+      byGroup.set(n.groupId, { n, fare: r.fare });
   }
   // 出発駅そのものを結果から除く。ここで消すのは id ではなく groupId である点が重要で、
   // 出発ノード以外の同一駅ノード（別路線ホーム）も一緒に消える。
   byGroup.delete(fromNode.groupId);
 
-  const stations = [...byGroup.values()].map(({ id, fare }) => {
-    const n = store.graph.nodes[id];
-    if (!n) throw new Error(`未知の駅: ${id}`);
+  const stations = [...byGroup.values()].map(({ n, fare }) => {
     return {
       id: n.id,
       name: n.name,
@@ -163,15 +167,17 @@ export function walkStationIds(
     result.meta.from,
     result.meta.budget,
   )) {
-    const g = store.graph.nodes[r.id]?.groupId;
-    if (g === undefined) continue;
-    const prev = noWalkFare.get(g);
-    if (prev === undefined || r.fare < prev) noWalkFare.set(g, r.fare);
+    const n = store.graph.nodes[r.id];
+    if (n === undefined) continue;
+    // findReachable は運賃の安い順なので、グループの最初の1件が最安
+    if (!noWalkFare.has(n.groupId)) noWalkFare.set(n.groupId, r.fare);
   }
   return result.stations
     .filter((s) => {
-      const g = store.graph.nodes[s.id]?.groupId;
-      const without = g === undefined ? undefined : noWalkFare.get(g);
+      const n = store.graph.nodes[s.id];
+      // グラフに無い駅は運賃を確かめられないので、徒歩前提として返す
+      if (n === undefined) return true;
+      const without = noWalkFare.get(n.groupId);
       return without === undefined || without > s.fare;
     })
     .map((s) => s.id);

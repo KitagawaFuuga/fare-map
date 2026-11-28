@@ -157,3 +157,41 @@ test("検索している間は、検索中であることが status で伝わる
   release();
   await expect(status).toHaveText(/\d+ 駅に到達可能/, { timeout: 30_000 });
 });
+
+// キーボードで使う人は、予算を打ったあと検索ボタンまで Tab で移らないと検索できなかった
+test("予算の欄で Enter を押すと検索が始まる", async ({ page }) => {
+  await stubTiles(page);
+  await page.goto("/");
+  const panel = sidebar(page);
+  await panel.getByPlaceholder("駅名を入力").fill("新宿");
+  await panel.getByRole("button", { name: /^新宿/ }).first().click();
+
+  const budget = panel.locator('input[type="number"]');
+  await budget.fill("300");
+  const request = page.waitForRequest((r) =>
+    r.url().includes("/api/reachable?"),
+  );
+  await budget.press("Enter");
+  // 打った直後の値で検索する（古い予算で検索しない）
+  expect(new URL((await request).url()).searchParams.get("budget")).toBe("300");
+  await expect(panel.getByRole("status")).toHaveText(/\d+ 駅に到達可能/, {
+    timeout: 30_000,
+  });
+});
+
+test("出発駅を選ぶ前に予算の欄で Enter を押しても、検索しない", async ({
+  page,
+}) => {
+  await stubTiles(page);
+  let requested = false;
+  await page.route("**/api/reachable?**", (route) => {
+    requested = true;
+    return route.continue();
+  });
+  await page.goto("/");
+  const budget = sidebar(page).locator('input[type="number"]');
+  await budget.fill("300");
+  await budget.press("Enter");
+  await page.waitForTimeout(1_000);
+  expect(requested).toBe(false);
+});

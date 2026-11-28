@@ -2178,3 +2178,67 @@ describe("createFareCalculator の入力の検査", () => {
     expect(calc.honshuThroughBaseFare(0)).toBe(0);
   });
 });
+
+describe("特定運賃の駅の組の鍵", () => {
+  // 区切りを入れずに繋ぐと「あい」+「う」と「あ」+「いう」が同じ鍵になる
+  it("駅名の切れ目が違う組を取り違えない", () => {
+    const flat = {
+      id: "f",
+      operators: ["甲鉄道"],
+      table: [[100, 150]] as [number, number][],
+      beyond: { fromKm: 100, baseFare: 150, ratePerKm: 0 },
+    };
+    const calc = createFareCalculator(
+      [flat, { ...flat, id: "fb", operators: [] }],
+      [
+        {
+          operator: "甲鉄道",
+          pairs: [{ from: "あい", to: "う", fare: 999 }],
+          source: { url: "u", fetchedAt: "f", note: "n" },
+        },
+      ],
+    );
+    expect(calc.estimate("甲鉄道", 5, "あい", "う")).toBe(999);
+    expect(calc.estimate("甲鉄道", 5, "あ", "いう")).toBe(150);
+  });
+});
+
+describe("本州3社の特定都区市内の距離の使い分け", () => {
+  // 1社の運賃は区域の会社の線路で測った centerKm、通し運賃は3社をまたいで測った
+  // throughCenterKm。中心駅から Far は 1社内で 250km、3社をまたぐと 240km
+  it("1社の運賃には、通し運賃用の距離を使わない", () => {
+    const perKm = {
+      id: "east",
+      operators: ["JR東日本"],
+      table: [[1, 10]] as [number, number][],
+      beyond: { fromKm: 1, baseFare: 10, ratePerKm: 10 },
+    };
+    const calc = createFareCalculator(
+      [perKm, { ...perKm, id: "fb", operators: [] }],
+      [],
+      [],
+      [
+        {
+          id: "x",
+          center: "C",
+          operator: "JR東日本",
+          minKm: 200,
+          stations: ["C", "A"],
+          centerKm: new Map([
+            ["C", 0],
+            ["A", 5],
+            ["Far", 250],
+          ]),
+          throughCenterKm: new Map([
+            ["C", 0],
+            ["A", 5],
+            ["Far", 240],
+          ]),
+        },
+      ],
+    );
+    // A が C と Far の間にある経路（実際の距離 245km）。読み替えた距離は
+    // 中心駅から Far までの距離そのもの（250km、通し運賃用なら 240km）になる
+    expect(calc.estimate("JR東日本", 245, "A", "Far")).toBe(2500);
+  });
+});

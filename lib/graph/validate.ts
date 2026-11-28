@@ -23,9 +23,8 @@ export function validateGraph(g: RailGraph): string[] {
       );
     }
   }
-  for (const id of Object.keys(g.nodes)) {
-    if (!touched.has(id))
-      problems.push(`孤立ノード: ${id} (${g.nodes[id]?.name})`);
+  for (const [id, node] of Object.entries(g.nodes)) {
+    if (!touched.has(id)) problems.push(`孤立ノード: ${id} (${node.name})`);
   }
   return problems;
 }

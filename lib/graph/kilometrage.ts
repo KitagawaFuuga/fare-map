@@ -45,6 +45,7 @@ export function buildKilometrageFix(
     const hit = byPair.get(key(operator, from, to));
     if (hit === undefined) return km;
     // 元の値が変わっていたら差し替えない（CSVが直った可能性があるため）
+    // Stryker disable next-line EqualityOperator: 許容差は小数の足し算の誤差を吸うためのもの。差がちょうど 1e-9 になる値は無い
     return Math.abs(hit.csvKm - km) < 1e-9 ? hit.officialKm : km;
   };
 }

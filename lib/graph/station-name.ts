@@ -43,9 +43,9 @@ export function buildNameLookup(names: Iterable<string>): Map<string, string> {
     byKey.set(key, [...(byKey.get(key) ?? []), name]);
   }
   const lookup = new Map<string, string>();
+  // found は名前を足したときにだけ作るので、少なくとも1件ある
   for (const [key, found] of byKey) {
-    const only = found[0];
-    if (found.length === 1 && only !== undefined) lookup.set(key, only);
+    if (found.length === 1) lookup.set(key, found[0]!);
   }
   return lookup;
 }

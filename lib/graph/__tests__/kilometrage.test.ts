@@ -103,3 +103,46 @@ describe("data/station-km-corrections.json", () => {
     expect(fix("甲", "あ", "い", 12.3)).toBe(12.3);
   });
 });
+
+describe("buildKilometrageFix の突き合わせ", () => {
+  const one = (operator: string, from: string, to: string) =>
+    buildKilometrageFix([
+      { operator, from, to, csvKm: 2.8, officialKm: 2.0, note: "n" },
+    ]);
+
+  it("同じ事業者でも、駅ペアが違えば差し替えない", () => {
+    expect(one("甲鉄道", "A", "B")("甲鉄道", "A", "C", 2.8)).toBe(2.8);
+  });
+
+  it("駅ペアが同じでも、事業者が違えば差し替えない", () => {
+    expect(one("甲鉄道", "A", "B")("乙鉄道", "A", "B", 2.8)).toBe(2.8);
+  });
+
+  // 区切りを入れずに繋ぐと「あい」+「う」と「あ」+「いう」が同じ鍵になる
+  it("駅名の切れ目が違う組を取り違えない", () => {
+    expect(one("甲鉄道", "あい", "う")("甲鉄道", "あ", "いう", 2.8)).toBe(2.8);
+  });
+});
+
+describe("kilometrageCorrectionsSchema", () => {
+  it("書いた項目をすべて残して通す", () => {
+    const file = {
+      corrections: [
+        {
+          operator: "甲鉄道",
+          from: "A",
+          to: "B",
+          csvKm: 2.8,
+          officialKm: 2.0,
+          note: "n",
+        },
+      ],
+      source: {
+        url: "https://example.com",
+        fetchedAt: "2026-01-01",
+        note: "n",
+      },
+    };
+    expect(kilometrageCorrectionsSchema.parse(file)).toEqual(file);
+  });
+});

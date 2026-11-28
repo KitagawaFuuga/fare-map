@@ -99,3 +99,40 @@ test("検索に失敗したら、alert で伝わる", async ({ page }) => {
     timeout: 30_000,
   });
 });
+
+test("当てはまる駅が無い名前を入れると、候補が出ないのではなく、そう伝える", async ({
+  page,
+}) => {
+  await stubTiles(page);
+  await page.route("**/api/stations?**", (route) => {
+    const q = new URL(route.request().url()).searchParams.get("q");
+    return q === "新宿"
+      ? route.continue()
+      : route.fulfill({ json: { stations: [] } });
+  });
+  await page.goto("/");
+  const panel = sidebar(page);
+  const input = panel.getByPlaceholder("駅名を入力");
+
+  await input.fill("存在しない駅");
+  await expect(
+    panel.getByText("「存在しない駅」に当てはまる駅はありません"),
+  ).toBeVisible();
+
+  // 入れ直して候補が出たら、前の「ありません」は消える
+  await input.fill("新宿");
+  await expect(
+    panel.getByRole("button", { name: /^新宿/ }).first(),
+  ).toBeVisible();
+  await expect(panel.getByText(/に当てはまる駅はありません/)).toHaveCount(0);
+});
+
+test("駅の候補を取りに行けなかったときは、そう伝える", async ({ page }) => {
+  await stubTiles(page);
+  await page.route("**/api/stations?**", (route) => route.abort());
+  await page.goto("/");
+  const panel = sidebar(page);
+
+  await panel.getByPlaceholder("駅名を入力").fill("新宿");
+  await expect(panel.getByText("駅の候補を取得できませんでした")).toBeVisible();
+});

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createFareCalculator } from "@/lib/fare/calculator";
 import {
   buildSpecialCities,
+  specialCitiesFileSchema,
   type SpecialCity,
 } from "@/lib/fare/special-cities";
 import type { FareOverride, FareRule } from "@/lib/fare/types";
@@ -603,5 +604,237 @@ describe("buildSpecialCities", () => {
         ],
       }),
     ).toThrow(/Z/);
+  });
+});
+
+describe("buildSpecialCities の駅のまとめ方", () => {
+  const n = (id: string, name: string, operator: string, groupId = id) => ({
+    id,
+    groupId,
+    name,
+    lat: 0,
+    lng: 0,
+    lineId: "l",
+    lineName: "l",
+    operator,
+  });
+  const rail = (from: string, to: string, km: number, operator: string) => ({
+    from,
+    to,
+    km,
+    kind: "rail" as const,
+    operator,
+  });
+  const transfer = (from: string, to: string) => ({
+    from,
+    to,
+    km: 0,
+    kind: "transfer" as const,
+    operator: "",
+  });
+  const cityOn = (
+    graph: RailGraph,
+    extra: { stations?: string[]; maxKm?: number } = {},
+  ) =>
+    buildSpecialCities(graph, {
+      cities: [
+        {
+          id: "x",
+          name: "X市内",
+          center: "C",
+          operator: "JR東日本",
+          minKm: 200,
+          stations: extra.stations ?? ["C"],
+          ...(extra.maxKm === undefined ? {} : { maxKm: extra.maxKm }),
+        },
+      ],
+    })[0]!;
+
+  it("同じ groupId の駅は1つの駅として、乗り換えなしでつなぐ", () => {
+    // C —5— D(線1)、D(線2) —7— E。D の2つのノードは同じ groupId
+    const graph: RailGraph = {
+      nodes: {
+        c: n("c", "C", "JR東日本"),
+        d1: n("d1", "D", "JR東日本", "gD"),
+        d2: n("d2", "D", "JR東日本", "gD"),
+        e: n("e", "E", "JR東日本"),
+      },
+      edges: [rail("c", "d1", 5, "JR東日本"), rail("d2", "e", 7, "JR東日本")],
+    };
+    expect([...cityOn(graph).centerKm]).toEqual([
+      ["C", 0],
+      ["D", 5],
+      ["E", 12],
+    ]);
+  });
+
+  it("区域の会社以外の駅を挟んだ乗換では、区域の会社の駅どうしをつながない", () => {
+    // JR東日本の S と JR東海の S は別の駅。私鉄の S が両方と乗換でつながっていても、
+    // 通し運賃の距離で S を1つの駅とみなさない（みなすと C→S→T が 6km になる）
+    const graph: RailGraph = {
+      nodes: {
+        c: n("c", "C", "JR東日本"),
+        s1: n("s1", "S", "JR東日本"),
+        s2: n("s2", "S", "JR東海"),
+        sp: n("sp", "S", "私鉄"),
+        t: n("t", "T", "JR東海"),
+      },
+      edges: [
+        rail("c", "s1", 2, "JR東日本"),
+        rail("s2", "t", 4, "JR東海"),
+        transfer("sp", "s1"),
+        transfer("sp", "s2"),
+      ],
+    };
+    const city = cityOn(graph);
+    expect(city.throughCenterKm?.has("T")).toBe(false);
+    expect(city.throughCenterKm?.has("S")).toBe(false);
+  });
+
+  it("グラフに無い駅への乗換の辺は無視する", () => {
+    const graph: RailGraph = {
+      nodes: { c: n("c", "C", "JR東日本"), d: n("d", "D", "JR東日本") },
+      edges: [rail("c", "d", 3, "JR東日本"), transfer("c", "ghost")],
+    };
+    expect([...cityOn(graph).centerKm]).toEqual([
+      ["C", 0],
+      ["D", 3],
+    ]);
+  });
+
+  it("線路でつながった同名の駅は、別の駅として距離を持たない", () => {
+    const graph: RailGraph = {
+      nodes: {
+        c: n("c", "C", "JR東日本"),
+        s1: n("s1", "S", "JR東日本"),
+        s2: n("s2", "S", "JR東日本"),
+      },
+      edges: [rail("c", "s1", 2, "JR東日本"), rail("s1", "s2", 1, "JR東日本")],
+    };
+    expect([...cityOn(graph).centerKm]).toEqual([["C", 0]]);
+  });
+
+  it("区域の会社の線路で届かない駅は距離を持たない", () => {
+    const graph: RailGraph = {
+      nodes: { c: n("c", "C", "JR東日本"), z: n("z", "Z", "JR東日本") },
+      edges: [],
+    };
+    expect([...cityOn(graph).centerKm]).toEqual([["C", 0]]);
+  });
+
+  it("区域の会社以外に同名の駅があっても、中心駅は1つと数える", () => {
+    const graph: RailGraph = {
+      nodes: {
+        c: n("c", "C", "JR東日本"),
+        cp: n("cp", "C", "私鉄"),
+        d: n("d", "D", "JR東日本"),
+      },
+      edges: [rail("c", "d", 3, "JR東日本")],
+    };
+    expect(cityOn(graph).centerKm.get("D")).toBe(3);
+  });
+
+  it("区域の会社に同名の中心駅が2つあれば例外", () => {
+    const graph: RailGraph = {
+      nodes: { c1: n("c1", "C", "JR東日本"), c2: n("c2", "C", "JR東日本") },
+      edges: [],
+    };
+    expect(() => cityOn(graph)).toThrow(
+      "中心駅 C が無いか、同名の駅が複数ある",
+    );
+  });
+
+  it("区域の駅が別の会社にしか無ければ例外", () => {
+    const graph: RailGraph = {
+      nodes: { c: n("c", "C", "JR東日本"), r: n("r", "R", "私鉄") },
+      edges: [],
+    };
+    expect(() => cityOn(graph, { stations: ["C", "R"] })).toThrow(
+      "X市内: 駅 R が JR東日本 に無い",
+    );
+  });
+
+  it("名前の違う駅どうしの乗換ではつながない", () => {
+    // C の隣の X へ乗換の辺がある（浜松町と大門のような別の駅）。X から先の Y は
+    // 区域の会社の線路では C から届かない
+    const graph: RailGraph = {
+      nodes: {
+        c: n("c", "C", "JR東日本"),
+        x: n("x", "X", "JR東日本"),
+        y: n("y", "Y", "JR東日本"),
+      },
+      edges: [transfer("c", "x"), rail("x", "y", 5, "JR東日本")],
+    };
+    expect([...cityOn(graph).centerKm]).toEqual([["C", 0]]);
+  });
+
+  it("区域の会社以外の線路は、区域の会社の駅どうしをつなぐ経路にも使わない", () => {
+    const graph: RailGraph = {
+      nodes: { c: n("c", "C", "JR東日本"), d: n("d", "D", "JR東日本") },
+      edges: [rail("c", "d", 3, "私鉄")],
+    };
+    expect([...cityOn(graph).centerKm]).toEqual([["C", 0]]);
+  });
+
+  it("先に見つかった遠い経路でなく、最短の距離を返す", () => {
+    // C から A へ直接 10km、B 経由なら 1+1=2km
+    const graph: RailGraph = {
+      nodes: {
+        c: n("c", "C", "JR東日本"),
+        a: n("a", "A", "JR東日本"),
+        b: n("b", "B", "JR東日本"),
+      },
+      edges: [
+        // 近い B を先に積み、遠い A（10km）を後に積む並び。取り出しが距離の順で
+        // なく積んだ順の逆だと、A を 10km で確定してしまう
+        rail("c", "b", 1, "JR東日本"),
+        rail("c", "a", 10, "JR東日本"),
+        rail("b", "a", 1, "JR東日本"),
+      ],
+    };
+    expect(cityOn(graph).centerKm.get("A")).toBe(2);
+  });
+
+  it("中心駅が区域の会社に無ければ例外", () => {
+    const graph: RailGraph = {
+      nodes: { c: n("c", "C", "私鉄") },
+      edges: [],
+    };
+    expect(() => cityOn(graph)).toThrow(
+      "中心駅 C が無いか、同名の駅が複数ある",
+    );
+  });
+
+  it("maxKm は書いたときだけ持つ", () => {
+    const graph: RailGraph = {
+      nodes: { c: n("c", "C", "JR東日本") },
+      edges: [],
+    };
+    expect("maxKm" in cityOn(graph)).toBe(false);
+    expect(cityOn(graph, { maxKm: 200 }).maxKm).toBe(200);
+  });
+});
+
+describe("specialCitiesFileSchema", () => {
+  const city = {
+    id: "x",
+    name: "X市内",
+    center: "C",
+    operator: "JR東日本",
+    minKm: 200,
+    stations: ["C", "A"],
+  };
+
+  it("駅が2つ以上ある区域は通す", () => {
+    expect(specialCitiesFileSchema.parse({ cities: [city] })).toEqual({
+      cities: [city],
+    });
+  });
+
+  it("駅が1つも無い区域は通さない", () => {
+    expect(
+      specialCitiesFileSchema.safeParse({ cities: [{ ...city, stations: [] }] })
+        .success,
+    ).toBe(false);
   });
 });

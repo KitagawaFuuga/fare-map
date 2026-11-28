@@ -600,3 +600,19 @@ test("吹き出しの「経路を見る」はリンクで、押すと新しい�
   expect(url).toContain("origin=黒崎駅前駅");
   expect(url).toContain("destination=熊西駅");
 });
+
+// 一覧（lib/security-headers.ts）に足しても、next.config.ts の headers() に
+// つながっていなければ応答には載らない。ページと API の両方で確かめる
+test("ページと API の応答に、守りのヘッダーが載っている", async ({
+  request,
+}) => {
+  for (const path of ["/", "/api/stations?q=%E6%96%B0%E5%AE%BF"]) {
+    const res = await request.get(path);
+    const headers = res.headers();
+    expect(headers["strict-transport-security"], path).toBe("max-age=31536000");
+    expect(headers["x-frame-options"], path).toBe("DENY");
+    expect(headers["content-security-policy"], path).toContain(
+      "default-src 'self'",
+    );
+  }
+});

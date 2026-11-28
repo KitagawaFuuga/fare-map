@@ -40,6 +40,10 @@ export const securityHeaders: SecurityHeader[] = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  // https を1年覚えさせ、http で開かれても通信の前に https に切り替えさせる。
+  // ホストは *.azurecontainerapps.io（自分のドメインではない）なので、
+  // includeSubDomains と preload は付けない。http の応答（手元の next start）ではブラウザが無視する
+  { key: "Strict-Transport-Security", value: "max-age=31536000" },
   // 強い権限はどれも使っていないので閉じる（現在地ボタンは外したので geolocation も）。
   {
     key: "Permissions-Policy",

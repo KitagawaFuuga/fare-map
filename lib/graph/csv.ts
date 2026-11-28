@@ -1,10 +1,10 @@
 // ekidata.jp の CSV は引用符・カンマ埋め込みが無い素朴な形式なので split で足りる
 export function parseCsv(text: string): Record<string, string>[] {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim() !== "");
-  const header = lines[0]?.split(",") ?? [];
+  const [head, ...lines] = text.split(/\r?\n/).filter((l) => l.trim() !== "");
+  if (head === undefined) return [];
+  const header = head.split(",");
   return (
     lines
-      .slice(1)
       .map((line) => {
         const cells = line.split(",");
         const row: Record<string, string> = {};

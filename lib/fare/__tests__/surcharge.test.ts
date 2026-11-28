@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   surchargeAmount,
   surchargePairAmount,
+  surchargeSchema,
   type Surcharge,
 } from "@/lib/fare/surcharge";
 
@@ -90,5 +91,124 @@ describe("surchargePairAmount", () => {
 
   it("同じ駅で乗り降りしていれば加算しない", () => {
     expect(surchargePairAmount(chita, "富貴", "富貴")).toBe(0);
+  });
+});
+
+describe("surchargeAmount（距離帯の表が無い定義）", () => {
+  it("駅間表式の定義に距離で聞いても加算しない", () => {
+    expect(surchargeAmount(chita, 5)).toBe(0);
+  });
+});
+
+describe("surchargePairAmount（組の突き合わせ）", () => {
+  // 野間は富貴→野間の降りる側、内海は上野間→内海の降りる側。
+  // 片方の駅だけ合う組を拾うと 60 か 50 が乗る
+  it("片方の駅だけ合う組は引かない", () => {
+    expect(surchargePairAmount(chita, "野間", "内海")).toBe(0);
+    // 降りた富貴は富貴→野間の乗る側。内海と富貴の組は表に無い
+    expect(surchargePairAmount(chita, "内海", "富貴")).toBe(0);
+  });
+
+  it("同じ駅の組が表にあっても、同じ駅での乗り降りは加算しない", () => {
+    const withSelf: Surcharge = {
+      ...chita,
+      pairs: [{ from: "富貴", to: "富貴", amount: 99 }],
+    };
+    expect(surchargePairAmount(withSelf, "富貴", "富貴")).toBe(0);
+  });
+
+  it("距離帯式の定義に駅の組で聞いても加算しない", () => {
+    expect(surchargePairAmount(toba, "鳥羽", "五十鈴川")).toBe(0);
+  });
+});
+
+function issuesOf(
+  input: unknown,
+): { code: string; path: PropertyKey[]; message: string }[] {
+  const result = surchargeSchema.safeParse(input);
+  if (result.success) return [];
+  return result.error.issues.map((i) => ({
+    code: i.code,
+    path: i.path,
+    message: i.message,
+  }));
+}
+
+const eitherMessage = (id: string) =>
+  `surchargeSchema: table+beyond か pairs のどちらか一方が必要です (id="${id}")`;
+const ascendingMessage = (id: string) =>
+  `surchargeSchema: table は昇順である必要があります (id="${id}")`;
+
+describe("surchargeSchema", () => {
+  it("距離帯式の定義は、書いた項目をすべて残して通す", () => {
+    const keihanna = {
+      ...toba,
+      id: "keihanna",
+      lines: ["近鉄けいはんな線"],
+      stations: ["長田", "生駒"],
+      pending: true,
+      source: {
+        url: "https://example.com",
+        fetchedAt: "2026-01-01",
+        note: "n",
+      },
+    };
+    expect(surchargeSchema.parse(keihanna)).toEqual(keihanna);
+  });
+
+  it("駅間表式の定義は、組の中身も残して通す", () => {
+    expect(surchargeSchema.parse(chita)).toEqual(chita);
+  });
+
+  it("table+beyond も pairs も無いと通さない", () => {
+    expect(issuesOf({ id: "x", operator: "o", lines: [] })).toEqual([
+      { code: "custom", path: [], message: eitherMessage("x") },
+    ]);
+  });
+
+  it("table+beyond と pairs の両方があると通さない", () => {
+    expect(issuesOf({ ...toba, pairs: chita.pairs })).toEqual([
+      { code: "custom", path: [], message: eitherMessage("toba") },
+    ]);
+  });
+
+  it("table だけで beyond が無いと通さない", () => {
+    const noBeyond = { ...toba, beyond: undefined };
+    expect(issuesOf(noBeyond)).toEqual([
+      { code: "custom", path: [], message: eitherMessage("toba") },
+    ]);
+  });
+
+  it("beyond だけで table が無いと通さない", () => {
+    const noTable = { ...toba, table: undefined };
+    expect(issuesOf(noTable)).toEqual([
+      { code: "custom", path: [], message: eitherMessage("toba") },
+    ]);
+  });
+
+  // 同じ上限が2つ並ぶと、後ろの帯に当たる距離が無くなる
+  it("上限が前の帯と同じか小さい帯を、その位置で指摘する", () => {
+    const table: [number, number][] = [
+      [6, 10],
+      [12, 20],
+      [12, 30],
+      [10, 40],
+    ];
+    expect(issuesOf({ ...toba, table })).toEqual([
+      {
+        code: "custom",
+        path: ["table", 2, 0],
+        message: ascendingMessage("toba"),
+      },
+      {
+        code: "custom",
+        path: ["table", 3, 0],
+        message: ascendingMessage("toba"),
+      },
+    ]);
+  });
+
+  it("帯が1つだけの表は通す", () => {
+    expect(issuesOf({ ...toba, table: [[6, 10]] })).toEqual([]);
   });
 });

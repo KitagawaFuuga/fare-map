@@ -100,3 +100,64 @@ describe("buildOperatorKmTable（運賃計算キロ）", () => {
     expect(buildOperatorKmTable(withFareKm, "甲鉄道")("A駅", "C駅")).toBe(3.0);
   });
 });
+
+describe("buildOperatorKmTable が通らない辺", () => {
+  const withEdges = (
+    extraNodes: ReturnType<typeof node>[],
+    extraEdges: RailGraph["edges"],
+  ): RailGraph => ({
+    nodes: {
+      ...graph.nodes,
+      ...Object.fromEntries(extraNodes.map((n) => [n.id, n])),
+    },
+    edges: [...graph.edges, ...extraEdges],
+  });
+
+  it("他社の駅を挟んだ乗換では、自社の別の駅へつながない", () => {
+    // C駅 →乗換→ 乙鉄道の X駅 →乗換→ 自社の E駅。自社線だけでは E駅へ届かない
+    const g = withEdges(
+      [node("x", "X駅", "乙鉄道"), node("e", "E駅", "甲鉄道")],
+      [
+        { from: "c", to: "x", km: 0, kind: "transfer", operator: "" },
+        { from: "x", to: "e", km: 0, kind: "transfer", operator: "" },
+      ],
+    );
+    const km = buildOperatorKmTable(g, "甲鉄道");
+    expect(km("A駅", "E駅")).toBeNull();
+    expect(km("A駅", "X駅")).toBeNull();
+  });
+
+  it("自社の駅どうしでも、他社の線路の区間は辿らない", () => {
+    const g = withEdges(
+      [node("e", "E駅", "甲鉄道")],
+      [{ from: "c", to: "e", km: 4, kind: "rail", operator: "乙鉄道" }],
+    );
+    expect(buildOperatorKmTable(g, "甲鉄道")("A駅", "E駅")).toBeNull();
+  });
+
+  it("乗換の辺は、km が入っていても0として数える", () => {
+    const g: RailGraph = {
+      ...graph,
+      edges: graph.edges.map((e) =>
+        e.kind === "transfer" ? { ...e, km: 0.5 } : e,
+      ),
+    };
+    expect(buildOperatorKmTable(g, "甲鉄道")("A駅", "C駅")).toBeCloseTo(3.0);
+  });
+
+  it("始点の駅名に同名の駅が複数あれば、乗換でつながっていなくてもどれからでも測る", () => {
+    // B駅の2つのノードの乗換を外す。A駅へは b から、C駅へは b2 からしか行けない
+    const g: RailGraph = {
+      ...graph,
+      edges: graph.edges.filter((e) => e.kind !== "transfer"),
+    };
+    const km = buildOperatorKmTable(g, "甲鉄道");
+    expect(km("B駅", "A駅")).toBeCloseTo(1.0);
+    expect(km("B駅", "C駅")).toBeCloseTo(2.0);
+  });
+
+  it("自社の駅でも、自社の線路で届かなければ null", () => {
+    const g = withEdges([node("z", "Z駅", "甲鉄道")], []);
+    expect(buildOperatorKmTable(g, "甲鉄道")("A駅", "Z駅")).toBeNull();
+  });
+});

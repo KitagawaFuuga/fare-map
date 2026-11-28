@@ -143,3 +143,106 @@ describe("walkStationIds（徒歩ありの判定）", () => {
     expect(walkStationIds(store, r)).toEqual([]);
   });
 });
+
+describe("suggestStations の件数", () => {
+  const many = createGraphStore(
+    {
+      nodes: {
+        E1: node("E1", "東駅一", 35, 139),
+        E2: node("E2", "東駅二", 35, 139),
+        E3: node("E3", "東駅三", 35, 139),
+        E4: node("E4", "東駅四", 35, 139),
+      },
+      edges: [],
+    },
+    rules,
+  );
+
+  it("別の駅が上限より多く当たれば、上限の件数だけ返す", () => {
+    expect(suggestStations(many, "東駅", 2)).toHaveLength(2);
+    expect(suggestStations(many, "東駅", 3)).toHaveLength(3);
+  });
+});
+
+describe("reachable の例外とグラフに無い駅", () => {
+  it("知らない出発駅は例外", () => {
+    expect(() => reachable(store, "NOPE", 500)).toThrow("未知の駅: NOPE");
+  });
+
+  // 乗換の辺の片端がグラフに無い（M）。探索は M を通って Z に着く
+  for (const [label, transfer] of [
+    ["乗換の先", { from: "S1", to: "M" }],
+    ["乗換の元", { from: "M", to: "S1" }],
+  ] as const) {
+    it(`${label}がグラフに無い駅でも、結果からその駅だけ除き、徒歩連絡とは見なさない`, () => {
+      const s = createGraphStore(
+        {
+          nodes: {
+            S1: node("S1", "出発", 35, 139, "G1"),
+            Z: node("Z", "先", 35, 139, "GZ"),
+          },
+          edges: [
+            { ...transfer, km: 0, kind: "transfer", operator: "" },
+            {
+              from: "M",
+              to: "Z",
+              km: 0.5,
+              kind: "rail",
+              operator: "テスト鉄道",
+            },
+          ],
+        },
+        rules,
+      );
+      const r = reachable(s, "S1", 500);
+      expect(r.stations.map((x) => [x.id, x.fare])).toEqual([["Z", 150]]);
+      expect(walkStationIds(s, r)).toEqual([]);
+    });
+  }
+});
+
+describe("walkStationIds の境目", () => {
+  it("徒歩なしでは予算内に届かない駅も返す", () => {
+    // 徒歩なら 乗換先 0.5km・目的地 1.0km でどちらも 150円。迂回は 目的地 5.0km で
+    // 320円、乗換先はさらに先（どちらも予算 300円を超える）
+    const r = reachable(walkStore, "W0", 300);
+    expect(walkStationIds(walkStore, r)).toEqual(["W2", "W3"]);
+  });
+
+  it("結果にグラフに無い駅があれば、運賃を確かめられないので徒歩前提として返す", () => {
+    const r = reachable(walkStore, "W0", 300);
+    const ghost = { ...r.stations[0]!, id: "GHOST" };
+    expect(
+      walkStationIds(walkStore, { ...r, stations: [...r.stations, ghost] }),
+    ).toEqual(["W2", "W3", "GHOST"]);
+  });
+});
+
+describe("walkStationIds と同じ駅の乗換", () => {
+  it("同じ駅の別路線ホームへの乗換は、徒歩連絡と見なさない", () => {
+    // P1 と P2 は同じ駅（groupId が同じ）。X へは P2 からしか行けない
+    const s = createGraphStore(
+      {
+        nodes: {
+          P1: node("P1", "駅", 35, 139, "G_P"),
+          P2: node("P2", "駅", 35, 139, "G_P", "テスト線2"),
+          X: node("X", "先", 35, 139, "G_X"),
+        },
+        edges: [
+          { from: "P1", to: "P2", km: 0, kind: "transfer", operator: "" },
+          {
+            from: "P2",
+            to: "X",
+            km: 0.5,
+            kind: "rail",
+            operator: "テスト鉄道",
+          },
+        ],
+      },
+      rules,
+    );
+    const r = reachable(s, "P1", 500);
+    expect(r.stations.map((x) => x.id)).toEqual(["X"]);
+    expect(walkStationIds(s, r)).toEqual([]);
+  });
+});

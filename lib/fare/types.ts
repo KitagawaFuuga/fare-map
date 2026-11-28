@@ -29,21 +29,20 @@ const fareRuleShape = z.object({
 
 export const fareRuleSchema = fareRuleShape.superRefine((rule, ctx) => {
   for (const key of ["table", "localTable"] as const) {
-    const table = rule[key] ?? [];
-    for (let i = 1; i < table.length; i++) {
-      const prev = table[i - 1];
-      const cur = table[i];
-      if (prev === undefined || cur === undefined) continue;
-      if (prev[0] >= cur[0]) {
+    // 先頭の行は比べる相手が無いので -Infinity から始める
+    let prevKm = -Infinity;
+    rule[key]?.forEach(([maxKm], i) => {
+      if (prevKm >= maxKm) {
         ctx.addIssue({
           code: "custom",
           path: [key, i, 0],
           message:
             `fareRuleSchema: ${key} は maxKm の厳密な昇順である必要があります ` +
-            `(id="${rule.id}"): ${key}[${i - 1}].maxKm=${prev[0]} >= ${key}[${i}].maxKm=${cur[0]}`,
+            `(id="${rule.id}"): ${key}[${i - 1}].maxKm=${prevKm} >= ${key}[${i}].maxKm=${maxKm}`,
         });
       }
-    }
+      prevKm = maxKm;
+    });
   }
 });
 export type FareRule = z.infer<typeof fareRuleShape>;
@@ -93,16 +92,16 @@ export const fareZoneSchema = z
   })
   .superRefine((zone, ctx) => {
     // tableFare は二分探索するので、運賃表と同じく厳密な昇順を要求する
-    for (let i = 1; i < zone.table.length; i++) {
-      const prev = zone.table[i - 1];
-      const cur = zone.table[i];
-      if (prev !== undefined && cur !== undefined && prev[0] >= cur[0]) {
+    let prevKm = -Infinity;
+    zone.table.forEach(([maxKm], i) => {
+      if (prevKm >= maxKm) {
         ctx.addIssue({
           code: "custom",
           path: ["table", i, 0],
           message: `fareZoneSchema: table は maxKm の厳密な昇順である必要があります (id="${zone.id}")`,
         });
       }
-    }
+      prevKm = maxKm;
+    });
   });
 export type FareZone = z.infer<typeof fareZoneSchema>;

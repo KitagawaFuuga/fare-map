@@ -46,6 +46,10 @@ export function createGraphStore(
 // 1度だけ構築して使い回す（Next.js のサーバープロセスが生きている間は保持される）。
 let cached: GraphStore | undefined;
 
+// ミューテーションテストでは data/graph.json を読めないようにしてある
+// （vitest.stryker.setup.ts）ので、ここは対象から外す。本物のデータを読む動きは
+// *.slow.test.ts（reachable-cache.slow.test.ts ほか）が CI で毎回確かめている
+// Stryker disable all
 export function getGraphStore(): GraphStore {
   if (!cached) {
     const graph = JSON.parse(
@@ -88,3 +92,4 @@ export function getGraphStore(): GraphStore {
   }
   return cached;
 }
+// Stryker restore all

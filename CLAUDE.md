@@ -8,6 +8,8 @@
   （Windows ではパスを大文字の `C:` から始める。小文字の `c:` だと全ファイルが 0 test で落ちる）
 - 型検査: `npm run typecheck`、lint: `npm run lint`、整形: `npm run format:check`
 - E2E: `npm run e2e`
+  画面の入力や読み込みの順番を変えたら WebKit でも: `E2E_WEBKIT=1 npx playwright test --project webkit --project mobile-safari`
+  （初回は `npx playwright install webkit`。Chromium では出ない、ハイドレーション前の入力の競合が出る）
 
 構成・技術の選び方・手順を変える前に `docs/DEVELOPMENT.md` を読み、変えたら更新する。
 

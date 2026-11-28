@@ -24,6 +24,9 @@ async function stubTiles(page: Page): Promise<void> {
 // モバイル幅では aside が非表示になるので、シート側だけを触る。
 const sheet = (page: Page) => page.locator("div.fixed.bottom-0");
 
+// WebKit（Playwright）は new Touch() を作れない（Illegal constructor）ので、スワイプのテストは飛ばす
+const NO_TOUCH_CONSTRUCTOR = "WebKit は Touch を組み立てられない";
+
 // React の onTouchStart / onTouchEnd を鳴らす。Playwright の touchscreen には
 // スワイプが無いので、実際の TouchEvent を組み立てて投げる。
 async function swipe(target: Locator, deltaY: number): Promise<void> {
@@ -101,7 +104,11 @@ test.describe("ボトムシート", () => {
       .toBeGreaterThan(before);
   });
 
-  test("上スワイプで広がり、下スワイプで縮む", async ({ page }) => {
+  test("上スワイプで広がり、下スワイプで縮む", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName === "webkit", NO_TOUCH_CONSTRUCTOR);
     await stubTiles(page);
     await page.goto("/");
 
@@ -120,7 +127,11 @@ test.describe("ボトムシート", () => {
       .toBeLessThan(opened);
   });
 
-  test("40px 未満の指ブレでは高さが変わらない", async ({ page }) => {
+  test("40px 未満の指ブレでは高さが変わらない", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName === "webkit", NO_TOUCH_CONSTRUCTOR);
     await stubTiles(page);
     await page.goto("/");
 
@@ -182,7 +193,11 @@ test.describe("ボトムシート", () => {
     await expect(status).toBeInViewport();
   });
 
-  test("畳まれた状態からでもつまみで開き直せる", async ({ page }) => {
+  test("畳まれた状態からでもつまみで開き直せる", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName === "webkit", NO_TOUCH_CONSTRUCTOR);
     await stubTiles(page);
     await page.goto("/");
 

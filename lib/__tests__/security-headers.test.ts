@@ -43,6 +43,12 @@ describe("securityHeaders", () => {
     expect(value).toContain("microphone=()");
   });
 
+  it("HSTS で https を1年覚えさせ、サブドメインと preload は含めない", () => {
+    // 本番のホストは *.azurecontainerapps.io（Microsoft のドメイン）の下にある。
+    // includeSubDomains や preload は自分のドメインでないと付けてはいけない
+    expect(header("Strict-Transport-Security")).toBe("max-age=31536000");
+  });
+
   it("現在地は使わないので geolocation も無効にする", () => {
     // 現在地ボタン（現在地の最寄り駅を出発駅にする）は外した。
     // 出発駅は駅名の入力だけで決める

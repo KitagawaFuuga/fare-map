@@ -37,7 +37,7 @@ docs/         このメモ、設計判断、テストの記録
 
 ## 進め方
 
-- **TDD**: `lib/`・`app/`・`components/` は赤のテストを先に書く。Probity（`probity.config.ts`）が PreToolUse で強制する。
+- **TDD**: `lib/`・`app/`・`components/`・`hooks/` は赤のテストを先に書く。Probity（`probity.config.ts`）が PreToolUse で強制する。Probity は Edit・Write しか見ないので、シェルからの書き換えは `scripts/hooks/guard-shell-writes.ts`（`.claude/settings.json`）が止める。
 - **設計判断**: 選択肢が2つ以上あった決定は `docs/decisions/` に1件1ファイル。データの出典・デプロイ・公開範囲に関わるものはユーザーが選ぶ。
 - **テストの検出力**: テストは書いた直後は通るので、わざと壊して落ちることを確かめてからコミットする。
   ミューテーションテスト（Stryker）で `lib/` を週1回壊して測る（[0004](decisions/0004-mutation-testing.md)）。全国の路線網を読むテストや1件が数秒かかるテストは `*.slow.test.ts` の名前にする（計測から外す目印）。

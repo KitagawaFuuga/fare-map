@@ -174,3 +174,202 @@ describe("deriveFareTable の警告（観測点が少なすぎる）", () => {
     );
   });
 });
+
+const tooFew = (points: number, bands: number) =>
+  `観測点が ${points} 点・帯が ${bands} 本しかない。` +
+  `この規模では自己検証はほぼ無条件に通るため、復元結果を信用してはいけない`;
+const hidden = (fare: number, lo: number, hi: number) =>
+  `${fare}円 の上限が ${lo}〜${hi}km の範囲に絞れていない。` +
+  `この間に別の帯が隠れている可能性がある`;
+const single =
+  "観測点が1点しかない帯がある。単一の起点からのデータだけで復元していないか確認すること";
+
+describe("deriveFareTable の結果の中身", () => {
+  it("観測点が0件なら、空の表と問題1件だけを返す", () => {
+    expect(deriveFareTable([p(0, 170)])).toEqual({
+      ok: false,
+      table: [],
+      bands: [],
+      problems: ["観測点が0件"],
+      warnings: [],
+      pairCount: 0,
+      unpinned: 0,
+    });
+  });
+
+  it("帯ごとに上限・範囲・pinned・観測点の数を返す（運賃の順は入力順によらない）", () => {
+    const r = deriveFareTable([
+      p(5.5, 300),
+      p(1.0, 170),
+      p(4.0, 210),
+      p(2.5, 170),
+      p(3.2, 210),
+      p(6.0, 300),
+      p(1.5, 170),
+    ]);
+    expect(r).toEqual({
+      ok: true,
+      table: [
+        [3, 170],
+        [4, 210],
+        [6, 300],
+      ],
+      bands: [
+        // 2.5〜3.2 の整数は 3 だけ
+        {
+          maxKm: 3,
+          fare: 170,
+          boundaryRange: [2.5, 3.2],
+          pinned: true,
+          observed: 3,
+        },
+        // 4.0〜5.5 の整数は 4 と 5
+        {
+          maxKm: 4,
+          fare: 210,
+          boundaryRange: [4.0, 5.5],
+          pinned: false,
+          observed: 2,
+        },
+        {
+          maxKm: 6,
+          fare: 300,
+          boundaryRange: null,
+          pinned: false,
+          observed: 2,
+        },
+      ],
+      problems: [],
+      warnings: [],
+      pairCount: 7,
+      unpinned: 2,
+    });
+  });
+
+  it("次の帯の最小キロが整数なら、それは候補に入れない", () => {
+    // 2.5〜4 の候補は 3 だけ（4 は次の帯の観測点なので上限になれない）
+    const r = deriveFareTable([p(2.5, 170), p(4, 210)]);
+    expect(r.bands[0]).toEqual({
+      maxKm: 3,
+      fare: 170,
+      boundaryRange: [2.5, 4],
+      pinned: true,
+      observed: 1,
+    });
+  });
+
+  it("範囲に整数が無ければ、観測した最大キロを上限にする", () => {
+    const r = deriveFareTable([p(2.1, 170), p(2.9, 210)]);
+    expect(r.table).toEqual([
+      [2.1, 170],
+      [2.9, 210],
+    ]);
+    expect(r.bands[0]?.pinned).toBe(false);
+    expect(r.problems).toEqual([]);
+  });
+});
+
+describe("deriveFareTable の問題の報告", () => {
+  it("同じキロの複数の運賃は、数の小さい順に並べて報告する", () => {
+    const r = deriveFareTable([p(3, 1000), p(3, 200), p(3, 30)]);
+    expect(r.ok).toBe(false);
+    expect(r.problems).toContain("同じ 3km に複数の運賃 (30, 200, 1000)");
+  });
+
+  it("安い運賃の最大キロと高い運賃の最小キロが同じでも、重なりとして報告する", () => {
+    const r = deriveFareTable([p(1, 170), p(3, 170), p(3.5, 180), p(5, 180)]);
+    expect(r.ok).toBe(true);
+    const touching = deriveFareTable([
+      p(1, 170),
+      p(3, 170),
+      p(3, 180),
+      p(5, 180),
+    ]);
+    expect(touching.problems).toContain(
+      "帯が重なっている: 170円 が 3km まであるのに 180円 が 3km から始まる",
+    );
+  });
+
+  it("重なった帯を落とした表が観測点を再現しなければ、その件数を報告する", () => {
+    const r = deriveFareTable([p(1, 170), p(3, 170), p(2, 180), p(4, 180)]);
+    expect(r).toEqual({
+      ok: false,
+      table: [[4, 180]],
+      bands: [
+        {
+          maxKm: 4,
+          fare: 180,
+          boundaryRange: null,
+          pinned: false,
+          observed: 2,
+        },
+      ],
+      problems: [
+        "帯が重なっている: 170円 が 3km まであるのに 180円 が 2km から始まる",
+        "復元したテーブルが観測点 2/4 件を再現しない",
+      ],
+      warnings: [tooFew(4, 1)],
+      pairCount: 4,
+      unpinned: 1,
+    });
+  });
+});
+
+describe("deriveFareTable の警告の境目", () => {
+  // 3本の帯で各2点、上限は 2・4 に1つずつ決まる
+  const six = [
+    p(1, 170),
+    p(2, 170),
+    p(2.5, 210),
+    p(4, 210),
+    p(4.5, 300),
+    p(5, 300),
+  ];
+
+  it("観測点6点・帯3本なら少なすぎ警告は出さない", () => {
+    expect(deriveFareTable(six).warnings).toEqual([]);
+  });
+
+  it("観測点が5点なら、帯が3本でも少なすぎ警告を出す", () => {
+    const r = deriveFareTable(six.slice(1));
+    expect(r.warnings).toContain(tooFew(5, 3));
+  });
+
+  it("帯が2本なら、観測点が6点でも少なすぎ警告を出す", () => {
+    const r = deriveFareTable([
+      p(1, 170),
+      p(1.5, 170),
+      p(2, 170),
+      p(2.5, 210),
+      p(3, 210),
+      p(3.5, 210),
+    ]);
+    expect(r.warnings).toEqual([tooFew(6, 2)]);
+  });
+
+  it("上限の範囲がちょうど2kmなら、隠れた帯の警告を出す", () => {
+    const r = deriveFareTable([
+      ...six.slice(0, 2),
+      p(4, 210),
+      p(4.2, 210),
+      ...six.slice(4),
+    ]);
+    expect(r.warnings).toEqual([hidden(170, 2, 4)]);
+  });
+
+  it("上限の範囲が2km未満なら、絞れていなくても隠れた帯の警告は出さない", () => {
+    const r = deriveFareTable([
+      ...six.slice(0, 2),
+      p(3.5, 210),
+      p(4, 210),
+      ...six.slice(4),
+    ]);
+    expect(r.bands[0]?.pinned).toBe(false); // 2 と 3 が候補
+    expect(r.warnings).toEqual([]);
+  });
+
+  it("観測点が1点の帯が1本でもあれば警告を出す", () => {
+    const r = deriveFareTable([...six, p(6, 400)]);
+    expect(r.warnings).toEqual([single]);
+  });
+});

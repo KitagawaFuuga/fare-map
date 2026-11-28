@@ -6,6 +6,8 @@ import { MAX_BUDGET, MIN_BUDGET } from "@/lib/budget";
 export interface BudgetInputProps {
   value: number;
   onChange(v: number): void;
+  // 数値の欄で Enter を押したとき。検索してよいか（出発駅・検索中）は呼ぶ側が決める
+  onSubmit?(): void;
 }
 
 // スライダーと数値入力は同じ値を編集する。上限は API の受付上限(MAX_BUDGET)と
@@ -14,7 +16,11 @@ export interface BudgetInputProps {
 // どちらの値も React に持たせない（uncontrolled）。持たせると、JS が届く前に打った予算が、
 // 動き出したとき（ハイドレーション）に初期値で上書きされて戻る（e2e/hydration.spec.ts）。
 // 2つの欄は、値が変わったら DOM を直接そろえる
-export default function BudgetInput({ value, onChange }: BudgetInputProps) {
+export default function BudgetInput({
+  value,
+  onChange,
+  onSubmit,
+}: BudgetInputProps) {
   const numberRef = useRef<HTMLInputElement>(null);
   const rangeRef = useRef<HTMLInputElement>(null);
 
@@ -55,6 +61,10 @@ export default function BudgetInput({ value, onChange }: BudgetInputProps) {
           step={100}
           defaultValue={value}
           onChange={(e) => onChange(Number(e.target.value))}
+          onKeyDown={(e) => {
+            // 変換の確定の Enter では検索しない
+            if (e.key === "Enter" && !e.nativeEvent.isComposing) onSubmit?.();
+          }}
           className="mt-1 w-28 rounded border border-gray-300 px-2 py-1 text-lg font-bold"
         />
         <span className="text-lg">円で行ける駅</span>

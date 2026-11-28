@@ -54,7 +54,14 @@ export default function Home() {
   const panel = (
     <div className="space-y-4">
       <SearchPanel selected={from} onSelect={setFrom} />
-      <BudgetInput value={budget} onChange={setBudget} />
+      <BudgetInput
+        value={budget}
+        onChange={setBudget}
+        // ボタンが押せないとき（出発駅が未選択・検索中）は Enter でも検索しない
+        onSubmit={() => {
+          if (from && !loading) void runSearch();
+        }}
+      />
       <button
         type="button"
         disabled={!from || loading}

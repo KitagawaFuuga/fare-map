@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import type { FeatureCollection, Point } from "geojson";
 import {
   Map as MapLibreMap,
@@ -30,6 +30,28 @@ export interface MapViewProps {
 
 const SOURCE_ID = "reachable";
 const LAYER_ID = "reachable-circles";
+
+const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
+// 背景のスタイルを取れなかったときの代わり。無地でも駅の円は描ける
+const FALLBACK_STYLE = {
+  version: 8 as const,
+  sources: {},
+  layers: [
+    {
+      id: "bg",
+      type: "background" as const,
+      paint: { "background-color": "#e8e8e8" },
+    },
+  ],
+};
+
+type MapProblem = "no-webgl" | "no-style";
+const PROBLEM_TEXT: Record<MapProblem, string> = {
+  "no-webgl":
+    "この環境では地図を表示できません（WebGL が使えません）。一覧から駅を確かめられます。",
+  "no-style":
+    "地図の背景を読み込めませんでした。駅の円と一覧はそのまま使えます。",
+};
 
 // maplibre-gl はワーカースクリプトを import.meta.url からの相対パスで解決するが、
 // Turbopack がバンドルしたチャンク URL は node_modules 上の相対位置と一致せず 404 になり、
@@ -176,6 +198,7 @@ export default function MapView({
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  const [problem, setProblem] = useState<MapProblem | null>(null);
   // 開いている吹き出しと選択中の印は1つだけにする（選び直したら前のを消す）
   const popupRef = useRef<Popup | null>(null);
   const selectedRef = useRef<Marker | null>(null);
@@ -211,16 +234,38 @@ export default function MapView({
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const map = new MapLibreMap({
-      container: containerRef.current,
-      style: "https://tiles.openfreemap.org/styles/liberty",
-      center: [139.767, 35.681],
-      zoom: 9,
-      attributionControl: { customAttribution: "駅データ.jp" },
-    });
+    let map: MapLibreMap;
+    try {
+      map = new MapLibreMap({
+        container: containerRef.current,
+        style: STYLE_URL,
+        center: [139.767, 35.681],
+        zoom: 9,
+        attributionControl: { customAttribution: "駅データ.jp" },
+      });
+    } catch {
+      // WebGL が使えないと例外になる。ここで止めないと画面全体が壊れ、一覧での検索もできない
+      setProblem("no-webgl");
+      return;
+    }
     mapRef.current = map;
 
+    // 背景のスタイルを取れないと load が来ず、駅の円のレイヤも作られない。
+    // 無地のスタイルに差し替えて load を起こし、円だけでも描く
+    let loaded = false;
+    map.on("error", (e: { error?: unknown }) => {
+      const url =
+        typeof e.error === "object" && e.error !== null && "url" in e.error
+          ? e.error.url
+          : undefined;
+      if (loaded || typeof url !== "string" || !url.startsWith(STYLE_URL))
+        return;
+      setProblem("no-style");
+      map.setStyle(FALLBACK_STYLE);
+    });
+
     map.on("load", () => {
+      loaded = true;
       map.addSource(SOURCE_ID, {
         type: "geojson",
         data: toGeoJson(stationsRef.current),
@@ -301,5 +346,14 @@ export default function MapView({
     if (bounds) mapRef.current?.fitBounds(bounds, { padding: 60, maxZoom: 13 });
   }, [resultKey]);
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  return (
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" />
+      {problem && (
+        <p className="absolute top-2 left-1/2 z-10 w-[min(90%,28rem)] -translate-x-1/2 rounded bg-white/95 px-3 py-2 text-sm text-gray-700 shadow">
+          {PROBLEM_TEXT[problem]}
+        </p>
+      )}
+    </div>
+  );
 }

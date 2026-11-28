@@ -60,11 +60,14 @@ function dominates(a: ParetoEntry, b: ParetoEntry): boolean {
 
 // SearchState.entry のプレースホルダ。挿入成功後に本物へ差し替える。freeze は
 // 万一 bucket や heap に漏れて書き込まれたときに TypeError で気づくため。
+// heap に入る前に必ず差し替えるので、中身はどこからも読まれない
+// Stryker disable next-line ObjectLiteral: 上のコメント
 const PENDING_ENTRY: ParetoEntry = Object.freeze({
   confirmedFare: 0,
   totalKm: 0,
   totalEastKm: 0,
   fare: 0,
+  // Stryker disable next-line BooleanLiteral: 上のコメント
   alive: false,
 });
 
@@ -122,13 +125,13 @@ export function tryInsertPareto(
   for (const existing of bucket) {
     if (dominates(existing, entry)) return false;
   }
-  for (let i = bucket.length - 1; i >= 0; i--) {
-    const existing = bucket[i];
-    if (existing !== undefined && dominates(entry, existing)) {
-      existing.alive = false;
-      bucket.splice(i, 1);
-    }
+  // 支配される既存を詰めて取り除く。書き込み位置は読み出し位置を追い越さない
+  let kept = 0;
+  for (const existing of bucket) {
+    if (dominates(entry, existing)) existing.alive = false;
+    else bucket[kept++] = existing;
   }
+  bucket.length = kept;
   bucket.push(entry);
   return true;
 }
@@ -156,7 +159,9 @@ function flagsKey(isHonshuThrough: boolean, segmentAllLocal: boolean): string {
   const index = (segmentAllLocal ? 2 : 0) | (isHonshuThrough ? 1 : 0);
   const key = FLAG_KEYS[index];
   // FLAG_KEYS は長さ4の固定配列で index は 0-3 の範囲に収まるため必ず存在する。
+  // Stryker disable next-line ConditionalExpression: 上のコメント
   if (key === undefined)
+    // Stryker disable next-line StringLiteral,CallExpression: 上のコメント
     throw new Error(`unreachable: flagsKey index ${index}`);
   return key;
 }
@@ -217,9 +222,10 @@ function runSearch(
     operator: string,
     localKm: number | undefined,
   ) => {
-    const arr = adjacency.get(from) ?? [];
-    arr.push({ to, km, kind, operator, localKm });
-    adjacency.set(from, arr);
+    const arr = adjacency.get(from);
+    if (arr === undefined)
+      adjacency.set(from, [{ to, km, kind, operator, localKm }]);
+    else arr.push({ to, km, kind, operator, localKm });
   };
   // 探索が扱う距離は運賃計算キロ（fareKm）。運賃を引くのも枝刈りの次元も距離は
   // ここだけで、外に出すのは運賃だけ（ReachableStation は距離を持たない）なので、
@@ -229,15 +235,12 @@ function runSearch(
   // 地方交通線の辺は「換算キロ（fareKm）が営業キロより長い、地方交通線の表を持つ
   // 事業者の辺」で見分ける（換算キロは data/fare-distance-classes.json の地方交通線
   // だけに入る）。名鉄の擬制キロなど、表を持たない事業者の fareKm は対象外。
+  // 乗換の辺は距離も localKm も使わない（乗換の分岐は状態を引き継ぐだけ）ので、
+  // rail かどうかは見なくてよい
   for (const e of graph.edges) {
     const km = e.fareKm ?? e.km;
     const localKm =
-      e.kind === "rail" &&
-      e.fareKm !== undefined &&
-      e.fareKm > e.km &&
-      calc.hasLocalTable(e.operator)
-        ? e.km
-        : undefined;
+      km > e.km && calc.hasLocalTable(e.operator) ? e.km : undefined;
     addAdj(e.from, e.to, km, e.kind, e.operator, localKm);
     addAdj(e.to, e.from, km, e.kind, e.operator, localKm);
   }
@@ -279,6 +282,8 @@ function runSearch(
   ): string => {
     const name = nameOf(segmentFromId);
     let key = "";
+    // 駅名が無くても calc は区間も特定運賃の駅も返さないので、これは型のためだけにある
+    // Stryker disable next-line ConditionalExpression: 上のコメント
     if (name !== undefined) {
       const zone = calc.zoneOf(segmentOperator, name);
       if (calc.isOverrideAnchor(segmentOperator, name)) key = name;
@@ -291,15 +296,34 @@ function runSearch(
       budget - confirmedFare,
     );
     if (city === undefined) return key;
-    // 辺を緩めるたびに文字列を作らないよう、区域ごとの接尾辞を使い回す
+    // 辺を緩めるたびに文字列を作らないよう、区域ごとの接尾辞を使い回す。
+    // 使い回さずに毎回作っても同じ文字列になる
     let suffix = citySuffixes.get(city);
+    // Stryker disable next-line ConditionalExpression: 上のコメント
     if (suffix === undefined) {
       suffix = `|city:${city}`;
+      // Stryker disable next-line CallExpression: 上のコメント
       citySuffixes.set(city, suffix);
     }
-    return key === "" ? suffix : key + suffix;
+    return key + suffix;
   };
   const citySuffixes = new Map<string, string>();
+
+  // 状態が入る bucket。出発駅の状態も、辺を緩めてできた状態も同じ規則で引く
+  const bucketOf = (s: SearchState): ParetoEntry[] =>
+    getBucket(
+      store,
+      s.stationId,
+      s.segmentOperator,
+      originBucketKey(
+        s.segmentOperator,
+        s.segmentFromId,
+        s.fareFromId,
+        s.isHonshuThrough,
+        s.confirmedFare,
+      ) + walkedKey(s),
+      flagsKey(s.isHonshuThrough, s.segmentAllLocal),
+    );
 
   const store: ParetoStore = new Map();
   const initialEntry: ParetoEntry = {
@@ -309,16 +333,6 @@ function runSearch(
     fare: 0,
     alive: true,
   };
-  tryInsertPareto(
-    getBucket(
-      store,
-      fromId,
-      "",
-      originBucketKey("", fromId, fromId, false, 0),
-      flagsKey(false, false),
-    ),
-    initialEntry,
-  );
   const initial: SearchState = {
     stationId: fromId,
     confirmedFare: 0,
@@ -335,17 +349,23 @@ function runSearch(
     fare: 0,
     entry: initialEntry,
   };
+  tryInsertPareto(bucketOf(initial), initialEntry);
+  // 取り出す順は探索の速さにだけ効く。支配されない状態はどの順でも全部広げるので、
+  // 最後に残る運賃は同じ
+  // Stryker disable next-line ArrowFunction,ArithmeticOperator: 上のコメント
   const heap = new MinHeap<SearchState>((a, b) => a.fare - b.fare);
   heap.push(initial);
 
-  while (heap.size > 0) {
-    const state = heap.pop();
-    if (state === undefined) break;
-
+  for (let state = heap.pop(); state !== undefined; state = heap.pop()) {
     // pop 時点で他状態に支配されて取り除かれていないか。参照を持っているので O(1)。
+    // 支配された状態を広げても、できる状態は支配した側から広げた状態に支配されるので、
+    // 結果は変わらず探索が重くなるだけ
+    // Stryker disable next-line ConditionalExpression: 上のコメント
     if (!state.entry.alive) continue;
 
-    for (const edge of adjacency.get(state.stationId) ?? []) {
+    const edges = adjacency.get(state.stationId);
+    if (edges === undefined) continue;
+    for (const edge of edges) {
       let next: SearchState;
       if (edge.kind === "transfer") {
         // 乗換では区間の終点（segmentEndId）を動かさない。運賃はその事業者を降りた駅までで
@@ -475,19 +495,7 @@ function runSearch(
           );
       if (next.confirmedFare + segmentLowerBound > budget) continue;
 
-      const nextBucket = getBucket(
-        store,
-        next.stationId,
-        next.segmentOperator,
-        originBucketKey(
-          next.segmentOperator,
-          next.segmentFromId,
-          next.fareFromId,
-          next.isHonshuThrough,
-          next.confirmedFare,
-        ) + walkedKey(next),
-        flagsKey(next.isHonshuThrough, next.segmentAllLocal),
-      );
+      const nextBucket = bucketOf(next);
       const nextEntry: ParetoEntry = {
         confirmedFare: next.confirmedFare,
         totalKm: next.honshuThroughKm + next.segmentKm,
@@ -525,9 +533,10 @@ export function findReachable(
         for (const bucket of byFlags.values()) {
           for (const entry of bucket) {
             if (entry.fare > budget) continue;
-            if (entry.fare < (byStation.get(stationId) ?? Infinity)) {
-              byStation.set(stationId, entry.fare);
-            }
+            byStation.set(
+              stationId,
+              Math.min(byStation.get(stationId) ?? Infinity, entry.fare),
+            );
           }
         }
       }

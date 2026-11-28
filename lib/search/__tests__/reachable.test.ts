@@ -8,6 +8,7 @@ import {
 } from "@/lib/search/reachable";
 import type { FareCalculator } from "@/lib/fare/calculator";
 import { createFareCalculator } from "@/lib/fare/calculator";
+import { buildSpecialCities } from "@/lib/fare/special-cities";
 import type { RailGraph } from "@/lib/graph/types";
 
 // 非線形な運賃表にすることで「距離合算」と「区間ごと加算」の結果が
@@ -1499,5 +1500,356 @@ describe("名前の違う駅へ歩いて乗り換える区間", () => {
         ?.fare;
     // 特定運賃 90円 + OpB 5km 100円
     expect([fareTo("X", "W"), fareTo("W", "X")]).toEqual([190, 190]);
+    // 降りた駅（Y）の名前で状態を分ける。起点 X は特定運賃の駅なので名前がキーになる
+    const store = __internalRunSearchForTest(walkGraph, walkCalc, "X", 1000);
+    expect([...(store.get("Z")?.get("OpA")?.keys() ?? [])]).toContain(
+      "X|walked:Y",
+    );
+  });
+});
+
+// store の中身を短く取り出す部品
+const keysOf = (
+  store: __internalParetoStore,
+  stationId: string,
+  operator: string,
+): string[] => [...(store.get(stationId)?.get(operator)?.keys() ?? [])];
+const flagsOf = (
+  store: __internalParetoStore,
+  stationId: string,
+  operator: string,
+  key: string,
+): string[] => [
+  ...(store.get(stationId)?.get(operator)?.get(key)?.keys() ?? []),
+];
+
+describe("tryInsertPareto: 加算額の対象キロ", () => {
+  it("加算額の対象キロだけが不利な状態は、ほかの次元で有利でも追い出さずに残す", () => {
+    const existing: ParetoEntry = {
+      confirmedFare: 100,
+      totalKm: 10,
+      totalEastKm: 5,
+      fare: 100,
+      alive: true,
+    };
+    const bucket = [existing];
+    const inserted = tryInsertPareto(bucket, {
+      confirmedFare: 100,
+      totalKm: 9,
+      totalEastKm: 6,
+      fare: 100,
+      alive: true,
+    });
+    expect(inserted).toBe(true);
+    expect(bucket).toHaveLength(2);
+    expect(existing.alive).toBe(true);
+  });
+});
+
+describe("findReachable: 結果のまとめ方", () => {
+  it("結果は見つけた順ではなく運賃の安い順に並ぶ", () => {
+    // 隣接は B（OpA 100円）が先、C（OpB 80円）が後
+    const g: RailGraph = {
+      nodes: {
+        A: node("A"),
+        B: node("B"),
+        C: { ...node("C"), operator: "OpB" },
+      },
+      edges: [
+        { from: "A", to: "B", km: 10, kind: "rail", operator: "OpA" },
+        { from: "A", to: "C", km: 10, kind: "rail", operator: "OpB" },
+      ],
+    };
+    expect(findReachable(g, calcWithOpB, "A", 1000)).toEqual([
+      { id: "A", fare: 0 },
+      { id: "C", fare: 80 },
+      { id: "B", fare: 100 },
+    ]);
+  });
+
+  it("線路の無い駅から探すと、出発駅だけを返す", () => {
+    const g: RailGraph = {
+      nodes: { ...graph.nodes, Z: node("Z") },
+      edges: graph.edges,
+    };
+    expect(findReachable(g, calc, "Z", 1000)).toEqual([{ id: "Z", fare: 0 }]);
+  });
+
+  it("グラフに無い駅を通る辺があっても落ちない", () => {
+    // A から M（グラフに無い駅）へ線路、M から B2 へ歩く
+    const g: RailGraph = {
+      nodes: { A: node("A"), B2: node("B2") },
+      edges: [
+        { from: "A", to: "M", km: 1, kind: "rail", operator: "OpA" },
+        { from: "M", to: "B2", km: 0, kind: "transfer", operator: "" },
+      ],
+    };
+    expect(findReachable(g, calc, "A", 1000)).toEqual([
+      { id: "A", fare: 0 },
+      { id: "M", fare: 100 },
+      { id: "B2", fare: 100 },
+    ]);
+    // 降りた駅の名前が引けなくても、歩いて着いた状態として分ける
+    const store = __internalRunSearchForTest(g, calc, "A", 1000);
+    expect(keysOf(store, "B2", "OpA")).toEqual(["|walked:"]);
+  });
+});
+
+describe("findReachable: 探索の状態の持ち方", () => {
+  it("出発駅の状態は、未乗車・起点のキー無し・フラグ無しで1つだけ持つ", () => {
+    // A2 は A と同じ名前の駅（乗る前に歩いて移れる）
+    const g: RailGraph = {
+      nodes: { A: node("A"), A2: node("A2"), B: node("B") },
+      edges: [
+        { from: "A", to: "A2", km: 0, kind: "transfer", operator: "" },
+        { from: "A2", to: "B", km: 10, kind: "rail", operator: "OpA" },
+      ],
+    };
+    g.nodes["A2"] = { ...node("A2"), name: "A" };
+    const store = __internalRunSearchForTest(g, calc, "A", 1000);
+    // "OpA" は B から戻ってきた状態
+    expect([...(store.get("A")?.keys() ?? [])]).toEqual(["", "OpA"]);
+    expect(keysOf(store, "A", "")).toEqual([""]);
+    expect(flagsOf(store, "A", "", "")).toEqual(["00"]);
+    expect(store.get("A")?.get("")?.get("")?.get("00")).toEqual([
+      { confirmedFare: 0, totalKm: 0, totalEastKm: 0, fare: 0, alive: true },
+    ]);
+    // 乗る前に歩いた先も同じ持ち方
+    expect(keysOf(store, "A2", "")).toEqual([""]);
+    expect(flagsOf(store, "A2", "", "")).toEqual(["00"]);
+  });
+
+  it("予算を超える駅は探索で広げない", () => {
+    // C は 20km で150円。予算120円なら C の状態は作らない
+    const store = __internalRunSearchForTest(graph, calc, "A", 120);
+    expect(store.has("B")).toBe(true);
+    expect(store.has("C")).toBe(false);
+  });
+});
+
+describe("findReachable: 通し運賃の状態", () => {
+  const throughCalc = createFareCalculator([
+    {
+      id: "fallback",
+      operators: [],
+      table: [[10, 999999]],
+      beyond: { fromKm: 10, baseFare: 999999, ratePerKm: 1 },
+    },
+    {
+      id: "jr-central",
+      operators: ["JR東海"],
+      table: [
+        [10, 100],
+        [20, 150],
+      ],
+      beyond: { fromKm: 20, baseFare: 150, ratePerKm: 10 },
+    },
+    {
+      id: "jr-east",
+      operators: ["JR東日本"],
+      table: [
+        [10, 120],
+        [20, 200],
+      ],
+      beyond: { fromKm: 20, baseFare: 200, ratePerKm: 10 },
+    },
+    {
+      id: "kasan",
+      operators: ["__jr-honshu-kasan"],
+      table: [
+        [10, 10],
+        [20, 20],
+      ],
+      beyond: { fromKm: 20, baseFare: 20, ratePerKm: 0 },
+    },
+  ]);
+  const jr = (id: string, operator: string) => ({ ...node(id), operator });
+  // A —JR東海10km— B —JR東日本10km— C
+  const g: RailGraph = {
+    nodes: {
+      A: jr("A", "JR東海"),
+      B: jr("B", "JR東海"),
+      C: jr("C", "JR東日本"),
+    },
+    edges: [
+      { from: "A", to: "B", km: 10, kind: "rail", operator: "JR東海" },
+      { from: "B", to: "C", km: 10, kind: "rail", operator: "JR東日本" },
+    ],
+  };
+
+  it("JR東海からJR東日本へ入ると、入った先の区間に加算額がかかる", () => {
+    // 基準額(20km)=150 + 加算額(10km)=10
+    expect(
+      findReachable(g, throughCalc, "A", 1000).find((r) => r.id === "C")?.fare,
+    ).toBe(160);
+  });
+
+  it("通し運賃の状態は、加算額の対象キロを持ち、地方交通線のフラグを立てない", () => {
+    const store = __internalRunSearchForTest(g, throughCalc, "A", 1000);
+    expect(flagsOf(store, "C", "JR東日本", "")).toEqual(["01"]);
+    expect(store.get("C")?.get("JR東日本")?.get("")?.get("01")).toEqual([
+      {
+        confirmedFare: 0,
+        totalKm: 20,
+        totalEastKm: 10,
+        fare: 160,
+        alive: true,
+      },
+    ]);
+  });
+
+  it("通し運賃で予算を超える駅は探索で広げない", () => {
+    // C は基準額だけで150円。予算140円なら C の状態は作らない
+    const store = __internalRunSearchForTest(g, throughCalc, "A", 140);
+    expect(store.has("B")).toBe(true);
+    expect(store.has("C")).toBe(false);
+  });
+});
+
+describe("findReachable: 地方交通線の見分け方", () => {
+  const localCalc = createFareCalculator([
+    {
+      id: "fallback",
+      operators: [],
+      table: [[100, 999]],
+      beyond: { fromKm: 100, baseFare: 999, ratePerKm: 0 },
+    },
+    {
+      id: "opj",
+      operators: ["OpJ"],
+      table: [
+        [10, 100],
+        [20, 200],
+      ],
+      localTable: [
+        [10, 110],
+        [20, 150],
+      ],
+      beyond: { fromKm: 20, baseFare: 200, ratePerKm: 10 },
+    },
+  ]);
+  const j = (id: string) => ({ ...node(id), operator: "OpJ" });
+  const fareTo = (g: RailGraph, to: string) =>
+    findReachable(g, localCalc, "A", 10000).find((r) => r.id === to)?.fare;
+
+  it("幹線のあとに地方交通線が続く区間は、幹線の表を運賃計算キロで引く", () => {
+    // 幹線5km＋地方交通線（換算9.9km）＝14.9km → 幹線の表で200円
+    const g: RailGraph = {
+      nodes: { A: j("A"), B: j("B"), C: j("C") },
+      edges: [
+        { from: "A", to: "B", km: 5, kind: "rail", operator: "OpJ" },
+        {
+          from: "B",
+          to: "C",
+          km: 9,
+          fareKm: 9.9,
+          kind: "rail",
+          operator: "OpJ",
+        },
+      ],
+    };
+    expect(fareTo(g, "C")).toBe(200);
+  });
+
+  it("運賃計算キロが営業キロと同じ辺は、地方交通線として扱わない", () => {
+    // 地方交通線の表なら 9km で110円、幹線の表なら100円
+    const g: RailGraph = {
+      nodes: { A: j("A"), B: j("B") },
+      edges: [
+        { from: "A", to: "B", km: 9, fareKm: 9, kind: "rail", operator: "OpJ" },
+      ],
+    };
+    expect(fareTo(g, "B")).toBe(100);
+  });
+
+  it("地方交通線の表を持たない事業者の運賃計算キロ（擬制キロ）は、地方交通線として扱わない", () => {
+    const g: RailGraph = {
+      nodes: { A: node("A"), B: node("B") },
+      edges: [
+        {
+          from: "A",
+          to: "B",
+          km: 10,
+          fareKm: 11.5,
+          kind: "rail",
+          operator: "OpA",
+        },
+      ],
+    };
+    const store = __internalRunSearchForTest(g, calc, "A", 1000);
+    expect(flagsOf(store, "B", "OpA", "")).toEqual(["00"]);
+  });
+});
+
+describe("findReachable: 特定都区市内の起点のキー", () => {
+  // S —乙1km— SA ⇒歩く⇒ A —甲JR5km— C、S —乙1km— SN ⇒歩く⇒ N —甲JR3km— C
+  // 区域X（中心C、区域の駅 A・C、200km超で効く）。1km=10円
+  const perKm = (id: string, operators: string[]) => ({
+    id,
+    operators,
+    table: [[1, 10]] as [number, number][],
+    beyond: { fromKm: 1, baseFare: 10, ratePerKm: 10 },
+  });
+  const n = (id: string, operator: string) => ({ ...node(id), operator });
+  const g: RailGraph = {
+    nodes: {
+      S: n("S", "乙鉄道"),
+      SA: n("SA", "乙鉄道"),
+      SN: n("SN", "乙鉄道"),
+      A: n("A", "甲JR"),
+      N: n("N", "甲JR"),
+      C: n("C", "甲JR"),
+    },
+    edges: [
+      { from: "S", to: "SA", km: 1, kind: "rail", operator: "乙鉄道" },
+      { from: "S", to: "SN", km: 1, kind: "rail", operator: "乙鉄道" },
+      { from: "SA", to: "A", km: 0, kind: "transfer", operator: "" },
+      { from: "SN", to: "N", km: 0, kind: "transfer", operator: "" },
+      { from: "A", to: "C", km: 5, kind: "rail", operator: "甲JR" },
+      { from: "N", to: "C", km: 3, kind: "rail", operator: "甲JR" },
+    ],
+  };
+  const cities = buildSpecialCities(g, {
+    cities: [
+      {
+        id: "x",
+        name: "X市内",
+        center: "C",
+        operator: "甲JR",
+        minKm: 200,
+        stations: ["A", "C"],
+      },
+    ],
+  });
+  const rules = [
+    perKm("kou", ["甲JR"]),
+    perKm("otsu", ["乙鉄道"]),
+    perKm("fb", []),
+  ];
+
+  it("残りの予算で区域の規則が効く距離まで行けるときだけ、区域のキーで分ける", () => {
+    const cityCalc = createFareCalculator(rules, [], [], cities);
+    // A で乗る時点で 10円払っている。200km（2000円）に届く残りがあるかで決まる
+    const at = (budget: number) =>
+      keysOf(__internalRunSearchForTest(g, cityCalc, "S", budget), "C", "甲JR");
+    expect(at(2005)).toEqual([""]);
+    expect(at(2010).sort()).toEqual(["", "|city:x"]);
+  });
+
+  it("特定運賃の駅が区域内にあれば、駅名と区域の両方をキーにする", () => {
+    const cityCalc = createFareCalculator(
+      rules,
+      [
+        {
+          operator: "甲JR",
+          pairs: [{ from: "A", to: "C", fare: 30 }],
+          source: { url: "https://example.test", fetchedAt: "", note: "" },
+        },
+      ],
+      [],
+      cities,
+    );
+    const store = __internalRunSearchForTest(g, cityCalc, "S", 3000);
+    expect(keysOf(store, "C", "甲JR").sort()).toEqual(["", "A|city:x"]);
   });
 });

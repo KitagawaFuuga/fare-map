@@ -28,9 +28,9 @@ export function buildOperatorKmTable(
 
   const adjacency = new Map<string, { to: string; km: number }[]>();
   const link = (from: string, to: string, km: number) => {
-    const list = adjacency.get(from) ?? [];
-    list.push({ to, km });
-    adjacency.set(from, list);
+    const list = adjacency.get(from);
+    if (list === undefined) adjacency.set(from, [{ to, km }]);
+    else list.push({ to, km });
   };
   for (const e of graph.edges) {
     if (!inOperator.has(e.from) || !inOperator.has(e.to)) continue;
@@ -48,11 +48,10 @@ export function buildOperatorKmTable(
 
   const idsByName = new Map<string, string[]>();
   for (const n of nodes) {
-    const list = idsByName.get(n.name) ?? [];
-    list.push(n.id);
-    idsByName.set(n.name, list);
+    const list = idsByName.get(n.name);
+    if (list === undefined) idsByName.set(n.name, [n.id]);
+    else list.push(n.id);
   }
-  const nameOf = new Map(nodes.map((n) => [n.id, n.name]));
 
   // 始点の駅名ごとの距離。問い合わせがあった駅名の分だけ求めて覚えておく。
   // JR西日本（1247ノード）は全駅名ぶん先に求めると約3秒かかり、テストが
@@ -60,21 +59,29 @@ export function buildOperatorKmTable(
   const table = new Map<string, Map<string, number>>();
   const from = (name: string): Map<string, number> | undefined => {
     const hit = table.get(name);
+    // Stryker disable next-line ConditionalExpression: 覚えた表を使わず求め直しても結果は同じ
     if (hit !== undefined) return hit;
     const starts = idsByName.get(name);
     if (starts === undefined) return undefined;
     const distance = new Map<string, number>();
+    // 距離は積むときに更新し、縮んだら積み直すので、取り出し順が崩れても
+    // 最後に残る距離は同じ（順は探索を速くするためのもの）
     const queue = new MinHeap<{ id: string; km: number }>(
+      // Stryker disable next-line ArrowFunction,ArithmeticOperator: 取り出し順は速さにしか効かない（上の説明）
       (x, y) => x.km - y.km,
     );
     for (const id of starts) {
       distance.set(id, 0);
       queue.push({ id, km: 0 });
     }
-    while (queue.size > 0) {
-      const current = queue.pop();
-      if (current === undefined) break;
+    for (
+      let current = queue.pop();
+      current !== undefined;
+      current = queue.pop()
+    ) {
+      // Stryker disable next-line ConditionalExpression,LogicalOperator: 古い候補を読み飛ばすだけ。広げ直しても結果は同じ
       if (current.km > (distance.get(current.id) ?? Infinity)) continue;
+      // Stryker disable next-line ArrayDeclaration: 線路の無い駅。中身を変えても距離が NaN の候補が増えるだけで更新されない
       for (const edge of adjacency.get(current.id) ?? []) {
         const next = current.km + edge.km;
         if (next < (distance.get(edge.to) ?? Infinity)) {
@@ -84,11 +91,12 @@ export function buildOperatorKmTable(
       }
     }
     const byName = new Map<string, number>();
-    for (const [id, km] of distance) {
-      const other = nameOf.get(id);
-      if (other === undefined) continue;
-      if (km < (byName.get(other) ?? Infinity)) byName.set(other, km);
+    for (const n of nodes) {
+      const km = distance.get(n.id);
+      if (km === undefined) continue;
+      byName.set(n.name, Math.min(byName.get(n.name) ?? Infinity, km));
     }
+    // Stryker disable next-line CallExpression: 覚えなくても次に求め直すだけ
     table.set(name, byName);
     return byName;
   };

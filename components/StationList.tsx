@@ -18,7 +18,7 @@ export default function StationList({ stations, onPick }: StationListProps) {
           色と運賃の対応を一覧を読みながら確かめられる */}
       {groupByBracket(stations).map((g) => (
         <section key={g.bracket} className="mt-3">
-          <h3 className="sticky top-0 flex items-center gap-2 border-b border-gray-200 bg-white py-1 text-sm font-bold">
+          <h2 className="sticky top-0 flex items-center gap-2 border-b border-gray-200 bg-white py-1 text-sm font-bold">
             <span
               className="inline-block h-3 w-3 shrink-0 rounded-full"
               style={{ backgroundColor: BRACKET_COLORS[g.bracket] }}
@@ -27,7 +27,7 @@ export default function StationList({ stations, onPick }: StationListProps) {
             <span className="font-normal text-gray-500">
               {g.stations.length}駅
             </span>
-          </h3>
+          </h2>
           <ul className="divide-y divide-gray-100">
             {g.stations.map((s) => (
               <li key={s.id}>

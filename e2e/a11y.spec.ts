@@ -6,7 +6,15 @@ import AxeBuilder from "@axe-core/playwright";
 // 落とす基準は小さく始めて、直せたら上げる）。
 // 自動検査で見つかるのは WCAG の一部だけ。キーボード操作や読み上げの確認の代わりにはならない。
 
-const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+// best-practice（見出しの順番など、WCAG の外の推奨）も含める。止めるかは WCAG と同じく重さで決める
+const WCAG_TAGS = [
+  "wcag2a",
+  "wcag2aa",
+  "wcag21a",
+  "wcag21aa",
+  "wcag22aa",
+  "best-practice",
+];
 const BLOCKING = new Set(["serious", "critical"]);
 
 const EMPTY_STYLE = {
@@ -85,4 +93,14 @@ test("検索結果を出した画面に、重いアクセシビリティの違�
   });
 
   await checkA11y(page, testInfo, "results");
+});
+
+test("無いページの案内に、重いアクセシビリティの違反が無い", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/no-such-page");
+  await expect(
+    page.getByRole("heading", { name: "ページが見つかりません" }),
+  ).toBeVisible();
+  await checkA11y(page, testInfo, "not-found");
 });

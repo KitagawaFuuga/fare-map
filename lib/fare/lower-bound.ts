@@ -21,12 +21,14 @@ export interface LowerBoundTable {
   beyond: { fromKm: number; baseFare: number; ratePerKm: number };
 }
 
-// 帯の中に収まる範囲で、いちばん桁の少ない値に丸める（表を読めるようにするため）
+// 帯の中に収まる範囲で、いちばん桁の少ない値に丸める（表を読めるようにするため）。
+// 両端とも含めない。中間の 0.0105 は小数では 0.010499999… なので、3桁に丸めると
+// 安い帯の最大km（0.010）に戻り、境界の余裕が0になる
 function shortest(value: number, min: number, max: number): number {
   for (let digits = 3; digits <= 9; digits++) {
     const scale = 10 ** digits;
     const rounded = Math.round(value * scale) / scale;
-    if (min <= rounded && rounded < max) return rounded;
+    if (min < rounded && rounded < max) return rounded;
   }
   return value;
 }

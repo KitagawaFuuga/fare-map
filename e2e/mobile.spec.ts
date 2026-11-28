@@ -24,6 +24,9 @@ async function stubTiles(page: Page): Promise<void> {
 // モバイル幅では aside が非表示になるので、シート側だけを触る。
 const sheet = (page: Page) => page.locator("div.fixed.bottom-0");
 
+// WebKit（Playwright）は new Touch() を作れない（Illegal constructor）ので、スワイプのテストは飛ばす
+const NO_TOUCH_CONSTRUCTOR = "WebKit は Touch を組み立てられない";
+
 // React の onTouchStart / onTouchEnd を鳴らす。Playwright の touchscreen には
 // スワイプが無いので、実際の TouchEvent を組み立てて投げる。
 async function swipe(target: Locator, deltaY: number): Promise<void> {
@@ -101,7 +104,11 @@ test.describe("ボトムシート", () => {
       .toBeGreaterThan(before);
   });
 
-  test("上スワイプで広がり、下スワイプで縮む", async ({ page }) => {
+  test("上スワイプで広がり、下スワイプで縮む", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName === "webkit", NO_TOUCH_CONSTRUCTOR);
     await stubTiles(page);
     await page.goto("/");
 
@@ -120,7 +127,11 @@ test.describe("ボトムシート", () => {
       .toBeLessThan(opened);
   });
 
-  test("40px 未満の指ブレでは高さが変わらない", async ({ page }) => {
+  test("40px 未満の指ブレでは高さが変わらない", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName === "webkit", NO_TOUCH_CONSTRUCTOR);
     await stubTiles(page);
     await page.goto("/");
 
@@ -182,7 +193,11 @@ test.describe("ボトムシート", () => {
     await expect(status).toBeInViewport();
   });
 
-  test("畳まれた状態からでもつまみで開き直せる", async ({ page }) => {
+  test("畳まれた状態からでもつまみで開き直せる", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName === "webkit", NO_TOUCH_CONSTRUCTOR);
     await stubTiles(page);
     await page.goto("/");
 
@@ -199,5 +214,41 @@ test.describe("ボトムシート", () => {
     await expect
       .poll(() => heightOf(target), { timeout: 5_000 })
       .toBeGreaterThan(collapsed);
+  });
+});
+
+test.describe("シートのつまみ", () => {
+  // 見た目の棒は高さ 6px。押せる範囲も同じだと、指では押しにくい
+  // （WCAG 2.5.8 の 24px は、周りに押せるものが無い例外で満たしていたが、使いにくさは変わらない）
+  test("押せる範囲は、指で押せる大きさ（縦横 24px 以上）がある", async ({
+    page,
+  }) => {
+    await stubTiles(page);
+    await page.goto("/");
+    const handle = sheet(page).getByRole("button", { name: "シートを開閉" });
+    const box = await handle.boundingBox();
+    if (!box) throw new Error("つまみが描画されていない");
+    expect(box.height).toBeGreaterThanOrEqual(24);
+    expect(box.width).toBeGreaterThanOrEqual(24);
+  });
+
+  test("開いているかどうかを、読み上げにも伝える（aria-expanded）", async ({
+    page,
+    browserName,
+  }) => {
+    // 畳むには下へのスワイプが要る。WebKit は Touch を組み立てられない
+    test.skip(browserName === "webkit", "WebKit は Touch を組み立てられない");
+    await stubTiles(page);
+    await page.goto("/");
+    const target = sheet(page);
+    const handle = target.getByRole("button", { name: "シートを開閉" });
+    // 最初は半分開いている
+    await expect(handle).toHaveAttribute("aria-expanded", "true");
+
+    await swipe(target, 100); // half → collapsed
+    await expect(handle).toHaveAttribute("aria-expanded", "false");
+
+    await handle.click(); // collapsed → half
+    await expect(handle).toHaveAttribute("aria-expanded", "true");
   });
 });

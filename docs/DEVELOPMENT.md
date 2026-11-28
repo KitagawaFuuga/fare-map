@@ -37,7 +37,7 @@ docs/         このメモ、設計判断、テストの記録
 
 ## 進め方
 
-- **TDD**: `lib/`・`app/`・`components/` は赤のテストを先に書く。Probity（`probity.config.ts`）が PreToolUse で強制する。
+- **TDD**: `lib/`・`app/`・`components/`・`hooks/` は赤のテストを先に書く。Probity（`probity.config.ts`）が PreToolUse で強制する。Probity は Edit・Write しか見ないので、シェルからの書き換えは `scripts/hooks/guard-shell-writes.ts`（`.claude/settings.json`）が止める。
 - **設計判断**: 選択肢が2つ以上あった決定は `docs/decisions/` に1件1ファイル。データの出典・デプロイ・公開範囲に関わるものはユーザーが選ぶ。
 - **テストの検出力**: テストは書いた直後は通るので、わざと壊して落ちることを確かめてからコミットする。
   ミューテーションテスト（Stryker）で `lib/` を週1回壊して測る（[0004](decisions/0004-mutation-testing.md)）。全国の路線網を読むテストや1件が数秒かかるテストは `*.slow.test.ts` の名前にする（計測から外す目印）。
@@ -46,6 +46,8 @@ docs/         このメモ、設計判断、テストの記録
 - **データの正しさ**: 運賃は運賃表との一致ではなく実額で確かめる。表の読み取りを変えたら新旧を比較する。
 - **使いやすさと速さ**: アクセシビリティは E2E の中で axe が検査し、serious・critical で CI を止める。表示速度は PR ごとに
   Lighthouse CI で測り、警告だけ出す。開発の流れは DORA の5指標を月1回集計する（[0008](decisions/0008-quality-measurements.md)）。
+- **ブラウザ**: 必須の E2E は Chromium（デスクトップと Pixel 7）。CI の `e2e-webkit` ジョブで同じ E2E を WebKit（Desktop Safari と iPhone 15）でも流す
+  （`E2E_WEBKIT=1` のときだけ足すプロジェクト。必須にはしていない）。WebKit は入力が早く、ハイドレーション前の入力の競合が出る。
   本番の障害を revert でなく修正で直したら、コミットのメッセージに `[incident]` を付ける。
 
 ## コマンド

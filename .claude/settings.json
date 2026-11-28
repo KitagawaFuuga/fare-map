@@ -9,6 +9,15 @@
             "command": "npx --no-install probity --agent claude-code"
           }
         ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node --no-warnings \"$CLAUDE_PROJECT_DIR/scripts/hooks/guard-shell-writes.ts\""
+          }
+        ]
       }
     ]
   }

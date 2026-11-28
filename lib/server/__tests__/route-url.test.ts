@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildRouteUrl } from "@/lib/server/route-url";
+import { ROUTE_URL_TIMEOUT_MS, buildRouteUrl } from "@/lib/server/route-url";
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
 });
@@ -29,6 +30,26 @@ describe("buildRouteUrl", () => {
     );
     const url = await buildRouteUrl("新宿", "高尾");
     expect(url).toBe("https://roote.ekispert.net/result?x=1");
+  });
+
+  it("駅すぱあとが応答しないときは、待ち続けず Google Maps にフォールバック", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("EKISPERT_API_KEY", "testkey");
+    // 中断されるまで応答しない
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        (_url: string, init?: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () =>
+              reject(new Error("aborted")),
+            );
+          }),
+      ),
+    );
+    const url = buildRouteUrl("新宿", "高尾");
+    await vi.advanceTimersByTimeAsync(ROUTE_URL_TIMEOUT_MS);
+    await expect(url).resolves.toContain("google.com/maps/dir");
   });
 
   it("駅すぱあとが失敗したら Google Maps にフォールバック", async () => {

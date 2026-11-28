@@ -7,6 +7,25 @@ const PORT = 3100;
 // 空文字は未指定と同じに扱う（?? だと baseURL が "" になり、webServer も立たない）
 const externalBaseURL = process.env.E2E_BASE_URL || undefined;
 
+// WebKit（Safari の描画エンジン）でも流す。iPhone の利用者が多いので Chromium だけでは足りない
+// （WebKit で流して、動き出す前に打った駅名が消える不具合を見つけた。PR #45）。
+// ブラウザを入れる手間と時間が増えるので、E2E_WEBKIT を付けたとき（CI の e2e-webkit ジョブ）だけ足す。
+// 必須の e2e とデプロイ前の確かめは、今までどおり Chromium だけで走る
+const webkitProjects = process.env.E2E_WEBKIT
+  ? [
+      {
+        name: "webkit",
+        use: { ...devices["Desktop Safari"] },
+        testIgnore: "**/mobile.spec.ts",
+      },
+      {
+        name: "mobile-safari",
+        use: { ...devices["iPhone 15"] },
+        testMatch: ["**/mobile.spec.ts", "**/a11y.spec.ts"],
+      },
+    ]
+  : [];
+
 // E2E は本番ビルドに対して走らせる。maplibre のワーカー解決は dev と本番で
 // 挙動が違い（Turbopack のチャンク URL が変わる）、検出したいのは本番側の
 // 404 なので、dev サーバーでは意味がない。
@@ -34,6 +53,7 @@ export default defineConfig({
       use: { ...devices["Pixel 7"] },
       testMatch: ["**/mobile.spec.ts", "**/a11y.spec.ts"],
     },
+    ...webkitProjects,
   ],
   webServer: externalBaseURL
     ? undefined

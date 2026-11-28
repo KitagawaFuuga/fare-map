@@ -18,13 +18,15 @@ const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 // 0件のときに一覧が消えるだけだと「何も起きなかった」ように見えるので、そう書く。
 // 予算は入力欄の今の値ではなく、検索したときの値（meta）を出す。
-// 失敗しても前の結果は残るので、エラーのときは空にする（前の件数が今の結果として読まれないように）
+// 失敗しても前の結果は残るので、エラーのときは空にする（前の件数が今の結果として読まれないように）。
+// 検索中はそう書く（ボタンの文字だけでなく、読み上げにも押した後に何が起きているかを伝える）
 function statusText(
   loading: boolean,
   error: string | null,
   data: { stations: unknown[]; meta: { budget: number } } | null,
 ): string {
-  if (loading || error || !data) return "";
+  if (loading) return "検索中…";
+  if (error || !data) return "";
   if (data.stations.length === 0)
     return `${data.meta.budget}円で行ける駅はありません。予算を上げてみてください。`;
   return `${data.stations.length} 駅に到達可能`;

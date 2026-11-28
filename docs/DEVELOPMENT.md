@@ -46,8 +46,8 @@ docs/         このメモ、設計判断、テストの記録
 - **データの正しさ**: 運賃は運賃表との一致ではなく実額で確かめる。表の読み取りを変えたら新旧を比較する。
 - **使いやすさと速さ**: アクセシビリティは E2E の中で axe が検査し、serious・critical で CI を止める。表示速度は PR ごとに
   Lighthouse CI で測り、警告だけ出す。開発の流れは DORA の5指標を月1回集計する（[0008](decisions/0008-quality-measurements.md)）。
-- **ブラウザ**: 必須の E2E は Chromium（デスクトップと Pixel 7）。CI の `e2e-webkit` ジョブで同じ E2E を WebKit（Desktop Safari と iPhone 15）でも流す
-  （`E2E_WEBKIT=1` のときだけ足すプロジェクト。必須にはしていない）。WebKit は入力が早く、ハイドレーション前の入力の競合が出る。
+- **ブラウザ**: E2E は Chromium（デスクトップと Pixel 7）と、CI の `e2e-webkit` ジョブで WebKit（Desktop Safari と iPhone 15）の両方を流し、
+  どちらも merge に必須（WebKit は `E2E_WEBKIT=1` のときだけ足すプロジェクト。29 回続けて通ったので 2026-11-28 に必須にした）。デプロイ前の確かめは Chromium だけ。WebKit は入力が早く、ハイドレーション前の入力の競合が出る。
   本番の障害を revert でなく修正で直したら、コミットのメッセージに `[incident]` を付ける。
 
 ## コマンド

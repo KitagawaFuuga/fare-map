@@ -10,6 +10,7 @@ const HONSHU_BASE_OPERATOR = "JR東海";
 // 加算額表は実在の事業者名と衝突しない合成名で登録してある
 const HONSHU_KASAN_OPERATOR = "__jr-honshu-kasan";
 // 特定都区市内の区域を事業者ごとにまとめるとき、通し運賃に効く区域のまとまりの名前
+// Stryker disable next-line StringLiteral: 事業者名と重ならなければ何でもよい（空文字の事業者は無い）
 const HONSHU_CITY_GROUP = "__jr-honshu";
 // 加算額の対象になる会社（区域で縮んだ距離を加算額の距離からも引く）
 const EAST_OPERATOR = "JR東日本";
@@ -131,14 +132,17 @@ export function createFareCalculator(
     string,
     { zone: FareZone; stations: Set<string> }
   >();
+  // Stryker disable next-line ArrayDeclaration: 区間が無いときの空配列。中身を変えても事業者名が undefined の区間になり、どの事業者にも当たらない
   for (const z of zones ?? []) {
     if (zoneByOperator.has(z.operator))
       throw new Error(`${z.operator} に区間運賃が2つある（1事業者1区間まで）`);
     zoneByOperator.set(z.operator, { zone: z, stations: new Set(z.stations) });
   }
-  const inZone = (operator: string, name: string | undefined) =>
-    name !== undefined &&
-    (zoneByOperator.get(operator)?.stations.has(name) ?? false);
+  const inZone = (operator: string, name: string | undefined) => {
+    const z = zoneByOperator.get(operator);
+    // Stryker disable next-line ConditionalExpression: 型を絞るため。駅名の集合に undefined は無い
+    return z !== undefined && name !== undefined && z.stations.has(name);
+  };
 
   // 特定都区市内（docs/search-design.md「特定都区市内」）。事業者ごとと、本州3社の
   // 通し運賃用（HONSHU_CITY_GROUP）にまとめる
@@ -393,6 +397,7 @@ export function createFareCalculator(
     fromName: string | undefined,
   ): number | undefined {
     // 下界の距離は minKm 以上なので、km がそれ以下なら緩める必要がない
+    // Stryker disable next-line ConditionalExpression,EqualityOperator: 速くするための近道。下で求めても km 以上になり、呼び出し側の min で同じ結果
     if (km <= (lowerReachByGroup.get(group) ?? Infinity)) return undefined;
     const list = citiesByGroup.get(group);
     // 区域の無い group は lowerReach も無く、上で返っている
@@ -442,17 +447,16 @@ export function createFareCalculator(
     let hi = table.length;
     while (lo < hi) {
       const mid = (lo + hi) >>> 1;
-      const row = table[mid];
-      if (row !== undefined && km <= row[0]) {
+      // mid は [lo, hi) の中なので必ず行がある
+      if (km <= table[mid]![0]) {
         hi = mid;
       } else {
         lo = mid + 1;
       }
     }
-    if (lo < table.length) {
-      const row = table[lo];
-      if (row !== undefined) return row[1];
-    }
+    // lo が表の長さに達したら（表の上限を超えた）行は無い
+    const row = table[lo];
+    if (row !== undefined) return row[1];
     const { fromKm, baseFare, ratePerKm } = rule.beyond;
     return Math.ceil((baseFare + (km - fromKm) * ratePerKm) / 10) * 10;
   }

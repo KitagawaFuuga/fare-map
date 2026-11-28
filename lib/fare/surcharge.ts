@@ -62,18 +62,18 @@ export const surchargeSchema = surchargeShape.superRefine((s, ctx) => {
       message: `surchargeSchema: table+beyond か pairs のどちらか一方が必要です (id="${s.id}")`,
     });
   }
-  for (let i = 1; i < (s.table?.length ?? 0); i++) {
-    const prev = s.table?.[i - 1];
-    const cur = s.table?.[i];
-    if (prev === undefined || cur === undefined) continue;
-    if (prev[0] >= cur[0]) {
+  // 先頭の帯は比べる相手が無いので -Infinity から始める
+  let prevKm = -Infinity;
+  s.table?.forEach(([maxKm], i) => {
+    if (prevKm >= maxKm) {
       ctx.addIssue({
         code: "custom",
         path: ["table", i, 0],
         message: `surchargeSchema: table は昇順である必要があります (id="${s.id}")`,
       });
     }
-  }
+    prevKm = maxKm;
+  });
 });
 
 export type Surcharge = z.infer<typeof surchargeShape>;
@@ -84,10 +84,8 @@ export function surchargeAmount(surcharge: Surcharge, rawKm: number): number {
   const km = withoutFloatNoise(rawKm);
   // 対象の線に乗っていなければ加算は無い
   if (!(km > 0)) return 0;
-  for (const [maxKm, amount] of surcharge.table ?? []) {
-    if (km <= maxKm) return amount;
-  }
-  return surcharge.beyond ?? 0;
+  const band = surcharge.table?.find(([maxKm]) => km <= maxKm);
+  return band?.[1] ?? surcharge.beyond ?? 0;
 }
 
 /**
@@ -99,10 +97,12 @@ export function surchargePairAmount(
   entry: string | undefined,
   exit: string | undefined,
 ): number {
-  if (entry === undefined || exit === undefined || entry === exit) return 0;
-  const key = [entry, exit].sort().join("\u0000");
-  for (const p of surcharge.pairs ?? []) {
-    if ([p.from, p.to].sort().join("\u0000") === key) return p.amount;
-  }
-  return 0;
+  // 片方が undefined なら、どの組の駅名（文字列）とも一致しないので 0 になる
+  if (entry === exit) return 0;
+  const hit = surcharge.pairs?.find(
+    (p) =>
+      (p.from === entry && p.to === exit) ||
+      (p.from === exit && p.to === entry),
+  );
+  return hit?.amount ?? 0;
 }

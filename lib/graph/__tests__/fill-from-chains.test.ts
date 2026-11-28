@@ -117,3 +117,199 @@ describe("fillFromRealChains", () => {
     expect(graph.edges[4]!.km).toBe(14.0);
   });
 });
+
+// 各停の駅を names の順に 1km ずつの実営業キロで並べ、快速の辺 express を足す
+const lineGraph = (
+  names: string[],
+  express: [string, string, number][],
+): { graph: RailGraph; real: StationKmEdge[] } => {
+  const nodes = [
+    ...names.map((n) => node(`L:${n}`, n, "各停")),
+    ...names.map((n) => node(`R:${n}`, n, "快速")),
+  ];
+  const local = names.slice(1).map((n, i) => ({
+    from: `L:${names[i]!}`,
+    to: `L:${n}`,
+    km: 1,
+    kind: "rail" as const,
+    operator: "甲鉄道",
+  }));
+  return {
+    graph: {
+      nodes: Object.fromEntries(nodes.map((n) => [n.id, n])),
+      edges: [
+        ...local,
+        ...express.map(([a, b, km]) => ({
+          from: `R:${a}`,
+          to: `R:${b}`,
+          km,
+          kind: "rail" as const,
+          operator: "甲鉄道",
+        })),
+      ],
+    },
+    real: names.slice(1).map((n, i) => ({
+      operator: "甲鉄道",
+      from: names[i]!,
+      to: n,
+      km: 1,
+    })),
+  };
+};
+
+describe("fillFromRealChains の報告", () => {
+  it("置き換えた数・延びた合計・例を返し、遠回りは無し", () => {
+    const graph = build();
+    const result = fillFromRealChains(graph, real, { maxRatio: 1.3 });
+    expect(result.totalDelta).toBeCloseTo(0.38, 10);
+    expect({ ...result, totalDelta: 0 }).toEqual({
+      replaced: 1,
+      totalDelta: 0,
+      worst: [{ from: "大阪", to: "尼崎", before: 7.32, after: 7.7 }],
+      skippedDetour: 0,
+      detours: [],
+    });
+  });
+
+  it("遠回りで使わなかった辺を、推定とつないだ長さつきで数える", () => {
+    const graph = build();
+    graph.edges[2]!.km = 5.0;
+    const result = fillFromRealChains(graph, real, { maxRatio: 1.3 });
+    expect(result).toEqual({
+      replaced: 0,
+      totalDelta: 0,
+      worst: [],
+      skippedDetour: 1,
+      detours: [
+        { from: "大阪", to: "尼崎", km: 5.0, chain: expect.closeTo(7.7, 10) },
+      ],
+    });
+  });
+
+  it("推定の5倍を超えないと結べない辺は、遠回りにも数えない", () => {
+    const graph = build();
+    graph.edges[2]!.km = 1.5; // 7.7 / 1.5 ≒ 5.13
+    const result = fillFromRealChains(graph, real, { maxRatio: 1.3 });
+    expect(graph.edges[2]!.km).toBe(1.5);
+    expect(result.skippedDetour).toBe(0);
+    expect(result.detours).toEqual([]);
+  });
+
+  it("つないだ長さが上限ちょうどなら置き換える", () => {
+    const { graph, real: chain } = lineGraph(["A", "B", "C"], [["A", "C", 2]]);
+    const result = fillFromRealChains(graph, chain, { maxRatio: 1 });
+    expect(result.replaced).toBe(1);
+    expect(graph.edges[2]!.km).toBe(2);
+  });
+
+  it("例は延び縮みの大きい順（縮んだ辺も大きさで比べる）", () => {
+    const { graph, real: chain } = lineGraph(
+      ["A", "B", "C", "D", "E"],
+      [
+        ["A", "E", 3.5], // 4 になって +0.5
+        ["B", "D", 1.7], // 2 になって +0.3
+        ["A", "C", 2.6], // 2 になって -0.6
+      ],
+    );
+    const result = fillFromRealChains(graph, chain, { maxRatio: 1.3 });
+    expect(result.worst.map((w) => `${w.from}-${w.to}`)).toEqual([
+      "A-C",
+      "A-E",
+      "B-D",
+    ]);
+    expect(result.totalDelta).toBeCloseTo(0.2, 10);
+  });
+
+  it("遠回りの例は、つないだ長さ / 推定 の大きい順", () => {
+    const { graph, real: chain } = lineGraph(
+      ["A", "B", "C", "D", "E"],
+      [
+        // 倍率の順と、推定の長さの順・つないだ長さの順がそれぞれ違う組
+        ["A", "C", 1.0], // 2倍
+        ["A", "E", 1.25], // 3.2倍
+        ["B", "D", 0.5], // 4倍
+      ],
+    );
+    const result = fillFromRealChains(graph, chain, { maxRatio: 1.3 });
+    expect(result.detours.map((d) => `${d.from}-${d.to}`)).toEqual([
+      "B-D",
+      "A-E",
+      "A-C",
+    ]);
+  });
+
+  it("例は10件まで。置き換えた数は全件", () => {
+    const names = Array.from({ length: 13 }, (_, i) => `S${i}`);
+    const express = names
+      .slice(0, 11)
+      .map((n, i): [string, string, number] => [n, names[i + 2]!, 1.9]);
+    const { graph, real: chain } = lineGraph(names, express);
+    const result = fillFromRealChains(graph, chain, { maxRatio: 1.3 });
+    expect(result.replaced).toBe(11);
+    expect(result.worst).toHaveLength(10);
+  });
+});
+
+describe("fillFromRealChains の経路探索", () => {
+  // A から T へは Q-R 経由（3km）と P 経由（6km）がある。先に見つかる側でなく
+  // 短い側を返す。駅数の少ない P 経由を先に取り出すと 6km になる
+  it("駅数が多くても短い経路の長さで置き換える", () => {
+    const graph: RailGraph = {
+      nodes: Object.fromEntries(
+        [node("a", "A", "快速"), node("t", "T", "快速")].map((n) => [n.id, n]),
+      ),
+      edges: [{ from: "a", to: "t", km: 3, kind: "rail", operator: "甲鉄道" }],
+    };
+    const chain: StationKmEdge[] = [
+      ["A", "Q", 1],
+      ["Q", "R", 1],
+      ["R", "T", 1],
+      ["A", "P", 1],
+      ["P", "T", 5],
+    ].map(([from, to, km]) => ({
+      operator: "甲鉄道",
+      from: from as string,
+      to: to as string,
+      km: km as number,
+    }));
+    fillFromRealChains(graph, chain, { maxRatio: 3 });
+    expect(graph.edges[0]!.km).toBe(3);
+  });
+});
+
+describe("fillFromRealChains が触らない辺", () => {
+  it("乗換の辺は、実営業キロで結べても書き換えない", () => {
+    const graph = build();
+    graph.edges[2]!.kind = "transfer";
+    const result = fillFromRealChains(graph, real, { maxRatio: 1.3 });
+    expect(graph.edges[2]!.km).toBe(7.32);
+    expect(result.replaced).toBe(0);
+  });
+
+  it("同じ駅名どうしの辺は 0km にしない", () => {
+    const graph = build();
+    graph.nodes["x1"] = node("x1", "大阪", "別線");
+    graph.edges.push({
+      from: "l1",
+      to: "x1",
+      km: 0.5,
+      kind: "rail",
+      operator: "甲鉄道",
+    });
+    fillFromRealChains(graph, real, { maxRatio: 1.3 });
+    expect(graph.edges[3]!.km).toBe(0.5);
+  });
+
+  it("グラフに無い駅を指す辺は飛ばす", () => {
+    for (const [from, to] of [
+      ["l1", "missing"],
+      ["missing", "l3"],
+    ] as const) {
+      const graph = build();
+      graph.edges.push({ from, to, km: 1, kind: "rail", operator: "甲鉄道" });
+      const result = fillFromRealChains(graph, real, { maxRatio: 1.3 });
+      expect(graph.edges[3]!.km).toBe(1);
+      expect(result.replaced).toBe(1);
+    }
+  });
+});

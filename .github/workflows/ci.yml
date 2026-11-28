@@ -56,7 +56,7 @@ jobs:
           retention-days: 7
 
   # 同じ E2E を WebKit（Safari の描画エンジン）でも流す（playwright.config.ts の E2E_WEBKIT）。
-  # 必須のチェックにはまだしない。安定して通るのを見てから決める
+  # merge に必須のチェック（29 回続けて通ったので 2026-11-28 に必須にした）。名前を変えるとブランチ保護の設定も直す
   e2e-webkit:
     runs-on: ubuntu-latest
     timeout-minutes: 20
